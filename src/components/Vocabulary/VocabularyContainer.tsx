@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import {
@@ -89,7 +89,12 @@ function dominantEntryTypeIsPhrase(words: ReviewListWord[]): boolean {
   return phraseCount > words.length - phraseCount;
 }
 
-function VocabularyContainer() {
+interface VocabularyContainerProps {
+  /** Rendered at the right of the page header (the analytics view switch on /vocabulary). */
+  headerSlot?: ReactNode;
+}
+
+function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const isTeacherOrAbove =
@@ -418,7 +423,7 @@ function VocabularyContainer() {
 
   return (
     <div className="max-w-screen-lg mx-auto px-4 py-4">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold flex items-center gap-2">
             <BookMarked className="h-5 w-5 text-indigo-500" />
@@ -434,6 +439,7 @@ function VocabularyContainer() {
             </Button>
           </h1>
         </div>
+        {headerSlot}
       </div>
 
       {isTeacherOrAbove && (

@@ -36,44 +36,45 @@ export default function VocabularyHome() {
 
   if (!isStaff) return <VocabularyContainer />;
 
+  // The view switch lives in the page-header row, next to the visible title.
+  const switcher = (
+    <SegmentedTabs
+      value={view}
+      onChange={go}
+      ariaLabel={t("vocabulary.analytics.viewLabel")}
+      options={[
+        { value: "mine", label: t("vocabulary.analytics.view.mine") },
+        {
+          value: "analytics",
+          label: (
+            <span className="flex items-center gap-1.5">
+              <BarChart3 className="h-4 w-4" />
+              {t("vocabulary.analytics.view.analytics")}
+            </span>
+          ),
+        },
+      ]}
+    />
+  );
+
+  if (view === "mine") return <VocabularyContainer headerSlot={switcher} />;
+
   return (
-    <>
-      <div className="mx-auto flex max-w-screen-lg items-center justify-end px-4 pt-4">
-        <SegmentedTabs
-          value={view}
-          onChange={go}
-          ariaLabel={t("vocabulary.analytics.viewLabel")}
-          options={[
-            { value: "mine", label: t("vocabulary.analytics.view.mine") },
-            {
-              value: "analytics",
-              label: (
-                <span className="flex items-center gap-1.5">
-                  <BarChart3 className="h-4 w-4" />
-                  {t("vocabulary.analytics.view.analytics")}
-                </span>
-              ),
-            },
-          ]}
-        />
+    <div className="mx-auto max-w-screen-lg px-4 py-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
+          <BarChart3 className="h-5 w-5 text-indigo-500" />
+          {t("vocabulary.analytics.title")}
+        </h1>
+        {switcher}
       </div>
-      {view === "mine" ? (
-        <VocabularyContainer />
-      ) : (
-        <div className="mx-auto max-w-screen-lg px-4 py-4">
-          <h1 className="mb-4 flex items-center gap-2 text-xl font-semibold">
-            <BarChart3 className="h-5 w-5 text-indigo-500" />
-            {t("vocabulary.analytics.title")}
-          </h1>
-          <StaffVocabularyAnalytics
-            role={role}
-            onOpenStudent={(userId, name) => {
-              void useVocabularyStore.getState().fetchVocabulary(userId, name);
-              go("mine");
-            }}
-          />
-        </div>
-      )}
-    </>
+      <StaffVocabularyAnalytics
+        role={role}
+        onOpenStudent={(userId, name) => {
+          void useVocabularyStore.getState().fetchVocabulary(userId, name);
+          go("mine");
+        }}
+      />
+    </div>
   );
 }
