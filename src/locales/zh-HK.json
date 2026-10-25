@@ -2140,6 +2140,93 @@
     "emptyTitle": "還沒有詞彙",
     "emptyDesc": "開始閱讀以收集詞彙。它們會出現在這裡供你複習。",
     "startReading": "開始閱讀",
+    "analytics": {
+      "title": "學生分析",
+      "viewLabel": "詞彙檢視",
+      "view": {
+        "mine": "我的詞彙",
+        "analytics": "學生分析"
+      },
+      "tabs": {
+        "overview": "概覽",
+        "sessions": "複習記錄",
+        "activity": "活動"
+      },
+      "noData": "此選擇暫時沒有詞彙活動。",
+      "noSessions": "此選擇暫時沒有複習記錄。",
+      "noActivity": "此期間暫時沒有活動。",
+      "statBank": "詞庫",
+      "statBankHint": "{{words}} 個單字 · {{phrases}} 個片語",
+      "statMastered": "已掌握（L5）",
+      "statMasteredHint": "佔詞庫 {{percent}}%",
+      "statDue": "待複習",
+      "statDueHint": "{{hard}} 個標為困難",
+      "statAvgMastery": "平均等級",
+      "statAvgMasteryHint": "0（新）至 5（已掌握）",
+      "statSessions": "複習次數",
+      "statSessionsHint": "平均準確率 {{percent}}%",
+      "statReviewed": "已複習字詞",
+      "statAdded": "新增字詞",
+      "statActiveDays": "活躍日數",
+      "chartActivity": {
+        "day": "每日活動",
+        "week": "每週活動"
+      },
+      "seriesReviewed": "已複習字詞",
+      "seriesAdded": "新增字詞",
+      "seriesAccuracy": "準確率",
+      "chartMastery": "掌握等級（目前詞庫）",
+      "entries": "項目",
+      "levelNew": "新",
+      "modesTitle": "複習模式",
+      "colMode": "模式",
+      "colSessions": "次數",
+      "colReviewed": "已複習字詞",
+      "colAccuracy": "準確率",
+      "mode": {
+        "flashcard": "字卡",
+        "quiz": "測驗",
+        "spelling": "拼字"
+      },
+      "entry": {
+        "word": "單字",
+        "phrase": "片語"
+      },
+      "chartHistory": "複習準確率走勢",
+      "sessionAccuracy": "準確率",
+      "wordCount": "{{count}} 個字詞",
+      "hardWordsTitle": "最常答錯的字詞",
+      "colWord": "字詞",
+      "colMissed": "答錯",
+      "colLearnersMissed": "答錯的學生數",
+      "note": "詞庫數字反映每位學生目前的詞彙狀況；複習次數、準確率及活動則按所選時間範圍計算。準確率為所有複習中答對的比例。",
+      "studentsTitle": "學生",
+      "filterToStudent": "只顯示此學生",
+      "openVocabulary": "詞彙",
+      "colBank": "詞庫",
+      "colMastered": "已掌握",
+      "colDue": "待複習",
+      "colTrend": "趨勢",
+      "colLastActive": "最近活躍",
+      "phraseCount": "{{count}} 個片語",
+      "colType": "類型",
+      "colWhen": "完成時間",
+      "colResult": "結果",
+      "colAttempts": "嘗試次數",
+      "colLevel": "複習後等級",
+      "correct": "正確",
+      "incorrect": "錯誤",
+      "rating": {
+        "again": "重來",
+        "hard": "困難",
+        "good": "良好",
+        "easy": "簡單"
+      },
+      "events": {
+        "session_completed": "{{mode}}複習：{{correct}}/{{total}}（{{accuracy}}%）",
+        "words_added": "新增 {{count}} 個{{kind}}"
+      }
+    },
     "studentView": {
       "title": "查看學生資料",
       "myVocabulary": "我的詞彙",

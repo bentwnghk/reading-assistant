@@ -725,6 +725,22 @@ CREATE TABLE vocabulary_review_results (
 CREATE INDEX idx_review_sessions_user_date ON vocabulary_review_sessions(user_id, completed_at DESC);
 CREATE INDEX idx_review_results_session ON vocabulary_review_results(session_id);
 
+-- Vocabulary activity ledger (staff analytics on /vocabulary)
+CREATE TABLE vocabulary_activity_events (
+  id         BIGSERIAL PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type       TEXT NOT NULL,
+  entry_type TEXT,
+  word       TEXT,
+  details    JSONB NOT NULL DEFAULT '{}'::jsonb,
+  event_key  TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX idx_vocab_activity_key ON vocabulary_activity_events(user_id, event_key) WHERE event_key IS NOT NULL;
+CREATE INDEX idx_vocab_activity_user ON vocabulary_activity_events(user_id, created_at DESC);
+CREATE INDEX idx_vocab_activity_created ON vocabulary_activity_events(created_at DESC);
+
 -- ─── Review Lists ─────────────────────────────────────────────────────────
 
 CREATE TABLE review_lists (

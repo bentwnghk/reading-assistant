@@ -658,6 +658,18 @@ Activity types added: `assignment_create`, `assignment_start`, `assignment_submi
 
 ---
 
+## Vocabulary Analytics (staff, `/vocabulary?view=analytics`)
+
+Teachers/admins/super-admins get a **Student analytics** view next to their own vocabulary (`VocabularyHome.tsx` is the `/vocabulary` entry; students see `VocabularyContainer` unchanged). Modelled on the Language Check "Student learning" tab and reuses its pieces: `StaffFilterBar` (class + student, `studentsEndpoint` prop), `SegmentedTabs`, `LearnRangeTabs`, `Stat`/`Delta`/`PercentBadge`, `requireStaff` (scope: teacher → classes, admin → school, super-admin → all).
+
+- **Ledger**: `vocabulary_activity_events` (`scripts/add-vocabulary-activity.sql`, backfills existing sessions/words, + `init-db.sql`). Types in `VOCABULARY_ACTIVITY_EVENT_TYPES` (`constants/vocabularyActivity.ts`): `session_completed` (written by `createReviewSession`, key `rs:<id>`) and `words_added` (glossary sync / phrases, only genuinely NEW rows; teacher-shared words are not the student's activity). `logVocabularyActivity` is fire-and-forget and idempotent via `event_key`.
+- **Data**: `src/lib/vocabulary-activity.ts`. Every query starts from a scope CTE (`sc`: students only, not banned, role/class/student filtered), so a filter can never reach outside the staff member's scope. Word-bank figures (`snapshot`, per-student bank columns) are the CURRENT state (hidden words excluded); sessions/accuracy/activity respect the time range. Review sessions come from `vocabulary_review_sessions` (source of truth), the ledger only adds `words_added`.
+- **API** (`/api/vocabulary/analytics/{dashboard,activity,sessions,students}`, staff-only, Zod in `lib/vocabulary-analytics-schema.ts`). Read-only session detail reuses `/api/vocabulary/review-sessions?id=&userId=` (already permission-checked). "Open vocabulary" on a student row calls `fetchVocabulary(userId, name)` and returns to the read-only student view.
+- **Tests**: `auth.test.ts` always runs; `vocabulary-activity.pg.test.ts` runs the real SQL and **skips unless** `npm i --no-save @electric-sql/pglite`.
+- **i18n**: `vocabulary.analytics.*` in both locales.
+
+---
+
 ## Language Check (`/language-check`)
 
 Standalone essay error-correction tool, reachable from the hamburger menu (`SectionNavSheet` → `pageLinks[]`). **Independent of reading sessions**: own table, store, API, hook and components — it must never read/write `reading.ts`, `history.ts` or `reading_sessions`.

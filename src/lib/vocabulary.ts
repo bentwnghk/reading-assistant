@@ -1,5 +1,6 @@
 import { getPool } from "./db";
 import type { PoolClient } from "pg";
+import { logVocabularyActivity } from "./vocabulary-activity";
 
 function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
   const rawCounts = row.srs_counts as { hard?: number; medium?: number } | null;
@@ -112,13 +113,15 @@ export async function upsertVocabularyFromGlossary(
 ): Promise<void> {
   const pool = getPool();
   const now = Date.now();
+  let addedWords = 0;
+  let addedPhrases = 0;
 
   for (const entry of glossary) {
     const word = entry.word.toLowerCase();
     const rating = ratings[entry.word] || null;
     const entryType = isMultiWordEntry(word) ? "phrase" : "word";
 
-    await pool.query(
+    const upserted = await pool.query(
       `INSERT INTO user_vocabulary (
         user_id, word, syllabification, part_of_speech,
         english_definition, chinese_definition, example,
@@ -152,7 +155,8 @@ export async function upsertVocabularyFromGlossary(
             user_vocabulary.source_session_ids || EXCLUDED.source_session_ids
           ) elem
         ),
-        updated_at = $11`,
+        updated_at = $11
+      RETURNING (xmax = 0) AS inserted`,
       [
         userId,
         word,
@@ -167,6 +171,27 @@ export async function upsertVocabularyFromGlossary(
         now,
       ]
     );
+    if (upserted.rows[0]?.inserted) {
+      if (entryType === "phrase") addedPhrases++;
+      else addedWords++;
+    }
+  }
+
+  if (addedWords > 0) {
+    await logVocabularyActivity({
+      userId,
+      type: "words_added",
+      entryType: "word",
+      details: { count: addedWords, source: "reading", sessionId },
+    });
+  }
+  if (addedPhrases > 0) {
+    await logVocabularyActivity({
+      userId,
+      type: "words_added",
+      entryType: "phrase",
+      details: { count: addedPhrases, source: "reading", sessionId },
+    });
   }
 }
 
@@ -203,7 +228,7 @@ export async function upsertPhrase(
   const word = chunk.chunk.toLowerCase().trim();
   if (!word) return;
 
-  await pool.query(
+  const upserted = await pool.query(
     `INSERT INTO user_vocabulary (
         user_id, word, syllabification, part_of_speech,
         english_definition, chinese_definition, example,
@@ -226,7 +251,8 @@ export async function upsertPhrase(
             user_vocabulary.source_session_ids || EXCLUDED.source_session_ids
           ) elem
         ),
-        updated_at = $9`,
+        updated_at = $9
+      RETURNING (xmax = 0) AS inserted`,
     [
       userId,
       word,
@@ -239,6 +265,14 @@ export async function upsertPhrase(
       now,
     ],
   );
+  if (upserted.rows[0]?.inserted) {
+    await logVocabularyActivity({
+      userId,
+      type: "words_added",
+      entryType: "phrase",
+      details: { count: 1, source: "collocations", sessionId: sessionId ?? null },
+    });
+  }
 }
 
 export async function recordSRSAction(
@@ -514,6 +548,20 @@ export async function createReviewSession(
       params
     );
   }
+
+  await logVocabularyActivity({
+    userId,
+    type: "session_completed",
+    entryType,
+    details: {
+      sessionId,
+      mode,
+      total: totalWords,
+      correct: correctCount,
+      accuracy,
+    },
+    eventKey: `rs:${sessionId}`,
+  });
 
   return sessionId;
 }

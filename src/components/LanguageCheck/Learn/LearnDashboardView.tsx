@@ -48,7 +48,7 @@ export function formatMinutes(minutes: number, t: (k: string, o?: Record<string,
   });
 }
 
-function Stat({
+export function Stat({
   icon: Icon,
   label,
   value,

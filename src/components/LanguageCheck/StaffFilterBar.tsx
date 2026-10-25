@@ -16,6 +16,8 @@ interface StaffFilterBarProps {
   role: string | undefined;
   value: StaffSelection;
   onChange: (next: StaffSelection) => void;
+  /** Student options endpoint (`?classId=` is appended). Defaults to Language Check's. */
+  studentsEndpoint?: string;
 }
 
 /**
@@ -25,7 +27,12 @@ interface StaffFilterBarProps {
  * school, super-admin → everyone) and the student list narrows by class only,
  * never by the selected student, so switching stays possible.
  */
-export default function StaffFilterBar({ role, value, onChange }: StaffFilterBarProps) {
+export default function StaffFilterBar({
+  role,
+  value,
+  onChange,
+  studentsEndpoint = "/api/language-check/staff/students",
+}: StaffFilterBarProps) {
   const { t } = useTranslation();
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [users, setUsers] = useState<LanguageCheckStaffUser[]>([]);
@@ -46,7 +53,7 @@ export default function StaffFilterBar({ role, value, onChange }: StaffFilterBar
     void (async () => {
       try {
         const qs = value.classId ? `?classId=${encodeURIComponent(value.classId)}` : "";
-        const res = await fetch(`/api/language-check/staff/students${qs}`, {
+        const res = await fetch(`${studentsEndpoint}${qs}`, {
           signal: ac.signal,
         });
         if (!res.ok) return;
@@ -57,7 +64,7 @@ export default function StaffFilterBar({ role, value, onChange }: StaffFilterBar
       }
     })();
     return () => ac.abort();
-  }, [value.classId]);
+  }, [value.classId, studentsEndpoint]);
 
   const scopeLabel =
     role === "teacher"

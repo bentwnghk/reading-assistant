@@ -9,8 +9,8 @@ import { useLayoutEffect } from "react";
 
 const Header = dynamic(() => import("@/components/Internal/Header"));
 const Footer = dynamic(() => import("@/components/Internal/Footer").then((m) => ({ default: m.Footer })));
-const VocabularyContainer = dynamic(
-  () => import("@/components/Vocabulary/VocabularyContainer"),
+const VocabularyHome = dynamic(
+  () => import("@/components/Vocabulary/VocabularyHome"),
   { ssr: false }
 );
 
@@ -44,7 +44,7 @@ export default function Page() {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
-        <VocabularyContainer />
+        <VocabularyHome />
       </div>
       <Footer />
     </div>
