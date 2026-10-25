@@ -36,7 +36,7 @@ import {
   type LearnExercise,
   type LearnLesson,
 } from "@/utils/languageCheckLearn";
-import { exerciseSolution } from "@/utils/languageCheckLearnGrade";
+import { answerText, exerciseSolution } from "@/utils/languageCheckLearnGrade";
 import type { LearnSessionWire, LearnUnitWire } from "@/utils/languageCheckLearnWire";
 
 /**
@@ -53,6 +53,10 @@ export interface LearnExportOptions {
   session: LearnSessionWire;
   language: "en" | "zh";
   withAnswers: boolean;
+  /** Also show the learner's practice outcome and quiz answers (staff review copy). */
+  studentWork?: boolean;
+  /** Shown on the cover of a staff review copy. */
+  studentName?: string;
   t: Translate;
   categoryLabel: (category: string) => string;
   /** Overridable for tests. */
@@ -847,6 +851,7 @@ function exerciseCard(
   index: number,
   total: number,
   mode: "practice" | "quiz",
+  unit: LearnUnitWire,
   ctx: Ctx,
 ): (Paragraph | Table)[] {
   const { t, withAnswers } = ctx;
@@ -875,8 +880,60 @@ function exerciseCard(
       ),
     );
   }
+  if (ctx.studentWork) body.push(...studentWorkBlock(item, mode, unit, ctx));
   if (withAnswers) body.push(...solutionNotes(item, ctx));
   return [box(body, { border: C.line, pad: 190 }), gap(170)];
+}
+
+/** What the learner did on this item: quiz answer + verdict, or practice outcome (answers are not stored for practice). */
+function studentWorkBlock(
+  item: LearnExercise,
+  mode: "practice" | "quiz",
+  unit: LearnUnitWire,
+  ctx: Ctx,
+): Paragraph[] {
+  const { t } = ctx;
+  const label = (text: string) =>
+    run(`${text}: `, { bold: true, color: C.sky, size: 21 });
+
+  if (mode === "practice") {
+    const r = unit.practiceResults[item.id];
+    const text = r
+      ? [
+          `${t("languageCheck.learnExport.firstAttempt")} ${Math.round(r.score * 100)}%`,
+          t("languageCheck.learnData.detail.attempts", { count: r.attempts }),
+          ...(r.revealed ? [t("languageCheck.learnData.detail.revealed")] : []),
+        ].join("  ·  ")
+      : t("languageCheck.learnData.detail.notAttempted");
+    const ok = r ? r.score >= 1 : null;
+    return [
+      para(
+        [label(t("languageCheck.learnExport.studentWork")), run(text, { bold: ok !== null, color: ok === null ? C.muted : ok ? C.green : C.red, size: 21 })],
+        { fill: C.skyBg, bar: C.skyLine, indent: 160, before: 60, after: 60, line: 288 },
+      ),
+    ];
+  }
+
+  const r = unit.quizResults[item.id];
+  if (!r) {
+    return [
+      para(
+        [label(t("languageCheck.learnExport.studentAnswer")), run(t("languageCheck.learnExport.notAnswered"), { italics: true, color: C.muted, size: 22 })],
+        { fill: C.skyBg, bar: C.skyLine, indent: 160, before: 60, after: 60, line: 300 },
+      ),
+    ];
+  }
+  const tone = r.correct ? C.green : C.red;
+  return [
+    para(
+      [
+        label(t("languageCheck.learnExport.studentAnswer")),
+        run(answerText(item, r.answer) || "—", { bold: true, color: tone, size: 23 }),
+        run(`   ${r.correct ? "✓" : "✗"} ${Math.round(r.score * 100)}%`, { bold: true, color: tone, size: 21 }),
+      ],
+      { fill: r.correct ? C.greenBg : C.redBg, bar: tone, indent: 160, before: 60, after: 60, line: 300 },
+    ),
+  ];
 }
 
 // ─── Stages, cover, document ─────────────────────────────────────────────────
@@ -885,6 +942,8 @@ interface Ctx {
   t: Translate;
   language: "en" | "zh";
   withAnswers: boolean;
+  studentWork: boolean;
+  studentName?: string;
   categoryLabel: (category: string) => string;
 }
 
@@ -962,7 +1021,7 @@ function unitBlocks(unit: LearnUnitWire, ctx: Ctx): (Paragraph | Table)[] {
   );
   if (practice.length === 0) out.push(...missing(t("languageCheck.learnData.detail.noPractice")));
   practice.forEach((item, i) =>
-    out.push(...exerciseCard(item, i, practice.length, "practice", ctx)),
+    out.push(...exerciseCard(item, i, practice.length, "practice", unit, ctx)),
   );
 
   const quiz = unit.quiz ?? [];
@@ -975,7 +1034,9 @@ function unitBlocks(unit: LearnUnitWire, ctx: Ctx): (Paragraph | Table)[] {
     ),
   );
   if (quiz.length === 0) out.push(...missing(t("languageCheck.learnData.detail.noQuiz")));
-  quiz.forEach((item, i) => out.push(...exerciseCard(item, i, quiz.length, "quiz", ctx)));
+  quiz.forEach((item, i) =>
+    out.push(...exerciseCard(item, i, quiz.length, "quiz", unit, ctx)),
+  );
   return out;
 }
 
@@ -997,7 +1058,16 @@ function cover(session: LearnSessionWire, ctx: Ctx, date: string): (Paragraph | 
     }),
     para(
       [
-        ctx.withAnswers
+        ctx.studentWork
+          ? run(` ${t("languageCheck.learnExport.versionStudentWork")} `, {
+              bold: true,
+              color: C.sky,
+              fill: C.skyBg,
+              size: 20,
+              caps: true,
+              spacing: 16,
+            })
+          : ctx.withAnswers
           ? run(` ${t("languageCheck.learnExport.versionAnswers")} `, {
               bold: true,
               color: C.green,
@@ -1021,6 +1091,17 @@ function cover(session: LearnSessionWire, ctx: Ctx, date: string): (Paragraph | 
       ],
       { after: 100, bottom: C.line },
     ),
+    ...(ctx.studentName
+      ? [
+          para(
+            [
+              run(`${t("languageCheck.learnExport.student_name")}: `, { color: C.muted, size: 22 }),
+              run(ctx.studentName, { bold: true, color: C.ink, size: 22 }),
+            ],
+            { after: 80 },
+          ),
+        ]
+      : []),
     sectionTitle(t("languageCheck.learnExport.topics"), C.ink),
   ];
   session.units.forEach((unit, i) => {
@@ -1061,11 +1142,13 @@ export function buildLearnDocx({
   session,
   language,
   withAnswers,
+  studentWork = false,
+  studentName,
   t,
   categoryLabel,
   now = new Date(),
 }: LearnExportOptions): Document {
-  const ctx: Ctx = { t, language, withAnswers, categoryLabel };
+  const ctx: Ctx = { t, language, withAnswers, studentWork, studentName, categoryLabel };
   const date = now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
   const title = session.essayTitle || t("languageCheck.list.untitled");
 
@@ -1091,9 +1174,11 @@ export function buildLearnDocx({
     ),
   );
 
-  const versionLabel = withAnswers
-    ? t("languageCheck.learnExport.versionAnswers")
-    : t("languageCheck.learnExport.versionStudent");
+  const versionLabel = studentWork
+    ? t("languageCheck.learnExport.versionStudentWork")
+    : withAnswers
+      ? t("languageCheck.learnExport.versionAnswers")
+      : t("languageCheck.learnExport.versionStudent");
 
   return new Document({
     creator: "Mr.🆖 ProReader",
@@ -1175,11 +1260,14 @@ export function buildLearnDocx({
 export async function exportLearnDocx(options: LearnExportOptions): Promise<void> {
   const doc = buildLearnDocx(options);
   const blob = await Packer.toBlob(doc);
-  const safe =
-    (options.session.essayTitle || "essay").replace(/[\\/:*?"<>|]+/g, "").trim().slice(0, 60) ||
-    "essay";
-  saveAs(
-    blob,
-    `${safe} - learn from mistakes${options.withAnswers ? " - model answers" : ""}.docx`,
-  );
+  const clean = (s: string, fallback: string) =>
+    s.replace(/[\\/:*?"<>|]+/g, "").trim().slice(0, 60) || fallback;
+  const safe = clean(options.session.essayTitle || "essay", "essay");
+  const who = options.studentName ? ` - ${clean(options.studentName, "student")}` : "";
+  const suffix = options.studentWork
+    ? " - student work"
+    : options.withAnswers
+      ? " - model answers"
+      : "";
+  saveAs(blob, `${safe}${who} - learn from mistakes${suffix}.docx`);
 }

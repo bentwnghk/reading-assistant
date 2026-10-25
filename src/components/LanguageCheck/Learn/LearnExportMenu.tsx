@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { FileDown, FileText, KeyRound, LoaderCircle } from "lucide-react";
+import { FileDown, FileText, KeyRound, LoaderCircle, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,8 @@ interface LearnExportMenuProps {
   /** Save pending work first (the session open in this browser). */
   flushFirst?: boolean;
   iconOnly?: boolean;
+  /** Staff only: offer the copy that also shows the learner's answers (endpoint must return `user`). */
+  includeStudentWork?: boolean;
   variant?: "outline" | "ghost" | "default";
 }
 
@@ -44,6 +46,7 @@ export default function LearnExportMenu({
   language,
   flushFirst = false,
   iconOnly = false,
+  includeStudentWork = false,
   variant = "outline",
 }: LearnExportMenuProps) {
   const { t } = useTranslation();
@@ -53,7 +56,7 @@ export default function LearnExportMenu({
   const [busy, setBusy] = useState(false);
   const allowed = canExportLearnSession(auth?.user?.role, status);
 
-  async function run(withAnswers: boolean) {
+  async function run(withAnswers: boolean, studentWork = false) {
     setBusy(true);
     try {
       if (flushFirst) await useLanguageCheckLearnStore.getState().flush();
@@ -64,6 +67,11 @@ export default function LearnExportMenu({
         session: (body as { session: LearnSessionWire }).session,
         language: language ?? preferred,
         withAnswers,
+        studentWork,
+        studentName: studentWork
+          ? (body as { user?: { name?: string; email?: string } }).user?.name ||
+            (body as { user?: { email?: string } }).user?.email
+          : undefined,
         t,
         categoryLabel,
       });
@@ -124,6 +132,17 @@ export default function LearnExportMenu({
             </span>
           </span>
         </DropdownMenuItem>
+        {includeStudentWork && status === "completed" && (
+          <DropdownMenuItem className="items-start gap-3 py-2" onSelect={() => void run(true, true)}>
+            <UserCheck className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
+            <span className="flex flex-col">
+              <span className="font-medium">{t("languageCheck.learnExport.studentWorkOption")}</span>
+              <span className="text-xs text-muted-foreground">
+                {t("languageCheck.learnExport.studentWorkHint")}
+              </span>
+            </span>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -364,6 +364,7 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
                     endpoint={`/api/language-check/learn/staff/sessions/${s.id}`}
                     variant="ghost"
                     iconOnly
+                    includeStudentWork
                   />
                 </td>
               </tr>
