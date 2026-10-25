@@ -56,13 +56,13 @@ describe("ExerciseCard (practice)", () => {
 
     fireEvent.click(screen.getByRole("radio", { name: /go$/ }));
     fireEvent.click(check());
-    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith({ score: 0, correct: false }));
+    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith(expect.objectContaining({ score: 0, correct: false })));
     expect(screen.getByText("languageCheck.learn.exercise.notQuite")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /tryAgain/ }));
     fireEvent.click(screen.getByRole("radio", { name: /goes/ }));
     fireEvent.click(check());
-    await waitFor(() => expect(onAttempt).toHaveBeenLastCalledWith({ score: 1, correct: true }));
+    await waitFor(() => expect(onAttempt).toHaveBeenLastCalledWith(expect.objectContaining({ score: 1, correct: true })));
     expect(screen.getByText("languageCheck.learn.exercise.correct")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /next/ }));
@@ -79,7 +79,7 @@ describe("ExerciseCard (practice)", () => {
     fireEvent.change(inputs[0], { target: { value: "tom" } });
     fireEvent.change(inputs[1], { target: { value: "bob" } });
     fireEvent.click(check());
-    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith({ score: 0.5, correct: false }));
+    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith(expect.objectContaining({ score: 0.5, correct: false })));
   });
 
   it("reorder: builds the sentence from tapped words", async () => {
@@ -89,7 +89,7 @@ describe("ExerciseCard (practice)", () => {
       fireEvent.click(screen.getByRole("button", { name: word }));
     }
     fireEvent.click(check());
-    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith({ score: 1, correct: true }));
+    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith(expect.objectContaining({ score: 1, correct: true })));
   });
 
   it("proofread: marks a word, types the fix and is graded", async () => {
@@ -107,7 +107,7 @@ describe("ExerciseCard (practice)", () => {
     const fix = screen.getByLabelText(/fixFor/);
     fireEvent.change(fix, { target: { value: "goes" } });
     fireEvent.click(check());
-    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith({ score: 1, correct: true }));
+    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith(expect.objectContaining({ score: 1, correct: true })));
   });
 
   it("rewrite: asks the AI evaluator when the answer is not a known rewrite", async () => {
@@ -121,7 +121,7 @@ describe("ExerciseCard (practice)", () => {
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "He is going." } });
     fireEvent.click(check());
     await waitFor(() => expect(evaluateOpen).toHaveBeenCalledWith(item, "He is going."));
-    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith({ score: 0.5, correct: false }));
+    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith(expect.objectContaining({ score: 0.5, correct: false })));
     expect(screen.getByText("Nearly")).toBeTruthy();
   });
 
@@ -134,7 +134,7 @@ describe("ExerciseCard (practice)", () => {
     const { onAttempt } = renderCard(item, { evaluateOpen });
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "he goes" } });
     fireEvent.click(check());
-    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith({ score: 1, correct: true }));
+    await waitFor(() => expect(onAttempt).toHaveBeenCalledWith(expect.objectContaining({ score: 1, correct: true })));
     expect(evaluateOpen).not.toHaveBeenCalled();
   });
 

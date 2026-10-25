@@ -4999,6 +4999,8 @@
       "studentWork": "Student's practice",
       "studentAnswer": "Student's answer",
       "firstAttempt": "First attempt",
+      "firstAnswer": "First answer",
+      "finalAnswer": "Final answer",
       "notAnswered": "Not answered",
       "student_name": "Student",
       "unavailable": "Finish all topics to export this session",

@@ -4988,6 +4988,8 @@
       "studentWork": "學生練習",
       "studentAnswer": "學生答案",
       "firstAttempt": "首次作答",
+      "firstAnswer": "首次答案",
+      "finalAnswer": "最終答案",
       "notAnswered": "未作答",
       "student_name": "學生",
       "unavailable": "完成所有主題後才可匯出",

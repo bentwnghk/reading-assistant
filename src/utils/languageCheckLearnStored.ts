@@ -115,6 +115,8 @@ export const practiceResultSchema = z.object({
   attempts: z.number().int().min(0).max(100),
   completed: z.boolean(),
   revealed: z.boolean().optional(),
+  answer: answer.optional(),
+  lastAnswer: answer.optional(),
 });
 
 export const quizResultSchema = z.object({

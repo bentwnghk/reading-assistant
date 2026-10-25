@@ -62,12 +62,17 @@ function mergePractice(
   if (!a) return b;
   if (!b) return a;
   const revealed = !!a.revealed || !!b.revealed;
+  const first = a.answer ?? b.answer;
+  // The side that has seen more attempts holds the most recent answer.
+  const latest = b.attempts > a.attempts ? (b.lastAnswer ?? a.lastAnswer) : (a.lastAnswer ?? b.lastAnswer);
   return {
     // Only the FIRST attempt is scored, so the authoritative score stands.
     score: a.score,
     attempts: Math.max(a.attempts, b.attempts),
     completed: a.completed || b.completed,
     ...(revealed ? { revealed: true } : {}),
+    ...(first !== undefined ? { answer: first } : {}),
+    ...(latest !== undefined ? { lastAnswer: latest } : {}),
   };
 }
 

@@ -122,19 +122,28 @@ export default function PracticePlayer({
         strict={strict}
         solved={!!unit.practiceResults[item.id]?.completed}
         isLast={index === items.length - 1}
-        onAttempt={({ score, correct }) =>
+        onAttempt={({ score, correct, answer }) =>
           recordPractice(sessionKey, unit.category, item.id, (prev) => ({
             // Only the first attempt is scored; retries are for learning.
             score: prev ? prev.score : score,
             attempts: (prev?.attempts ?? 0) + 1,
             completed: !!prev?.completed || correct,
+            ...(prev?.revealed ? { revealed: true } : {}),
+            ...(prev?.answer !== undefined
+              ? { answer: prev.answer }
+              : answer !== undefined
+                ? { answer }
+                : {}),
+            ...(answer !== undefined ? { lastAnswer: answer } : prev?.lastAnswer !== undefined ? { lastAnswer: prev.lastAnswer } : {}),
           }))
         }
         onReveal={() =>
           recordPractice(sessionKey, unit.category, item.id, (prev) => ({
+            ...prev,
             score: prev?.score ?? 0,
             attempts: prev?.attempts ?? 1,
             completed: true,
+            revealed: true,
           }))
         }
         onNext={() => setIndex(index + 1)}

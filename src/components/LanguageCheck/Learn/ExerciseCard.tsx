@@ -41,6 +41,7 @@ import type { ExplanationLanguage } from "@/store/languageCheck";
 interface AttemptOutcome {
   score: number;
   correct: boolean;
+  answer?: LearnAnswer;
 }
 
 interface ExerciseCardProps {
@@ -132,7 +133,7 @@ export default function ExerciseCard({
     setOpen(evaluation);
     setGrade(result);
     setAttempts((n) => n + 1);
-    onAttempt?.({ score: result.score, correct: result.correct });
+    onAttempt?.({ score: result.score, correct: result.correct, answer });
   }
 
   function handleRetry() {

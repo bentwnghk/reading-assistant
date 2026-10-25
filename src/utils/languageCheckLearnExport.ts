@@ -906,12 +906,37 @@ function studentWorkBlock(
         ].join("  ·  ")
       : t("languageCheck.learnData.detail.notAttempted");
     const ok = r ? r.score >= 1 : null;
-    return [
+    const out = [
       para(
         [label(t("languageCheck.learnExport.studentWork")), run(text, { bold: ok !== null, color: ok === null ? C.muted : ok ? C.green : C.red, size: 21 })],
         { fill: C.skyBg, bar: C.skyLine, indent: 160, before: 60, after: 60, line: 288 },
       ),
     ];
+    if (r?.answer !== undefined) {
+      const first = answerText(item, r.answer) || "—";
+      out.push(
+        para(
+          [
+            label(t("languageCheck.learnExport.firstAnswer")),
+            run(first, { bold: true, color: ok ? C.green : C.red, size: 22 }),
+          ],
+          { fill: C.skyBg, bar: C.skyLine, indent: 160, before: 0, after: 60, line: 300 },
+        ),
+      );
+      const last = r.lastAnswer !== undefined ? answerText(item, r.lastAnswer) : "";
+      if (last && last !== first) {
+        out.push(
+          para(
+            [
+              label(t("languageCheck.learnExport.finalAnswer")),
+              run(last, { bold: true, color: r.completed && !r.revealed ? C.green : C.muted, size: 22 }),
+            ],
+            { fill: C.skyBg, bar: C.skyLine, indent: 160, before: 0, after: 60, line: 300 },
+          ),
+        );
+      }
+    }
+    return out;
   }
 
   const r = unit.quizResults[item.id];

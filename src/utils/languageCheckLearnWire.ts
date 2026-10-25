@@ -28,6 +28,10 @@ export interface PracticeResult {
   completed: boolean;
   /** The learner gave up and looked at the answer. */
   revealed?: boolean;
+  /** The learner's answer on the FIRST attempt (absent for results saved before answers were stored). */
+  answer?: LearnAnswer;
+  /** The learner's most recent answer (differs from `answer` after retries). */
+  lastAnswer?: LearnAnswer;
 }
 
 export interface QuizResult {

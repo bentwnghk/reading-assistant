@@ -245,10 +245,16 @@ function PracticeTab({ unit, language }: { unit: LearnUnitWire; language: Explan
             id: item.id,
             item,
             ok: r ? r.score >= 1 : null,
-            mine: "",
+            mine: r?.answer !== undefined ? answerText(item, r.answer) : "",
             note: r
               ? `${t("languageCheck.learnData.detail.attempts", { count: r.attempts })}${
                   r.revealed ? ` · ${t("languageCheck.learnData.detail.revealed")}` : ""
+                }${
+                  r.lastAnswer !== undefined &&
+                  r.answer !== undefined &&
+                  answerText(item, r.lastAnswer) !== answerText(item, r.answer)
+                    ? ` · ${t("languageCheck.learnExport.finalAnswer")}: ${answerText(item, r.lastAnswer)}`
+                    : ""
                 }`
               : t("languageCheck.learnData.detail.notAttempted"),
           };
