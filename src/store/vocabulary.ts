@@ -110,6 +110,9 @@ interface VocabularyStoreActions {
   exitReviewList: () => void;
 }
 
+/** Monotonic id of the latest fetchVocabulary call (stale responses are dropped). */
+let fetchVocabularyRequestId = 0;
+
 export const useVocabularyStore = create<
   VocabularyStoreState & VocabularyStoreActions
 >((set, get) => ({
@@ -145,12 +148,26 @@ export const useVocabularyStore = create<
   viewingUserName: null,
 
   fetchVocabulary: async (userId, userName) => {
-    set({ isLoading: true });
+    // Record the target view up front (not when the response lands): anything
+    // mounting meanwhile (the container's remount fetch) must see the view
+    // being opened, not the previous one, or it re-fetches the wrong user.
+    const requestId = ++fetchVocabularyRequestId;
+    const previous = {
+      viewingUserId: get().viewingUserId,
+      viewingUserName: get().viewingUserName,
+    };
+    set({
+      isLoading: true,
+      viewingUserId: userId ?? null,
+      viewingUserName: userId ? userName ?? null : null,
+    });
     try {
       const qs = userId ? `?userId=${encodeURIComponent(userId)}` : "";
       const res = await fetch(`/api/vocabulary${qs}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
+      // A newer fetch superseded this one — never let a slow response clobber it.
+      if (requestId !== fetchVocabularyRequestId) return;
       set({
         viewingUserId: userId ?? null,
         viewingUserName: userId ? userName ?? null : null,
@@ -174,7 +191,7 @@ export const useVocabularyStore = create<
       });
     } catch (error) {
       console.error("Failed to fetch vocabulary:", error);
-      set({ isLoading: false });
+      if (requestId === fetchVocabularyRequestId) set({ ...previous, isLoading: false });
     }
   },
 
