@@ -2159,7 +2159,7 @@
       "noSessions": "此選擇暫時沒有複習記錄。",
       "noActivity": "此期間暫時沒有活動。",
       "statBank": "詞庫",
-      "statBankHint": "{{words}} 個單字 · {{phrases}} 個片語",
+      "statBankHint": "{{words}} 個單字 · {{phrases}} 個詞組",
       "statMastered": "已掌握（L5）",
       "statMasteredHint": "佔詞庫 {{percent}}%",
       "statDue": "待複習",
@@ -2193,7 +2193,7 @@
       },
       "entry": {
         "word": "單字",
-        "phrase": "片語"
+        "phrase": "詞組"
       },
       "chartHistory": "複習準確率走勢",
       "sessionAccuracy": "準確率",
@@ -2212,7 +2212,7 @@
       "colDue": "待複習",
       "colTrend": "趨勢",
       "colLastActive": "最近活躍",
-      "phraseCount": "{{count}} 個片語",
+      "phraseCount": "{{count}} 個詞組",
       "colType": "類型",
       "colWhen": "完成時間",
       "colResult": "結果",
@@ -2658,7 +2658,7 @@
         },
         "cards": {
           "name": "概覽統計卡",
-          "desc": "詞庫規模（單字＋片語）、已掌握數目、待複習詞彙、平均掌握等級、複習次數與平均準確率、已複習字詞、新增字詞，以及活躍日數。"
+          "desc": "詞庫規模（單字＋詞組）、已掌握數目、待複習詞彙、平均掌握等級、複習次數與平均準確率、已複習字詞、新增字詞，以及活躍日數。"
         },
         "charts": {
           "name": "圖表與表格",
