@@ -2,19 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Eye, LoaderCircle } from "lucide-react";
+import { Eye } from "lucide-react";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { useVocabularyStore } from "@/store/vocabulary";
-import { formatClassLabel } from "@/components/Internal/ClassCombobox";
-import { cn } from "@/utils/style";
+import {
+  ClassCombobox,
+  type ClassComboboxClass,
+} from "@/components/Internal/ClassCombobox";
+import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
 
 interface ScopedStudentClass {
   id: string;
@@ -53,19 +54,12 @@ function studentClasses(s: ScopedStudent): ScopedStudentClass[] {
   return [];
 }
 
-const classOptionLabel = (c: ScopedStudentClass) =>
-  formatClassLabel({
-    name: c.name,
-    subjectName: c.subjectName ?? undefined,
-    gradeName: c.gradeName ?? undefined,
-  });
+const studentLabel = (s: ScopedStudent) =>
+  s.name?.trim() || s.email || s.id;
 
 interface StudentViewFiltersProps {
   role: "teacher" | "admin" | "super-admin";
 }
-
-const studentLabel = (s: ScopedStudent) =>
-  s.name?.trim() || s.email || s.id;
 
 function StudentViewFilters({ role }: StudentViewFiltersProps) {
   const { t } = useTranslation();
@@ -79,7 +73,8 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
   const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [schoolFilter, setSchoolFilter] = useState<string>("all");
-  const [classFilter, setClassFilter] = useState<string>("all");
+  /** null = all classes; "__none__" = ClassCombobox sentinel for no class. */
+  const [classFilter, setClassFilter] = useState<string | null>(null);
   const [teacherFilter, setTeacherFilter] = useState<string>("all");
 
   useEffect(() => {
@@ -126,19 +121,30 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
     [students]
   );
 
-  const classOptions = useMemo(() => {
+  // Class options are derived from the scoped students themselves (not
+  // /api/classes): the roster can include co-taught classes that are not
+  // the viewer's own, and only classes that actually contain a scoped
+  // student are worth filtering by here.
+  const comboboxClasses = useMemo<ClassComboboxClass[]>(() => {
     const map = new Map<string, ScopedStudentClass>();
     for (const s of students) {
       for (const c of studentClasses(s)) {
         if (!map.has(c.id)) map.set(c.id, c);
       }
     }
-    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+    return [...map.values()].map((c) => ({
+      id: c.id,
+      name: c.name,
+      subjectName: c.subjectName ?? undefined,
+      gradeName: c.gradeName ?? undefined,
+      teacherName: c.teacherName ?? undefined,
+    }));
   }, [students]);
 
   const classFiltered = useMemo(() => {
-    if (classFilter === "all") return students;
-    if (classFilter === "none") return students.filter((s) => studentClasses(s).length === 0);
+    if (classFilter === null) return students;
+    if (classFilter === "__none__")
+      return students.filter((s) => studentClasses(s).length === 0);
     return students.filter((s) => studentClasses(s).some((c) => c.id === classFilter));
   }, [students, classFilter]);
 
@@ -164,7 +170,7 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
   const studentOptions = useMemo(() => {
     const list = [...teacherFiltered];
     // Keep the currently viewed student selectable even if it falls outside
-    // the active filters, so the Select never shows a raw id.
+    // the active filters, so the picker never shows a raw id.
     if (viewingUserId && !list.some((s) => s.id === viewingUserId)) {
       const current = students.find((s) => s.id === viewingUserId);
       if (current) list.unshift(current);
@@ -172,29 +178,28 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
     return list;
   }, [teacherFiltered, viewingUserId, students]);
 
-  const groupedBySchool = useMemo(() => {
-    if (!isSuperAdmin || schoolFilter !== "all") return null;
-    const groups = new Map<string, { label: string; students: ScopedStudent[] }>();
-    for (const s of studentOptions) {
-      const key = s.schoolId || "__none__";
-      const label = s.schoolName || t("vocabulary.studentView.noSchool");
-      const group = groups.get(key) || { label, students: [] };
-      group.students.push(s);
-      groups.set(key, group);
-    }
-    return [...groups.entries()].map(([key, group]) => ({
-      key,
-      ...group,
-    }));
-  }, [isSuperAdmin, schoolFilter, studentOptions, t]);
+  // Flat {id, name, email} rows for StudentCombobox; the email column is
+  // hidden when the display name IS the email (students without a name).
+  const comboboxUsers = useMemo<LanguageCheckStaffUser[]>(
+    () =>
+      studentOptions.map((s) => {
+        const name = s.name?.trim();
+        return {
+          id: s.id,
+          name: name || s.email || s.id,
+          email: name ? s.email ?? "" : "",
+        };
+      }),
+    [studentOptions]
+  );
 
-  const handleStudentChange = (value: string) => {
-    if (value === "my") {
+  const handleStudentChange = (userId: string | null) => {
+    if (userId === null) {
       fetchVocabulary(null);
       return;
     }
-    const student = students.find((s) => s.id === value);
-    fetchVocabulary(value, student ? studentLabel(student) : value);
+    const student = students.find((s) => s.id === userId);
+    fetchVocabulary(userId, student ? studentLabel(student) : userId);
   };
 
   const selectTriggerClass =
@@ -214,7 +219,7 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
           value={schoolFilter}
           onValueChange={(v) => {
             setSchoolFilter(v);
-            setClassFilter("all");
+            setClassFilter(null);
             setTeacherFilter("all");
           }}
         >
@@ -234,32 +239,21 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
         </Select>
       )}
 
-      <Select
-        value={classFilter}
-        onValueChange={(v) => {
-          setClassFilter(v);
-          setTeacherFilter("all");
-        }}
-      >
-        <SelectTrigger className={selectTriggerClass}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="max-w-[calc(100vw-3rem)]">
-          <SelectItem value="all">
-            {t("vocabulary.studentView.allClasses")}
-          </SelectItem>
-          {hasNoClassStudents && (
-            <SelectItem value="none">
-              {t("vocabulary.studentView.noClass")}
-            </SelectItem>
-          )}
-          {classOptions.map((c) => (
-            <SelectItem key={c.id} value={c.id}>
-              {classOptionLabel(c)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="w-full sm:w-[180px]">
+        <ClassCombobox
+          classes={comboboxClasses}
+          value={classFilter}
+          onChange={(v) => {
+            setClassFilter(v);
+            setTeacherFilter("all");
+          }}
+          allowAll
+          allLabel={t("vocabulary.studentView.allClasses")}
+          allowNone={hasNoClassStudents}
+          noneLabel={t("vocabulary.studentView.noClass")}
+          disabled={isLoading}
+        />
+      </div>
 
       {showTeacherFilter && (
         <Select
@@ -282,48 +276,20 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
         </Select>
       )}
 
-      <Select
-        value={viewingUserId ?? "my"}
-        onValueChange={handleStudentChange}
-      >
-        <SelectTrigger
-          className={cn(selectTriggerClass, "sm:w-[220px] font-medium")}
-        >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="max-w-[calc(100vw-3rem)] max-h-[50vh]">
-          <SelectItem value="my">
-            {t("vocabulary.studentView.myVocabulary")}
-          </SelectItem>
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
-              <LoaderCircle className="h-4 w-4 animate-spin" />
-              {t("vocabulary.studentView.loading")}
-            </div>
-          ) : studentOptions.length === 0 ? (
-            <div className="py-4 px-2 text-sm text-muted-foreground text-center">
-              {t("vocabulary.studentView.noStudents")}
-            </div>
-          ) : groupedBySchool ? (
-            groupedBySchool.map((group) => (
-              <SelectGroup key={group.key}>
-                <SelectLabel>{group.label}</SelectLabel>
-                {group.students.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {studentLabel(s)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))
-          ) : (
-            studentOptions.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {studentLabel(s)}
-              </SelectItem>
-            ))
-          )}
-        </SelectContent>
-      </Select>
+      <div className="w-full sm:w-[220px]">
+        <StudentCombobox
+          users={comboboxUsers}
+          value={viewingUserId}
+          onChange={handleStudentChange}
+          allowMine
+          mineLabel={t("vocabulary.studentView.myVocabulary")}
+          loading={isLoading}
+          loadingLabel={t("vocabulary.studentView.loading")}
+          emptyLabel={t("vocabulary.studentView.noStudents")}
+          searchPlaceholder={t("vocabulary.studentView.searchStudents")}
+          className="font-medium"
+        />
+      </div>
     </div>
   );
 }

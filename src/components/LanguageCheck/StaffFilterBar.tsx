@@ -36,6 +36,7 @@ export default function StaffFilterBar({
   const { t } = useTranslation();
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [users, setUsers] = useState<LanguageCheckStaffUser[]>([]);
+  const [isLoadingStudents, setIsLoadingStudents] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -50,6 +51,8 @@ export default function StaffFilterBar({
 
   useEffect(() => {
     const ac = new AbortController();
+    let superseded = false;
+    setIsLoadingStudents(true);
     void (async () => {
       try {
         const qs = value.classId ? `?classId=${encodeURIComponent(value.classId)}` : "";
@@ -61,9 +64,16 @@ export default function StaffFilterBar({
         setUsers(body.users);
       } catch {
         // Aborted or offline — keep the previous options.
+      } finally {
+        // A request aborted because the class changed must not clear the
+        // spinner of the request that replaced it.
+        if (!superseded) setIsLoadingStudents(false);
       }
     })();
-    return () => ac.abort();
+    return () => {
+      superseded = true;
+      ac.abort();
+    };
   }, [value.classId, studentsEndpoint]);
 
   const scopeLabel =
@@ -100,6 +110,8 @@ export default function StaffFilterBar({
             allLabel={t("languageCheck.staff.allStudents")}
             emptyLabel={t("languageCheck.staff.noStudents")}
             searchPlaceholder={t("languageCheck.staff.searchStudents")}
+            loading={isLoadingStudents}
+            loadingLabel={t("languageCheck.staff.loadingStudents")}
           />
         </div>
       </div>
