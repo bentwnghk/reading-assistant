@@ -35,6 +35,9 @@ interface StudentComboboxProps {
    *  Pass at most one of allowMine / allLabel — both emit null. */
   allowMine?: boolean;
   mineLabel?: string;
+  /** Trigger label for a `value` that is not in `users` (e.g. a student kept
+   *  open while the filters exclude them), so it need not be listed. */
+  customLabel?: string;
   disabled?: boolean;
   className?: string;
 }
@@ -56,6 +59,7 @@ export default function StudentCombobox({
   loadingLabel,
   allowMine = false,
   mineLabel,
+  customLabel,
   disabled = false,
   className,
 }: StudentComboboxProps) {
@@ -79,16 +83,21 @@ export default function StudentCombobox({
           disabled={disabled}
           className={cn(
             "w-full justify-between font-normal",
-            !selected && !(allowMine && value == null) && "text-muted-foreground",
+            !selected &&
+              !(value != null && customLabel) &&
+              !(allowMine && value == null) &&
+              "text-muted-foreground",
             className,
           )}
         >
           <span className="truncate">
             {selected
               ? selected.name
-              : allowMine && value == null
-                ? mineLabel
-                : placeholder ?? ""}
+              : value != null && customLabel
+                ? customLabel
+                : allowMine && value == null
+                  ? mineLabel
+                  : placeholder ?? ""}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>

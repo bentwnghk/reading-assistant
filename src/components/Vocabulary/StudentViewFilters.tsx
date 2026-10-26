@@ -64,6 +64,7 @@ interface StudentViewFiltersProps {
 function StudentViewFilters({ role }: StudentViewFiltersProps) {
   const { t } = useTranslation();
   const viewingUserId = useVocabularyStore((s) => s.viewingUserId);
+  const viewingUserName = useVocabularyStore((s) => s.viewingUserName);
   const fetchVocabulary = useVocabularyStore((s) => s.fetchVocabulary);
 
   const isSuperAdmin = role === "super-admin";
@@ -167,22 +168,19 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
     );
   }, [classFiltered, teacherFilter, showTeacherFilter]);
 
-  const studentOptions = useMemo(() => {
-    const list = [...teacherFiltered];
-    // Keep the currently viewed student selectable even if it falls outside
-    // the active filters, so the picker never shows a raw id.
-    if (viewingUserId && !list.some((s) => s.id === viewingUserId)) {
-      const current = students.find((s) => s.id === viewingUserId);
-      if (current) list.unshift(current);
-    }
-    return list;
-  }, [teacherFiltered, viewingUserId, students]);
+  // The open student's trigger label comes from `customLabel`, so the list
+  // itself always reflects exactly the active filters.
+  const viewingLabel = useMemo(() => {
+    if (!viewingUserId) return undefined;
+    const current = students.find((s) => s.id === viewingUserId);
+    return current ? studentLabel(current) : viewingUserName ?? undefined;
+  }, [viewingUserId, viewingUserName, students]);
 
   // Flat {id, name, email} rows for StudentCombobox; the email column is
   // hidden when the display name IS the email (students without a name).
   const comboboxUsers = useMemo<LanguageCheckStaffUser[]>(
     () =>
-      studentOptions.map((s) => {
+      teacherFiltered.map((s) => {
         const name = s.name?.trim();
         return {
           id: s.id,
@@ -190,7 +188,7 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
           email: name ? s.email ?? "" : "",
         };
       }),
-    [studentOptions]
+    [teacherFiltered]
   );
 
   const handleStudentChange = (userId: string | null) => {
@@ -283,6 +281,7 @@ function StudentViewFilters({ role }: StudentViewFiltersProps) {
           onChange={handleStudentChange}
           allowMine
           mineLabel={t("vocabulary.studentView.myVocabulary")}
+          customLabel={viewingLabel}
           loading={isLoading}
           loadingLabel={t("vocabulary.studentView.loading")}
           emptyLabel={t("vocabulary.studentView.noStudents")}
