@@ -50,14 +50,9 @@ export default function VocabularyHome() {
         { value: "mine", label: t("vocabulary.analytics.view.mine") },
         {
           value: "analytics",
-          label: (
-            <span className="flex items-center gap-1.5">
-              <BarChart3 className="h-4 w-4" />
-              {isStaff
-                ? t("vocabulary.analytics.view.analytics")
-                : t("vocabulary.analytics.view.myAnalytics")}
-            </span>
-          ),
+          label: isStaff
+            ? t("vocabulary.analytics.view.analytics")
+            : t("vocabulary.analytics.view.myAnalytics"),
         },
       ]}
     />

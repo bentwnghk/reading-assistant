@@ -58,6 +58,7 @@ import {
 } from "@/components/ui/select"
 import { useGlobalStore } from "@/store/global"
 import { cn } from "@/utils/style"
+import { SegmentedTabs } from "@/components/LanguageCheck/shared"
 import { RecipientPicker } from "@/components/Internal/RecipientPicker"
 import type { ShareTargetGroup } from "@/lib/shared-sessions"
 import PresetsSection from "./PresetsSection"
@@ -233,45 +234,20 @@ export default function AssignmentsList() {
             <HelpCircle className="h-4 w-4 text-muted-foreground" />
           </Button>
         </h1>
-        {isTeacher && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setOpenDashboard(true, "sessions")}
-            title={t("assignments.teacherView.new")}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            {t("assignments.teacherView.new")}
-          </Button>
+        {/* Admins/super-admins: same-row view switch as /vocabulary. The
+            create button moved next to the status filter below, so it only
+            appears on the "My Assignments" tab. */}
+        {hasSchoolTab && (
+          <SegmentedTabs
+            value={activeTab}
+            onChange={setActiveTab}
+            options={[
+              { value: "mine", label: t("assignments.schoolView.tabMine") },
+              { value: "school", label: t("assignments.schoolView.tabSchool") },
+            ]}
+          />
         )}
       </div>
-
-      {hasSchoolTab && (
-        <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
-          <button
-            onClick={() => setActiveTab("mine")}
-            className={cn(
-              "px-4 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === "mine"
-                ? "bg-background shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t("assignments.schoolView.tabMine")}
-          </button>
-          <button
-            onClick={() => setActiveTab("school")}
-            className={cn(
-              "px-4 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === "school"
-                ? "bg-background shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t("assignments.schoolView.tabSchool")}
-          </button>
-        </div>
-      )}
 
       {activeTab === "school" && hasSchoolTab ? (
         <SchoolAssignmentsTable
@@ -289,29 +265,47 @@ export default function AssignmentsList() {
           presets inside the assign dialog instead */}
       {hasSchoolTab && <PresetsSection />}
 
-      {isTeacher && assignments.length > 0 && (
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => {
-            setStatusFilter(v as StatusFilter)
-            setPage(1)
-          }}
-        >
-          <SelectTrigger className="h-8 w-auto min-w-[110px] text-xs">
-            <SelectValue placeholder={t("assignments.schoolView.allStatuses")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">
-              {t("assignments.schoolView.allStatuses")}
-            </SelectItem>
-            <SelectItem value="active">
-              {t("assignments.status.active")}
-            </SelectItem>
-            <SelectItem value="archived">
-              {t("assignments.status.archived")}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Teachers only, and only on the "My Assignments" tab (the school
+          tab renders SchoolAssignmentsTable above). The create button sits
+          on the same row as the status filter; with no assignments yet the
+          filter hides but the button stays. */}
+      {isTeacher && (
+        <div className="flex flex-wrap items-center gap-3">
+          {assignments.length > 0 && (
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v as StatusFilter)
+                setPage(1)
+              }}
+            >
+              <SelectTrigger className="h-8 w-auto min-w-[110px] text-xs">
+                <SelectValue placeholder={t("assignments.schoolView.allStatuses")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  {t("assignments.schoolView.allStatuses")}
+                </SelectItem>
+                <SelectItem value="active">
+                  {t("assignments.status.active")}
+                </SelectItem>
+                <SelectItem value="archived">
+                  {t("assignments.status.archived")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto"
+            onClick={() => setOpenDashboard(true, "sessions")}
+            title={t("assignments.teacherView.new")}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            {t("assignments.teacherView.new")}
+          </Button>
+        </div>
       )}
 
       {filtered.length === 0 ? (
