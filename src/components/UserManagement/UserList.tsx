@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
-import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Hourglass, Trash2, ShieldCheck, Pencil } from "lucide-react"
+import { Loader2, Shield, GraduationCap, User, ArrowUpDown, School, Search, Crown, ChevronLeft, ChevronRight, ShieldOff, Clock, Ban, CreditCard, Gauge, Gift, Hourglass, Trash2, ShieldCheck, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -74,6 +75,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
   const [roleFilter, setRoleFilter] = useState<string>("all")
   const [classFilter, setClassFilter] = useState<string>(initialClassFilter ?? "all")
   const [schoolFilter, setSchoolFilter] = useState<string>(initialSchoolFilter ?? "all")
+  const [searchQuery, setSearchQuery] = useState("")
   const [page, setPage] = useState(1)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [revoking, setRevoking] = useState(false)
@@ -149,6 +151,14 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
       }
     }
 
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter(u =>
+        u.name?.toLowerCase().includes(query) ||
+        u.email?.toLowerCase().includes(query)
+      )
+    }
+
     result.sort((a, b) => {
       let comparison = 0
       switch (sortField) {
@@ -172,7 +182,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
     })
 
     return result
-  }, [users, sortField, sortOrder, roleFilter, classFilter, schoolFilter, isSuperAdmin, currentUserId])
+  }, [users, sortField, sortOrder, roleFilter, classFilter, schoolFilter, searchQuery, isSuperAdmin, currentUserId])
 
   const totalPages = Math.max(1, Math.ceil(filteredAndSortedUsers.length / PAGE_SIZE))
   const paginatedUsers = useMemo(() => {
@@ -205,7 +215,7 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
 
   useEffect(() => {
     setPage(1)
-  }, [roleFilter, classFilter, sortField, sortOrder])
+  }, [roleFilter, classFilter, searchQuery, sortField, sortOrder])
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -535,6 +545,15 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
             allLabel={t("userManagement.users.allClasses")}
             allowNone
             noneLabel={t("userManagement.users.noClass")}
+          />
+        </div>
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("userManagement.users.search")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 w-64"
           />
         </div>
         {isSuperAdmin && (
@@ -876,7 +895,9 @@ export default function UserList({ isSuperAdmin, initialSchoolFilter, initialCla
       </Table>
       {filteredAndSortedUsers.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          {t("userManagement.users.noUsers")}
+          {searchQuery
+            ? t("userManagement.users.noResults")
+            : t("userManagement.users.noUsers")}
         </div>
       )}
       {totalPages > 1 && (
