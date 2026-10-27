@@ -18,6 +18,8 @@ import {
   AlarmClock,
   BookMarked,
   Brain,
+  ChevronLeft,
+  ChevronRight,
   Layers,
   ListPlus,
   Plus,
@@ -57,6 +59,10 @@ export const MODE_ICON: Record<"flashcard" | "quiz" | "spelling", LucideIcon> = 
 
 const shortDate = (bucket: string) => bucket.slice(5);
 
+/** Rows of the "most missed words" table visible at once (the server sends
+ *  up to 100 and selection spans every page). */
+const HARD_WORDS_PAGE_SIZE = 20;
+
 /**
  * Totals, activity over time, mastery distribution, modes and the hardest
  * words. `variant="self"` is the learner's own view: staff-only phrasing and
@@ -75,9 +81,13 @@ export default function VocabularyDashboardView({
 
   // "Most missed words" → new review list, mirroring the main vocabulary
   // table's bulk-selection flow. Ephemeral view state: it resets with the
-  // component (tab switch) and is pruned when the data refetches.
+  // component (tab switch) and is pruned when the data refetches. Selection
+  // is keyed by word over the FULL hardWords array (all pages), so "Add to
+  // review list" can act on every one of the up-to-100 rows, not just the
+  // visible page.
   const [selectedHardWords, setSelectedHardWords] = useState<Set<string>>(new Set());
   const [addToListOpen, setAddToListOpen] = useState(false);
+  const [hardPage, setHardPage] = useState(1);
 
   // Drop selections that fell outside the refetched data (range switch).
   useEffect(() => {
@@ -87,6 +97,11 @@ export default function VocabularyDashboardView({
       const next = new Set([...prev].filter((word) => valid.has(word)));
       return next.size === prev.size ? prev : next;
     });
+  }, [hardWords]);
+
+  // Refetched data (range/filter switch) restarts on the first page.
+  useEffect(() => {
+    setHardPage(1);
   }, [hardWords]);
 
   if (
@@ -131,11 +146,20 @@ export default function VocabularyDashboardView({
       allHardSelected ? new Set() : new Set(selectableHardWords.map((w) => w.word))
     );
 
+  // The table shows one page at a time; hardWords itself holds up to 100.
+  const hardTotalPages = Math.max(1, Math.ceil(hardWords.length / HARD_WORDS_PAGE_SIZE));
+  const safeHardPage = Math.min(hardPage, hardTotalPages);
+  const pagedHardWords = hardWords.slice(
+    (safeHardPage - 1) * HARD_WORDS_PAGE_SIZE,
+    safeHardPage * HARD_WORDS_PAGE_SIZE
+  );
+
   // Definitions arrive with the dashboard payload: the server resolves each
   // hard word against a scope-visible word-bank row (self variant → the
   // learner's own bank). Only selectable rows can be checked, so everything
   // selected lands in the list with its definition fields; the entryType
-  // guard narrows the type.
+  // guard narrows the type. Built from the FULL hardWords array — words
+  // checked on other pages are included.
   const selectedHardListWords: ReviewListWord[] = hardWords
     .filter((w) => selectedHardWords.has(w.word))
     .flatMap((w) =>
@@ -343,6 +367,11 @@ export default function VocabularyDashboardView({
               {t("vocabulary.analytics.hardWordsTitle")}
             </h4>
             <div className="flex-1" />
+            {selectedHardWords.size > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {t("vocabulary.selectedCount", { count: selectedHardWords.size })}
+              </span>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -375,7 +404,7 @@ export default function VocabularyDashboardView({
               </tr>
             </thead>
             <tbody>
-              {hardWords.map((w) => {
+              {pagedHardWords.map((w) => {
                 const unavailable = w.entryType == null;
                 return (
                   <tr
@@ -432,6 +461,31 @@ export default function VocabularyDashboardView({
               })}
             </tbody>
           </table>
+          {hardWords.length > HARD_WORDS_PAGE_SIZE && (
+            <div className="flex items-center justify-end gap-1 border-t px-3 py-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                disabled={safeHardPage <= 1}
+                onClick={() => setHardPage(safeHardPage - 1)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="px-2 text-xs text-muted-foreground">
+                {t("languageCheck.staff.page", { page: safeHardPage, total: hardTotalPages })}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                disabled={safeHardPage >= hardTotalPages}
+                onClick={() => setHardPage(safeHardPage + 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
       <AddToReviewListDialog

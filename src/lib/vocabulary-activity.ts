@@ -130,6 +130,9 @@ function scopeCte(
 const cutoffMs = (range: number): number =>
   range > 0 ? Date.now() - range * 86_400_000 : 0;
 
+/** How many "most missed words" the dashboard returns (paged client-side). */
+const HARD_WORDS_LIMIT = 100;
+
 /** Students the filter bar offers: scope + class only (never narrowed by student). */
 export async function listAnalyticsStudents(
   scope: LanguageCheckStaffScope,
@@ -249,7 +252,7 @@ export async function getVocabularyAnalytics(
       FROM x GROUP BY 1 ORDER BY 1`;
   });
 
-  // Definitions are resolved ONLY for the 15 aggregated words (never per
+  // Definitions are resolved ONLY for the aggregated hard words (never per
   // review-result row — a lateral in the aggregate would re-execute for
   // every row and there is no word-leading index on user_vocabulary, which
   // made super-admin dashboards take seconds). One DISTINCT ON pass picks
@@ -267,7 +270,7 @@ export async function getVocabularyAnalytics(
         GROUP BY r.word
         HAVING COUNT(*) FILTER (WHERE NOT r.correct) > 0
         ORDER BY wrong DESC, attempts DESC, r.word
-        LIMIT 15
+        LIMIT ${HARD_WORDS_LIMIT}
       ),
       defs AS (
         SELECT DISTINCT ON (uv.word) uv.word, uv.syllabification, uv.part_of_speech,
