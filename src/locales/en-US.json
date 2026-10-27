@@ -2200,6 +2200,7 @@
       "sessionAccuracy": "Accuracy",
       "wordCount": "{{count}} words",
       "hardWordsTitle": "Most missed words",
+      "hardWordsListName": "Most missed words - {{datetime}}",
       "hardWordsUnavailable": "No longer in the word bank — this word can't be added to a review list.",
       "colWord": "Word",
       "colMissed": "Missed",

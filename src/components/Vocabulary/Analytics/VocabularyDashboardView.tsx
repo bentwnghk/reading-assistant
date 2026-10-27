@@ -41,6 +41,7 @@ import { Delta, PercentBadge, Stat } from "@/components/LanguageCheck/Learn/Lear
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import AddToReviewListDialog from "@/components/Vocabulary/AddToReviewListDialog";
+import { formatDateTime } from "@/utils/formatDate";
 import type { VocabularyAnalyticsData } from "@/utils/vocabularyAnalyticsWire";
 
 const COLORS = {
@@ -87,6 +88,9 @@ export default function VocabularyDashboardView({
   // review list" can act on every one of the up-to-100 rows.
   const [selectedHardWords, setSelectedHardWords] = useState<Set<string>>(new Set());
   const [addToListOpen, setAddToListOpen] = useState(false);
+  // Suggested list name for the "Add to review list" dialog, recomputed on
+  // every open so its timestamp stays current.
+  const [hardListName, setHardListName] = useState("");
   const [hardPage, setHardPage] = useState(1);
 
   // Drop selections that fell outside the refetched data (range switch).
@@ -188,6 +192,11 @@ export default function VocabularyDashboardView({
 
   const openAddToList = () => {
     if (selectedHardListWords.length === 0) return;
+    // Auto name the new list from its origin + the current date and time;
+    // the user can still override it in the dialog.
+    setHardListName(
+      t("vocabulary.analytics.hardWordsListName", { datetime: formatDateTime(new Date()) })
+    );
     setAddToListOpen(true);
   };
 
@@ -500,6 +509,7 @@ export default function VocabularyDashboardView({
         open={addToListOpen}
         onOpenChange={setAddToListOpen}
         words={selectedHardListWords}
+        defaultName={hardListName}
       />
       <p className={cn("text-[11px] text-muted-foreground")}>
         {t(isSelf ? "vocabulary.analytics.selfNote" : "vocabulary.analytics.note")}

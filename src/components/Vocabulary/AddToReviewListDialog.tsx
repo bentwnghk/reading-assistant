@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -24,12 +24,16 @@ interface AddToReviewListDialogProps {
    * are used instead.
    */
   words?: ReviewListWord[];
+  /** Prefills the list-name input each time the dialog opens (the caller
+   * recomputes it per open, so timestamps stay current). */
+  defaultName?: string;
 }
 
 export default function AddToReviewListDialog({
   open,
   onOpenChange,
   words,
+  defaultName,
 }: AddToReviewListDialogProps) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
@@ -53,6 +57,15 @@ export default function AddToReviewListDialog({
   // Table selections are type-homogeneous (the container clears cross-type
   // selections on tab change), so one entry decides the wording.
   const isPhrase = listWords.some((w) => (w.entryType ?? "word") === "phrase");
+
+  // Reset on open: prefill the name with the caller's suggestion (e.g. the
+  // analytics "Most missed words - <date time>" default) or clear any stale
+  // text, mirroring CreateReviewListDialog's reset-on-open behaviour.
+  useEffect(() => {
+    if (!open) return;
+    const suggested = defaultName?.trim();
+    setName(suggested ? suggested.slice(0, 200) : "");
+  }, [open, defaultName]);
 
   const handleSave = async () => {
     if (!name.trim() || listWords.length === 0) return;
