@@ -696,6 +696,7 @@ CREATE INDEX idx_user_vocabulary_next_review ON user_vocabulary(user_id, next_re
 CREATE INDEX idx_user_vocabulary_rating ON user_vocabulary(user_id, rating);
 CREATE INDEX idx_user_vocabulary_mastery ON user_vocabulary(user_id, mastery_level);
 CREATE INDEX idx_user_vocabulary_word ON user_vocabulary(user_id, word);
+CREATE INDEX idx_user_vocabulary_word_lookup ON user_vocabulary(word);
 CREATE INDEX idx_user_vocabulary_shared_by ON user_vocabulary(user_id, shared_by);
 
 CREATE TABLE vocabulary_review_sessions (

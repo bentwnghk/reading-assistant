@@ -125,7 +125,7 @@ export default function AddToReviewListDialog({
                   >
                     <span className="font-medium shrink-0">{w.word}</span>
                     <span className="text-muted-foreground truncate min-w-0 flex-1">
-                      {w.englishDefinition}
+                      {w.chineseDefinition || w.englishDefinition}
                     </span>
                   </div>
                 ))}

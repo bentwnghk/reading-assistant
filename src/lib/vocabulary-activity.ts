@@ -249,32 +249,42 @@ export async function getVocabularyAnalytics(
       FROM x GROUP BY 1 ORDER BY 1`;
   });
 
+  // Definitions are resolved ONLY for the 15 aggregated words (never per
+  // review-result row — a lateral in the aggregate would re-execute for
+  // every row and there is no word-leading index on user_vocabulary, which
+  // made super-admin dashboards take seconds). One DISTINCT ON pass picks
+  // the richest in-scope bank row per word.
   const hardQ = q(
-    (p, sc) => `WITH ${sc}
-      SELECT r.word, COUNT(*)::int AS attempts,
-             COUNT(*) FILTER (WHERE NOT r.correct)::int AS wrong,
-             COUNT(DISTINCT s.user_id) FILTER (WHERE NOT r.correct)::int AS learners,
-             d.syllabification, d.part_of_speech, d.english_definition,
-             d.chinese_definition, d.example, d.entry_type
-      FROM vocabulary_review_results r
-      JOIN vocabulary_review_sessions s ON s.id = r.session_id
-      JOIN sc ON sc.id = s.user_id
-      LEFT JOIN LATERAL (
-        SELECT uv.syllabification, uv.part_of_speech, uv.english_definition,
-               uv.chinese_definition, uv.example, uv.entry_type
+    (p, sc) => `WITH ${sc},
+      hard AS (
+        SELECT r.word, COUNT(*)::int AS attempts,
+               COUNT(*) FILTER (WHERE NOT r.correct)::int AS wrong,
+               COUNT(DISTINCT s.user_id) FILTER (WHERE NOT r.correct)::int AS learners
+        FROM vocabulary_review_results r
+        JOIN vocabulary_review_sessions s ON s.id = r.session_id
+        JOIN sc ON sc.id = s.user_id
+        WHERE ${sessWhere(p)}
+        GROUP BY r.word
+        HAVING COUNT(*) FILTER (WHERE NOT r.correct) > 0
+        ORDER BY wrong DESC, attempts DESC, r.word
+        LIMIT 15
+      ),
+      defs AS (
+        SELECT DISTINCT ON (uv.word) uv.word, uv.syllabification, uv.part_of_speech,
+               uv.english_definition, uv.chinese_definition, uv.example, uv.entry_type
         FROM user_vocabulary uv
         JOIN sc bank ON bank.id = uv.user_id
-        WHERE uv.word = r.word AND uv.hidden_at = 0
-        ORDER BY length(uv.english_definition) + length(uv.chinese_definition)
+        WHERE uv.hidden_at = 0 AND uv.word IN (SELECT word FROM hard)
+        ORDER BY uv.word,
+                 length(uv.english_definition) + length(uv.chinese_definition)
                  + length(uv.example) DESC, uv.updated_at DESC
-        LIMIT 1
-      ) d ON true
-      WHERE ${sessWhere(p)}
-      GROUP BY r.word, d.syllabification, d.part_of_speech, d.english_definition,
-               d.chinese_definition, d.example, d.entry_type
-      HAVING COUNT(*) FILTER (WHERE NOT r.correct) > 0
-      ORDER BY wrong DESC, attempts DESC, r.word
-      LIMIT 15`
+      )
+      SELECT h.word, h.attempts, h.wrong, h.learners,
+             d.syllabification, d.part_of_speech, d.english_definition,
+             d.chinese_definition, d.example, d.entry_type
+      FROM hard h
+      LEFT JOIN defs d ON d.word = h.word
+      ORDER BY h.wrong DESC, h.attempts DESC, h.word`
   );
 
   const singleLearner = !!opts.userId;
