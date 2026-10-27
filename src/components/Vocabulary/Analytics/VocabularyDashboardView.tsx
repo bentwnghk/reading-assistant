@@ -82,9 +82,9 @@ export default function VocabularyDashboardView({
   // "Most missed words" → new review list, mirroring the main vocabulary
   // table's bulk-selection flow. Ephemeral view state: it resets with the
   // component (tab switch) and is pruned when the data refetches. Selection
-  // is keyed by word over the FULL hardWords array (all pages), so "Add to
-  // review list" can act on every one of the up-to-100 rows, not just the
-  // visible page.
+  // is keyed by word over the FULL hardWords array and aggregates across
+  // pages (the header select-all toggles only the current page), so "Add to
+  // review list" can act on every one of the up-to-100 rows.
   const [selectedHardWords, setSelectedHardWords] = useState<Set<string>>(new Set());
   const [addToListOpen, setAddToListOpen] = useState(false);
   const [hardPage, setHardPage] = useState(1);
@@ -123,13 +123,6 @@ export default function VocabularyDashboardView({
   // (deleted/hidden since review, or no in-scope student holds them) can
   // never enter a review list: their checkboxes are disabled with a
   // tooltip, and select-all skips them.
-  const selectableHardWords = hardWords.filter((w) => w.entryType != null);
-
-  const allHardSelected =
-    selectableHardWords.length > 0 &&
-    selectableHardWords.every((w) => selectedHardWords.has(w.word));
-  const someHardSelected = selectedHardWords.size > 0 && !allHardSelected;
-
   const toggleHardWord = (word: string) =>
     setSelectedHardWords((prev) => {
       const next = new Set(prev);
@@ -141,11 +134,6 @@ export default function VocabularyDashboardView({
       return next;
     });
 
-  const toggleAllHardWords = () =>
-    setSelectedHardWords(
-      allHardSelected ? new Set() : new Set(selectableHardWords.map((w) => w.word))
-    );
-
   // The table shows one page at a time; hardWords itself holds up to 100.
   const hardTotalPages = Math.max(1, Math.ceil(hardWords.length / HARD_WORDS_PAGE_SIZE));
   const safeHardPage = Math.min(hardPage, hardTotalPages);
@@ -153,6 +141,26 @@ export default function VocabularyDashboardView({
     (safeHardPage - 1) * HARD_WORDS_PAGE_SIZE,
     safeHardPage * HARD_WORDS_PAGE_SIZE
   );
+
+  // The header checkbox is PAGE-scoped (it reflects and toggles only the
+  // visible rows), but the selection itself aggregates across pages:
+  // checking the header on each of the five pages gathers all 100 words
+  // for "Add to review list".
+  const pageSelectableHardWords = pagedHardWords.filter((w) => w.entryType != null);
+  const allHardSelected =
+    pageSelectableHardWords.length > 0 &&
+    pageSelectableHardWords.every((w) => selectedHardWords.has(w.word));
+  const someHardSelected =
+    pageSelectableHardWords.some((w) => selectedHardWords.has(w.word)) && !allHardSelected;
+
+  const toggleAllHardWords = () =>
+    setSelectedHardWords((prev) => {
+      const next = new Set(prev);
+      pageSelectableHardWords.forEach((w) =>
+        allHardSelected ? next.delete(w.word) : next.add(w.word)
+      );
+      return next;
+    });
 
   // Definitions arrive with the dashboard payload: the server resolves each
   // hard word against a scope-visible word-bank row (self variant → the
@@ -391,7 +399,7 @@ export default function VocabularyDashboardView({
                       allHardSelected ? true : someHardSelected ? "indeterminate" : false
                     }
                     onCheckedChange={toggleAllHardWords}
-                    disabled={selectableHardWords.length === 0}
+                    disabled={pageSelectableHardWords.length === 0}
                     aria-label={t("share.selectAll")}
                   />
                 </th>
