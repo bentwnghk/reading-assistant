@@ -408,7 +408,7 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
   }, []);
 
   return (
-    <div className="max-w-screen-lg mx-auto px-4 py-4">
+    <div className="py-4">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold flex items-center gap-2">

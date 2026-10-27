@@ -76,7 +76,7 @@ export default function VocabularyHome() {
 
   if (!isStaff) {
     return (
-      <div className="mx-auto max-w-screen-lg px-4 py-4">
+      <div className="py-4">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h1 className="flex items-center gap-2 text-xl font-semibold">
             <BarChart3 className="h-5 w-5 text-indigo-500" />
@@ -92,7 +92,7 @@ export default function VocabularyHome() {
   }
 
   return (
-    <div className="mx-auto max-w-screen-lg px-4 py-4">
+    <div className="py-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="flex items-center gap-2 text-xl font-semibold">
           <BarChart3 className="h-5 w-5 text-indigo-500" />
