@@ -2643,7 +2643,7 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>Tab</th><th>Visible to</th><th>Purpose</th></tr>
         <tr><td><b>Schools</b></td><td><span class="role super">super-admin</span></td><td>CRUD schools</td></tr>
-        <tr><td><b>Users</b></td><td>super-admin + admin</td><td>Change role, assign school/class, bulk-revoke access, delete</td></tr>
+        <tr><td><b>Users</b></td><td>super-admin + admin</td><td>Change role, assign school/class, bulk-revoke access, delete — filter by role/class/school, search by name or email</td></tr>
         <tr><td><b>Classes</b></td><td>all staff</td><td>CRUD classes; view members</td></tr>
         <tr><td><b>Student Data</b></td><td>all staff</td><td>Cross-student session analytics + Excel export</td></tr>
         <tr><td><b>Teacher Data</b></td><td>super-admin + admin</td><td>Cross-teacher session analytics + Excel export</td></tr>
@@ -2667,7 +2667,7 @@ body.toc-noscroll{overflow:hidden}
       <div class="callout tip"><strong>Lazy-loaded</strong> Detail data is fetched on demand only when you click — the table itself loads fast even for large classes. A spinner appears briefly while fetching.</div>
 
       <h4>Teacher Data — staff usage at a glance <span class="tag-admin"></span></h4>
-      <p>A parallel table of <b>teachers' own reading sessions</b>, visible to admins and super-admins only. It mirrors the Student Data table — same columns, sorting, date-range filter, search, pagination, and all seven click-to-view detail dialogs — but filters by <b>teacher</b> instead of class: pick a school <span class="role super">super-admin</span>, then a single teacher or All Teachers. Excel export produces a "Teacher Data" report with the selected school/teacher named in the summary sheet.</p>
+      <p>A parallel table of <b>teachers' own reading sessions</b>, visible to admins and super-admins only. It mirrors the Student Data table — same columns, sorting, date-range filter, search (by teacher name, email, or reading text title), pagination, and all seven click-to-view detail dialogs — but filters by <b>teacher</b> instead of class: pick a school <span class="role super">super-admin</span>, then a single teacher or All Teachers. Excel export produces a "Teacher Data" report with the selected school/teacher named in the summary sheet.</p>
       <div class="callout tip"><strong>Why it exists</strong> Teachers are readers too — their own practice sessions, glossaries, and quiz attempts appear here so school leads can support staff learning the same way they follow students.</div>
 
       <h3>11.6 Account &amp; session security</h3>

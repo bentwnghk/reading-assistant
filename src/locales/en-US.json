@@ -3837,7 +3837,7 @@
           },
           "users": {
             "name": "Users",
-            "desc": "View all users in a sortable, filterable table. Change roles (student, teacher, admin), assign users to schools, and assign students to classes. Filter by role, class, or school. Click a student's or teacher's name to jump to their reading session data."
+            "desc": "View all users in a sortable, filterable table. Change roles (student, teacher, admin), assign users to schools, and assign students to classes. Filter by role, class, or school, or search users by name or email. Click a student's or teacher's name to jump to their reading session data."
           },
           "classes": {
             "name": "Classes",
@@ -3853,11 +3853,11 @@
           },
           "studentData": {
             "name": "Student Data",
-            "desc": "View detailed reading session data for students across classes. Filter by school, class, date range, or search by student name. Export filtered data to Excel for offline analysis. Reached by clicking a name in the Users tab or a class name in the Classes tab — the class is pre-selected (English class preferred) and classless students are loaded directly."
+            "desc": "View detailed reading session data for students across classes. Filter by school, class, date range, or search by student name, email, or reading text title. Export filtered data to Excel for offline analysis. Reached by clicking a name in the Users tab or a class name in the Classes tab — the class is pre-selected (English class preferred) and classless students are loaded directly."
           },
           "teacherData": {
             "name": "Teacher Data",
-            "desc": "View detailed reading session data for teachers across schools. Filter by school, teacher, date range, or search by teacher name. Export filtered data to Excel for offline analysis. Available to admins and super-admins only. Clicking a teacher's name in the Users tab pre-selects them here."
+            "desc": "View detailed reading session data for teachers across schools. Filter by school, teacher, date range, or search by teacher name, email, or reading text title. Export filtered data to Excel for offline analysis. Available to admins and super-admins only. Clicking a teacher's name in the Users tab pre-selects them here."
           },
           "aiQuestions": {
             "name": "AI Questions",
@@ -3906,7 +3906,7 @@
           },
           "search": {
             "name": "Search",
-            "desc": "Search across Student Data by student name, email, or reading text title. In AI Questions, search by question text. Results update as you type."
+            "desc": "Search across Student Data and Teacher Data by name, email, or reading text title. In the Users tab, find users by name or email. In AI Questions, search by question text. Results update as you type."
           },
           "dateRange": {
             "name": "Date Range Filter",
