@@ -37,9 +37,12 @@ beforeAll(async () => {
     CREATE TABLE class_members (class_id TEXT, student_id TEXT);
     CREATE TABLE user_vocabulary (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), user_id TEXT NOT NULL, word TEXT NOT NULL,
+      syllabification TEXT DEFAULT '', part_of_speech TEXT DEFAULT '',
+      english_definition TEXT DEFAULT '', chinese_definition TEXT DEFAULT '', example TEXT DEFAULT '',
       rating TEXT, mastery_level INTEGER NOT NULL DEFAULT 0, review_count INTEGER NOT NULL DEFAULT 0,
       next_review_at BIGINT NOT NULL DEFAULT 0, entry_type TEXT NOT NULL DEFAULT 'word',
-      hidden_at BIGINT NOT NULL DEFAULT 0, created_at BIGINT NOT NULL DEFAULT 0, shared_by TEXT
+      hidden_at BIGINT NOT NULL DEFAULT 0, created_at BIGINT NOT NULL DEFAULT 0,
+      updated_at BIGINT NOT NULL DEFAULT 0, shared_by TEXT
     );
     CREATE TABLE vocabulary_review_sessions (
       id TEXT PRIMARY KEY, user_id TEXT NOT NULL, mode TEXT NOT NULL, total_words INTEGER, correct_count INTEGER,
@@ -65,6 +68,18 @@ beforeAll(async () => {
       ('b','pear',1,1,${now - 1000},'word','hard',${now - 5 * DAY}),
       ('ban','x',1,1,0,'word',NULL,${now});
     UPDATE user_vocabulary SET hidden_at = 1 WHERE word = 'gone';
+    -- Definitions behind the analytics counts (Ann's apple is rich, Bob's is bare
+    -- so the richness ordering is testable; Bob's pear is the only filled pear).
+    UPDATE user_vocabulary SET syllabification = 'ap-ple', part_of_speech = 'noun',
+      english_definition = 'a round fruit', chinese_definition = '蘋果',
+      example = 'An apple a day.', updated_at = ${now - 2 * DAY}
+      WHERE user_id = 'a' AND word = 'apple';
+    UPDATE user_vocabulary SET syllabification = 'pear', part_of_speech = 'noun',
+      english_definition = 'a sweet fruit', chinese_definition = '梨',
+      example = 'She ate a pear.', updated_at = ${now - DAY}
+      WHERE user_id = 'b' AND word = 'pear';
+    INSERT INTO user_vocabulary (user_id, word, entry_type, created_at, updated_at) VALUES
+      ('b', 'apple', 'word', ${now - DAY}, ${now});
     INSERT INTO vocabulary_review_sessions VALUES
       ('s1','a','flashcard',4,3,75,'word',0,${now - 3 * DAY}),
       ('s2','a','spelling',4,4,100,'word',0,${now - 1 * DAY}),
@@ -72,7 +87,7 @@ beforeAll(async () => {
       ('s4','b','quiz',5,1,20,'word',0,${now - 200 * DAY}),
       ('s5','ban','quiz',5,5,100,'word',0,${now});
     INSERT INTO vocabulary_review_results (session_id, word, correct) VALUES
-      ('s1','apple',TRUE),('s1','pear',FALSE),('s3','pear',FALSE),('s3','apple',FALSE),('s4','pear',FALSE);
+      ('s1','apple',TRUE),('s1','pear',FALSE),('s1','gone',FALSE),('s3','pear',FALSE),('s3','apple',FALSE),('s4','pear',FALSE);
   `;
   await db.exec(
     fs.readFileSync("scripts/add-vocabulary-activity.sql", "utf8").replace(/GRANT[^;]*;/g, "").replace(
@@ -132,6 +147,31 @@ describe.skipIf(pgliteMissing)("vocabulary analytics SQL", () => {
     expect(hard.word).toBe("pear");
     expect(hard.wrong).toBe(3);
     expect(hard.learners).toBe(2);
+  });
+
+  it("hard words resolve definitions from in-scope banks; hidden or out-of-scope words stay null", async () => {
+    // School scope: both banks visible.
+    const school = await lib.getVocabularyAnalytics({ kind: "school", schoolId: "s1" }, { ...base, range: 0 });
+    const pear = school.hardWords.find((w) => w.word === "pear");
+    expect(pear?.entryType).toBe("word");
+    expect(pear?.englishDefinition).toBe("a sweet fruit");
+    expect(pear?.chineseDefinition).toBe("梨");
+    expect(pear?.example).toBe("She ate a pear.");
+    // Richest in-scope row wins: Ann's filled 'apple' beats Bob's bare one.
+    expect(school.hardWords.find((w) => w.word === "apple")?.englishDefinition).toBe("a round fruit");
+    // 'gone' is hidden since review — unresolvable even though Ann reviewed it.
+    const gone = school.hardWords.find((w) => w.word === "gone");
+    expect(gone?.entryType).toBeNull();
+    expect(gone?.englishDefinition).toBeNull();
+    // Teacher t1 cannot see Bob's bank, so 'pear' resolves to nothing there.
+    const t1v = await lib.getVocabularyAnalytics(t1, { ...base, range: 0 });
+    expect(t1v.hardWords.find((w) => w.word === "pear")?.entryType).toBeNull();
+    // Self view resolves from the learner's own bank only (Bob's 'apple' is bare).
+    const selfB = await lib.getSelfVocabularyAnalytics("b", { range: 0, timeZone: "UTC" });
+    expect(selfB.hardWords.find((w) => w.word === "pear")?.englishDefinition).toBe("a sweet fruit");
+    const selfApple = selfB.hardWords.find((w) => w.word === "apple");
+    expect(selfApple?.entryType).toBe("word");
+    expect(selfApple?.englishDefinition).toBe("");
   });
 
   it("single learner view returns progress history; class filter narrows", async () => {

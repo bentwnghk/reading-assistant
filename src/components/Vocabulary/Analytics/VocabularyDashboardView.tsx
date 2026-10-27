@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Bar,
@@ -18,15 +19,26 @@ import {
   BookMarked,
   Brain,
   Layers,
+  ListPlus,
   Plus,
   SpellCheck,
   Target,
   Trophy,
   ClipboardList,
+  CircleOff,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/utils/style";
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Delta, PercentBadge, Stat } from "@/components/LanguageCheck/Learn/LearnDashboardView";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import AddToReviewListDialog from "@/components/Vocabulary/AddToReviewListDialog";
 import type { VocabularyAnalyticsData } from "@/utils/vocabularyAnalyticsWire";
 
 const COLORS = {
@@ -61,6 +73,22 @@ export default function VocabularyDashboardView({
   const { totals, snapshot, modes, series, hardWords, sessionHistory } = data;
   const isSelf = variant === "self";
 
+  // "Most missed words" → new review list, mirroring the main vocabulary
+  // table's bulk-selection flow. Ephemeral view state: it resets with the
+  // component (tab switch) and is pruned when the data refetches.
+  const [selectedHardWords, setSelectedHardWords] = useState<Set<string>>(new Set());
+  const [addToListOpen, setAddToListOpen] = useState(false);
+
+  // Drop selections that fell outside the refetched data (range switch).
+  useEffect(() => {
+    setSelectedHardWords((prev) => {
+      if (prev.size === 0) return prev;
+      const valid = new Set(hardWords.map((w) => w.word));
+      const next = new Set([...prev].filter((word) => valid.has(word)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [hardWords]);
+
   if (
     totals.sessions === 0 &&
     totals.wordsAdded === 0 &&
@@ -75,6 +103,62 @@ export default function VocabularyDashboardView({
 
   const bankTotal = snapshot.words + snapshot.phrases;
   const masteredPct = bankTotal > 0 ? Math.round((snapshot.mastered / bankTotal) * 100) : null;
+
+  // Words the server could not resolve to a (scope-visible) word-bank row
+  // (deleted/hidden since review, or no in-scope student holds them) can
+  // never enter a review list: their checkboxes are disabled with a
+  // tooltip, and select-all skips them.
+  const selectableHardWords = hardWords.filter((w) => w.entryType != null);
+
+  const allHardSelected =
+    selectableHardWords.length > 0 &&
+    selectableHardWords.every((w) => selectedHardWords.has(w.word));
+  const someHardSelected = selectedHardWords.size > 0 && !allHardSelected;
+
+  const toggleHardWord = (word: string) =>
+    setSelectedHardWords((prev) => {
+      const next = new Set(prev);
+      if (next.has(word)) {
+        next.delete(word);
+      } else {
+        next.add(word);
+      }
+      return next;
+    });
+
+  const toggleAllHardWords = () =>
+    setSelectedHardWords(
+      allHardSelected ? new Set() : new Set(selectableHardWords.map((w) => w.word))
+    );
+
+  // Definitions arrive with the dashboard payload: the server resolves each
+  // hard word against a scope-visible word-bank row (self variant → the
+  // learner's own bank). Only selectable rows can be checked, so everything
+  // selected lands in the list with its definition fields; the entryType
+  // guard narrows the type.
+  const selectedHardListWords: ReviewListWord[] = hardWords
+    .filter((w) => selectedHardWords.has(w.word))
+    .flatMap((w) =>
+      w.entryType == null
+        ? []
+        : [
+            {
+              word: w.word,
+              syllabification: w.syllabification ?? "",
+              partOfSpeech: w.partOfSpeech ?? "",
+              englishDefinition: w.englishDefinition ?? "",
+              chineseDefinition: w.chineseDefinition ?? "",
+              example: w.example ?? "",
+              entryType: w.entryType,
+            },
+          ]
+    );
+
+  const openAddToList = () => {
+    if (selectedHardListWords.length === 0) return;
+    setAddToListOpen(true);
+  };
+
   const levels = snapshot.levels.map((count, level) => ({
     level: level === 0 ? t("vocabulary.analytics.levelNew") : `L${level}`,
     count,
@@ -254,12 +338,34 @@ export default function VocabularyDashboardView({
 
       {hardWords.length > 0 && (
         <div className="overflow-x-auto rounded-lg border">
-          <h4 className="px-3 pt-3 text-sm font-semibold text-muted-foreground">
-            {t("vocabulary.analytics.hardWordsTitle")}
-          </h4>
+          <div className="flex items-center gap-2 px-3 pt-3">
+            <h4 className="text-sm font-semibold text-muted-foreground">
+              {t("vocabulary.analytics.hardWordsTitle")}
+            </h4>
+            <div className="flex-1" />
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={selectedHardWords.size === 0}
+              onClick={openAddToList}
+            >
+              <ListPlus className="h-4 w-4 mr-1" />
+              {t("vocabulary.reviewLists.addToList")}
+            </Button>
+          </div>
           <table className="w-full min-w-[28rem] text-sm">
             <thead>
               <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <th className="w-[40px] px-3 py-2">
+                  <Checkbox
+                    checked={
+                      allHardSelected ? true : someHardSelected ? "indeterminate" : false
+                    }
+                    onCheckedChange={toggleAllHardWords}
+                    disabled={selectableHardWords.length === 0}
+                    aria-label={t("share.selectAll")}
+                  />
+                </th>
                 <th className="px-3 py-2 font-medium">{t("vocabulary.analytics.colWord")}</th>
                 <th className="px-3 py-2 font-medium">{t("vocabulary.analytics.colMissed")}</th>
                 {!isSelf && (
@@ -269,20 +375,70 @@ export default function VocabularyDashboardView({
               </tr>
             </thead>
             <tbody>
-              {hardWords.map((w) => (
-                <tr key={w.word} className="border-b last:border-0">
-                  <td className="px-3 py-2 font-medium">{w.word}</td>
-                  <td className="px-3 py-2 tabular-nums">{w.wrong}/{w.attempts}</td>
-                  {!isSelf && <td className="px-3 py-2 tabular-nums">{w.learners}</td>}
-                  <td className="px-3 py-2">
-                    <PercentBadge value={Math.round(((w.attempts - w.wrong) / w.attempts) * 100)} />
-                  </td>
-                </tr>
-              ))}
+              {hardWords.map((w) => {
+                const unavailable = w.entryType == null;
+                return (
+                  <tr
+                    key={w.word}
+                    className={cn(
+                      "border-b last:border-0",
+                      selectedHardWords.has(w.word) && "bg-primary/5"
+                    )}
+                  >
+                    <td className="px-3 py-2">
+                      {unavailable ? (
+                        <TooltipProvider>
+                          <UITooltip delayDuration={100}>
+                            <TooltipTrigger asChild>
+                              {/* span wrapper: a disabled checkbox swallows
+                                  pointer events, the span keeps the tooltip */}
+                              <span className="inline-flex">
+                                <Checkbox checked={false} disabled aria-label={w.word} />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-md:hidden">
+                              {t("vocabulary.analytics.hardWordsUnavailable")}
+                            </TooltipContent>
+                          </UITooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <Checkbox
+                          checked={selectedHardWords.has(w.word)}
+                          onCheckedChange={() => toggleHardWord(w.word)}
+                          aria-label={w.word}
+                        />
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1.5 font-medium",
+                          unavailable && "text-muted-foreground"
+                        )}
+                      >
+                        {unavailable && (
+                          <CircleOff className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                        )}
+                        {w.word}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 tabular-nums">{w.wrong}/{w.attempts}</td>
+                    {!isSelf && <td className="px-3 py-2 tabular-nums">{w.learners}</td>}
+                    <td className="px-3 py-2">
+                      <PercentBadge value={Math.round(((w.attempts - w.wrong) / w.attempts) * 100)} />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
+      <AddToReviewListDialog
+        open={addToListOpen}
+        onOpenChange={setAddToListOpen}
+        words={selectedHardListWords}
+      />
       <p className={cn("text-[11px] text-muted-foreground")}>
         {t(isSelf ? "vocabulary.analytics.selfNote" : "vocabulary.analytics.note")}
       </p>

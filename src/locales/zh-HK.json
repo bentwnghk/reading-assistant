@@ -2199,6 +2199,7 @@
       "sessionAccuracy": "準確率",
       "wordCount": "{{count}} 個字詞",
       "hardWordsTitle": "最常答錯的字詞",
+      "hardWordsUnavailable": "此字詞已不在生字庫中，無法加入溫習清單。",
       "colWord": "字詞",
       "colMissed": "答錯",
       "colLearnersMissed": "答錯的學生數",

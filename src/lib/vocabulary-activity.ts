@@ -253,12 +253,25 @@ export async function getVocabularyAnalytics(
     (p, sc) => `WITH ${sc}
       SELECT r.word, COUNT(*)::int AS attempts,
              COUNT(*) FILTER (WHERE NOT r.correct)::int AS wrong,
-             COUNT(DISTINCT s.user_id) FILTER (WHERE NOT r.correct)::int AS learners
+             COUNT(DISTINCT s.user_id) FILTER (WHERE NOT r.correct)::int AS learners,
+             d.syllabification, d.part_of_speech, d.english_definition,
+             d.chinese_definition, d.example, d.entry_type
       FROM vocabulary_review_results r
       JOIN vocabulary_review_sessions s ON s.id = r.session_id
       JOIN sc ON sc.id = s.user_id
+      LEFT JOIN LATERAL (
+        SELECT uv.syllabification, uv.part_of_speech, uv.english_definition,
+               uv.chinese_definition, uv.example, uv.entry_type
+        FROM user_vocabulary uv
+        JOIN sc bank ON bank.id = uv.user_id
+        WHERE uv.word = r.word AND uv.hidden_at = 0
+        ORDER BY length(uv.english_definition) + length(uv.chinese_definition)
+                 + length(uv.example) DESC, uv.updated_at DESC
+        LIMIT 1
+      ) d ON true
       WHERE ${sessWhere(p)}
-      GROUP BY r.word
+      GROUP BY r.word, d.syllabification, d.part_of_speech, d.english_definition,
+               d.chinese_definition, d.example, d.entry_type
       HAVING COUNT(*) FILTER (WHERE NOT r.correct) > 0
       ORDER BY wrong DESC, attempts DESC, r.word
       LIMIT 15`
@@ -399,6 +412,13 @@ export async function getVocabularyAnalytics(
     attempts: num(r.attempts),
     wrong: num(r.wrong),
     learners: num(r.learners),
+    // null across the board when no scope-visible bank holds the word
+    syllabification: (r.syllabification as string) ?? null,
+    partOfSpeech: (r.part_of_speech as string) ?? null,
+    englishDefinition: (r.english_definition as string) ?? null,
+    chineseDefinition: (r.chinese_definition as string) ?? null,
+    example: (r.example as string) ?? null,
+    entryType: (r.entry_type as "word" | "phrase") ?? null,
   }));
 
   const sessionHistory: VocabularySessionPoint[] = historyR.rows

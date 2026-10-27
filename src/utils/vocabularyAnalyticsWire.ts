@@ -47,6 +47,19 @@ export interface VocabularyHardWord {
   attempts: number;
   wrong: number;
   learners: number;
+  /**
+   * Definition fields resolved server-side from a scope-visible word-bank
+   * row (richest match wins: teacher scope → own-class students, self →
+   * the learner's own bank). All null when no in-scope bank currently
+   * holds the word (deleted/hidden since review) — the UI then skips the
+   * word when creating a review list.
+   */
+  syllabification?: string | null;
+  partOfSpeech?: string | null;
+  englishDefinition?: string | null;
+  chineseDefinition?: string | null;
+  example?: string | null;
+  entryType?: "word" | "phrase" | null;
 }
 
 export interface VocabularySessionPoint {

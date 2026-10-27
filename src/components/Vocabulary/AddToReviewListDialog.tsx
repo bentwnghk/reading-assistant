@@ -18,27 +18,30 @@ import { useVocabularyStore } from "@/store/vocabulary";
 interface AddToReviewListDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /**
+   * Words to put in the new list, e.g. analytics "most missed" rows. When
+   * omitted, the words selected in the vocabulary table (store selection)
+   * are used instead.
+   */
+  words?: ReviewListWord[];
 }
 
 export default function AddToReviewListDialog({
   open,
   onOpenChange,
+  words,
 }: AddToReviewListDialogProps) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
-  const { selectedWordIds, words } = useVocabularyStore();
+  const { selectedWordIds, words: bankWords } = useVocabularyStore();
 
-  const selectedWords = words.filter((w) => selectedWordIds.has(w.id));
-  // Selections are type-homogeneous (the container clears cross-type
-  // selections on tab change), so one entry decides the wording.
-  const isPhrase = selectedWords.some((w) => (w.entryType ?? "word") === "phrase");
-
-  const handleSave = async () => {
-    if (!name.trim() || selectedWords.length === 0) return;
-    setSaving(true);
-    try {
-      const listWords = selectedWords.map((w) => ({
+  // Explicit words win over the store selection.
+  const listWords: ReviewListWord[] =
+    words ??
+    bankWords
+      .filter((w) => selectedWordIds.has(w.id))
+      .map((w) => ({
         word: w.word,
         syllabification: w.syllabification,
         partOfSpeech: w.partOfSpeech,
@@ -47,6 +50,14 @@ export default function AddToReviewListDialog({
         example: w.example,
         entryType: w.entryType,
       }));
+  // Table selections are type-homogeneous (the container clears cross-type
+  // selections on tab change), so one entry decides the wording.
+  const isPhrase = listWords.some((w) => (w.entryType ?? "word") === "phrase");
+
+  const handleSave = async () => {
+    if (!name.trim() || listWords.length === 0) return;
+    setSaving(true);
+    try {
       const res = await fetch("/api/review-lists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,7 +69,7 @@ export default function AddToReviewListDialog({
           isPhrase
             ? "vocabulary.reviewLists.createdPhrase"
             : "vocabulary.reviewLists.created",
-          { count: selectedWords.length }
+          { count: listWords.length }
         )
       );
       setName("");
@@ -81,7 +92,7 @@ export default function AddToReviewListDialog({
                 ? "vocabulary.reviewLists.addDescriptionPhrase"
                 : "vocabulary.reviewLists.addDescription",
               {
-                count: selectedWords.length,
+                count: listWords.length,
               }
             )}
           </DialogDescription>
@@ -107,9 +118,9 @@ export default function AddToReviewListDialog({
             </label>
             <div className="border rounded-md overflow-hidden max-h-48 min-h-0 overflow-y-auto">
               <div className="p-2 space-y-1">
-                {selectedWords.map((w) => (
+                {listWords.map((w) => (
                   <div
-                    key={w.id}
+                    key={w.word}
                     className="flex items-center gap-2 text-sm py-1 px-2 rounded hover:bg-muted min-w-0"
                   >
                     <span className="font-medium shrink-0">{w.word}</span>
@@ -133,7 +144,7 @@ export default function AddToReviewListDialog({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!name.trim() || saving || selectedWords.length === 0}
+            disabled={!name.trim() || saving || listWords.length === 0}
           >
             {saving
               ? t("vocabulary.reviewLists.saving")
