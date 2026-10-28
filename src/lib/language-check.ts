@@ -245,13 +245,17 @@ export function isStaffRole(role: string | null | undefined): boolean {
  * May this staff member scan an essay on the student's behalf? Same scope as
  * the staff views (teacher → students in their classes, admin → school,
  * super-admin → everyone), restricted to current, non-banned student
- * accounts — the target must be a learner, not a colleague.
+ * accounts — the target must be a learner, not a colleague. Roles live in
+ * user_roles; a user with no row there is implicitly a student.
  */
 export async function canUploadForStudent(
   scope: LanguageCheckStaffScope,
   studentId: string,
 ): Promise<boolean> {
-  const clauses = [`u.role = 'student'`, `NOT u.banned`]
+  const clauses = [
+    `COALESCE(ur.role, 'student') = 'student'`,
+    `COALESCE(u.banned, FALSE) = FALSE`,
+  ]
   const params: unknown[] = []
   if (scope.kind === "teacher") {
     params.push(scope.teacherId)
@@ -269,6 +273,7 @@ export async function canUploadForStudent(
   params.push(studentId)
   const { rowCount } = await getPool().query(
     `SELECT 1 FROM users u
+     LEFT JOIN user_roles ur ON ur.user_id = u.id
      WHERE u.id = $${params.length} AND ${clauses.join(" AND ")}`,
     params,
   )

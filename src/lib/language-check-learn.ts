@@ -1148,14 +1148,19 @@ export async function listStaffStudents(
  * for" picker) — not limited to learners who already have essays/learning
  * history, because the whole point is uploading the FIRST one for them.
  * Same scope semantics as canUploadForStudent: teacher → own classes,
- * admin → school, super-admin → everyone; current, non-banned students only.
+ * admin → school, super-admin → everyone; current, non-banned students only
+ * (roles live in user_roles; no row there = implicit student, like the
+ * user-management queries).
  */
 export async function listAllStaffStudents(
   scope: LanguageCheckStaffScope,
   opts: { classId?: string },
 ): Promise<{ id: string; name: string; email: string }[]> {
   const p = new Params()
-  const clauses: string[] = [`u.role = 'student'`, `NOT u.banned`]
+  const clauses: string[] = [
+    `COALESCE(ur.role, 'student') = 'student'`,
+    `COALESCE(u.banned, FALSE) = FALSE`,
+  ]
   if (scope.kind === "teacher") {
     clauses.push(
       `EXISTS (
@@ -1174,6 +1179,7 @@ export async function listAllStaffStudents(
   }
   const res = await getPool().query(
     `SELECT u.id, u.name, u.email FROM users u
+     LEFT JOIN user_roles ur ON ur.user_id = u.id
      WHERE ${clauses.join(" AND ")}
      ORDER BY u.name, u.email
      LIMIT 1000`,

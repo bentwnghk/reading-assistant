@@ -54,7 +54,10 @@ beforeAll(async () => {
   await db.exec(`
     CREATE FUNCTION update_updated_at_column() RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$ LANGUAGE plpgsql;
     CREATE ROLE reading_user;
-    CREATE TABLE users (id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT, email TEXT UNIQUE, school_id TEXT, role TEXT, banned BOOLEAN DEFAULT FALSE);
+    CREATE TABLE users (id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT, email TEXT UNIQUE, school_id TEXT, banned BOOLEAN DEFAULT FALSE);
+    -- Roles live in their own table (no users.role column); a missing row
+    -- means an implicit student, exactly like the production schema.
+    CREATE TABLE user_roles (user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('super-admin', 'admin', 'teacher', 'student')));
     CREATE TABLE classes (id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT, teacher_id TEXT, school_id TEXT);
     CREATE TABLE class_members (class_id TEXT, student_id TEXT, PRIMARY KEY (class_id, student_id));
     CREATE TABLE language_check_essays (
@@ -329,13 +332,19 @@ describe.skipIf(pgliteMissing)("teacher-uploaded essays (real SQL)", () => {
   beforeAll(async () => {
     if (pgliteMissing) return;
     await db.query(
-      `INSERT INTO users (id,name,email,school_id,role,banned) VALUES
-        ('t9','T9','t9@x','school-9','teacher',false),
-        ('s9','Nina','s9@x','school-9','student',false),
-        ('s8','Out','s8@x','school-9','student',false)`,
+      `INSERT INTO users (id,name,email,school_id,banned) VALUES
+        ('t9','T9','t9@x','school-9',false),
+        ('s9','Nina','s9@x','school-9',false),
+        ('s8','Out','s8@x','school-9',false),
+        ('s7','NoRole','s7@x','school-9',false)`,
+    );
+    // s9 gets an explicit student row; s7/s8 keep NO row (implicit student);
+    // t2 (base fixture) is made a teacher so the "not a student" case is real.
+    await db.query(
+      `INSERT INTO user_roles (user_id, role) VALUES ('t9','teacher'), ('s9','student'), ('t2','teacher')`,
     );
     await db.query(`INSERT INTO classes (id,name,teacher_id) VALUES ('c9','5C','t9'),('c8','5D','t2')`);
-    await db.query(`INSERT INTO class_members VALUES ('c9','s9'),('c8','s8')`);
+    await db.query(`INSERT INTO class_members VALUES ('c9','s9'),('c8','s8'),('c9','s7')`);
   });
 
   afterAll(async () => {
@@ -344,15 +353,17 @@ describe.skipIf(pgliteMissing)("teacher-uploaded essays (real SQL)", () => {
     await db.query(`DELETE FROM language_check_learn_sessions WHERE user_id = 's9'`);
     await db.query(`DELETE FROM language_check_essays WHERE user_id = 's9'`);
     await db.query(`DELETE FROM classes WHERE id IN ('c9','c8')`);
-    await db.query(`DELETE FROM users WHERE id IN ('t9','s9','s8')`);
+    await db.query(`DELETE FROM user_roles WHERE user_id = 't2'`);
+    await db.query(`DELETE FROM users WHERE id IN ('t9','s9','s8','s7')`);
   });
 
-  it("scope check admits own-class students, not colleagues' or banned ones", async () => {
+  it("scope check admits own-class students, not colleagues' or non-students", async () => {
     const scope = await essays.resolveStaffScope("teacher", "t9");
     expect(scope).toEqual({ kind: "teacher", teacherId: "t9" });
-    expect(await essays.canUploadForStudent(scope!, "s9")).toBe(true);
+    expect(await essays.canUploadForStudent(scope!, "s9")).toBe(true); // explicit student row
+    expect(await essays.canUploadForStudent(scope!, "s7")).toBe(true); // implicit student (no user_roles row)
     expect(await essays.canUploadForStudent(scope!, "s8")).toBe(false); // other teacher's class
-    expect(await essays.canUploadForStudent(scope!, "t2")).toBe(false); // not a student
+    expect(await essays.canUploadForStudent(scope!, "t2")).toBe(false); // teacher, not a student
   });
 
   it("essay is owned by the student; uploader keeps access; only the student learns from it", async () => {

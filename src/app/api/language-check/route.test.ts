@@ -106,8 +106,10 @@ describe("POST /api/language-check (teacher upload)", () => {
     const res = await POST(post({ images: [IMAGE], studentId: "s1" }));
     expect(res.status).toBe(403);
     expect(insertQuery()).toBeUndefined();
-    // Teacher scope: membership in the caller's classes, students only.
-    expect(scopeQuery()!.sql).toContain("u.role = 'student'");
+    // Teacher scope: membership in the caller's classes, students only
+    // (roles live in user_roles — no row = implicit student).
+    expect(scopeQuery()!.sql).toContain("LEFT JOIN user_roles ur");
+    expect(scopeQuery()!.sql).toContain("COALESCE(ur.role, 'student') = 'student'");
     expect(scopeQuery()!.sql).toContain("uc.teacher_id = $1");
     expect(scopeQuery()!.values[1]).toBe("s1");
   });

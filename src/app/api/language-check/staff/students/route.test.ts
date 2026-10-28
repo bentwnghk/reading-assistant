@@ -83,10 +83,12 @@ describe("staff students route", () => {
   it("all=1 lists every in-scope student, not just those with essays", async () => {
     await GET(req("all=1"));
     // The teacher-upload picker needs first-time learners too, so it reads
-    // the users table directly (current, non-banned students only).
+    // the users table directly (current, non-banned students only — roles
+    // live in user_roles; no row there = implicit student).
     expect(queries[0].sql).toContain("FROM users u");
-    expect(queries[0].sql).toContain("u.role = 'student'");
-    expect(queries[0].sql).toContain("NOT u.banned");
+    expect(queries[0].sql).toContain("LEFT JOIN user_roles ur");
+    expect(queries[0].sql).toContain("COALESCE(ur.role, 'student') = 'student'");
+    expect(queries[0].sql).toContain("COALESCE(u.banned, FALSE) = FALSE");
     expect(queries[0].sql).not.toContain("language_check_essays");
     expect(queries[0].sql).toContain("ac.teacher_id = $1");
   });
