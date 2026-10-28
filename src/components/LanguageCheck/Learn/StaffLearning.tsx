@@ -63,8 +63,11 @@ export default function StaffLearning({ classId, userId, onPickStudent }: StaffL
   const [tab, setTab] = useState<Tab>("overview");
   const [range, setRange] = useRange(30);
 
+  // "__mine__" (My Classes) travels as mine=1 — the same translation the
+  // essay log and the "Check an essay for" picker use.
   const filters: Record<string, string | undefined> = {
-    classId: classId ?? undefined,
+    classId: classId && classId !== "__mine__" ? classId : undefined,
+    mine: classId === "__mine__" ? "1" : undefined,
     userId: userId ?? undefined,
   };
 
@@ -131,7 +134,9 @@ function Overview({
   );
 
   // Any filter change goes back to the first page of students.
-  const filterKey = `${range}|${filters.classId}|${filters.userId}`;
+  // "My Classes" (classId undefined + mine set) must not collide with
+  // "All Classes" (both undefined) — both would otherwise keep the old page.
+  const filterKey = `${range}|${filters.classId}|${filters.mine}|${filters.userId}`;
   const [lastKey, setLastKey] = useState(filterKey);
   if (lastKey !== filterKey) {
     setLastKey(filterKey);

@@ -9,9 +9,13 @@ const range = z.coerce
     "bad range"
   );
 
+/** "1" = narrow to the caller's own classes ("My Classes" in the class picker). */
+const mine = z.enum(["0", "1"]).optional();
+
 const filters = {
   userId: z.string().min(1).max(64).optional(),
   classId: z.string().min(1).max(64).optional(),
+  mine,
 };
 
 const paging = {
@@ -41,4 +45,5 @@ export const analyticsSessionsQuerySchema = z.object({
 
 export const analyticsStudentsQuerySchema = z.object({
   classId: z.string().min(1).max(64).optional(),
+  mine,
 });

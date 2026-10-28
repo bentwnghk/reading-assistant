@@ -102,7 +102,8 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
         page: String(page),
         pageSize: String(pageSize),
       });
-      if (classId !== "all") params.set("classId", classId);
+      if (classId === "__mine__") params.set("mine", "1");
+      else if (classId !== "all") params.set("classId", classId);
       if (userId !== "all") params.set("userId", userId);
       if (status !== "all") params.set("status", status);
       if (search) params.set("q", search);

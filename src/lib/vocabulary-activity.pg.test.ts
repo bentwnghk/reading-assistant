@@ -185,6 +185,30 @@ describe.skipIf(pgliteMissing)("vocabulary analytics SQL", () => {
     expect(out.totals.sessions).toBe(0);
   });
 
+  it("mineTeacherId (My Classes) narrows every query and intersects the scope", async () => {
+    // Super-admin + "My Classes" (t1 owns k1): only Ann, exactly like classId=k1.
+    const mine = await lib.getVocabularyAnalytics({ kind: "all" }, { ...base, mineTeacherId: "t1" });
+    expect(mine.students.map((s) => s.userId)).toEqual(["a"]);
+    expect(mine.totals.sessions).toBe(2); // s1 + s2, not b's s3/s4
+    expect(mine.users.map((u) => u.id)).toEqual(["a"]);
+    // The teacher's own scope ∩ another teacher's classes = nothing leaks.
+    const none = await lib.getVocabularyAnalytics(t1, { ...base, mineTeacherId: "t2" });
+    expect(none.students).toEqual([]);
+    expect(none.totals.sessions).toBe(0);
+    const sess = await lib.listStaffReviewSessions(
+      { kind: "all" },
+      { range: 0, page: 1, pageSize: 20, mineTeacherId: "t1" },
+    );
+    expect(sess.rows.map((r) => r.userId)).toEqual(["a", "a"]);
+    const act = await lib.listVocabularyActivity(
+      { kind: "all" },
+      { range: 0, page: 1, pageSize: 50, mineTeacherId: "t1" },
+    );
+    expect(act.rows.every((r) => r.userId === "a")).toBe(true);
+    const stu = await lib.listAnalyticsStudents({ kind: "all" }, { mineTeacherId: "t1" });
+    expect(stu.map((s) => s.id)).toEqual(["a"]);
+  });
+
   it("self analytics: the learner's own data only, no per-student/user lists", async () => {
     const d = await lib.getSelfVocabularyAnalytics("a", { range: 30, timeZone: "UTC" });
     expect(d.students).toEqual([]);

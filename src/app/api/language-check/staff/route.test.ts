@@ -79,6 +79,17 @@ describe("staff route: real handler, recorded SQL", () => {
     expect(usersQuery().sql).toContain("class_id = $2");
   });
 
+  it("mine=1 (My Classes) narrows rows, stats AND student options", async () => {
+    const res = await GET(makeRequest("page=1&pageSize=20&mine=1"));
+    expect(res.status).toBe(200);
+    const list = listQuery();
+    expect(list.sql).toContain("FROM class_members mcm");
+    expect(list.sql).toContain("mc.teacher_id = $2");
+    expect(list.values).toEqual(["teacher-1", "teacher-1", 20, 0]);
+    expect(statsQuery().sql).toContain("mc.teacher_id = $2");
+    expect(usersQuery().sql).toContain("mc.teacher_id = $2");
+  });
+
   it("student+class filters combine sequentially", async () => {
     const res = await GET(
       makeRequest("page=1&pageSize=20&userId=student-9&classId=class-7"),

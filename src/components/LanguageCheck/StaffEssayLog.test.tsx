@@ -190,6 +190,15 @@ describe("StaffEssayLog filters", () => {
     });
   });
 
+  it("the '__mine__' selection (My Classes) travels as mine=1, not classId", async () => {
+    render(<StaffEssayLog classId="__mine__" userId={null} />);
+    await waitFor(() => {
+      const last = staffRequests[staffRequests.length - 1];
+      expect(last).toContain("mine=1");
+      expect(last).not.toContain("classId=");
+    });
+  });
+
   it("picking a status narrows the table and the stats cards", async () => {
     render(<StaffEssayLog classId={null} userId={null} />);
 

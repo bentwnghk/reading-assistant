@@ -11,6 +11,9 @@ const range = z.coerce
   .int()
   .refine((n) => (LANGUAGE_CHECK_LEARN_RANGES as readonly number[]).includes(n), "bad range")
 
+/** "1" = narrow to the caller's own classes ("My Classes" in the class picker). */
+const mine = z.enum(["0", "1"]).optional()
+
 /** Query of the dashboards / activity feeds. */
 export const dashboardQuerySchema = z.object({
   range: range.default(30),
@@ -20,6 +23,7 @@ export const dashboardQuerySchema = z.object({
 export const staffDashboardQuerySchema = dashboardQuerySchema.extend({
   userId: z.string().min(1).max(64).optional(),
   classId: z.string().min(1).max(64).optional(),
+  mine,
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 })
@@ -30,6 +34,7 @@ export const activityQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   userId: z.string().min(1).max(64).optional(),
   classId: z.string().min(1).max(64).optional(),
+  mine,
 })
 
 export const sessionsQuerySchema = z.object({
@@ -37,4 +42,5 @@ export const sessionsQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   userId: z.string().min(1).max(64).optional(),
   classId: z.string().min(1).max(64).optional(),
+  mine,
 })

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const users =
       parsed.data.all === "1"
         ? await listAllStaffStudents(staff.scope, opts)
-        : await listStaffStudents(staff.scope, parsed.data)
+        : await listStaffStudents(staff.scope, opts)
     return NextResponse.json({ users })
   } catch (error) {
     console.error("Error listing language-check staff students:", error)

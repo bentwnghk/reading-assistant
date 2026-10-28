@@ -62,6 +62,8 @@ export interface AnalyticsFilters {
   range: number;
   userId?: string;
   classId?: string;
+  /** "My Classes" — students of the classes this teacher owns. */
+  mineTeacherId?: string;
 }
 
 const num = (v: unknown): number => Number(v) || 0;
@@ -94,13 +96,13 @@ class Params {
 /**
  * CTE `sc` = the students the staff member may see: role-scoped (teacher →
  * students in their classes, admin → their school, super-admin → everyone),
- * optionally narrowed by class and student. Banned users and staff accounts
- * never appear.
+ * optionally narrowed by class ("My Classes" via `mineTeacherId`) and student.
+ * Banned users and staff accounts never appear.
  */
 function scopeCte(
   p: Params,
   scope: LanguageCheckStaffScope,
-  f: { classId?: string; userId?: string }
+  f: { classId?: string; mineTeacherId?: string; userId?: string }
 ): string {
   const clauses = [
     `COALESCE(ur.role, 'student') = 'student'`,
@@ -117,6 +119,15 @@ function scopeCte(
   if (f.classId) {
     clauses.push(
       `u.id IN (SELECT student_id FROM class_members WHERE class_id = ${p.add(f.classId)})`
+    );
+  }
+  if (f.mineTeacherId) {
+    clauses.push(
+      `u.id IN (
+         SELECT mcm.student_id FROM class_members mcm
+         JOIN classes mc ON mc.id = mcm.class_id
+         WHERE mc.teacher_id = ${p.add(f.mineTeacherId)}
+       )`
     );
   }
   if (f.userId) clauses.push(`u.id = ${p.add(f.userId)}`);
@@ -136,10 +147,10 @@ const HARD_WORDS_LIMIT = 100;
 /** Students the filter bar offers: scope + class only (never narrowed by student). */
 export async function listAnalyticsStudents(
   scope: LanguageCheckStaffScope,
-  opts: { classId?: string }
+  opts: { classId?: string; mineTeacherId?: string }
 ): Promise<{ id: string; name: string; email: string }[]> {
   const p = new Params();
-  const cte = scopeCte(p, scope, { classId: opts.classId });
+  const cte = scopeCte(p, scope, { classId: opts.classId, mineTeacherId: opts.mineTeacherId });
   const res = await getPool().query(
     `WITH ${cte}
      SELECT id, name, email FROM sc ORDER BY name, email LIMIT 1000`,
@@ -168,6 +179,7 @@ export async function getVocabularyAnalytics(
     const p = new Params();
     const cte = scopeCte(p, scope, {
       classId: opts.classId,
+      mineTeacherId: opts.mineTeacherId,
       userId: withUser ? opts.userId : undefined,
     });
     const sql = build(p, cte);
@@ -369,7 +381,10 @@ export async function getVocabularyAnalytics(
       studentsQ,
       opts.selfOnly
         ? Promise.resolve([])
-        : listAnalyticsStudents(scope, { classId: opts.classId }),
+        : listAnalyticsStudents(scope, {
+            classId: opts.classId,
+            mineTeacherId: opts.mineTeacherId,
+          }),
     ]);
 
   const modeOrder: Mode[] = ["flashcard", "quiz", "spelling"];
@@ -504,7 +519,11 @@ export async function listStaffReviewSessions(
   opts: AnalyticsFilters & { page: number; pageSize: number; mode?: Mode }
 ): Promise<{ rows: VocabularyStaffSessionRow[]; total: number }> {
   const p = new Params();
-  const cte = scopeCte(p, scope, { classId: opts.classId, userId: opts.userId });
+  const cte = scopeCte(p, scope, {
+    classId: opts.classId,
+    mineTeacherId: opts.mineTeacherId,
+    userId: opts.userId,
+  });
   const clauses = [`s.completed_at >= ${p.add(cutoffMs(opts.range))}`];
   if (opts.mode) clauses.push(`s.mode = ${p.add(opts.mode)}`);
   const limit = p.add(opts.pageSize);
@@ -542,7 +561,11 @@ export async function listVocabularyActivity(
   opts: AnalyticsFilters & { page: number; pageSize: number }
 ): Promise<{ rows: VocabularyActivityRow[]; total: number }> {
   const p = new Params();
-  const cte = scopeCte(p, scope, { classId: opts.classId, userId: opts.userId });
+  const cte = scopeCte(p, scope, {
+    classId: opts.classId,
+    mineTeacherId: opts.mineTeacherId,
+    userId: opts.userId,
+  });
   const since = p.add(cutoffMs(opts.range));
   const limit = p.add(opts.pageSize);
   const offset = p.add((opts.page - 1) * opts.pageSize);

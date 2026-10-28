@@ -113,4 +113,14 @@ describe("staff students route", () => {
     expect(queries[1].sql).toContain("mc.teacher_id = $2");
     expect(queries[1].values).toEqual(["u-1", "u-1"]);
   });
+
+  it("mine=1 also narrows the shared filter bar's picker (no all=1)", async () => {
+    // The staff filter bar fetches without all=1 — "My Classes" must narrow
+    // that path too (regression: `mine` used to be dropped here).
+    role = "super-admin";
+    await GET(req("mine=1"));
+    expect(queries[0].sql).toContain("FROM class_members mcm");
+    expect(queries[0].sql).toContain("mc.teacher_id = $1");
+    expect(queries[0].values).toEqual(["u-1"]);
+  });
 });

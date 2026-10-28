@@ -347,6 +347,12 @@ export async function listStaffEssays(
      * class's members are not in scope, so nothing leaks).
      */
     classId?: string
+    /**
+     * "My Classes" — narrows to the students of the classes the CALLER
+     * teaches (the class picker's default for admins/super-admins who
+     * teach). Same intersection semantics as classId.
+     */
+    mineTeacherId?: string
   },
 ): Promise<{
   rows: LanguageCheckStaffRow[]
@@ -372,7 +378,10 @@ export async function listStaffEssays(
   // → "could not determine data type of parameter $2").
   const inClass =
     "e.user_id IN (SELECT student_id FROM class_members WHERE class_id = @)"
+  const inMineClasses =
+    "e.user_id IN (SELECT mcm.student_id FROM class_members mcm JOIN classes mc ON mc.id = mcm.class_id WHERE mc.teacher_id = @)"
   if (opts.classId) add(inClass, opts.classId)
+  if (opts.mineTeacherId) add(inMineClasses, opts.mineTeacherId)
   const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : ""
 
   // The student dropdown options reflect the scope + class filter only —
@@ -388,6 +397,7 @@ export async function listStaffEssays(
     scopeOnly.params.push(...values)
   }
   if (opts.classId) scopeAdd(inClass, opts.classId)
+  if (opts.mineTeacherId) scopeAdd(inMineClasses, opts.mineTeacherId)
   const scopeWhere =
     scopeOnly.clauses.length > 0
       ? `WHERE ${scopeOnly.clauses.join(" AND ")}`

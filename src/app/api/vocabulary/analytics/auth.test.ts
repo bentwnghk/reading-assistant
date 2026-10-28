@@ -11,13 +11,17 @@ vi.mock("@/lib/language-check", async () => ({
 }));
 const mocks = vi.hoisted(() => ({
   getSelfVocabularyAnalytics: vi.fn(async () => ({ ok: true })),
+  getVocabularyAnalytics: vi.fn(async () => ({ ok: true })),
+  listVocabularyActivity: vi.fn(async () => ({ rows: [], total: 0 })),
+  listStaffReviewSessions: vi.fn(async () => ({ rows: [], total: 0 })),
+  listAnalyticsStudents: vi.fn(async () => []),
 }));
 vi.mock("@/lib/vocabulary-activity", () => ({
-  getVocabularyAnalytics: async () => ({ ok: true }),
+  getVocabularyAnalytics: mocks.getVocabularyAnalytics,
   getSelfVocabularyAnalytics: mocks.getSelfVocabularyAnalytics,
-  listVocabularyActivity: async () => ({ rows: [], total: 0 }),
-  listStaffReviewSessions: async () => ({ rows: [], total: 0 }),
-  listAnalyticsStudents: async () => [],
+  listVocabularyActivity: mocks.listVocabularyActivity,
+  listStaffReviewSessions: mocks.listStaffReviewSessions,
+  listAnalyticsStudents: mocks.listAnalyticsStudents,
   safeTimeZone: (tz: string | undefined) => tz ?? "UTC",
 }));
 
@@ -45,6 +49,31 @@ describe("vocabulary analytics routes are staff-only", () => {
   it("rejects an unsupported range", async () => {
     role = "admin";
     expect((await dashboard(req("range=5"))).status).toBe(400);
+  });
+
+  it("mine=1 (My Classes) resolves to the caller's id as mineTeacherId", async () => {
+    role = "teacher";
+    Object.values(mocks).forEach((f) => f.mockClear());
+    await dashboard(req("range=30&mine=1"));
+    expect(mocks.getVocabularyAnalytics).toHaveBeenCalledWith(
+      { kind: "all" },
+      expect.objectContaining({ mineTeacherId: "u1" })
+    );
+    await sessions(req("mine=1"));
+    expect(mocks.listStaffReviewSessions).toHaveBeenCalledWith(
+      { kind: "all" },
+      expect.objectContaining({ mineTeacherId: "u1" })
+    );
+    await activity(req("mine=1"));
+    expect(mocks.listVocabularyActivity).toHaveBeenCalledWith(
+      { kind: "all" },
+      expect.objectContaining({ mineTeacherId: "u1" })
+    );
+    await students(req("mine=1"));
+    expect(mocks.listAnalyticsStudents).toHaveBeenCalledWith(
+      { kind: "all" },
+      { mineTeacherId: "u1" }
+    );
   });
 });
 

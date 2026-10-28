@@ -87,6 +87,25 @@ describe("learning routes", () => {
     expect((await staffSessionsGET(req())).status).toBe(403);
   });
 
+  it("mine=1 (My Classes) resolves to the caller's id as mineTeacherId", async () => {
+    session = { user: { id: "t1", role: "teacher" } };
+    await staffDashboardGET(req("range=30&mine=1"));
+    expect(lib.getStaffDashboard).toHaveBeenCalledWith(
+      { kind: "teacher", teacherId: "t1" },
+      expect.objectContaining({ mineTeacherId: "t1" }),
+    );
+    await staffSessionsGET(req("mine=1"));
+    expect(lib.listStaffSessions).toHaveBeenCalledWith(
+      { kind: "teacher", teacherId: "t1" },
+      expect.objectContaining({ mineTeacherId: "t1" }),
+    );
+    await staffActivityGET(req("mine=1"));
+    expect(lib.listEvents).toHaveBeenCalledWith(
+      { kind: "teacher", teacherId: "t1" },
+      expect.objectContaining({ mineTeacherId: "t1" }),
+    );
+  });
+
   it("the learner's own dashboard/activity ignore any user id in the query", async () => {
     session = { user: { id: "me", role: "student" } };
     await dashboardGET(req("range=30&userId=someone-else"));

@@ -14,6 +14,11 @@ const querySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   userId: z.string().min(1).optional(),
   classId: z.string().min(1).optional(),
+  /**
+   * "1" = narrow to the CALLER'S OWN classes (the class picker's "My Classes"
+   * option). Ignored when classId is set.
+   */
+  mine: z.enum(["0", "1"]).optional(),
   status: z.enum(LANGUAGE_CHECK_STATUSES).optional(),
   q: z.string().trim().min(1).max(100).optional(),
 })
@@ -41,7 +46,10 @@ export async function GET(request: NextRequest) {
     if (!scope) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
-    const data = await listStaffEssays(scope, parsed.data)
+    const data = await listStaffEssays(scope, {
+      ...parsed.data,
+      mineTeacherId: parsed.data.mine === "1" ? session.user.id : undefined,
+    })
     return NextResponse.json(data)
   } catch (error) {
     console.error("Error listing staff language-check essays:", error)

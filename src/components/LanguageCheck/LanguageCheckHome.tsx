@@ -131,7 +131,12 @@ export default function LanguageCheckHome({
           )
         ) : (
           <>
-            <StaffFilterBar role={role} value={selection} onChange={setSelection} />
+            <StaffFilterBar
+              role={role}
+              value={selection}
+              onChange={setSelection}
+              allowMine
+            />
             {section === "essays" ? (
               <StaffEssayLog classId={selection.classId} userId={selection.userId} />
             ) : (

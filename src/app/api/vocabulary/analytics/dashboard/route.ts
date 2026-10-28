@@ -13,9 +13,13 @@ export async function GET(request: NextRequest) {
       Object.fromEntries(request.nextUrl.searchParams)
     );
     if (!parsed.success) return invalid(parsed.error);
-    const { tz, ...rest } = parsed.data;
+    const { tz, mine, ...rest } = parsed.data;
     return NextResponse.json(
-      await getVocabularyAnalytics(staff.scope, { ...rest, timeZone: safeTimeZone(tz) })
+      await getVocabularyAnalytics(staff.scope, {
+        ...rest,
+        mineTeacherId: mine === "1" ? staff.userId : undefined,
+        timeZone: safeTimeZone(tz),
+      })
     );
   } catch (error) {
     console.error("Error loading vocabulary analytics:", error);

@@ -61,8 +61,11 @@ export default function StaffVocabularyAnalytics({ role, onOpenStudent }: Props)
   const [tab, setTab] = useState<Tab>("overview");
   const [range, setRange] = useState(30);
 
+  // "__mine__" (My Classes) travels as mine=1 — the same translation the
+  // Language Check staff tabs and the "Check an essay for" picker use.
   const filters: Filters = {
-    classId: selection.classId ?? undefined,
+    classId: selection.classId && selection.classId !== "__mine__" ? selection.classId : undefined,
+    mine: selection.classId === "__mine__" ? "1" : undefined,
     userId: selection.userId ?? undefined,
   };
 
@@ -73,6 +76,7 @@ export default function StaffVocabularyAnalytics({ role, onOpenStudent }: Props)
         value={selection}
         onChange={setSelection}
         studentsEndpoint={STUDENTS_ENDPOINT}
+        allowMine
       />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <SegmentedTabs
@@ -96,10 +100,18 @@ export default function StaffVocabularyAnalytics({ role, onOpenStudent }: Props)
         />
       )}
       {tab === "sessions" && (
-        <StaffSessions key={`${range}|${filters.classId}|${filters.userId}`} range={range} filters={filters} />
+        <StaffSessions
+          key={`${range}|${filters.classId}|${filters.mine}|${filters.userId}`}
+          range={range}
+          filters={filters}
+        />
       )}
       {tab === "activity" && (
-        <ActivityFeed key={`${range}|${filters.classId}|${filters.userId}`} range={range} filters={filters} />
+        <ActivityFeed
+          key={`${range}|${filters.classId}|${filters.mine}|${filters.userId}`}
+          range={range}
+          filters={filters}
+        />
       )}
     </section>
   );
@@ -154,7 +166,9 @@ function Overview({
 }) {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const filterKey = `${range}|${filters.classId}|${filters.userId}`;
+  // "My Classes" (classId undefined + mine set) must not collide with
+  // "All Classes" (both undefined) — both would otherwise keep the old page.
+  const filterKey = `${range}|${filters.classId}|${filters.mine}|${filters.userId}`;
   const [lastKey, setLastKey] = useState(filterKey);
   if (lastKey !== filterKey) {
     setLastKey(filterKey);

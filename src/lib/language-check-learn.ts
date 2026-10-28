@@ -722,6 +722,8 @@ export interface LearnFilters {
   range: number
   userId?: string
   classId?: string
+  /** "My Classes" — students of the classes this teacher owns. */
+  mineTeacherId?: string
 }
 
 function filterClauses(
@@ -736,6 +738,15 @@ function filterClauses(
   if (f.classId) {
     clauses.push(
       `${alias}.user_id IN (SELECT student_id FROM class_members WHERE class_id = ${p.add(f.classId)})`,
+    )
+  }
+  if (f.mineTeacherId) {
+    clauses.push(
+      `${alias}.user_id IN (
+         SELECT mcm.student_id FROM class_members mcm
+         JOIN classes mc ON mc.id = mcm.class_id
+         WHERE mc.teacher_id = ${p.add(f.mineTeacherId)}
+       )`,
     )
   }
   if (f.range > 0 && opts.time) {
@@ -1072,11 +1083,17 @@ export async function getStaffDashboard(
     timeZone: string
     userId?: string
     classId?: string
+    mineTeacherId?: string
     page: number
     pageSize: number
   },
 ): Promise<LearnStaffDashboardData> {
-  const filters: LearnFilters = { range: opts.range, userId: opts.userId, classId: opts.classId }
+  const filters: LearnFilters = {
+    range: opts.range,
+    userId: opts.userId,
+    classId: opts.classId,
+    mineTeacherId: opts.mineTeacherId,
+  }
   const data = await computeDashboard(scope, filters, {
     timeZone: opts.timeZone,
     withStudents: { page: opts.page, pageSize: opts.pageSize },
@@ -1086,7 +1103,11 @@ export async function getStaffDashboard(
   // the essay log, so switching students stays possible.
   const p = new Params()
   const where = whereOf([
-    ...filterClauses(p, scope, "ev", { range: 0, classId: opts.classId }),
+    ...filterClauses(p, scope, "ev", {
+      range: 0,
+      classId: opts.classId,
+      mineTeacherId: opts.mineTeacherId,
+    }),
     `ev.type <> 'session_deleted'`,
   ])
   const users = await getPool().query(
@@ -1119,10 +1140,10 @@ export async function getStaffDashboard(
  */
 export async function listStaffStudents(
   scope: LanguageCheckStaffScope,
-  opts: { classId?: string },
+  opts: { classId?: string; mineTeacherId?: string },
 ): Promise<{ id: string; name: string; email: string }[]> {
   const p = new Params()
-  const where = whereOf(filterClauses(p, scope, "x", { range: 0, classId: opts.classId }))
+  const where = whereOf(filterClauses(p, scope, "x", { range: 0, ...opts }))
   const res = await getPool().query(
     `SELECT DISTINCT u.id, u.name, u.email
      FROM (
@@ -1248,10 +1269,17 @@ export async function listEvents(
 
 export async function listStaffSessions(
   scope: LanguageCheckStaffScope,
-  opts: { userId?: string; classId?: string; page: number; pageSize: number },
+  opts: { userId?: string; classId?: string; mineTeacherId?: string; page: number; pageSize: number },
 ): Promise<{ rows: LearnStaffSessionSummary[]; total: number }> {
   const p = new Params()
-  const where = whereOf(filterClauses(p, scope, "s", { range: 0, userId: opts.userId, classId: opts.classId }))
+  const where = whereOf(
+    filterClauses(p, scope, "s", {
+      range: 0,
+      userId: opts.userId,
+      classId: opts.classId,
+      mineTeacherId: opts.mineTeacherId,
+    }),
+  )
   const values = [...p.values]
   const limit = `$${values.length + 1}`
   const offset = `$${values.length + 2}`
