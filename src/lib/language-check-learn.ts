@@ -1150,11 +1150,13 @@ export async function listStaffStudents(
  * Same scope semantics as canUploadForStudent: teacher → own classes,
  * admin → school, super-admin → everyone; current, non-banned students only
  * (roles live in user_roles; no row there = implicit student, like the
- * user-management queries).
+ * user-management queries). `classId` narrows to one class; `mineTeacherId`
+ * (the picker's "My Classes" default for admins/super-admins who teach)
+ * narrows to the students of the classes that teacher owns.
  */
 export async function listAllStaffStudents(
   scope: LanguageCheckStaffScope,
-  opts: { classId?: string },
+  opts: { classId?: string; mineTeacherId?: string },
 ): Promise<{ id: string; name: string; email: string }[]> {
   const p = new Params()
   const clauses: string[] = [
@@ -1172,7 +1174,15 @@ export async function listAllStaffStudents(
   } else if (scope.kind === "school") {
     clauses.push(`u.school_id = ${p.add(scope.schoolId)}`)
   }
-  if (opts.classId) {
+  if (opts.mineTeacherId) {
+    clauses.push(
+      `u.id IN (
+        SELECT mcm.student_id FROM class_members mcm
+        JOIN classes mc ON mc.id = mcm.class_id
+        WHERE mc.teacher_id = ${p.add(opts.mineTeacherId)}
+      )`,
+    )
+  } else if (opts.classId) {
     clauses.push(
       `u.id IN (SELECT student_id FROM class_members WHERE class_id = ${p.add(opts.classId)})`,
     )

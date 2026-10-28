@@ -11,6 +11,11 @@ const querySchema = z.object({
    * with existing essays/learning history — a first essay needs a first pick.
    */
   all: z.enum(["0", "1"]).optional(),
+  /**
+   * "1" = students of the CALLER'S OWN classes (the picker's "My Classes"
+   * default for admins/super-admins who teach). Ignored when classId is set.
+   */
+  mine: z.enum(["0", "1"]).optional(),
 })
 
 /** Scoped student options for the shared staff filter bar (essays + learning). */
@@ -20,9 +25,13 @@ export async function GET(request: NextRequest) {
     if ("response" in staff) return staff.response
     const parsed = querySchema.safeParse(Object.fromEntries(request.nextUrl.searchParams))
     if (!parsed.success) return invalid(parsed.error)
+    const opts = {
+      classId: parsed.data.classId,
+      mineTeacherId: parsed.data.mine === "1" ? staff.userId : undefined,
+    }
     const users =
       parsed.data.all === "1"
-        ? await listAllStaffStudents(staff.scope, parsed.data)
+        ? await listAllStaffStudents(staff.scope, opts)
         : await listStaffStudents(staff.scope, parsed.data)
     return NextResponse.json({ users })
   } catch (error) {

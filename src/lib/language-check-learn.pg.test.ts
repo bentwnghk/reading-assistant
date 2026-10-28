@@ -339,9 +339,10 @@ describe.skipIf(pgliteMissing)("teacher-uploaded essays (real SQL)", () => {
         ('s7','NoRole','s7@x','school-9',false)`,
     );
     // s9 gets an explicit student row; s7/s8 keep NO row (implicit student);
-    // t2 (base fixture) is made a teacher so the "not a student" case is real.
+    // t1/t2 (base fixture "teachers") get real teacher rows so the implicit
+    // -student rule does not leak them into student lists.
     await db.query(
-      `INSERT INTO user_roles (user_id, role) VALUES ('t9','teacher'), ('s9','student'), ('t2','teacher')`,
+      `INSERT INTO user_roles (user_id, role) VALUES ('t9','teacher'), ('s9','student'), ('t1','teacher'), ('t2','teacher')`,
     );
     await db.query(`INSERT INTO classes (id,name,teacher_id) VALUES ('c9','5C','t9'),('c8','5D','t2')`);
     await db.query(`INSERT INTO class_members VALUES ('c9','s9'),('c8','s8'),('c9','s7')`);
@@ -353,7 +354,7 @@ describe.skipIf(pgliteMissing)("teacher-uploaded essays (real SQL)", () => {
     await db.query(`DELETE FROM language_check_learn_sessions WHERE user_id = 's9'`);
     await db.query(`DELETE FROM language_check_essays WHERE user_id = 's9'`);
     await db.query(`DELETE FROM classes WHERE id IN ('c9','c8')`);
-    await db.query(`DELETE FROM user_roles WHERE user_id = 't2'`);
+    await db.query(`DELETE FROM user_roles WHERE user_id IN ('t1','t2')`);
     await db.query(`DELETE FROM users WHERE id IN ('t9','s9','s8','s7')`);
   });
 
@@ -364,6 +365,20 @@ describe.skipIf(pgliteMissing)("teacher-uploaded essays (real SQL)", () => {
     expect(await essays.canUploadForStudent(scope!, "s7")).toBe(true); // implicit student (no user_roles row)
     expect(await essays.canUploadForStudent(scope!, "s8")).toBe(false); // other teacher's class
     expect(await essays.canUploadForStudent(scope!, "t2")).toBe(false); // teacher, not a student
+  });
+
+  it("picker students: 'My Classes' narrows to the caller's own class members", async () => {
+    const all = await lib.listAllStaffStudents({ kind: "all" }, {});
+    expect(all.map((s) => s.id).sort()).toEqual(["s1", "s2", "s7", "s8", "s9"]);
+    // t9 teaches c9 → s9 + s7 only (not s8 in t2's class).
+    const mine = await lib.listAllStaffStudents(
+      { kind: "all" },
+      { mineTeacherId: "t9" },
+    );
+    expect(mine.map((s) => s.id).sort()).toEqual(["s7", "s9"]);
+    // One concrete class narrows further.
+    const one = await lib.listAllStaffStudents({ kind: "all" }, { classId: "c8" });
+    expect(one.map((s) => s.id)).toEqual(["s8"]);
   });
 
   it("essay is owned by the student; uploader keeps access; only the student learns from it", async () => {

@@ -40,6 +40,7 @@ import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
 import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
+import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import {
   ExplanationLanguageToggle,
   useCategoryLabel,
@@ -97,38 +98,81 @@ export default function LanguageCheckContainer() {
 
   // Teacher upload: which learner this scan is for (null = my own essay).
   // Component-local is fine — it only matters while staging pages here.
+  // Class + student dropdowns, laid out like the Teacher Dashboard filters:
+  // class narrows the student options (and resets the pick). Class value is
+  // "__mine__" (My Classes), a class id, or null (All Classes).
   const role = session?.user?.role;
   const isStaff = role === "teacher" || role === "admin" || role === "super-admin";
+  const myId = session?.user?.id;
+  const [forClassId, setForClassId] = useState<string | null>(null);
   const [forStudentId, setForStudentId] = useState<string | null>(null);
+  const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [students, setStudents] = useState<LanguageCheckStaffUser[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
+
+  // Classes the caller teaches — drives the "My Classes" option, which is
+  // also the DEFAULT: admins/super-admins otherwise land on every class in
+  // scope instead of their own. Same derivation as the Teacher Dashboard.
+  const myClasses = classes.filter((c) => !!c.teacherId && c.teacherId === myId);
 
   useEffect(() => {
     loadList().catch((e) => toast.error(parseError(e)));
   }, [loadList]);
 
-  // Every student the teacher may scan for (not just those with essays yet —
-  // the whole point is uploading a first essay for them).
+  // Class options — same source as the Teacher Dashboard / staff filter bars.
   useEffect(() => {
     if (!isStaff) return;
-    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/classes");
+        if (!res.ok) return;
+        const list = (await res.json()) as ClassInfo[];
+        setClasses(list);
+        // Adopt "My Classes" as the default once options arrive, but only
+        // while nothing has been picked ("All Classes" can only be chosen
+        // after this runs, so a deliberate pick is never overridden).
+        if (list.some((c) => c.teacherId && c.teacherId === myId)) {
+          setForClassId((prev) => (prev === null ? "__mine__" : prev));
+        }
+      } catch {
+        // Non-fatal: the student picker still works without the class filter.
+      }
+    })();
+  }, [isStaff, myId]);
+
+  // Every student the teacher may scan for (not just those with essays yet —
+  // the whole point is uploading a first essay for them), narrowed by the
+  // class selection ("My Classes" = the caller's own classes).
+  useEffect(() => {
+    if (!isStaff) return;
+    const ac = new AbortController();
+    let superseded = false;
     setStudentsLoading(true);
     void (async () => {
       try {
-        const res = await fetch("/api/language-check/staff/students?all=1");
+        const qs = new URLSearchParams({ all: "1" });
+        if (forClassId === "__mine__") qs.set("mine", "1");
+        else if (forClassId) qs.set("classId", forClassId);
+        const res = await fetch(
+          `/api/language-check/staff/students?${qs.toString()}`,
+          { signal: ac.signal },
+        );
         if (!res.ok) return;
         const body = (await res.json()) as { users: LanguageCheckStaffUser[] };
-        if (!cancelled) setStudents(body.users);
+        if (!superseded) setStudents(body.users);
       } catch {
-        // Non-fatal: the picker simply shows no options.
+        // Aborted or offline — keep the previous options.
       } finally {
-        if (!cancelled) setStudentsLoading(false);
+        // A request aborted because the class changed must not clear the
+        // spinner of the request that replaced it.
+        if (!superseded) setStudentsLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      superseded = true;
+      ac.abort();
     };
-  }, [isStaff]);
+  }, [isStaff, forClassId]);
 
   const forStudent = students.find((s) => s.id === forStudentId) ?? null;
 
@@ -222,14 +266,29 @@ export default function LanguageCheckContainer() {
 
   if (!active) {
     // Staff picker shown inside the upload card (above the drop prompt AND
-    // the staging tray, so the attribution stays visible while cropping).
+    // the staging tray, so the attribution stays visible while cropping):
+    // class dropdown first, then the student dropdown it narrows — the same
+    // pair the Teacher Dashboard uses.
     const studentPicker = isStaff ? (
       <div className="flex flex-wrap items-center gap-2">
         <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
           <UserCog className="h-4 w-4" />
           {t("languageCheck.upload.checkFor")}
         </span>
-        <div className="w-full sm:w-64">
+        <div className="w-full sm:w-56">
+          <ClassCombobox
+            classes={classes}
+            value={forClassId}
+            onChange={(classId) => {
+              // A student picked under another class may not belong to this one.
+              setForClassId(classId);
+              setForStudentId(null);
+            }}
+            allowAll
+            allowMine={myClasses.length > 0}
+          />
+        </div>
+        <div className="w-full sm:w-56">
           <StudentCombobox
             users={students}
             value={forStudentId}

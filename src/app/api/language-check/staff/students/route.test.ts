@@ -99,4 +99,18 @@ describe("staff students route", () => {
     expect(queries[0].sql).toContain("class_id = $1");
     expect(queries[0].values).toEqual(["class-9"]);
   });
+
+  it("mine=1 narrows to the caller's own classes (the 'My Classes' default)", async () => {
+    // Super-admin: no scope clause, so the own-classes membership is $1.
+    role = "super-admin";
+    await GET(req("all=1&mine=1"));
+    expect(queries[0].sql).toContain("FROM class_members mcm");
+    expect(queries[0].sql).toContain("mc.teacher_id = $1");
+    expect(queries[0].values).toEqual(["u-1"]);
+    // Teacher: scope clause first, own-classes membership second.
+    role = "teacher";
+    await GET(req("all=1&mine=1"));
+    expect(queries[1].sql).toContain("mc.teacher_id = $2");
+    expect(queries[1].values).toEqual(["u-1", "u-1"]);
+  });
 });
