@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect, vi, beforeAll } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import fs from "fs";
 
 // Real-Postgres tests. They need the in-process engine, which is deliberately
@@ -39,6 +39,7 @@ vi.mock("@/lib/db", () => {
 vi.mock("@/lib/users", () => ({ getSchoolForUser: async () => "school-1" }));
 
 import * as lib from "@/lib/language-check-learn";
+import * as essays from "@/lib/language-check";
 import type { LearnLesson } from "@/utils/languageCheckLearn";
 
 const ESSAY_TEXT = "She go to school. He have a book. I goed home.";
@@ -53,13 +54,15 @@ beforeAll(async () => {
   await db.exec(`
     CREATE FUNCTION update_updated_at_column() RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$ LANGUAGE plpgsql;
     CREATE ROLE reading_user;
-    CREATE TABLE users (id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT, email TEXT UNIQUE, school_id TEXT);
+    CREATE TABLE users (id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT, email TEXT UNIQUE, school_id TEXT, role TEXT, banned BOOLEAN DEFAULT FALSE);
     CREATE TABLE classes (id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT, teacher_id TEXT, school_id TEXT);
     CREATE TABLE class_members (class_id TEXT, student_id TEXT, PRIMARY KEY (class_id, student_id));
     CREATE TABLE language_check_essays (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      uploaded_by TEXT REFERENCES users(id) ON DELETE SET NULL,
       title TEXT NOT NULL DEFAULT '', images JSONB NOT NULL DEFAULT '[]', transcript TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'draft', checked_text TEXT NOT NULL DEFAULT '', corrections JSONB NOT NULL DEFAULT '[]',
+      ocr_model TEXT NOT NULL DEFAULT '', check_model TEXT NOT NULL DEFAULT '', dropped_count INTEGER NOT NULL DEFAULT 0,
       created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW());
   `);
   await db.exec(fs.readFileSync("scripts/add-language-check-learn.sql", "utf8"));
@@ -317,5 +320,82 @@ describe.skipIf(pgliteMissing)("learn persistence against real Postgres", () => 
     // another user gets nothing
     expect(await lib.getSessionForReview("s1", id)).toBeNull();
     await lib.deleteSession("s2", id);
+  });
+});
+
+describe.skipIf(pgliteMissing)("teacher-uploaded essays (real SQL)", () => {
+  // Isolated fixtures (own school + class) so the counts asserted by the
+  // suite above never see them; everything is removed again in afterAll.
+  beforeAll(async () => {
+    if (pgliteMissing) return;
+    await db.query(
+      `INSERT INTO users (id,name,email,school_id,role,banned) VALUES
+        ('t9','T9','t9@x','school-9','teacher',false),
+        ('s9','Nina','s9@x','school-9','student',false),
+        ('s8','Out','s8@x','school-9','student',false)`,
+    );
+    await db.query(`INSERT INTO classes (id,name,teacher_id) VALUES ('c9','5C','t9'),('c8','5D','t2')`);
+    await db.query(`INSERT INTO class_members VALUES ('c9','s9'),('c8','s8')`);
+  });
+
+  afterAll(async () => {
+    if (pgliteMissing) return;
+    await db.query(`DELETE FROM language_check_learn_events WHERE user_id = 's9'`);
+    await db.query(`DELETE FROM language_check_learn_sessions WHERE user_id = 's9'`);
+    await db.query(`DELETE FROM language_check_essays WHERE user_id = 's9'`);
+    await db.query(`DELETE FROM classes WHERE id IN ('c9','c8')`);
+    await db.query(`DELETE FROM users WHERE id IN ('t9','s9','s8')`);
+  });
+
+  it("scope check admits own-class students, not colleagues' or banned ones", async () => {
+    const scope = await essays.resolveStaffScope("teacher", "t9");
+    expect(scope).toEqual({ kind: "teacher", teacherId: "t9" });
+    expect(await essays.canUploadForStudent(scope!, "s9")).toBe(true);
+    expect(await essays.canUploadForStudent(scope!, "s8")).toBe(false); // other teacher's class
+    expect(await essays.canUploadForStudent(scope!, "t2")).toBe(false); // not a student
+  });
+
+  it("essay is owned by the student; uploader keeps access; only the student learns from it", async () => {
+    const essay = await essays.createEssay({
+      userId: "s9",
+      uploadedBy: "t9",
+      title: "",
+      images: ["data:image/jpeg;base64,AAAA"],
+      ocrModel: "m",
+    });
+    expect(essay.ownerId).toBe("s9");
+    expect(essay.ownerName).toBe("Nina");
+
+    // Lists: the student sees it as their own; the teacher sees it attributed.
+    expect((await essays.listEssays("s9")).some((e) => e.id === essay.id && e.ownerId === "s9")).toBe(true);
+    const teacherRow = (await essays.listEssays("t9")).find((e) => e.id === essay.id);
+    expect(teacherRow?.ownerId).toBe("s9");
+    expect(teacherRow?.ownerName).toBe("Nina");
+    expect((await essays.listEssays("t2")).some((e) => e.id === essay.id)).toBe(false);
+
+    // Access: uploader can open/patch, an unrelated teacher cannot.
+    expect((await essays.getEssay("t9", essay.id))?.ownerId).toBe("s9");
+    expect(await essays.updateEssay("t9", essay.id, { transcript: ESSAY_TEXT, status: "transcribed" })).toBe(true);
+    expect(await essays.updateEssay("t2", essay.id, { title: "no" })).toBe(false);
+
+    // The uploader completes the check…
+    expect(
+      await essays.updateEssay("t9", essay.id, {
+        status: "checked",
+        checkedText: ESSAY_TEXT,
+        corrections: corrections as unknown as LanguageCheckError[],
+      }),
+    ).toBe(true);
+
+    // …and the STUDENT can learn from their own writing, the teacher cannot.
+    const started = await lib.startSession("s9", { essayId: essay.id, categories: ["tense"], age: 15 });
+    expect(started.ok).toBe(true);
+    expect(await lib.startSession("t9", { essayId: essay.id, categories: ["tense"], age: 15 })).toMatchObject({
+      ok: false,
+      reason: "essay-not-found",
+    });
+
+    // Either side may delete (owner or uploader).
+    expect(await essays.deleteEssay("t9", essay.id)).toBe(true);
   });
 });

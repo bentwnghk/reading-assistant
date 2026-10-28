@@ -4696,6 +4696,10 @@
           "name": "Storage & Privacy",
           "desc": "Original scans are removed {{days}} days after upload. Checked essays keep their transcript and corrections so you can review them anytime."
         },
+        "uploadForStudent": {
+          "name": "Checking for a Student",
+          "desc": "Teachers can pick a student above the upload zone and scan that student's handwritten essay for them. The checked essay lands in the student's \"My essays\" list exactly as if they had uploaded it, ready for them to learn from the corrections."
+        },
         "staff": {
           "name": "Staff View",
           "desc": "Switch between \"My work\" and \"My students\". Under \"My students\" the two sections become \"Student essays\" and \"Student learning\", sharing one class and student filter — teachers see their classes, admins their school."
@@ -4782,7 +4786,11 @@
       "camera": "Take photo",
       "preparing": "Preparing your pages…",
       "unsupported": "Please upload an image or a PDF file.",
-      "tooManyPages": "Too many pages. Please upload at most {{max}} pages per essay."
+      "tooManyPages": "Too many pages. Please upload at most {{max}} pages per essay.",
+      "checkFor": "Check an essay for",
+      "forMyself": "Myself",
+      "dropFor": "Drop {{name}}'s handwritten essay here, or paste a photo",
+      "forStudentHint": "It will be saved to {{name}}'s essays, where they can review the corrections and learn from them."
     },
     "staging": {
       "title": "Pages to transcribe ({{count}}/{{max}})",
@@ -4832,6 +4840,7 @@
       "title": "Your essays",
       "empty": "No essays yet. Upload your first one above.",
       "untitled": "Untitled essay",
+      "for": "For {{name}}",
       "pages_one": "{{count}} scanned page",
       "pages_other": "{{count}} scanned pages",
       "errors_one": "{{count}} comment",

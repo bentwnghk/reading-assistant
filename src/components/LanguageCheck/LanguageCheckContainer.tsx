@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -13,6 +14,7 @@ import {
   ScanText,
   SpellCheck,
   Square,
+  UserCog,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/utils/style";
@@ -37,6 +39,7 @@ import PageStaging, { type StagedPage } from "@/components/LanguageCheck/PageSta
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
+import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
 import {
   ExplanationLanguageToggle,
   useCategoryLabel,
@@ -82,6 +85,7 @@ async function preparePage(dataUrl: string): Promise<string> {
 
 export default function LanguageCheckContainer() {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const { transcribe } = useLanguageCheck();
   const active = useLanguageCheckStore((s) => s.active);
   const activeLoading = useLanguageCheckStore((s) => s.activeLoading);
@@ -91,9 +95,42 @@ export default function LanguageCheckContainer() {
   const [preparing, setPreparing] = useState(false);
   const [staged, setStaged] = useState<StagedPage[]>([]);
 
+  // Teacher upload: which learner this scan is for (null = my own essay).
+  // Component-local is fine — it only matters while staging pages here.
+  const role = session?.user?.role;
+  const isStaff = role === "teacher" || role === "admin" || role === "super-admin";
+  const [forStudentId, setForStudentId] = useState<string | null>(null);
+  const [students, setStudents] = useState<LanguageCheckStaffUser[]>([]);
+  const [studentsLoading, setStudentsLoading] = useState(false);
+
   useEffect(() => {
     loadList().catch((e) => toast.error(parseError(e)));
   }, [loadList]);
+
+  // Every student the teacher may scan for (not just those with essays yet —
+  // the whole point is uploading a first essay for them).
+  useEffect(() => {
+    if (!isStaff) return;
+    let cancelled = false;
+    setStudentsLoading(true);
+    void (async () => {
+      try {
+        const res = await fetch("/api/language-check/staff/students?all=1");
+        if (!res.ok) return;
+        const body = (await res.json()) as { users: LanguageCheckStaffUser[] };
+        if (!cancelled) setStudents(body.users);
+      } catch {
+        // Non-fatal: the picker simply shows no options.
+      } finally {
+        if (!cancelled) setStudentsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isStaff]);
+
+  const forStudent = students.find((s) => s.id === forStudentId) ?? null;
 
   // Pages are staged (and optionally cropped) before anything is uploaded, so
   // a multi-page essay can be built from several camera shots. Ephemeral UI
@@ -151,8 +188,12 @@ export default function LanguageCheckContainer() {
     try {
       const pages: string[] = [];
       for (const page of staged) pages.push(await preparePage(page.src));
-      const essay = await create(pages, useSettingStore.getState().ocrModel);
+      const studentId = forStudentId ?? undefined;
+      const essay = await create(pages, useSettingStore.getState().ocrModel, studentId);
       setStaged([]);
+      // Back to "Myself" so the teacher's next own upload can never be
+      // silently attributed to the previous student.
+      setForStudentId(null);
       // Fire and forget: progress/state live in the store, so it survives navigation.
       void transcribe(essay.id);
     } catch (error) {
@@ -180,12 +221,43 @@ export default function LanguageCheckContainer() {
   }
 
   if (!active) {
+    // Staff picker shown inside the upload card (above the drop prompt AND
+    // the staging tray, so the attribution stays visible while cropping).
+    const studentPicker = isStaff ? (
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <UserCog className="h-4 w-4" />
+          {t("languageCheck.upload.checkFor")}
+        </span>
+        <div className="w-full sm:w-64">
+          <StudentCombobox
+            users={students}
+            value={forStudentId}
+            onChange={setForStudentId}
+            allowMine
+            mineLabel={t("languageCheck.upload.forMyself")}
+            emptyLabel={t("languageCheck.staff.noStudents")}
+            searchPlaceholder={t("languageCheck.staff.searchStudents")}
+            loading={studentsLoading}
+            loadingLabel={t("languageCheck.staff.loadingStudents")}
+          />
+        </div>
+        {forStudent && (
+          <p className="w-full text-xs text-muted-foreground sm:w-auto sm:flex-1">
+            {t("languageCheck.upload.forStudentHint", { name: forStudent.name })}
+          </p>
+        )}
+      </div>
+    ) : undefined;
+
     return (
       <LanguageCheckHome
         essayListProps={{
           preparing,
           onFiles: handleFiles,
           onOpen: handleOpen,
+          studentPicker,
+          forStudentName: forStudent?.name ?? null,
           staging:
             staged.length > 0 ? (
               <PageStaging
@@ -208,6 +280,7 @@ export default function LanguageCheckContainer() {
 
 function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const categoryLabel = useCategoryLabel();
   const { runCheck } = useLanguageCheck();
   const close = useLanguageCheckStore((s) => s.close);
@@ -225,6 +298,11 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   const busyHere = generatingId === essay.id;
   const checkRunning = busyHere && !!generating["language-check"];
   const ocrRunning = busyHere && !!generating["ocr"];
+
+  // Teacher-uploaded essay: the viewer is the uploader, not the owner. They
+  // can still review/re-check/export, but learning sessions are personal —
+  // they are built from and recorded against the owner (the student).
+  const ownedByViewer = !essay.ownerId || essay.ownerId === session?.user?.id;
 
   // Past the retention window the essay becomes a read-only archive: the
   // scans are purged server-side, so scan/edit/recheck are disabled while
@@ -322,6 +400,16 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
             className="h-9 border-transparent bg-transparent text-base font-semibold shadow-none hover:border-input focus-visible:border-input"
           />
         </div>
+        {!ownedByViewer && (
+          <span
+            className="shrink-0 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+            title={t("languageCheck.upload.forStudentHint", {
+              name: essay.ownerName,
+            })}
+          >
+            {t("languageCheck.list.for", { name: essay.ownerName })}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -386,19 +474,21 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
                 {t("languageCheck.stop")}
               </Button>
             )}
-            <Button
-              size="sm"
-              disabled={essay.corrections.length === 0}
-              title={
-                essay.corrections.length === 0
-                  ? t("languageCheck.learn.noMistakes")
-                  : undefined
-              }
-              onClick={() => setLearnOpen(true)}
-            >
-              <GraduationCap className="mr-1.5 h-4 w-4" />
-              {t("languageCheck.learn.button")}
-            </Button>
+            {ownedByViewer && (
+              <Button
+                size="sm"
+                disabled={essay.corrections.length === 0}
+                title={
+                  essay.corrections.length === 0
+                    ? t("languageCheck.learn.noMistakes")
+                    : undefined
+                }
+                onClick={() => setLearnOpen(true)}
+              >
+                <GraduationCap className="mr-1.5 h-4 w-4" />
+                {t("languageCheck.learn.button")}
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"

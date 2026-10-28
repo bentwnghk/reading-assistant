@@ -866,6 +866,9 @@ CREATE INDEX idx_user_trials_expires ON user_trials(expires_at);
 CREATE TABLE language_check_essays (
   id            TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  -- Staff uploader for teacher-uploaded essays (NULL = self-uploaded).
+  -- user_id remains the student owner so the essay behaves as their own.
+  uploaded_by   TEXT REFERENCES users(id) ON DELETE SET NULL,
   title         TEXT NOT NULL DEFAULT '',
   images        JSONB NOT NULL DEFAULT '[]'::jsonb,
   transcript    TEXT NOT NULL DEFAULT '',
@@ -882,6 +885,10 @@ CREATE TABLE language_check_essays (
 
 CREATE INDEX idx_language_check_essays_user
   ON language_check_essays(user_id, updated_at DESC);
+
+CREATE INDEX idx_language_check_essays_uploaded_by
+  ON language_check_essays(uploaded_by, updated_at DESC)
+  WHERE uploaded_by IS NOT NULL;
 
 CREATE TRIGGER update_language_check_essays_updated_at
     BEFORE UPDATE ON language_check_essays

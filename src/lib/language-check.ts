@@ -21,6 +21,8 @@ function mapSummary(row: Record<string, unknown>): LanguageCheckEssaySummary {
     status: row.status as LanguageCheckEssaySummary["status"],
     pageCount: Number(row.page_count) || 0,
     errorCount: Number(row.error_count) || 0,
+    ownerId: (row.owner_id as string) || (row.user_id as string) || "",
+    ownerName: (row.owner_name as string) || "",
     createdAt: toMs(row.created_at),
     updatedAt: toMs(row.updated_at),
   }
@@ -38,6 +40,8 @@ function mapEssay(row: Record<string, unknown>): LanguageCheckEssay {
     ocrModel: (row.ocr_model as string) || "",
     checkModel: (row.check_model as string) || "",
     droppedCount: Number(row.dropped_count) || 0,
+    ownerId: (row.owner_id as string) || (row.user_id as string) || "",
+    ownerName: (row.owner_name as string) || "",
     createdAt: toMs(row.created_at),
     updatedAt: toMs(row.updated_at),
   }
@@ -70,18 +74,26 @@ export async function sweepExpiredEssays(): Promise<void> {
   )
 }
 
-/** Lightweight list: never selects images/transcript/corrections payloads. */
+/**
+ * Lightweight list: never selects images/transcript/corrections payloads.
+ * Includes essays the caller uploaded on a student's behalf (uploaded_by) so
+ * staff can re-open what they scanned — rows carry the owner's id/name so the
+ * UI can attribute them ("For <student>"). For the student owner nothing
+ * changes: ownerId is themselves, so the row renders exactly like their own.
+ */
 export async function listEssays(
   userId: string,
 ): Promise<LanguageCheckEssaySummary[]> {
   await sweepExpiredEssays()
   const { rows } = await getPool().query(
-    `SELECT id, title, status, created_at, updated_at,
-            jsonb_array_length(images) AS page_count,
-            jsonb_array_length(corrections) AS error_count
-     FROM language_check_essays
-     WHERE user_id = $1
-     ORDER BY updated_at DESC
+    `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
+            e.user_id AS owner_id, u.name AS owner_name,
+            jsonb_array_length(e.images) AS page_count,
+            jsonb_array_length(e.corrections) AS error_count
+     FROM language_check_essays e
+     LEFT JOIN users u ON u.id = e.user_id
+     WHERE e.user_id = $1 OR e.uploaded_by = $1
+     ORDER BY e.updated_at DESC
      LIMIT $2`,
     [userId, LANGUAGE_CHECK_MAX_ESSAYS],
   )
@@ -94,10 +106,11 @@ export async function getEssay(
 ): Promise<LanguageCheckEssay | null> {
   // Retention on direct access too (the sweep may not have run, e.g. for an
   // id that only lives in the client-side cache): never-checked essays are
-  // deleted, checked ones only have their scans purged.
+  // deleted, checked ones only have their scans purged. The caller may be
+  // the owner OR the staff uploader — both see the same essay.
   await getPool().query(
     `DELETE FROM language_check_essays
-     WHERE id = $1 AND user_id = $2
+     WHERE id = $1 AND (user_id = $2 OR uploaded_by = $2)
        AND created_at < now() - make_interval(days => $3)
        AND status <> 'checked'`,
     [id, userId, LANGUAGE_CHECK_RETENTION_DAYS],
@@ -105,13 +118,16 @@ export async function getEssay(
   await getPool().query(
     `UPDATE language_check_essays
      SET images = '[]'::jsonb
-     WHERE id = $1 AND user_id = $2
+     WHERE id = $1 AND (user_id = $2 OR uploaded_by = $2)
        AND created_at < now() - make_interval(days => $3)
        AND jsonb_array_length(images) > 0`,
     [id, userId, LANGUAGE_CHECK_RETENTION_DAYS],
   )
   const { rows } = await getPool().query(
-    `SELECT * FROM language_check_essays WHERE id = $1 AND user_id = $2`,
+    `SELECT e.*, e.user_id AS owner_id, u.name AS owner_name
+     FROM language_check_essays e
+     LEFT JOIN users u ON u.id = e.user_id
+     WHERE e.id = $1 AND (e.user_id = $2 OR e.uploaded_by = $2)`,
     [id, userId],
   )
   return rows[0] ? mapEssay(rows[0]) : null
@@ -127,14 +143,31 @@ export async function countEssays(userId: string): Promise<number> {
 }
 
 export async function createEssay(
-  userId: string,
-  data: { title: string; images: string[]; ocrModel?: string },
+  data: {
+    /** The essay's owner. For teacher uploads this is the STUDENT. */
+    userId: string
+    /** Staff member who scanned the essay on the owner's behalf. */
+    uploadedBy?: string
+    title: string
+    images: string[]
+    ocrModel?: string
+  },
 ): Promise<LanguageCheckEssay> {
   const { rows } = await getPool().query(
-    `INSERT INTO language_check_essays (user_id, title, images, ocr_model)
-     VALUES ($1, $2, $3::jsonb, $4)
-     RETURNING *`,
-    [userId, data.title, JSON.stringify(data.images), data.ocrModel ?? ""],
+    `WITH ins AS (
+       INSERT INTO language_check_essays (user_id, uploaded_by, title, images, ocr_model)
+       VALUES ($1, $2, $3, $4::jsonb, $5)
+       RETURNING *
+     )
+     SELECT ins.*, ins.user_id AS owner_id, u.name AS owner_name
+     FROM ins LEFT JOIN users u ON u.id = ins.user_id`,
+    [
+      data.userId,
+      data.uploadedBy ?? null,
+      data.title,
+      JSON.stringify(data.images),
+      data.ocrModel ?? "",
+    ],
   )
   return mapEssay(rows[0])
 }
@@ -178,7 +211,8 @@ export async function updateEssay(
   values.push(id, userId)
   const result = await getPool().query(
     `UPDATE language_check_essays SET ${sets.join(", ")}
-     WHERE id = $${values.length - 1} AND user_id = $${values.length}`,
+     WHERE id = $${values.length - 1}
+       AND (user_id = $${values.length} OR uploaded_by = $${values.length})`,
     values,
   )
   return (result.rowCount ?? 0) > 0
@@ -189,7 +223,8 @@ export async function deleteEssay(
   id: string,
 ): Promise<boolean> {
   const result = await getPool().query(
-    `DELETE FROM language_check_essays WHERE id = $1 AND user_id = $2`,
+    `DELETE FROM language_check_essays
+     WHERE id = $1 AND (user_id = $2 OR uploaded_by = $2)`,
     [id, userId],
   )
   return (result.rowCount ?? 0) > 0
@@ -204,6 +239,40 @@ export type LanguageCheckStaffScope =
 
 export function isStaffRole(role: string | null | undefined): boolean {
   return role === "teacher" || role === "admin" || role === "super-admin"
+}
+
+/**
+ * May this staff member scan an essay on the student's behalf? Same scope as
+ * the staff views (teacher → students in their classes, admin → school,
+ * super-admin → everyone), restricted to current, non-banned student
+ * accounts — the target must be a learner, not a colleague.
+ */
+export async function canUploadForStudent(
+  scope: LanguageCheckStaffScope,
+  studentId: string,
+): Promise<boolean> {
+  const clauses = [`u.role = 'student'`, `NOT u.banned`]
+  const params: unknown[] = []
+  if (scope.kind === "teacher") {
+    params.push(scope.teacherId)
+    clauses.push(
+      `EXISTS (
+        SELECT 1 FROM class_members ucm
+        JOIN classes uc ON uc.id = ucm.class_id
+        WHERE ucm.student_id = u.id AND uc.teacher_id = $${params.length}
+      )`,
+    )
+  } else if (scope.kind === "school") {
+    params.push(scope.schoolId)
+    clauses.push(`u.school_id = $${params.length}`)
+  }
+  params.push(studentId)
+  const { rowCount } = await getPool().query(
+    `SELECT 1 FROM users u
+     WHERE u.id = $${params.length} AND ${clauses.join(" AND ")}`,
+    params,
+  )
+  return (rowCount ?? 0) > 0
 }
 
 /**

@@ -1140,6 +1140,14 @@ interface LanguageCheckEssaySummary {
   status: "draft" | "transcribed" | "checked";
   pageCount: number;
   errorCount: number;
+  /**
+   * The essay's owner (the learner it belongs to). For teacher-uploaded
+   * essays this is the student, not the uploader — the uploader is not on
+   * the wire (students must see the essay exactly as if they uploaded it).
+   */
+  ownerId: string;
+  /** Owner display name ("" if the user row is gone). */
+  ownerName: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -1158,6 +1166,10 @@ interface LanguageCheckEssay {
   checkModel: string;
   /** Errors the model reported that could not be anchored in the text. */
   droppedCount: number;
+  /** Owner (learner) of the essay — equals the caller for self-uploads. */
+  ownerId: string;
+  /** Owner display name ("" if the user row is gone). */
+  ownerName: string;
   createdAt: number;
   updatedAt: number;
 }

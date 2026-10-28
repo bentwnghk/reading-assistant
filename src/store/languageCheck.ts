@@ -50,7 +50,15 @@ interface LanguageCheckActions {
   setGeneratingEssayId: (id: string | null) => void;
   setProgress: (progress: LanguageCheckProgress | null) => void;
   loadList: (force?: boolean) => Promise<void>;
-  create: (images: string[], ocrModel: string) => Promise<LanguageCheckEssay>;
+  /**
+   * Create an essay from staged pages. `studentId` (staff only) uploads on
+   * the student's behalf — the returned essay is owned by them.
+   */
+  create: (
+    images: string[],
+    ocrModel: string,
+    studentId?: string,
+  ) => Promise<LanguageCheckEssay>;
   open: (id: string) => Promise<void>;
   close: () => void;
   /** In-memory edit of the open essay (no network). */
@@ -79,6 +87,8 @@ function toSummary(e: LanguageCheckEssay): LanguageCheckEssaySummary {
     status: e.status,
     pageCount: e.images.length,
     errorCount: e.corrections.length,
+    ownerId: e.ownerId,
+    ownerName: e.ownerName,
     createdAt: e.createdAt,
     updatedAt: e.updatedAt,
   };
@@ -173,11 +183,11 @@ export const useLanguageCheckStore = create(
         }
       },
 
-      create: async (images, ocrModel) => {
+      create: async (images, ocrModel, studentId) => {
         const res = await fetch(BASE, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ images, ocrModel }),
+          body: JSON.stringify({ images, ocrModel, studentId }),
         });
         if (!res.ok) throw new Error(await readError(res));
         const essay = (await res.json()) as LanguageCheckEssay;

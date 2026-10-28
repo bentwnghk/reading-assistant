@@ -413,7 +413,12 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                       category filter and the cross-linked correction cards.
                       ResultsView never reads `images`. */}
                   <ResultsView
-                    essay={{ ...detail, images: [] }}
+                    essay={{
+                      ...detail,
+                      ownerId: detail.userId,
+                      ownerName: detail.userName,
+                      images: [],
+                    }}
                     language={language}
                   />
                 </div>

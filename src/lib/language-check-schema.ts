@@ -32,6 +32,11 @@ export const createSchema = z.object({
   title: z.string().max(200).optional().default(""),
   images: z.array(imageSchema).min(1).max(LANGUAGE_CHECK_MAX_PAGES),
   ocrModel: z.string().max(100).optional().default(""),
+  /**
+   * Staff-only: scan this essay on a student's behalf. The essay is created
+   * with user_id = studentId (the student owns it) and uploaded_by = caller.
+   */
+  studentId: z.string().min(1).max(64).optional(),
 })
 
 export const patchSchema = z.object({

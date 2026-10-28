@@ -17,6 +17,7 @@ import {
   Route,
   ShieldCheck,
   SpellCheck,
+  UserCog,
   Users,
 } from "lucide-react";
 import {
@@ -138,6 +139,14 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
               name={t("languageCheck.help.overview.statuses.name")}
               desc={t("languageCheck.help.overview.statuses.desc")}
             />
+            {isStaff && (
+              <HelpRow
+                icon={UserCog}
+                tone="bg-rose-500/10 text-rose-500"
+                name={t("languageCheck.help.overview.uploadForStudent.name")}
+                desc={t("languageCheck.help.overview.uploadForStudent.desc")}
+              />
+            )}
             <HelpRow
               icon={Clock}
               tone="bg-orange-500/10 text-orange-500"

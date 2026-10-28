@@ -1143,6 +1143,49 @@ export async function listStaffStudents(
   }))
 }
 
+/**
+ * Every student a staff member may scan an essay for (the "Check an essay
+ * for" picker) — not limited to learners who already have essays/learning
+ * history, because the whole point is uploading the FIRST one for them.
+ * Same scope semantics as canUploadForStudent: teacher → own classes,
+ * admin → school, super-admin → everyone; current, non-banned students only.
+ */
+export async function listAllStaffStudents(
+  scope: LanguageCheckStaffScope,
+  opts: { classId?: string },
+): Promise<{ id: string; name: string; email: string }[]> {
+  const p = new Params()
+  const clauses: string[] = [`u.role = 'student'`, `NOT u.banned`]
+  if (scope.kind === "teacher") {
+    clauses.push(
+      `EXISTS (
+        SELECT 1 FROM class_members acm
+        JOIN classes ac ON ac.id = acm.class_id
+        WHERE acm.student_id = u.id AND ac.teacher_id = ${p.add(scope.teacherId)}
+      )`,
+    )
+  } else if (scope.kind === "school") {
+    clauses.push(`u.school_id = ${p.add(scope.schoolId)}`)
+  }
+  if (opts.classId) {
+    clauses.push(
+      `u.id IN (SELECT student_id FROM class_members WHERE class_id = ${p.add(opts.classId)})`,
+    )
+  }
+  const res = await getPool().query(
+    `SELECT u.id, u.name, u.email FROM users u
+     WHERE ${clauses.join(" AND ")}
+     ORDER BY u.name, u.email
+     LIMIT 1000`,
+    p.values,
+  )
+  return res.rows.map((r: Row) => ({
+    id: r.id as string,
+    name: (r.name as string) || (r.email as string) || "",
+    email: (r.email as string) || "",
+  }))
+}
+
 // ─── Activity feed ───────────────────────────────────────────────────────────
 
 export async function listEvents(

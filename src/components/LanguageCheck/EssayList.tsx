@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
@@ -8,6 +9,7 @@ import {
   ImagePlus,
   LoaderCircle,
   Trash2,
+  UserCog,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -38,11 +40,26 @@ interface EssayListProps {
   onOpen: (id: string) => void;
   /** Staging tray (crop/reorder pages); replaces the empty drop prompt when present. */
   staging?: ReactNode;
+  /**
+   * Staff-only "Check an essay for <student>" selector rendered at the top of
+   * the upload card (above the drop prompt AND the staging tray).
+   */
+  studentPicker?: ReactNode;
+  /** Student display name when a staff upload is targeted; null = my own. */
+  forStudentName?: string | null;
 }
 
 /** Upload zone + saved essays (the "My essays" tab). */
-export default function EssayList({ preparing, onFiles, onOpen, staging }: EssayListProps) {
+export default function EssayList({
+  preparing,
+  onFiles,
+  onOpen,
+  staging,
+  studentPicker,
+  forStudentName,
+}: EssayListProps) {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const essays = useLanguageCheckStore((s) => s.essays);
   const listLoading = useLanguageCheckStore((s) => s.listLoading);
   const listLoaded = useLanguageCheckStore((s) => s.listLoaded);
@@ -120,6 +137,9 @@ export default function EssayList({ preparing, onFiles, onOpen, staging }: Essay
           dragging ? "border-primary bg-primary/5" : "border-border bg-card",
         )}
       >
+        {studentPicker && (
+          <div className="mb-4 border-b pb-3">{studentPicker}</div>
+        )}
         {staging ? (
           <div className="flex flex-col items-center gap-3 text-center">{staging}</div>
         ) : preparing ? (
@@ -135,10 +155,18 @@ export default function EssayList({ preparing, onFiles, onOpen, staging }: Essay
             )}
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <ImagePlus className="h-5 w-5 text-primary" />
+              {forStudentName ? (
+                <UserCog className="h-5 w-5 text-primary" />
+              ) : (
+                <ImagePlus className="h-5 w-5 text-primary" />
+              )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{t("languageCheck.upload.drop")}</p>
+              <p className="text-sm font-medium">
+                {forStudentName
+                  ? t("languageCheck.upload.dropFor", { name: forStudentName })
+                  : t("languageCheck.upload.drop")}
+              </p>
               <p className="mt-0.5 max-w-xl text-xs text-muted-foreground">
                 {t("languageCheck.upload.hint", { max: LANGUAGE_CHECK_MAX_PAGES })}
               </p>
@@ -194,6 +222,16 @@ export default function EssayList({ preparing, onFiles, onOpen, staging }: Essay
                         ` · ${t("languageCheck.list.errors", { count: essay.errorCount })}`}
                     </span>
                   </span>
+                  {essay.ownerId && essay.ownerId !== session?.user?.id && (
+                    <span
+                      className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"
+                      title={t("languageCheck.upload.forStudentHint", {
+                        name: essay.ownerName,
+                      })}
+                    >
+                      {t("languageCheck.list.for", { name: essay.ownerName })}
+                    </span>
+                  )}
                   <span
                     className={cn(
                       "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",

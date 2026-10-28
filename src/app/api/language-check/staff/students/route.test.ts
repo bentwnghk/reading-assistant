@@ -79,4 +79,22 @@ describe("staff students route", () => {
     expect(queries[0].sql).toContain("language_check_essays");
     expect(queries[0].sql).toContain("language_check_learn_events");
   });
+
+  it("all=1 lists every in-scope student, not just those with essays", async () => {
+    await GET(req("all=1"));
+    // The teacher-upload picker needs first-time learners too, so it reads
+    // the users table directly (current, non-banned students only).
+    expect(queries[0].sql).toContain("FROM users u");
+    expect(queries[0].sql).toContain("u.role = 'student'");
+    expect(queries[0].sql).toContain("NOT u.banned");
+    expect(queries[0].sql).not.toContain("language_check_essays");
+    expect(queries[0].sql).toContain("ac.teacher_id = $1");
+  });
+
+  it("all=1 narrows by class for every scope kind", async () => {
+    role = "super-admin";
+    await GET(req("all=1&classId=class-9"));
+    expect(queries[0].sql).toContain("class_id = $1");
+    expect(queries[0].values).toEqual(["class-9"]);
+  });
 });
