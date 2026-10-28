@@ -3,7 +3,7 @@ import { useState, type ComponentProps } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { GraduationCap, HelpCircle, SpellCheck } from "lucide-react";
+import { FileText, GraduationCap, HelpCircle, SpellCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EssayList from "@/components/LanguageCheck/EssayList";
 import HelpDialog from "@/components/LanguageCheck/HelpDialog";
@@ -117,6 +117,7 @@ export default function LanguageCheckHome({
                   : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
+              {x === "essays" && <FileText className="h-4 w-4" />}
               {x === "learning" && <GraduationCap className="h-4 w-4" />}
               {t(`languageCheck.page.sections.${scope}.${x}`)}
             </button>
