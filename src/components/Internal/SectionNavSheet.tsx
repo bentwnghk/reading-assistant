@@ -561,13 +561,16 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
           navSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Tighter padding + the compact wordmark buy the headroom that keeps
-            the show/hide button clear of the title at the narrow default and
-            minimum widths (default 232 / min 224). While the sidebar is
-            expanded this row is the ONLY place the brand and the toggle
-            appear — the header hides its duplicates — so the wordmark is a
-            home link here, taking over that role from the header brand. */}
-        <div className="flex items-start justify-between gap-1.5 px-3 pb-2 pt-[calc(env(safe-area-inset-top,0px)+var(--ios-status-bar-gap)+1rem)]">
+        {/* Same height as the header's content row (lg:h-14) with the same
+            safe-area top padding, so this row's bottom border lines up exactly
+            with the header's border-b instead of floating a few px off.
+            Horizontal clearance for the show/hide button comes from the compact
+            wordmark + px-3, keeping it clear at the narrow default/minimum
+            widths (default 232 / min 224). While the sidebar is expanded this
+            row is the ONLY place the brand and the toggle appear — the header
+            hides its duplicates — so the wordmark is a home link here, taking
+            over that role from the header brand. */}
+        <div className="flex items-center justify-between gap-1.5 px-3 shrink-0 pt-[calc(env(safe-area-inset-top,0px)+var(--ios-status-bar-gap))] h-[calc(env(safe-area-inset-top,0px)+var(--ios-status-bar-gap)+3.5rem)]">
           <h2 className="text-left text-lg font-semibold flex items-center gap-1.5">
             <Link
               href="/"
