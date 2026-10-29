@@ -1,4 +1,10 @@
 "use client";
+import {
+  useEffect,
+  useRef,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter, usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
@@ -22,7 +28,7 @@ import {
   Upload,
   User,
   Waypoints,
-  X,
+  PanelLeftClose,
   type LucideIcon,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -30,7 +36,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useReadingStore } from "@/store/reading";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { useAssignmentsStore } from "@/store/assignments";
-import { useGlobalStore } from "@/store/global";
+import {
+  clampNavSidebarWidth,
+  NAV_SIDEBAR_DEFAULT_WIDTH,
+  NAV_SIDEBAR_MAX_WIDTH,
+  NAV_SIDEBAR_MIN_WIDTH,
+  useGlobalStore,
+} from "@/store/global";
 import { grammarGameBestScore } from "@/utils/sessionMetrics";
 import { cn } from "@/utils/style";
 
@@ -229,7 +241,100 @@ const pageLinks: PageLink[] = [
   },
 ];
 
-function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
+/** The "Mr.🆖 ProReader" wordmark shared by the drawer title and the
+ *  desktop sidebar header. */
+function BrandText() {
+  return (
+    <>
+      <span className="text-blue-600 dark:text-blue-400">Mr.</span>
+      <span className="text-2xl leading-none">🆖</span>
+      <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
+        ProReader
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
+      </span>
+    </>
+  );
+}
+
+/**
+ * Drag handle on the right edge of the desktop sidebar. Pointer capture keeps
+ * the drag alive even when the pointer races ahead of the 6px strip; arrow
+ * keys nudge the width for keyboard users; double-click resets to default.
+ */
+function SidebarResizeHandle({
+  width,
+  onWidthChange,
+}: {
+  width: number;
+  onWidthChange: (width: number) => void;
+}) {
+  const { t } = useTranslation();
+  const dragStart = useRef<{ pointerId: number; startX: number; startWidth: number } | null>(null);
+
+  function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    dragStart.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startWidth: width,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    // Global cursor + text-selection lock while dragging (globals.css).
+    document.documentElement.classList.add("nav-sidebar-resizing");
+  }
+
+  function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const start = dragStart.current;
+    if (!start) return;
+    onWidthChange(clampNavSidebarWidth(start.startWidth + event.clientX - start.startX));
+  }
+
+  function handlePointerEnd(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!dragStart.current) return;
+    dragStart.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    document.documentElement.classList.remove("nav-sidebar-resizing");
+  }
+
+  function handleKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
+    // 16px per key press — coarse enough to feel responsive, fine enough
+    // to reach every width between the clamps.
+    const step = event.key === "ArrowLeft" ? -16 : event.key === "ArrowRight" ? 16 : 0;
+    if (step === 0) return;
+    event.preventDefault();
+    onWidthChange(clampNavSidebarWidth(width + step));
+  }
+
+  return (
+    <div
+      role="separator"
+      aria-orientation="vertical"
+      aria-label={t("toc.resizeSidebar")}
+      aria-valuenow={width}
+      aria-valuemin={NAV_SIDEBAR_MIN_WIDTH}
+      aria-valuemax={NAV_SIDEBAR_MAX_WIDTH}
+      tabIndex={0}
+      title={t("toc.resizeSidebar")}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+      onKeyDown={handleKeyDown}
+      onDoubleClick={() => onWidthChange(NAV_SIDEBAR_DEFAULT_WIDTH)}
+      className="absolute inset-y-0 right-0 z-10 w-1.5 cursor-col-resize touch-none select-none bg-transparent transition-colors hover:bg-primary/30 focus-visible:outline-none focus-visible:bg-primary/40 active:bg-primary/50"
+    />
+  );
+}
+
+/**
+ * The nav entries themselves (reading-workflow sections, tutor chat, page
+ * links). Shared verbatim by the mobile drawer and the desktop sidebar so
+ * the two never drift. `onNavigate` fires after an entry is activated —
+ * the drawer closes itself, the desktop sidebar stays put so it keeps
+ * working side by side with the page content.
+ */
+function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
@@ -260,7 +365,7 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
       // ?goto= param (handled in page.tsx after the store is restored).
       router.push(`/?goto=${id}`);
     }
-    onOpenChange(false);
+    onNavigate?.();
   }
 
   function handleTutorClick() {
@@ -272,18 +377,18 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
       router.push("/");
     }
     setOpenTutorChat(true);
-    onOpenChange(false);
+    onNavigate?.();
   }
 
   function handlePageLinkClick(page: PageLink) {
     if (page.openDashboard) {
       setOpenDashboard(true);
-      onOpenChange(false);
+      onNavigate?.();
       return;
     }
     if (page.openTeacherDashboard) {
       setOpenTeacherDashboard(true);
-      onOpenChange(false);
+      onNavigate?.();
       return;
     }
     if (pathname !== page.href) {
@@ -291,130 +396,217 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
     } else {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    onOpenChange(false);
+    onNavigate?.();
   }
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content
-          aria-describedby={undefined}
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 flex h-full w-72 max-w-[85vw] flex-col border-r bg-background shadow-lg duration-200",
-            "data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left"
-          )}
-        >
-          <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
-            <div>
-              <DialogPrimitive.Title className="text-left text-xl font-semibold flex items-center gap-1.5">
-                <span className="text-blue-600 dark:text-blue-400">Mr.</span>
-                <span className="text-2xl leading-none">🆖</span>
-                <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
-                  ProReader
-                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
+    <nav className="space-y-1 p-2" aria-label={t("toc.title")}>
+      {sections.map((section) => {
+        const Icon = section.icon;
+        const isCompleted = section.checkCompleted(store);
+        const isPartial =
+          !isCompleted && !!section.checkPartial?.(store);
+        const isAccessible = section.isAccessible(store);
+        return (
+          <button
+            key={section.id}
+            onClick={() => handleSectionClick(section.id, isAccessible)}
+            disabled={!isAccessible}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+              "hover:bg-accent hover:text-accent-foreground",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              !isAccessible && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
+            )}
+          >
+            <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="flex-1">{t(section.labelKey)}</span>
+            {isCompleted ? (
+              <Check className="h-4 w-4 shrink-0 text-primary" />
+            ) : (
+              isPartial && <HalfCheck />
+            )}
+          </button>
+        );
+      })}
+      <div className="my-2 border-t" />
+      <button
+        onClick={handleTutorClick}
+        disabled={!store.extractedText}
+        className={cn(
+          "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+          "hover:bg-accent hover:text-accent-foreground",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          !store.extractedText && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
+        )}
+      >
+        <MessageCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <span className="flex-1">{t("reading.tutor.title")}</span>
+      </button>
+      <div className="my-2 border-t" />
+      {pageLinks
+        .filter((page) => !page.roles || (role && page.roles.includes(role)))
+        .map((page) => {
+        const Icon = page.icon;
+        const isCurrent = !page.openDashboard && !page.openTeacherDashboard && pathname === page.href;
+        const badgeCount = pageBadges[page.href] ?? 0;
+        const badgeTone = page.href === "/vocabulary" ? "bg-orange-500" : "bg-red-500";
+        return (
+          <div key={page.href} className="w-full">
+            {page.separatorAbove && <div className="my-2 border-t" />}
+            <button
+              onClick={() => handlePageLinkClick(page)}
+              title={
+                page.href === "/vocabulary" && badgeCount > 0
+                  ? t("vocabulary.dueBadgeHint", { count: badgeCount })
+                  : undefined
+              }
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+                "hover:bg-accent hover:text-accent-foreground",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                isCurrent && "bg-accent text-accent-foreground font-medium"
+              )}
+            >
+              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="flex-1">{t(page.labelKey)}</span>
+              {badgeCount > 0 ? (
+                <span
+                  className={cn(
+                    "flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white",
+                    badgeTone
+                  )}
+                >
+                  {badgeCount > 9 ? "9+" : badgeCount}
                 </span>
-              </DialogPrimitive.Title>
-            </div>
-            <DialogPrimitive.Close className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </DialogPrimitive.Close>
+              ) : (
+                isCurrent && (
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
+                )
+              )}
+            </button>
           </div>
-          <ScrollArea className="flex-1 min-h-0 border-t">
-            <nav className="space-y-1 p-2">
-              {sections.map((section) => {
-                const Icon = section.icon;
-                const isCompleted = section.checkCompleted(store);
-                const isPartial =
-                  !isCompleted && !!section.checkPartial?.(store);
-                const isAccessible = section.isAccessible(store);
-                return (
-                  <button
-                    key={section.id}
-                    onClick={() => handleSectionClick(section.id, isAccessible)}
-                    disabled={!isAccessible}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
-                      "hover:bg-accent hover:text-accent-foreground",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      !isAccessible && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
-                    )}
-                  >
-                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <span className="flex-1">{t(section.labelKey)}</span>
-                    {isCompleted ? (
-                      <Check className="h-4 w-4 shrink-0 text-primary" />
-                    ) : (
-                      isPartial && <HalfCheck />
-                    )}
-                  </button>
-                );
-              })}
-              <div className="my-2 border-t" />
-              <button
-                onClick={handleTutorClick}
-                disabled={!store.extractedText}
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  !store.extractedText && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
-                )}
-              >
-                <MessageCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="flex-1">{t("reading.tutor.title")}</span>
-              </button>
-              <div className="my-2 border-t" />
-              {pageLinks
-                .filter((page) => !page.roles || (role && page.roles.includes(role)))
-                .map((page) => {
-                const Icon = page.icon;
-                const isCurrent = !page.openDashboard && !page.openTeacherDashboard && pathname === page.href;
-                const badgeCount = pageBadges[page.href] ?? 0;
-                const badgeTone = page.href === "/vocabulary" ? "bg-orange-500" : "bg-red-500";
-                return (
-                  <div key={page.href} className="w-full">
-                    {page.separatorAbove && <div className="my-2 border-t" />}
-                    <button
-                      onClick={() => handlePageLinkClick(page)}
-                      title={
-                        page.href === "/vocabulary" && badgeCount > 0
-                          ? t("vocabulary.dueBadgeHint", { count: badgeCount })
-                          : undefined
-                      }
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
-                        "hover:bg-accent hover:text-accent-foreground",
-                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        isCurrent && "bg-accent text-accent-foreground font-medium"
-                      )}
-                    >
-                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <span className="flex-1">{t(page.labelKey)}</span>
-                      {badgeCount > 0 ? (
-                        <span
-                          className={cn(
-                            "flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full px-1 text-[9px] font-bold text-white",
-                            badgeTone
-                          )}
-                        >
-                          {badgeCount > 9 ? "9+" : badgeCount}
-                        </span>
-                      ) : (
-                        isCurrent && (
-                          <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />
-                        )
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </nav>
-          </ScrollArea>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+        );
+      })}
+    </nav>
+  );
+}
+
+function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
+  const { t } = useTranslation();
+  const navSidebarOpen = useGlobalStore((s) => s.navSidebarOpen);
+  const navSidebarWidth = useGlobalStore((s) => s.navSidebarWidth);
+  const setNavSidebarOpen = useGlobalStore((s) => s.setNavSidebarOpen);
+  const setNavSidebarWidth = useGlobalStore((s) => s.setNavSidebarWidth);
+
+  // Mirror the desktop sidebar state onto <html> so the page content — which
+  // lives outside this component's tree, as a sibling of the Header on every
+  // page — can make room for it: `--nav-sidebar-w` drives body padding-left
+  // and `nav-sidebar-open` gates it to lg+ viewports (see globals.css). The
+  // classes live on <html> (not in React state) so they survive the Header
+  // remounting on every SPA navigation.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--nav-sidebar-w", `${clampNavSidebarWidth(navSidebarWidth)}px`);
+    const wasOpen = root.classList.contains("nav-sidebar-open");
+    root.classList.toggle("nav-sidebar-open", navSidebarOpen);
+    // Animate only open/close toggles — width changes come from live
+    // drag-resizing and must apply instantly, or the content visibly lags
+    // behind the sidebar edge. (On a fresh load `wasOpen` is always false,
+    // so an expanded sidebar slides content over once, deliberately.)
+    if (wasOpen === navSidebarOpen) return;
+    root.classList.add("nav-sidebar-anim");
+    const timeout = window.setTimeout(() => root.classList.remove("nav-sidebar-anim"), 250);
+    return () => {
+      window.clearTimeout(timeout);
+      root.classList.remove("nav-sidebar-anim");
+    };
+  }, [navSidebarOpen, navSidebarWidth]);
+
+  // When the Header unmounts (pages without one, e.g. /privacy-policy), stop
+  // reserving space for the sidebar. React runs unmount cleanups before the
+  // next page's Header mounts its own sync effect, so in-app navigation never
+  // sees a gap. `--nav-sidebar-w` is reset too — it is only meaningful while
+  // a sidebar can exist.
+  useEffect(() => {
+    return () => {
+      const root = document.documentElement;
+      root.classList.remove("nav-sidebar-open", "nav-sidebar-anim", "nav-sidebar-resizing");
+      root.style.removeProperty("--nav-sidebar-w");
+    };
+  }, []);
+
+  return (
+    <>
+      {/* Desktop (lg+): persistent sidebar docked to the left edge, working
+          side by side with the page content (which is padded via body). It
+          stays mounted even when collapsed so the slide transition works;
+          `inert` keeps its buttons out of the tab order while hidden. */}
+      <aside
+        inert={!navSidebarOpen}
+        aria-label={t("toc.title")}
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 hidden w-[var(--nav-sidebar-w)] flex-col border-r bg-background shadow-sm print:hidden",
+          "lg:flex motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out",
+          navSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex items-start justify-between gap-2 px-4 pb-2 pt-[calc(env(safe-area-inset-top,0px)+var(--ios-status-bar-gap)+1rem)]">
+          <h2 className="text-left text-xl font-semibold flex items-center gap-1.5">
+            <BrandText />
+          </h2>
+          {/* Expand/collapse toggle — replaces the old close button. Collapses
+              the sidebar; the Header's hamburger (or this button, once
+              re-expanded via the hamburger) brings it back. */}
+          <button
+            type="button"
+            onClick={() => setNavSidebarOpen(false)}
+            title={t("toc.hideSidebar")}
+            aria-label={t("toc.hideSidebar")}
+            className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </button>
+        </div>
+        <ScrollArea className="flex-1 min-h-0 border-t">
+          {/* The desktop sidebar stays open after navigation — no onNavigate. */}
+          <NavMenu />
+        </ScrollArea>
+        <SidebarResizeHandle width={navSidebarWidth} onWidthChange={setNavSidebarWidth} />
+      </aside>
+
+      {/* Mobile (<lg): the original slide-in drawer. `lg:hidden` is a safety
+          net for a drawer left open while the viewport grows past lg — the
+          hamburger itself only opens this on <lg viewports. */}
+      <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 lg:hidden" />
+          <DialogPrimitive.Content
+            aria-describedby={undefined}
+            className={cn(
+              "fixed inset-y-0 left-0 z-50 flex h-full w-72 max-w-[85vw] flex-col border-r bg-background shadow-lg duration-200",
+              "data-[state=open]:animate-in data-[state=open]:slide-in-from-left data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left",
+              "lg:hidden"
+            )}
+          >
+            <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
+              <div>
+                <DialogPrimitive.Title className="text-left text-xl font-semibold flex items-center gap-1.5">
+                  <BrandText />
+                </DialogPrimitive.Title>
+              </div>
+              <DialogPrimitive.Close className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                <PanelLeftClose className="h-4 w-4" />
+                <span className="sr-only">{t("toc.hideSidebar")}</span>
+              </DialogPrimitive.Close>
+            </div>
+            <ScrollArea className="flex-1 min-h-0 border-t">
+              <NavMenu onNavigate={() => onOpenChange(false)} />
+            </ScrollArea>
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
+    </>
   );
 }
 

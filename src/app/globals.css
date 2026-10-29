@@ -476,4 +476,48 @@ html {
   50% { opacity: 0.7; }
 }
 
+/* ── Desktop navigation sidebar (SectionNavSheet) ─────────────────
+ * On lg+ viewports the nav menu renders as a fixed sidebar (inside the
+ * Header) and the page content makes room for it via body padding. The
+ * state lives as classes/CSS variables on <html> rather than in any
+ * page's tree, so it survives the Header remounting on every SPA
+ * navigation and applies uniformly to every page that renders the
+ * Header. `--nav-sidebar-w` is kept in sync by SectionNavSheet; 288px
+ * matches the store default (w-72).
+ */
+:root {
+  --nav-sidebar-w: 288px;
+}
+@media (min-width: 1024px) {
+  html.nav-sidebar-open body {
+    padding-left: var(--nav-sidebar-w);
+  }
+}
+/* Only open/close toggles animate — width changes come from live
+ * drag-resizing and must apply instantly, or the page content visibly
+ * lags behind the sidebar edge. SectionNavSheet adds this class for
+ * ~250ms around a toggle. Mirrors the sidebar's motion-safe: classes. */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  html.nav-sidebar-anim body {
+    transition: padding-left 200ms ease-out;
+  }
+}
+/* While drag-resizing: kill text selection and show the resize cursor
+ * everywhere, so a fast pointer moving off the thin handle never
+ * selects page text or flashes a different cursor. */
+html.nav-sidebar-resizing,
+html.nav-sidebar-resizing body {
+  cursor: col-resize;
+}
+html.nav-sidebar-resizing body {
+  user-select: none;
+}
+/* The sidebar itself is print:hidden like the header — never pad the
+ * printed page. */
+@media print {
+  html.nav-sidebar-open body {
+    padding-left: 0;
+  }
+}
+
 

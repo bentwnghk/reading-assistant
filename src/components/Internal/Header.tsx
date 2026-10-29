@@ -37,6 +37,8 @@ import {
   Compass,
   Swords,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -72,6 +74,7 @@ import { useGlobalStore } from "@/store/global";
 import { useReadingStore } from "@/store/reading";
 import { markLastOpenedSession } from "@/store/setting";
 import useAiAccess from "@/hooks/useAiAccess";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { downloadFile } from "@/utils/file";
 import { useSharingStore } from "@/store/sharing";
 import { useBattleStore } from "@/store/battle";
@@ -110,6 +113,10 @@ function Header() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  // lg+ viewports get the persistent desktop nav sidebar (SectionNavSheet);
+  // below lg the hamburger opens the slide-in drawer instead. Same boundary
+  // as the sidebar's own `hidden lg:flex` / body-padding media query.
+  const isDesktopViewport = useMediaQuery("(min-width: 1024px)");
   const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [openShortcuts, setOpenShortcuts] = useState<boolean>(false);
@@ -117,7 +124,7 @@ function Header() {
   const [openNoPending, setOpenNoPending] = useState<boolean>(false);
   const [openUserManagement, setOpenUserManagement] = useState<boolean>(false);
   const [openSectionNav, setOpenSectionNav] = useState<boolean>(false);
-  const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout } = useGlobalStore();
+  const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout, navSidebarOpen, setNavSidebarOpen } = useGlobalStore();
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
     pendingReviewListShareCount,
@@ -340,11 +347,39 @@ function Header() {
               variant="ghost"
               size="icon"
               className="h-9 w-9 shrink-0"
-              title={t("toc.title")}
-              aria-label={t("toc.title")}
-              onClick={() => setOpenSectionNav(true)}
+              title={
+                isDesktopViewport
+                  ? navSidebarOpen
+                    ? t("toc.hideSidebar")
+                    : t("toc.showSidebar")
+                  : t("toc.title")
+              }
+              aria-label={
+                isDesktopViewport
+                  ? navSidebarOpen
+                    ? t("toc.hideSidebar")
+                    : t("toc.showSidebar")
+                  : t("toc.title")
+              }
+              aria-expanded={isDesktopViewport ? navSidebarOpen : openSectionNav}
+              onClick={() => {
+                // Desktop toggles the docked sidebar; mobile opens the drawer.
+                if (isDesktopViewport) {
+                  setNavSidebarOpen(!navSidebarOpen);
+                } else {
+                  setOpenSectionNav(true);
+                }
+              }}
             >
-              <Menu className="h-5 w-5" />
+              {isDesktopViewport ? (
+                navSidebarOpen ? (
+                  <PanelLeftClose className="h-5 w-5" />
+                ) : (
+                  <PanelLeftOpen className="h-5 w-5" />
+                )
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
             <Link href="/" className="text-left text-xl font-semibold flex items-center gap-1.5 relative group">
               <span className="text-blue-600 dark:text-blue-400">Mr.</span>

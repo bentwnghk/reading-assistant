@@ -1,6 +1,20 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+/** Desktop navigation sidebar width bounds (px). 288 = w-72, the drawer
+ *  width the sidebar evolved from. */
+export const NAV_SIDEBAR_MIN_WIDTH = 224;
+export const NAV_SIDEBAR_MAX_WIDTH = 480;
+export const NAV_SIDEBAR_DEFAULT_WIDTH = 288;
+
+export function clampNavSidebarWidth(width: number): number {
+  if (!Number.isFinite(width)) return NAV_SIDEBAR_DEFAULT_WIDTH;
+  return Math.min(
+    NAV_SIDEBAR_MAX_WIDTH,
+    Math.max(NAV_SIDEBAR_MIN_WIDTH, Math.round(width))
+  );
+}
+
 interface GlobalStore {
   openSetting: boolean;
   openHistory: boolean;
@@ -21,6 +35,17 @@ interface GlobalStore {
   openTutorChat: boolean;
   tutorChatSelectedText: string;
   openTeacherDashboard: boolean;
+  /**
+   * Desktop navigation sidebar (SectionNavSheet). Expanded by default on
+   * desktop; below lg the sidebar is hidden and the hamburger opens the
+   * slide-in drawer instead, so this flag only ever affects lg+ viewports.
+   * Persisted (unlike the dialog flags) so the user's collapsed/expanded
+   * choice and preferred width survive reloads — it is layout, not an
+   * ephemeral dialog.
+   */
+  navSidebarOpen: boolean;
+  /** Pixel width of the desktop navigation sidebar (clamped 224–480). */
+  navSidebarWidth: number;
 }
 
 interface GlobalActions {
@@ -33,6 +58,8 @@ interface GlobalActions {
   setOpenTutorChat: (visible: boolean) => void;
   setTutorChatSelectedText: (text: string) => void;
   setOpenTeacherDashboard: (visible: boolean) => void;
+  setNavSidebarOpen: (open: boolean) => void;
+  setNavSidebarWidth: (width: number) => void;
 }
 
 export const useGlobalStore = create(
@@ -48,6 +75,9 @@ export const useGlobalStore = create(
       openTutorChat: false,
       tutorChatSelectedText: "",
       openTeacherDashboard: false,
+      // 288px = w-72, the drawer width the sidebar evolved from.
+      navSidebarOpen: true,
+      navSidebarWidth: 288,
       setOpenSetting: (visible) => set({ openSetting: visible }),
       setOpenHistory: (visible) => set({ openHistory: visible }),
       setOpenDashboard: (visible, initialTab) =>
@@ -60,6 +90,8 @@ export const useGlobalStore = create(
       setOpenTutorChat: (visible) => set({ openTutorChat: visible }),
       setTutorChatSelectedText: (text) => set({ tutorChatSelectedText: text }),
       setOpenTeacherDashboard: (visible) => set({ openTeacherDashboard: visible }),
+      setNavSidebarOpen: (open) => set({ navSidebarOpen: open }),
+      setNavSidebarWidth: (width) => set({ navSidebarWidth: clampNavSidebarWidth(width) }),
     }),
     {
       name: "global",
