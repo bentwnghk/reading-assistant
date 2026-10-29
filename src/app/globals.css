@@ -482,11 +482,11 @@ html {
  * state lives as classes/CSS variables on <html> rather than in any
  * page's tree, so it survives the Header remounting on every SPA
  * navigation and applies uniformly to every page that renders the
- * Header. `--nav-sidebar-w` is kept in sync by SectionNavSheet; 288px
- * matches the store default (w-72).
+ * Header. `--nav-sidebar-w` is kept in sync by SectionNavSheet; 232px
+ * matches the store default.
  */
 :root {
-  --nav-sidebar-w: 288px;
+  --nav-sidebar-w: 232px;
 }
 @media (min-width: 1024px) {
   html.nav-sidebar-open body {

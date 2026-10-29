@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-/** Desktop navigation sidebar width bounds (px). 288 = w-72, the drawer
- *  width the sidebar evolved from. */
+/** Desktop navigation sidebar width bounds (px). The default was compacted
+ *  from 288 (w-72, the drawer width the sidebar evolved from) to 232px
+ *  (≈1.5cm narrower) once the sidebar's brand row was shrunk to a size that
+ *  still leaves the show/hide button clear of the wordmark at MIN width. */
 export const NAV_SIDEBAR_MIN_WIDTH = 224;
 export const NAV_SIDEBAR_MAX_WIDTH = 480;
-export const NAV_SIDEBAR_DEFAULT_WIDTH = 288;
+export const NAV_SIDEBAR_DEFAULT_WIDTH = 232;
 
 export function clampNavSidebarWidth(width: number): number {
   if (!Number.isFinite(width)) return NAV_SIDEBAR_DEFAULT_WIDTH;
@@ -75,9 +77,8 @@ export const useGlobalStore = create(
       openTutorChat: false,
       tutorChatSelectedText: "",
       openTeacherDashboard: false,
-      // 288px = w-72, the drawer width the sidebar evolved from.
       navSidebarOpen: true,
-      navSidebarWidth: 288,
+      navSidebarWidth: NAV_SIDEBAR_DEFAULT_WIDTH,
       setOpenSetting: (visible) => set({ openSetting: visible }),
       setOpenHistory: (visible) => set({ openHistory: visible }),
       setOpenDashboard: (visible, initialTab) =>
@@ -95,6 +96,21 @@ export const useGlobalStore = create(
     }),
     {
       name: "global",
+      // v1: the desktop sidebar's untouched default width shrank from 288px
+      // to 232px when its header row was compacted. Migrate ONLY the old
+      // default value — a width the user actually dragged to is respected.
+      // (Existing stores were written with version 0, so this runs once.)
+      version: 1,
+      migrate: (persisted) => {
+        const state = persisted as Partial<GlobalStore>;
+        if (
+          typeof state?.navSidebarWidth === "number" &&
+          state.navSidebarWidth === 288
+        ) {
+          state.navSidebarWidth = NAV_SIDEBAR_DEFAULT_WIDTH;
+        }
+        return state as GlobalStore & GlobalActions;
+      },
       // Dialog visibility flags are session-ephemeral — persisting them lets
       // a dialog left open by a previous browser session (or a previous user
       // on a shared device) auto-open on the next boot.

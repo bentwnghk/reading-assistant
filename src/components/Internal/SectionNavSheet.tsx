@@ -242,13 +242,22 @@ const pageLinks: PageLink[] = [
 ];
 
 /** The "Mr.🆖 ProReader" wordmark shared by the drawer title and the
- *  desktop sidebar header. */
-function BrandText() {
+ *  desktop sidebar header. `compact` renders the desktop sidebar variant one
+ *  step smaller — that is what lets the show/hide button stay clear of the
+ *  wordmark at the sidebar's narrower default/minimum widths. */
+function BrandText({ compact = false }: { compact?: boolean }) {
+  const titleSize = compact ? "text-lg" : "text-xl";
+  const markSize = compact ? "text-xl" : "text-2xl";
   return (
     <>
-      <span className="text-blue-600 dark:text-blue-400">Mr.</span>
-      <span className="text-2xl leading-none">🆖</span>
-      <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
+      <span className={cn("text-blue-600 dark:text-blue-400", titleSize)}>Mr.</span>
+      <span className={cn("leading-none", markSize)}>🆖</span>
+      <span
+        className={cn(
+          "bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden",
+          titleSize
+        )}
+      >
         ProReader
         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
       </span>
@@ -551,9 +560,12 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
           navSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex items-start justify-between gap-2 px-4 pb-2 pt-[calc(env(safe-area-inset-top,0px)+var(--ios-status-bar-gap)+1rem)]">
-          <h2 className="text-left text-xl font-semibold flex items-center gap-1.5">
-            <BrandText />
+        {/* Tighter padding + the compact wordmark buy the headroom that keeps
+            the show/hide button clear of the title at the narrow default and
+            minimum widths (default 232 / min 224). */}
+        <div className="flex items-start justify-between gap-1.5 px-3 pb-2 pt-[calc(env(safe-area-inset-top,0px)+var(--ios-status-bar-gap)+1rem)]">
+          <h2 className="text-left text-lg font-semibold flex items-center gap-1.5">
+            <BrandText compact />
           </h2>
           {/* Expand/collapse toggle — replaces the old close button. Collapses
               the sidebar; the Header's hamburger (or this button, once
