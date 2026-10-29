@@ -7,6 +7,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   BarChart3,
@@ -562,10 +563,18 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
       >
         {/* Tighter padding + the compact wordmark buy the headroom that keeps
             the show/hide button clear of the title at the narrow default and
-            minimum widths (default 232 / min 224). */}
+            minimum widths (default 232 / min 224). While the sidebar is
+            expanded this row is the ONLY place the brand and the toggle
+            appear — the header hides its duplicates — so the wordmark is a
+            home link here, taking over that role from the header brand. */}
         <div className="flex items-start justify-between gap-1.5 px-3 pb-2 pt-[calc(env(safe-area-inset-top,0px)+var(--ios-status-bar-gap)+1rem)]">
           <h2 className="text-left text-lg font-semibold flex items-center gap-1.5">
-            <BrandText compact />
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 rounded-sm transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <BrandText compact />
+            </Link>
           </h2>
           {/* Expand/collapse toggle — replaces the old close button. Collapses
               the sidebar; the Header's hamburger (or this button, once

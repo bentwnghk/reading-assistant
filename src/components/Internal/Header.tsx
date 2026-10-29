@@ -125,6 +125,11 @@ function Header() {
   const [openUserManagement, setOpenUserManagement] = useState<boolean>(false);
   const [openSectionNav, setOpenSectionNav] = useState<boolean>(false);
   const { openSetting, setOpenSetting, openDashboard, setOpenDashboard, openTeacherDashboard, setOpenTeacherDashboard, hasOpenedAbout, setHasOpenedAbout, navSidebarOpen, setNavSidebarOpen } = useGlobalStore();
+  // When the desktop nav sidebar is expanded, its own header row displays the
+  // brand and the show/hide toggle — the header hides its duplicates so
+  // neither is ever on screen twice. Mobile never hides them: the drawer
+  // overlays the header, so nothing is visually duplicated there anyway.
+  const sidebarExpandedOnDesktop = isDesktopViewport && navSidebarOpen;
   const { pendingCount, fetchPendingCount, setShowSharedDialog } = useSharingStore();
   const {
     pendingReviewListShareCount,
@@ -343,52 +348,60 @@ function Header() {
       >
         <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 flex flex-col lg:flex-row lg:justify-between lg:items-center lg:h-14 gap-y-1 py-1 lg:py-0">
           <div className="flex items-center gap-1 self-center lg:self-auto">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 shrink-0"
-              title={
-                isDesktopViewport
-                  ? navSidebarOpen
-                    ? t("toc.hideSidebar")
-                    : t("toc.showSidebar")
-                  : t("toc.title")
-              }
-              aria-label={
-                isDesktopViewport
-                  ? navSidebarOpen
-                    ? t("toc.hideSidebar")
-                    : t("toc.showSidebar")
-                  : t("toc.title")
-              }
-              aria-expanded={isDesktopViewport ? navSidebarOpen : openSectionNav}
-              onClick={() => {
-                // Desktop toggles the docked sidebar; mobile opens the drawer.
-                if (isDesktopViewport) {
-                  setNavSidebarOpen(!navSidebarOpen);
-                } else {
-                  setOpenSectionNav(true);
+            {/* While the desktop sidebar is expanded, its own header row owns
+                the brand and the show/hide toggle — these render only when the
+                sidebar is not showing them. The hamburger returns to this same
+                top-left corner the moment the sidebar collapses. */}
+            {!sidebarExpandedOnDesktop && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0"
+                title={
+                  isDesktopViewport
+                    ? navSidebarOpen
+                      ? t("toc.hideSidebar")
+                      : t("toc.showSidebar")
+                    : t("toc.title")
                 }
-              }}
-            >
-              {isDesktopViewport ? (
-                navSidebarOpen ? (
-                  <PanelLeftClose className="h-5 w-5" />
+                aria-label={
+                  isDesktopViewport
+                    ? navSidebarOpen
+                      ? t("toc.hideSidebar")
+                      : t("toc.showSidebar")
+                    : t("toc.title")
+                }
+                aria-expanded={isDesktopViewport ? navSidebarOpen : openSectionNav}
+                onClick={() => {
+                  // Desktop toggles the docked sidebar; mobile opens the drawer.
+                  if (isDesktopViewport) {
+                    setNavSidebarOpen(!navSidebarOpen);
+                  } else {
+                    setOpenSectionNav(true);
+                  }
+                }}
+              >
+                {isDesktopViewport ? (
+                  navSidebarOpen ? (
+                    <PanelLeftClose className="h-5 w-5" />
+                  ) : (
+                    <PanelLeftOpen className="h-5 w-5" />
+                  )
                 ) : (
-                  <PanelLeftOpen className="h-5 w-5" />
-                )
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
-            <Link href="/" className="text-left text-xl font-semibold flex items-center gap-1.5 relative group">
-              <span className="text-blue-600 dark:text-blue-400">Mr.</span>
-              <span className="text-2xl leading-none">🆖</span>
-              <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
-                ProReader
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
-              </span>
-            </Link>
+                  <Menu className="h-5 w-5" />
+                )}
+              </Button>
+            )}
+            {!sidebarExpandedOnDesktop && (
+              <Link href="/" className="text-left text-xl font-semibold flex items-center gap-1.5 relative group">
+                <span className="text-blue-600 dark:text-blue-400">Mr.</span>
+                <span className="text-2xl leading-none">🆖</span>
+                <span className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent font-bold relative overflow-hidden">
+                  ProReader
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 dark:via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer" />
+                </span>
+              </Link>
+            )}
           </div>
           <div className="flex items-center justify-center lg:justify-end gap-1 flex-wrap max-sm:gap-0.5 max-sm:[&_button]:px-2">
             <Button
