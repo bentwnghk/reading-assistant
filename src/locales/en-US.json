@@ -18,9 +18,9 @@
     "glossary": "Vocabulary",
     "collocations": "Collocations",
     "grammar": "Grammar",
-    "hideSidebar": "Hide navigation menu",
-    "showSidebar": "Show navigation menu",
-    "resizeSidebar": "Resize navigation menu"
+    "hideSidebar": "Hide sidebar",
+    "showSidebar": "Show sidebar",
+    "resizeSidebar": "Resize sidebar"
   },
   "settingsBanner": {
     "message": "Please activate your personal/school subscription, or configure your API Key or Access Password in Settings to use this app.",

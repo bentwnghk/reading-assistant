@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
+import dynamic from "next/dynamic"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -53,6 +54,8 @@ import {
 } from "@/components/Internal/SessionResultDialogs"
 import { Footer } from "@/components/Internal/Footer"
 import type { StudentSessionData } from "@/lib/users"
+
+const Header = dynamic(() => import("@/components/Internal/Header"))
 
 function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return ""
@@ -301,11 +304,14 @@ export default function AssignmentDetailPage({
 
   if (notFound || !assignment) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3">
-        <p className="text-muted-foreground">{t("assignments.error.notFound")}</p>
-        <Link href="/assignments">
-          <Button variant="outline">{t("assignments.back")}</Button>
-        </Link>
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          <p className="text-muted-foreground">{t("assignments.error.notFound")}</p>
+          <Link href="/assignments">
+            <Button variant="outline">{t("assignments.back")}</Button>
+          </Link>
+        </div>
       </div>
     )
   }
@@ -397,6 +403,7 @@ export default function AssignmentDetailPage({
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
       <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4 py-6 space-y-4">
         <div className="flex items-center gap-2">
           <Button
