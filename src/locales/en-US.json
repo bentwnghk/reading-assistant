@@ -4673,6 +4673,12 @@
     "stop": "Stop",
     "rename": "Rename essay",
     "cancelled": "Cancelled.",
+    "errors": {
+      "noSubscription": "You don't have an active subscription, so the AI couldn't be reached. Subscribe in Settings (or ask your school admin), or switch to your own API key or the shared access password.",
+      "noAccessPassword": "Access was denied: the shared access password is missing or incorrect. Enter it in Settings and try again.",
+      "unauthorized": "Your session has expired. Please sign in again.",
+      "serverKeyMissing": "The server has no AI provider API key configured. If you host this app yourself, set the provider key in your environment."
+    },
     "help": {
       "title": "Language Check Guide",
       "tabs": {

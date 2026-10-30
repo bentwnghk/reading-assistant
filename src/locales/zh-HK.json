@@ -4670,6 +4670,12 @@
     "stop": "停止",
     "rename": "重新命名作文",
     "cancelled": "已取消。",
+    "errors": {
+      "noSubscription": "你目前沒有有效訂閱，無法連接 AI。請在設定中訂閱（或向學校管理員申請），或改用你自己的 API 金鑰或共用通行密碼。",
+      "noAccessPassword": "存取被拒：共用通行密碼錯誤或尚未填寫。請在設定中輸入後再試。",
+      "unauthorized": "你的登入已過期，請重新登入。",
+      "serverKeyMissing": "伺服器尚未設定 AI 供應商的 API 金鑰。如你自己部署此應用，請在環境變數中設定供應商金鑰。"
+    },
     "help": {
       "title": "語言檢查指南",
       "tabs": {

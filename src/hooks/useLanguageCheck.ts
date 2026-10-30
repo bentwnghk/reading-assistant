@@ -42,6 +42,30 @@ function isAbortError(error: unknown): boolean {
   );
 }
 
+/**
+ * Translate well-known AI-gateway failures into actionable messages;
+ * anything else keeps its `parseError` form. These gates are what users
+ * actually hit when they have not subscribed or configured access (the
+ * /api/ai/subscription route and the middleware HMAC check), and the raw
+ * `[FORBIDDEN]: ...` strings alone don't tell them what to do.
+ */
+function describeGenerationError(error: unknown): string {
+  const raw = parseError(error);
+  if (raw.includes("No active subscription")) {
+    return i18next.t("languageCheck.errors.noSubscription");
+  }
+  if (raw.includes("No permissions")) {
+    return i18next.t("languageCheck.errors.noAccessPassword");
+  }
+  if (raw.includes("server does not have an API key")) {
+    return i18next.t("languageCheck.errors.serverKeyMissing");
+  }
+  if (raw.includes("Unauthorized")) {
+    return i18next.t("languageCheck.errors.unauthorized");
+  }
+  return raw;
+}
+
 let fallbackModelPromise: Promise<string> | null = null;
 function getFallbackModel(): Promise<string> {
   if (!fallbackModelPromise) {
@@ -90,6 +114,7 @@ export default function useLanguageCheck() {
           .getState()
           .setProgress({ current: i + 1, total: essay.images.length });
 
+        let streamError: unknown = null;
         const result = streamText({
           model,
           // Transcriber persona only (never the teacher/marker prompt): vision
@@ -110,7 +135,12 @@ export default function useLanguageCheck() {
             },
           ],
           abortSignal: ac.signal,
-          onError: () => {},
+          // Capture rather than swallow: streamText routes request failures
+          // here and the textStream just ends, so without this the real
+          // error (e.g. 403 "No active subscription") would be lost.
+          onError: (event) => {
+            streamError = event.error;
+          },
         });
 
         let pageText = "";
@@ -121,8 +151,12 @@ export default function useLanguageCheck() {
             .getState()
             .updateLocal(essayId, { transcript: joinPages([...pages, pageText]) });
         }
-        // streamText swallows request errors into onError; an empty stream is
-        // the observable symptom.
+        // A captured stream error means the page is incomplete (usually no
+        // text at all when an access gate blocked the request): surface the
+        // real cause instead of blaming the photo quality. Only a clean
+        // stream that still yields no text falls back to the "unreadable
+        // page" message.
+        if (streamError !== null) throw streamError;
         if (!pageText.trim()) {
           throw new Error(i18next.t("languageCheck.ocr.empty", { page: i + 1 }));
         }
@@ -201,7 +235,7 @@ export default function useLanguageCheck() {
         toast.warning(i18next.t("languageCheck.cancelled"));
       } else {
         console.error("Language check OCR failed:", error);
-        toast.error(parseError(error));
+        toast.error(describeGenerationError(error));
       }
       // Keep whatever text was recognised so far for manual completion.
       if (pages.length > 0) {
@@ -332,7 +366,7 @@ export default function useLanguageCheck() {
         toast.warning(i18next.t("languageCheck.cancelled"));
       } else {
         console.error("Language check failed:", error);
-        toast.error(parseError(error));
+        toast.error(describeGenerationError(error));
       }
       return false;
     } finally {

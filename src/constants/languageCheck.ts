@@ -315,6 +315,14 @@ export const LANGUAGE_CHECK_MAX_TRANSCRIPT_CHARS = 60_000;
 /** Essays (scans included) are auto-deleted this many days after upload. */
 export const LANGUAGE_CHECK_RETENTION_DAYS = 30;
 
+/**
+ * Dead drafts are swept sooner: a `draft` essay with an empty transcript holds
+ * nothing but multi-MB scans and no recoverable work — OCR never produced any
+ * text (typically blocked at an access gate) or the upload was abandoned
+ * mid-flow. Drafts the user typed into keep the full retention window.
+ */
+export const LANGUAGE_CHECK_DRAFT_RETENTION_DAYS = 7;
+
 // ─── Learn from your mistakes (lessons → practice → quiz) ───────────────────
 
 /** Max categories studied in one learning session (each one is a full unit). */

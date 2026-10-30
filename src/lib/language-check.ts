@@ -1,6 +1,7 @@
 import { getPool } from "./db"
 import { getSchoolForUser } from "./users"
 import {
+  LANGUAGE_CHECK_DRAFT_RETENTION_DAYS,
   LANGUAGE_CHECK_MAX_ESSAYS,
   LANGUAGE_CHECK_RETENTION_DAYS,
   type LanguageCheckStatus,
@@ -54,6 +55,10 @@ function mapEssay(row: Record<string, unknown>): LanguageCheckEssay {
  *   storage;
  * - checked essays keep their record (transcript, corrections, models) for
  *   student review and staff tracking, but have their scans purged.
+ * Dead drafts go sooner (LANGUAGE_CHECK_DRAFT_RETENTION_DAYS): a `draft`
+ * essay with an empty transcript is pure storage — multi-MB scans, no
+ * recoverable work (OCR never produced text, e.g. blocked at an access
+ * gate). Drafts with a typed transcript keep the full window.
  * Runs opportunistically (list/count/staff-list). Note: `updated_at` is
  * deliberately untouched — it orders the list and a purge must not bump
  * old essays to the top.
@@ -71,6 +76,13 @@ export async function sweepExpiredEssays(): Promise<void> {
      WHERE created_at < now() - make_interval(days => $1)
        AND jsonb_array_length(images) > 0`,
     [LANGUAGE_CHECK_RETENTION_DAYS],
+  )
+  await getPool().query(
+    `DELETE FROM language_check_essays
+     WHERE created_at < now() - make_interval(days => $1)
+       AND status = 'draft'
+       AND transcript = ''`,
+    [LANGUAGE_CHECK_DRAFT_RETENTION_DAYS],
   )
 }
 
@@ -106,7 +118,8 @@ export async function getEssay(
 ): Promise<LanguageCheckEssay | null> {
   // Retention on direct access too (the sweep may not have run, e.g. for an
   // id that only lives in the client-side cache): never-checked essays are
-  // deleted, checked ones only have their scans purged. The caller may be
+  // deleted, checked ones only have their scans purged, and dead drafts
+  // (empty transcript) expire on the shorter draft window. The caller may be
   // the owner OR the staff uploader — both see the same essay.
   await getPool().query(
     `DELETE FROM language_check_essays
@@ -122,6 +135,14 @@ export async function getEssay(
        AND created_at < now() - make_interval(days => $3)
        AND jsonb_array_length(images) > 0`,
     [id, userId, LANGUAGE_CHECK_RETENTION_DAYS],
+  )
+  await getPool().query(
+    `DELETE FROM language_check_essays
+     WHERE id = $1 AND (user_id = $2 OR uploaded_by = $2)
+       AND created_at < now() - make_interval(days => $3)
+       AND status = 'draft'
+       AND transcript = ''`,
+    [id, userId, LANGUAGE_CHECK_DRAFT_RETENTION_DAYS],
   )
   const { rows } = await getPool().query(
     `SELECT e.*, e.user_id AS owner_id, u.name AS owner_name
