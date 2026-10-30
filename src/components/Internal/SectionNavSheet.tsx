@@ -342,9 +342,17 @@ function SidebarResizeHandle({
  * links). Shared verbatim by the mobile drawer and the desktop sidebar so
  * the two never drift. `onNavigate` fires after an entry is activated —
  * the drawer closes itself, the desktop sidebar stays put so it keeps
- * working side by side with the page content.
+ * working side by side with the page content. `compact` tightens the row
+ * spacing for the desktop sidebar, whose always-visible menu is long enough
+ * to scroll; the mobile drawer keeps the roomier touch targets.
  */
-function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
+function NavMenu({
+  onNavigate,
+  compact = false,
+}: {
+  onNavigate?: () => void;
+  compact?: boolean;
+}) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
@@ -410,7 +418,10 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
   }
 
   return (
-    <nav className="space-y-1 p-2" aria-label={t("toc.title")}>
+    <nav
+      className={cn("p-2", compact ? "space-y-0.5" : "space-y-1")}
+      aria-label={t("toc.title")}
+    >
       {sections.map((section) => {
         const Icon = section.icon;
         const isCompleted = section.checkCompleted(store);
@@ -423,7 +434,8 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
             onClick={() => handleSectionClick(section.id, isAccessible)}
             disabled={!isAccessible}
             className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+              "w-full flex items-center gap-3 px-3 rounded-md text-left transition-colors",
+              compact ? "py-1.5" : "py-2.5",
               "hover:bg-accent hover:text-accent-foreground",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               !isAccessible && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
@@ -439,12 +451,13 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
           </button>
         );
       })}
-      <div className="my-2 border-t" />
+      <div className={cn(compact ? "my-1" : "my-2", "border-t")} />
       <button
         onClick={handleTutorClick}
         disabled={!store.extractedText}
         className={cn(
-          "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+          "w-full flex items-center gap-3 px-3 rounded-md text-left transition-colors",
+          compact ? "py-1.5" : "py-2.5",
           "hover:bg-accent hover:text-accent-foreground",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           !store.extractedText && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
@@ -453,7 +466,7 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
         <MessageCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="flex-1">{t("reading.tutor.title")}</span>
       </button>
-      <div className="my-2 border-t" />
+      <div className={cn(compact ? "my-1" : "my-2", "border-t")} />
       {pageLinks
         .filter((page) => !page.roles || (role && page.roles.includes(role)))
         .map((page) => {
@@ -463,7 +476,7 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
         const badgeTone = page.href === "/vocabulary" ? "bg-orange-500" : "bg-red-500";
         return (
           <div key={page.href} className="w-full">
-            {page.separatorAbove && <div className="my-2 border-t" />}
+            {page.separatorAbove && <div className={cn(compact ? "my-1" : "my-2", "border-t")} />}
             <button
               onClick={() => handlePageLinkClick(page)}
               title={
@@ -472,7 +485,8 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
                   : undefined
               }
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-colors",
+                "w-full flex items-center gap-3 px-3 rounded-md text-left transition-colors",
+                compact ? "py-1.5" : "py-2.5",
                 "hover:bg-accent hover:text-accent-foreground",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 isCurrent && "bg-accent text-accent-foreground font-medium"
@@ -593,8 +607,10 @@ function SectionNavSheet({ open, onOpenChange }: SectionNavSheetProps) {
           </button>
         </div>
         <ScrollArea className="flex-1 min-h-0 border-t">
-          {/* The desktop sidebar stays open after navigation — no onNavigate. */}
-          <NavMenu />
+          {/* The desktop sidebar stays open after navigation — no onNavigate.
+              `compact` reduces the row spacing so the long menu needs less
+              scrolling (the mobile drawer keeps the roomier spacing). */}
+          <NavMenu compact />
         </ScrollArea>
         <SidebarResizeHandle width={navSidebarWidth} onWidthChange={setNavSidebarWidth} />
       </aside>
