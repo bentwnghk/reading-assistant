@@ -238,7 +238,9 @@ export function RecipientPicker({
                                 })
                               : group.label === "Staff"
                                 ? t("share.staffGroup")
-                                : group.label}
+                                : group.label === "Teachers"
+                                  ? t("share.teachersGroup")
+                                  : group.label}
                           </span>
                           <span className="text-xs text-muted-foreground shrink-0">
                             {selectedCount > 0 ? `${selectedCount}/` : ""}

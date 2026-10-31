@@ -367,9 +367,9 @@ A dedicated auth-gated page for systematic vocabulary review across all reading 
 ### Sharing Rules
 
 - **Vocabulary sharing**: Teachers/admins/super-admins can share individual words with same-school users. Super-admins can share with any user.
-- **Review list sharing**: Teachers/admins/super-admins can share named review lists. Share button hidden from students in UI.
-- **Accept flow**: When a student accepts a shared review list, words are written to `user_vocabulary` with `shared_by = sender_id` (teacher source) AND to `review_lists` (recipient's copy).
-- **Role gating**: UI shows share controls conditionally; API rejects non-teacher/admin/super-admin requests.
+- **Review list sharing**: Teachers/admins/super-admins can share named review lists (same-school users / any user for super-admins). **Students** can also share review lists — with their classmates and the teachers of their classes (the `student` branch of `getShareTargets`).
+- **Accept flow**: When a recipient accepts a shared review list, words are written to `user_vocabulary` with `shared_by = sender_id` (sender may be staff or a student) AND to `review_lists` (recipient's copy).
+- **Role gating**: UI shows share controls conditionally; the vocabulary word-share and session-share APIs reject student requests, while the review-list share API (`/api/review-lists/share`) allows all four roles.
 
 ### Important Implementation Notes
 
@@ -608,7 +608,7 @@ Teachers and admins can share completed reading sessions with students. Shared s
 - **super-admin**: All users across all schools, grouped by class and school
 - **admin**: All users in the same school, grouped by class
 - **teacher**: Students in the teacher's classes
-- **student**: Classmates in the same class
+- **student**: Classmates in the same class, plus the teachers of those classes (one combined "Teachers" group — a stable sentinel label translated client-side by `RecipientPicker`, like the teacher branch's "Staff" group)
 
 ### Data Stripping
 

@@ -182,7 +182,7 @@
           "manageStudents": "Add students & track their learning progress through Teacher Dashboard",
           "assignHomework": "Turn reading sessions into trackable class assignments",
           "uploadTexts": "Upload reading materials to Text Repository to share with your classes",
-          "shareVocabulary": "Share curated vocabulary & review lists with students",
+          "shareVocabulary": "Share curated vocabulary & review lists with students & colleagues",
           "exportData": "Export detailed Excel reports",
           "viewLeaderboard": "Monitor class leaderboards",
           "viewAiQuestions": "Track questions students ask AI Tutor"
@@ -193,7 +193,8 @@
           "assignments": "Complete teacher-assigned reading & track your progress",
           "cloudSync": "Automatic cloud sync",
           "history": "Track reading and learning activity in Learning Journey",
-          "leaderboard": "Compete in leaderboards & unlock achievements"
+          "leaderboard": "Compete in leaderboards & unlock achievements",
+          "shareReviewLists": "Share review lists with classmates & teachers"
         }
       },
       "features": {
@@ -280,7 +281,7 @@
         },
         "vocabularyPage": {
           "title": "My Vocabulary Hub",
-          "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Teachers can share curated review lists with students!"
+          "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Share review lists with your classmates and teachers — teachers and admins can share school-wide!"
         },
         "languageCheck": {
           "title": "Language Check",
@@ -2635,7 +2636,7 @@
         },
         "reviewLists": {
           "name": "Review Lists",
-          "desc": "Create named lists of words and phrases for focused study — here, or straight from a reading's Vocabulary section. Edit, share, or delete your lists. Teachers can share lists with students."
+          "desc": "Create named lists of words and phrases for focused study — here, or straight from a reading's Vocabulary section. Edit, share, or delete your lists. Share a list with your classmates and teachers (students) or across your school (teachers and admins)."
         },
         "share": {
           "name": "Share Vocabulary",
@@ -3142,6 +3143,7 @@
     "title": "Share Reading Session",
     "shareWith": "Share with",
     "staffGroup": "Staff",
+    "teachersGroup": "Teachers",
     "searchUsers": "Search users...",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",

@@ -2341,7 +2341,7 @@ body.toc-noscroll{overflow:hidden}
       </table>
 
       <h3>9.6 Review Lists <span style="font-weight:400;font-size:.8em">(named word sets)</span></h3>
-      <p>Create named lists from selected words (via "Add to Review List"), then manage them in the <b>Lists tab</b>: <b>Play</b> (load into the review queue), <b>Edit</b> (rename / remove words), <b>Share</b> <span class="tag-teacher"></span>, <b>Delete</b>. Paginated 10/20/30/50 per page.</p>
+      <p>Create named lists from selected words (via "Add to Review List"), then manage them in the <b>Lists tab</b>: <b>Play</b> (load into the review queue), <b>Edit</b> (rename / remove words), <b>Share</b> (§9.9 — students send to classmates &amp; their teachers; staff share school-wide), <b>Delete</b>. Paginated 10/20/30/50 per page.</p>
 
       <h3>9.7 Export <span style="font-weight:400;font-size:.8em">(4 formats)</span></h3>
       <p>The Export panel exports either your selected words/phrases or all of them (scoped to the active Words or Phrases tab):</p>
@@ -2356,14 +2356,14 @@ body.toc-noscroll{overflow:hidden}
       <h3>9.8 Review History</h3>
       <p>A paginated log of past review sessions (flashcard/quiz/spelling). Each row shows mode, word count, accuracy % (color-coded), and timestamp, with an entry-type badge distinguishing <b>word</b> vs <b>phrase</b> sessions. Expand a row to see per-rating counts (flashcard) or per-word results (quiz/spelling), with resulting mastery badges.</p>
 
-      <h3>9.9 Sharing <span class="tag-teacher"></span></h3>
-      <div class="callout teacher"><strong>Teacher / admin / super-admin only</strong> Two kinds of sharing exist, both hidden from students:
+      <h3>9.9 Sharing</h3>
+      <div class="callout teacher"><strong>Who can share what</strong>
       <ul style="margin:6px 0 0">
-        <li><b>Share individual words</b> — send selected words to same-school users (super-admins: any user). Recipients who already have a word are skipped.</li>
-        <li><b>Share a named review list</b> — send an entire list. On accept, the words are written to the recipient's vocabulary with you as the source, and a copy is added to their review lists.</li>
+        <li><b>Share individual words</b> — teachers, admins and super-admins only: send selected words to same-school users (super-admins: any user). Recipients who already have a word are skipped.</li>
+        <li><b>Share a named review list</b> — everyone: students send a list to their classmates and their teachers; teachers/admins send to their students and same-school staff (super-admins: any user). On accept, the words are written to the recipient's vocabulary with you as the source, and a copy is added to their review lists.</li>
       </ul>
       </div>
-      <p>The recipient picker groups targets by <b>school → class → user</b> with search, select-all/group/individual checkboxes. Incoming shares arrive as a <b>Bell</b> notification in the header (red badge). <b>Accept</b> loads the words; <b>Decline</b> dismisses. "Accept All / Decline All" appear when there are several.</p>
+      <p>The recipient picker groups targets by <b>school → class → user</b> with search, select-all/group/individual checkboxes; students get an extra <b>Teachers</b> group with the teachers of their classes. Incoming shares arrive as a <b>Bell</b> notification in the header (red badge). <b>Accept</b> loads the words; <b>Decline</b> dismisses. "Accept All / Decline All" appear when there are several.</p>
       <div class="mock">
         <div class="mock-bar"><span class="pill">🔔 Shared Review List dialog (indigo)</span></div>
         <div class="mock-body">
@@ -2759,8 +2759,9 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>My Vocabulary page &amp; review</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>Leaderboard &amp; Achievements</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>Student Dashboard</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
-        <tr><td>Share reading sessions</td><td class="small">classmates</td><td class="small">own students</td><td class="small">whole school</td><td class="small">all schools</td></tr>
-        <tr><td>Share vocabulary / review lists</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+        <tr><td>Share reading sessions</td><td class="small">classmates &amp; teachers</td><td class="small">own students</td><td class="small">whole school</td><td class="small">all schools</td></tr>
+        <tr><td>Share vocabulary words</td><td class="no">—</td><td class="small">students &amp; staff</td><td class="small">school</td><td class="small">any user</td></tr>
+        <tr><td>Share review lists</td><td class="small">classmates &amp; teachers</td><td class="small">students &amp; staff</td><td class="small">school</td><td class="small">any user</td></tr>
         <tr><td>Upload to text repository</td><td class="small">limited</td><td class="small">class</td><td class="small">school</td><td class="small">public</td></tr>
         <tr><td>Create assignments</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
         <tr><td>Teacher Dashboard</td><td class="no">—</td><td class="small">own classes</td><td class="small">all classes</td><td class="small">all schools</td></tr>

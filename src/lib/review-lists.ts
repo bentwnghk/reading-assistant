@@ -122,7 +122,7 @@ export async function shareReviewList(
   senderId: string,
   recipientIds: string[],
   listId: string,
-  role: "super-admin" | "admin" | "teacher"
+  role: "super-admin" | "admin" | "teacher" | "student"
 ): Promise<{ inserted: number }> {
   const pool = getPool();
 

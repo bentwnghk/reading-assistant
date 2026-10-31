@@ -949,6 +949,7 @@ function Header() {
                     <li>• {t("header.about.roles.student.learn")}</li>
                     <li>• {t("header.about.roles.student.assignments")}</li>
                     <li>• {t("header.about.roles.student.cloudSync")}</li>
+                    <li>• {t("header.about.roles.student.shareReviewLists")}</li>
                     <li>• {t("header.about.roles.student.history")}</li>
                     <li>• {t("header.about.roles.student.leaderboard")}</li>
                   </ul>

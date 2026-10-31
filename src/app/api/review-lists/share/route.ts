@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     const role = session.user.role as string;
-    if (!["super-admin", "admin", "teacher"].includes(role)) {
+    if (!["super-admin", "admin", "teacher", "student"].includes(role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       session.user.id,
       parsed.data.recipientIds,
       parsed.data.listId,
-      role as "super-admin" | "admin" | "teacher"
+      role as "super-admin" | "admin" | "teacher" | "student"
     );
 
     return NextResponse.json(result, { status: 201 });

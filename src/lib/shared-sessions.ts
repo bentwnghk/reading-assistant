@@ -459,7 +459,8 @@ export async function getShareTargets(
   }
 
   if (role === "student") {
-    // Union of classmates across ALL the student's classes (deduped, self excluded).
+    // Union of classmates across ALL the student's classes (deduped, self
+    // excluded), plus the teachers of those classes as one combined group.
     const classIds = await getStudentClassIds(userId)
     if (classIds.length === 0) return []
 
@@ -469,10 +470,12 @@ export async function getShareTargets(
       const seen = new Set<string>()
 
       const classesResult = await client.query(
-        `SELECT c.id, c.name, sub.name AS subject_name, g.name AS grade_name
+        `SELECT c.id, c.name, sub.name AS subject_name, g.name AS grade_name,
+                tu.id AS teacher_user_id, tu.name AS teacher_name, tu.email AS teacher_email
          FROM classes c
          LEFT JOIN subjects sub ON sub.id = c.subject_id
          LEFT JOIN grades g ON g.id = c.grade_id
+         LEFT JOIN users tu ON tu.id = c.teacher_id AND COALESCE(tu.banned, FALSE) = FALSE
          WHERE c.id = ANY($1)`,
         [classIds]
       )
@@ -513,6 +516,28 @@ export async function getShareTargets(
             users: targets,
           })
         }
+      }
+
+      // The teachers of the student's classes as one combined group (deduped,
+      // self/banned excluded). Label is a stable sentinel — RecipientPicker
+      // translates it client-side (same pattern as the teacher branch's "Staff").
+      const teacherById = new Map<string, ShareTarget>()
+      for (const row of classesResult.rows as Record<string, unknown>[]) {
+        // Keyed on the joined user id: when the class teacher is banned the
+        // LEFT JOIN nulls tu.* while c.teacher_id stays set — skip those.
+        const teacherId = row.teacher_user_id as string | null
+        if (!teacherId || teacherId === userId || teacherById.has(teacherId)) continue
+        teacherById.set(teacherId, {
+          id: teacherId,
+          name: (row.teacher_name as string | null) ?? null,
+          email: (row.teacher_email as string | null) ?? null,
+        })
+      }
+      if (teacherById.size > 0) {
+        result.push({
+          label: "Teachers",
+          users: [...teacherById.values()],
+        })
       }
       return result
     } finally {
