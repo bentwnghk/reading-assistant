@@ -79,3 +79,57 @@ export function generateWordCountOptions(totalWords: number): number[] {
   }
   return options;
 }
+
+/**
+ * The glossary prompt lists highlighted terms one per line, but a model may
+ * still split a comma-containing phrase (e.g. "Agriculture, Fisheries and
+ * Conservation Department") into separate entries at its commas. Stitch such
+ * fragments back into the single highlighted term the student selected.
+ *
+ * A run of consecutive entries is merged only when its words joined together
+ * exactly equal a comma-containing highlighted term (match ignores case,
+ * commas and repeated whitespace, so fragments like "agriculture," also
+ * match). The merged entry keeps the LAST fragment's definition fields — for
+ * "X, Y and Z Department"-style names the trailing fragment carries the head
+ * noun the definitions describe — with `word` replaced by the full listed
+ * term. Entries that match nothing are passed through untouched.
+ */
+export function mergeSplitGlossaryEntries(
+  entries: GlossaryEntry[],
+  highlightedWords: string[]
+): GlossaryEntry[] {
+  if (entries.length < 2 || highlightedWords.length === 0) return entries;
+
+  const normalize = (value: string) =>
+    value.replace(/,/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+
+  const phrases = new Map<string, string>();
+  for (const word of highlightedWords) {
+    if (word.includes(",")) phrases.set(normalize(word), word);
+  }
+  if (phrases.size === 0) return entries;
+
+  const result: GlossaryEntry[] = [];
+  let i = 0;
+  while (i < entries.length) {
+    let mergedSpan = 0;
+    // Try the longest run first so a matching prefix cannot strand the rest
+    // of the phrase as unmatched leftovers.
+    for (let j = entries.length - 1; j > i; j--) {
+      const joined = normalize(entries.slice(i, j + 1).map((e) => e.word).join(" "));
+      const phrase = phrases.get(joined);
+      if (phrase) {
+        result.push({ ...entries[j], word: phrase });
+        mergedSpan = j - i + 1;
+        break;
+      }
+    }
+    if (mergedSpan > 0) {
+      i += mergedSpan;
+    } else {
+      result.push(entries[i]);
+      i += 1;
+    }
+  }
+  return result;
+}

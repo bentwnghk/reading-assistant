@@ -591,17 +591,17 @@ ${Object.entries(skillQuestionTypes).map(([skill, types]) => `- ${skill}: use ${
 }
 
 export function generateGlossaryPrompt(text: string, highlightedWords: string[]) {
-  return `Create a bilingual glossary for these highlighted words from the text.
+  return `Create a bilingual glossary for these highlighted terms from the text.
 
 <text>
 ${text}
 </text>
 
 <highlighted-words>
-${highlightedWords.join(", ")}
+${highlightedWords.map((w, i) => `${i + 1}. ${w}`).join("\n")}
 </highlighted-words>
 
-For each word, provide a bilingual glossary entry. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
+For each listed term, provide exactly ONE bilingual glossary entry. You MUST respond with ONLY a valid JSON array, no markdown code blocks, no additional text.
 
 [
   {
@@ -615,13 +615,16 @@ For each word, provide a bilingual glossary entry. You MUST respond with ONLY a 
 ]
 
 **Requirements:**
-- Syllabification: Break down the word into syllables separated by middle dots (·). Use UPPERCASE to mark the stressed syllable (e.g., "beau·TI·ful", "IM·por·tant", "ex·CEP·tion·al").
+- Each numbered line in <highlighted-words> is ONE single term. Some terms are multi-word phrases (e.g. organisation names like "Agriculture, Fisheries and Conservation Department") that may themselves contain commas or "and". NEVER split a term at a comma, at "and", or at spaces — one listed term = exactly one JSON entry.
+- The "word" field MUST be copied verbatim from the listed term, including any internal commas.
+- The number of entries MUST equal the number of listed terms.
+- Syllabification: Break down the word into syllables separated by middle dots (·). Use UPPERCASE to mark the stressed syllable (e.g., "beau·TI·ful", "IM·por·tant", "ex·CEP·tion·al"). For multi-word phrases, separate the words' syllable breakdowns with spaces.
 - Part of speech should be: noun, verb, adjective, adverb, preposition, conjunction, interjection, pronoun, or phrase.
 - English definitions should be simple and clear for students.
 - Chinese translations MUST be in Traditional Chinese (繁體中文), not Simplified.
 - Examples should be relevant and easy to understand.
-- Include ALL highlighted words in the response.
-- Maintain the same order as the highlighted words list.
+- Include ALL highlighted terms in the response.
+- Maintain the same order as the highlighted terms list.
 
   **Respond with ONLY the JSON array, no markdown, no code blocks.`;
 }

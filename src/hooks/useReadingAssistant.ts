@@ -47,6 +47,7 @@ import { fetchAppConfig } from "@/utils/app-config";
 import { logActivity } from "@/utils/activityLogger";
 import { generateSignature } from "@/utils/signature";
 import { computeSkillBreakdown } from "@/utils/skillProfile";
+import { mergeSplitGlossaryEntries } from "@/utils/vocabulary";
 
 function smoothTextStream(type: "character" | "word" | "line") {
   return smoothStream({
@@ -1023,7 +1024,11 @@ function useReadingAssistant() {
         return [];
       }
 
-      const entries: GlossaryEntry[] = JSON.parse(text);
+      const parsed: GlossaryEntry[] = JSON.parse(text);
+      // Safety net: if the model still split a comma-containing highlighted
+      // phrase (e.g. "Agriculture, Fisheries and Conservation Department")
+      // into separate entries, stitch it back into the term the student chose.
+      const entries = mergeSplitGlossaryEntries(parsed, highlightedWords);
       setGlossary(entries);
 
       // Log for achievements — count of vocabulary items added
