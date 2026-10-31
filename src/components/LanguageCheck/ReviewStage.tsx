@@ -20,6 +20,7 @@ import {
   useLanguageCheckStore,
 } from "@/store/languageCheck";
 import { parseError } from "@/utils/error";
+import { countWords } from "@/utils/languageCheck";
 
 interface ReviewStageProps {
   essay: LanguageCheckEssay;
@@ -72,7 +73,7 @@ export default function ReviewStage({ essay, onChecked }: ReviewStageProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => flush, []);
 
-  const words = essay.transcript.split(/\s+/).filter(Boolean).length;
+  const words = countWords(essay.transcript);
   const changedSinceCheck =
     essay.status === "checked" && essay.transcript !== essay.checkedText;
 

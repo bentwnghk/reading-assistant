@@ -218,6 +218,8 @@ export default function EssayList({
                     <span className="block truncate text-xs text-muted-foreground">
                       {formatDateTime(essay.updatedAt)} ·{" "}
                       {t("languageCheck.list.pages", { count: essay.pageCount })}
+                      {essay.wordCount > 0 &&
+                        ` · ${t("languageCheck.list.words", { count: essay.wordCount })}`}
                       {essay.status === "checked" &&
                         ` · ${t("languageCheck.list.errors", { count: essay.errorCount })}`}
                     </span>

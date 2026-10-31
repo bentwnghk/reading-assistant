@@ -48,6 +48,7 @@ const ESSAYS: LanguageCheckEssaySummary[] = [
     status: "checked",
     pageCount: 1,
     errorCount: 2,
+    wordCount: 120,
     ownerId: "teacher-1",
     ownerName: "Teacher",
     createdAt: 0,
@@ -59,6 +60,7 @@ const ESSAYS: LanguageCheckEssaySummary[] = [
     status: "checked",
     pageCount: 2,
     errorCount: 1,
+    wordCount: 0,
     ownerId: "s1",
     ownerName: "Amy",
     createdAt: 0,
@@ -112,5 +114,16 @@ describe("EssayList teacher-upload affordances", () => {
     );
     expect(screen.getByText("languageCheck.upload.drop")).toBeTruthy();
     expect(screen.queryByText(/dropFor/)).toBeNull();
+  });
+
+  it("shows the transcript word count under the title when there is text", () => {
+    render(
+      <EssayList preparing={false} onFiles={() => {}} onOpen={() => {}} />,
+    );
+    const ownRow = screen.getByText("My own essay").closest("button");
+    const amyRow = screen.getByText("Amy's essay").closest("button");
+    expect(ownRow?.textContent).toContain("languageCheck.list.words");
+    // wordCount 0 (no transcript yet) shows no words segment.
+    expect(amyRow?.textContent).not.toContain("languageCheck.list.words");
   });
 });

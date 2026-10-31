@@ -1141,6 +1141,8 @@ interface LanguageCheckEssaySummary {
   status: "draft" | "transcribed" | "checked";
   pageCount: number;
   errorCount: number;
+  /** Words in the transcript (0 while there is no text yet). */
+  wordCount: number;
   /**
    * The essay's owner (the learner it belongs to). For teacher-uploaded
    * essays this is the student, not the uploader — the uploader is not on
@@ -1205,6 +1207,8 @@ interface LanguageCheckStaffRow {
   status: "draft" | "transcribed" | "checked";
   pageCount: number;
   errorCount: number;
+  /** Words in the transcript (0 while there is no text yet). */
+  wordCount: number;
   createdAt: number;
   updatedAt: number;
 }

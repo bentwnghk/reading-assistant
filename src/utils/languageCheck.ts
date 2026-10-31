@@ -6,6 +6,18 @@ import {
   isExpressionCategory,
 } from "@/constants/languageCheck";
 
+// ─── Word count ──────────────────────────────────────────────────────────────
+
+/**
+ * Whitespace-delimited word count of a transcript — the display definition
+ * everywhere (review stage, essay lists, staff dialog). The server derives the
+ * same figure for lightweight list rows in SQL
+ * (regexp_split_to_array(btrim(transcript), '\s+')); keep both in sync.
+ */
+export function countWords(text: string): number {
+  return text.split(/\s+/).filter(Boolean).length;
+}
+
 // ─── Paragraphs ──────────────────────────────────────────────────────────────
 
 export interface ParagraphSpan {

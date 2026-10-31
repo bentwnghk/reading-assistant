@@ -58,6 +58,7 @@ function staffResponse(url: URL) {
       status: r.status,
       pageCount: 1,
       errorCount: i,
+      wordCount: 10 + i,
       createdAt: 0,
       updatedAt: 0,
     })),

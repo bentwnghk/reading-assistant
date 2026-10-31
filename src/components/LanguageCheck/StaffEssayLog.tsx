@@ -238,7 +238,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       ) : (
         <>
           <div className={cn("overflow-x-auto rounded-xl border bg-card px-3", loading && "opacity-60")}>
-            <table className="w-full min-w-[52rem] text-sm">
+            <table className="w-full min-w-[56rem] text-sm">
               <thead>
                 <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <th className="py-2 pr-3 font-medium">
@@ -252,6 +252,9 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                   </th>
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colPages")}
+                  </th>
+                  <th className="py-2 pr-3 font-medium">
+                    {t("languageCheck.staff.colWords")}
                   </th>
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colErrors")}
@@ -287,6 +290,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                       </span>
                     </td>
                     <td className="py-2 pr-3 tabular-nums">{row.pageCount}</td>
+                    <td className="py-2 pr-3 tabular-nums">{row.wordCount}</td>
                     <td className="py-2 pr-3 tabular-nums">
                       {row.status === "checked" ? row.errorCount : "—"}
                     </td>
@@ -391,6 +395,8 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
               <DialogDescription>
                 {detail.userName} · {detail.userEmail} ·{" "}
                 {t("languageCheck.list.pages", { count: detail.pageCount })}
+                {detail.wordCount > 0 &&
+                  ` · ${t("languageCheck.list.words", { count: detail.wordCount })}`}
                 {detail.status === "checked" &&
                   ` · ${t("languageCheck.list.errors", { count: detail.errorCount })}`}
               </DialogDescription>

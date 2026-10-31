@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { LANGUAGE_CHECK_LEARN_DEFAULT_AGE } from "@/constants/languageCheck";
 import { useLanguageCheckLearnStore } from "@/store/languageCheckLearn";
+import { countWords } from "@/utils/languageCheck";
 
 /**
  * Language Check store — fully independent of the reading/history stores.
@@ -87,6 +88,7 @@ function toSummary(e: LanguageCheckEssay): LanguageCheckEssaySummary {
     status: e.status,
     pageCount: e.images.length,
     errorCount: e.corrections.length,
+    wordCount: countWords(e.transcript),
     ownerId: e.ownerId,
     ownerName: e.ownerName,
     createdAt: e.createdAt,
@@ -253,6 +255,10 @@ export const useLanguageCheckStore = create(
                       errorCount: patch.corrections
                         ? patch.corrections.length
                         : e.errorCount,
+                      wordCount:
+                        patch.transcript !== undefined
+                          ? countWords(patch.transcript)
+                          : e.wordCount,
                       updatedAt: now,
                     }
                   : e,

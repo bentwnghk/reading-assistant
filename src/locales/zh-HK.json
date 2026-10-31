@@ -4855,6 +4855,7 @@
       "untitled": "未命名作文",
       "for": "{{name}} 的",
       "pages_other": "{{count}} 掃描頁",
+      "words_other": "{{count}} 字",
       "errors_other": "{{count}} 項批註",
       "status": {
         "draft": "草稿",
@@ -4889,6 +4890,7 @@
       "colTitle": "標題",
       "colStatus": "狀態",
       "colPages": "頁數",
+      "colWords": "字數",
       "colErrors": "批註",
       "colUpdated": "更新時間",
       "view": "查看",

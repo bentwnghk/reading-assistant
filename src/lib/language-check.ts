@@ -1,5 +1,6 @@
 import { getPool } from "./db"
 import { getSchoolForUser } from "./users"
+import { countWords } from "@/utils/languageCheck"
 import {
   LANGUAGE_CHECK_DRAFT_RETENTION_DAYS,
   LANGUAGE_CHECK_MAX_ESSAYS,
@@ -15,6 +16,15 @@ function arrayOf<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : []
 }
 
+/**
+ * Word count computed on read from the transcript. Mirrors `countWords()`
+ * (src/utils/languageCheck.ts): whitespace-delimited words, 0 for empty text.
+ * The lightweight lists never select the transcript payload, so the figure is
+ * derived in SQL exactly like page_count / error_count.
+ */
+const WORD_COUNT_SQL = `CASE WHEN btrim(e.transcript) = '' THEN 0
+     ELSE array_length(regexp_split_to_array(btrim(e.transcript), '\\s+'), 1) END`
+
 function mapSummary(row: Record<string, unknown>): LanguageCheckEssaySummary {
   return {
     id: row.id as string,
@@ -22,6 +32,7 @@ function mapSummary(row: Record<string, unknown>): LanguageCheckEssaySummary {
     status: row.status as LanguageCheckEssaySummary["status"],
     pageCount: Number(row.page_count) || 0,
     errorCount: Number(row.error_count) || 0,
+    wordCount: Number(row.word_count) || 0,
     ownerId: (row.owner_id as string) || (row.user_id as string) || "",
     ownerName: (row.owner_name as string) || "",
     createdAt: toMs(row.created_at),
@@ -101,7 +112,8 @@ export async function listEssays(
     `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
             e.user_id AS owner_id, u.name AS owner_name,
             jsonb_array_length(e.images) AS page_count,
-            jsonb_array_length(e.corrections) AS error_count
+            jsonb_array_length(e.corrections) AS error_count,
+            ${WORD_COUNT_SQL} AS word_count
      FROM language_check_essays e
      LEFT JOIN users u ON u.id = e.user_id
      WHERE e.user_id = $1 OR e.uploaded_by = $1
@@ -429,7 +441,8 @@ export async function listStaffEssays(
       `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
               e.user_id, u.name AS user_name, u.email AS user_email,
               jsonb_array_length(e.images) AS page_count,
-              jsonb_array_length(e.corrections) AS error_count
+              jsonb_array_length(e.corrections) AS error_count,
+              ${WORD_COUNT_SQL} AS word_count
        ${STAFF_FROM}
        ${where}
        ORDER BY e.updated_at DESC
@@ -477,6 +490,7 @@ export async function listStaffEssays(
         status: row.status as LanguageCheckStaffRow["status"],
         pageCount: Number(row.page_count) || 0,
         errorCount: Number(row.error_count) || 0,
+        wordCount: Number(row.word_count) || 0,
         createdAt: toMs(row.created_at),
         updatedAt: toMs(row.updated_at),
       }),
@@ -540,6 +554,7 @@ export async function getStaffEssay(
     status: row.status as LanguageCheckStaffDetail["status"],
     pageCount: Number(row.page_count) || 0,
     errorCount: arrayOf<LanguageCheckError>(row.corrections).length,
+    wordCount: countWords((row.transcript as string) || ""),
     createdAt: toMs(row.created_at),
     updatedAt: toMs(row.updated_at),
     transcript: (row.transcript as string) || "",

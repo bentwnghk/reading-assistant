@@ -4859,6 +4859,8 @@
       "for": "For {{name}}",
       "pages_one": "{{count}} scanned page",
       "pages_other": "{{count}} scanned pages",
+      "words_one": "{{count}} word",
+      "words_other": "{{count}} words",
       "errors_one": "{{count}} comment",
       "errors_other": "{{count}} comments",
       "status": {
@@ -4894,6 +4896,7 @@
       "colTitle": "Title",
       "colStatus": "Status",
       "colPages": "Pages",
+      "colWords": "Words",
       "colErrors": "Comments",
       "colUpdated": "Updated",
       "view": "View",

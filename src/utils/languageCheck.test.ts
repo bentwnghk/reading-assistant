@@ -5,6 +5,7 @@ import {
   buildSegments,
   chunkParagraphs,
   contextAround,
+  countWords,
   deriveTitle,
   diffChanges,
   originalMarks,
@@ -26,6 +27,18 @@ const raw = (o: Partial<RawLanguageError>): RawLanguageError => ({
   explanationZh: "",
   alternatives: [],
   ...o,
+});
+
+describe("countWords", () => {
+  it("counts whitespace-delimited words", () => {
+    expect(countWords("One two three.")).toBe(3);
+    expect(countWords("  hello   world\n\tworld  ")).toBe(3);
+  });
+
+  it("returns 0 for empty or whitespace-only text", () => {
+    expect(countWords("")).toBe(0);
+    expect(countWords("  \n\t ")).toBe(0);
+  });
 });
 
 describe("splitParagraphs", () => {
