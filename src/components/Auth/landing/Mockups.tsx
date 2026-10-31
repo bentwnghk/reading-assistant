@@ -87,6 +87,14 @@ import {
   FileEdit,
   FileMinus,
   EyeOff,
+  ArrowRight,
+  RefreshCw,
+  ZoomIn,
+  ZoomOut,
+  PenLine,
+  MoreHorizontal,
+  CircleAlert,
+  Activity,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -3472,6 +3480,1212 @@ export function UnderstandDifficultyMockup() {
       {/* the three text tabs follow below the difficulty panel */}
       <div className="mt-3">
         <TextAnalysisTabs active="original" />
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CHAPTER 06 — LANGUAGE CHECK (from reading to writing)
+   Faithful, static mockups of /language-check and its "Learn from
+   your mistakes" session, mirroring:
+     1. ReviewStage.tsx + ScanViewer.tsx   — scan ↔ transcript review
+     2. ResultsView.tsx + ErrorSpan.tsx + CorrectionCard.tsx
+     3. LessonView.tsx (+ LearnPath sidebar)
+     4. PracticePlayer.tsx + ExerciseCard.tsx (practice mode)
+     5. QuizPlayer.tsx + ExerciseCard.tsx (quiz mode)
+     6. LanguageCheckHome.tsx + StaffLearning.tsx + LearnDashboardView.tsx
+   ════════════════════════════════════════════════════════════════ */
+
+/* Category styles for the corrections shown — faithful subset of
+   LANGUAGE_CHECK_CATEGORY_STYLES (src/constants/languageCheck.ts). */
+const LC_STYLE = {
+  svo: {
+    highlight: "bg-red-200 dark:bg-red-900/70",
+    badge: "bg-red-600 text-white",
+    dot: "bg-red-500",
+    border: "border-l-red-500",
+    label: "Subject-verb agreement",
+  },
+  plural: {
+    highlight: "bg-yellow-200 dark:bg-yellow-800/70",
+    badge: "bg-yellow-600 text-white",
+    dot: "bg-yellow-500",
+    border: "border-l-yellow-500",
+    label: "Plurals & countability",
+  },
+  chinglish: {
+    highlight:
+      "bg-[#f7cdee] dark:bg-[#57194c] underline decoration-dotted decoration-2 underline-offset-4 decoration-[#b6209b]",
+    badge: "bg-[#8b1876] text-white",
+    dot: "bg-[#b6209b]",
+    border: "border-l-[#b6209b]",
+    label: "Chinglish (literal translation)",
+  },
+  choice: {
+    highlight: "bg-teal-200 dark:bg-teal-900/70",
+    badge: "bg-teal-600 text-white",
+    dot: "bg-teal-500",
+    border: "border-l-teal-500",
+    label: "Word choice",
+  },
+  wform: {
+    highlight: "bg-emerald-200 dark:bg-emerald-900/70",
+    badge: "bg-emerald-600 text-white",
+    dot: "bg-emerald-500",
+    border: "border-l-emerald-500",
+    label: "Word form",
+  },
+  tense: {
+    highlight: "bg-orange-200 dark:bg-orange-900/70",
+    badge: "bg-orange-600 text-white",
+    dot: "bg-orange-500",
+    border: "border-l-orange-500",
+    label: "Tense / time frame",
+  },
+} as const;
+
+type LcCategory = keyof typeof LC_STYLE;
+
+/* Inline highlight — mirrors ErrorSpan (ErrorSpan.tsx): rounded chip with the
+   category highlight + superscript number; `active` adds the selection ring. */
+function LcSpan({
+  cat,
+  n,
+  active = false,
+  children,
+}: {
+  cat: LcCategory;
+  n: number;
+  active?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className={`rounded-md border border-black/10 px-1 py-0.5 box-decoration-clone dark:border-white/10 ${LC_STYLE[cat].highlight} ${
+        active ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""
+      }`}
+    >
+      {children}
+      <sup className="ml-0.5 text-[0.6em] font-semibold opacity-80">({n})</sup>
+    </span>
+  );
+}
+
+/* Legend chip — mirrors the ResultsView legend buttons (dot + label + count). */
+function LcLegendChip({ cat, count }: { cat: LcCategory; count: number }) {
+  const s = LC_STYLE[cat];
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border bg-card px-2 py-0.5 text-[9px] text-[var(--lp-ink)]">
+      <span className={`h-2 w-2 rounded-full ${s.dot}`} />
+      <span>{s.label}</span>
+      <span className="font-semibold tabular-nums text-muted-foreground">{count}</span>
+    </span>
+  );
+}
+
+/* The transcribed essay — the same text in every slide of this chapter. */
+const LC_TRANSCRIPT_P1 =
+  "Everyone know that plastic takes hundreds of years to break down. Every year, million of plastic bottles are thrown away and we continue to cause serious pollution to the environment. The government should introduce a levy on plastic bags as soon as possible.";
+const LC_TRANSCRIPT_P2 =
+  "However, many citizens think recycling is troublesome. They rather throw everything into one bin than wash and separate their rubbish. If we do not act now, the situation will become more and more worse.";
+
+/* ── 06 · 1. LANGUAGE CHECK — transcription review stage (faithful, static) ──
+   Mirrors ReviewStage.tsx: step indicator, hint + verify switch + action row,
+   and the scan ↔ transcript split panes. */
+export function LanguageCheckTranscribeMockup() {
+  return (
+    <MockupFrame label="LANGUAGE CHECK · Mr.🆖 ProReader">
+      <div className="space-y-2.5">
+        {/* Step indicator — Scan ✓ · Review transcript (current) · Corrections */}
+        <ol className="flex flex-wrap items-center gap-1.5 text-[11px]">
+          <li className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-white">
+              <Check className="h-3 w-3" />
+            </span>
+            Scan
+          </li>
+          <li className="flex items-center gap-1.5">
+            <span className="h-px w-4 bg-border" aria-hidden />
+            <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-[var(--lp-ink)]">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs tabular-nums text-primary-foreground">
+                2
+              </span>
+              Review transcript
+            </span>
+          </li>
+          <li className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="h-px w-4 bg-border" aria-hidden />
+            <span className="flex items-center gap-1.5 rounded-full px-2 py-0.5 opacity-50">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full border text-xs tabular-nums">
+                3
+              </span>
+              Corrections
+            </span>
+          </li>
+        </ol>
+
+        {/* Hint + verify switch + actions */}
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+          <p className="text-[10px] text-muted-foreground">
+            Compare the transcript with the original scan and fix any misread words.
+          </p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 text-[9px] text-muted-foreground">
+              <span className="inline-flex h-3.5 w-6 items-center rounded-full bg-primary px-0.5">
+                <span className="ml-auto h-2.5 w-2.5 rounded-full bg-white" />
+              </span>
+              Double-check transcription
+            </span>
+            <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+              <RefreshCw className="mr-1 h-3 w-3" />
+              Re-transcribe
+            </span>
+            <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground">
+              <SpellCheck className="mr-1 h-3 w-3" />
+              Run language check
+            </span>
+          </div>
+        </div>
+
+        {/* Scan ↔ transcript split — ResizablePanelGroup on desktop */}
+        <div className="grid grid-cols-2 gap-2">
+          {/* ScanViewer pane: page nav + zoom toolbar over the photographed page */}
+          <div className="flex min-w-0 flex-col overflow-hidden rounded-xl border bg-muted/40">
+            <div className="flex items-center justify-between border-b bg-background/80 px-1.5 py-1">
+              <div className="flex items-center gap-0.5">
+                <ChevronLeft className="h-3 w-3 text-muted-foreground/40" />
+                <span className="px-1 text-[9px] tabular-nums text-muted-foreground">Page 1 / 2</span>
+                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+              </div>
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <ZoomOut className="h-3 w-3" />
+                <ZoomIn className="h-3 w-3" />
+                <RotateCcw className="h-3 w-3" />
+              </div>
+            </div>
+            <div
+              className="min-h-0 flex-1 px-3 py-2"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(transparent, transparent 19px, rgba(59,130,246,0.18) 19px, rgba(59,130,246,0.18) 20px)",
+                fontFamily: "'Bradley Hand','Segoe Script','Comic Sans MS',cursive",
+              }}
+            >
+              <p className="text-[10px] italic leading-[20px] text-slate-700 dark:text-slate-200">
+                {LC_TRANSCRIPT_P1}
+              </p>
+              <p className="mt-5 text-right text-[10px] italic leading-[20px] text-slate-400 dark:text-slate-500">
+                … continued on page 2
+              </p>
+            </div>
+          </div>
+
+          {/* Transcript pane: editable textarea, spell-check suppressed */}
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-medium text-[var(--lp-ink)]">Transcript</p>
+              <p className="text-[9px] text-muted-foreground">78 words</p>
+            </div>
+            <div className="min-h-0 flex-1 rounded-md border px-2.5 py-2">
+              <p className="whitespace-pre-wrap text-[9.5px] leading-relaxed text-[var(--lp-ink)]">
+                {LC_TRANSCRIPT_P1}
+                {"\n\n"}
+                {LC_TRANSCRIPT_P2}
+                <span className="ml-px inline-block h-3 w-px animate-pulse bg-[var(--lp-ink)] align-middle" />
+              </p>
+            </div>
+            <p className="text-[9px] text-muted-foreground">Separate paragraphs with a blank line.</p>
+          </div>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 06 · 2. LANGUAGE CHECK — checked results + correction popover (faithful) ──
+   Mirrors the results workspace: toolbar, ResultsSummary line, two-tier legend,
+   the highlighted essay with an open ErrorSpan popover, and CorrectionCards. */
+export function LanguageCheckResultsMockup() {
+  return (
+    <MockupFrame label="LANGUAGE CHECK · Mr.🆖 ProReader">
+      <div className="space-y-2.5">
+        {/* Toolbar — ExplanationLanguageToggle · Learn · Export · More */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+            <span className="font-semibold">English</span>
+            <span className="inline-flex h-3.5 w-6 items-center rounded-full bg-muted-foreground/30 px-0.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-white" />
+            </span>
+            <span className="text-muted-foreground">繁體中文</span>
+          </span>
+          <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground">
+            <GraduationCap className="mr-1 h-3 w-3" />
+            Learn from mistakes
+          </span>
+          <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+            <Download className="mr-1 h-3 w-3" />
+            Export to Word
+          </span>
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border text-muted-foreground">
+            <MoreHorizontal className="h-3.5 w-3.5" />
+          </span>
+        </div>
+
+        {/* ResultsSummary line */}
+        <p className="text-[10px] text-muted-foreground">
+          <span className="font-medium text-[var(--lp-ink)]">5 corrections · 1 suggestion</span>
+          <span className="mx-1.5">·</span>
+          Model: claude-sonnet-5-5
+        </p>
+
+        {/* Two-tier legend — errors, then optional-expression suggestions */}
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="mr-0.5 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
+              Errors
+            </span>
+            <LcLegendChip cat="svo" count={1} />
+            <LcLegendChip cat="plural" count={1} />
+            <LcLegendChip cat="choice" count={1} />
+            <LcLegendChip cat="wform" count={1} />
+            <span className="text-[8px] text-muted-foreground">Hide group</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="mr-0.5 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
+              Suggestions
+            </span>
+            <LcLegendChip cat="chinglish" count={1} />
+            <span className="text-[8px] text-muted-foreground">Hide group</span>
+          </div>
+        </div>
+
+        {/* Highlighted essay (left) + correction cards (right) */}
+        <div className="grid gap-2.5 lg:grid-cols-[minmax(0,1fr)_42%]">
+          <div className="min-w-0 rounded-xl border bg-card p-3">
+            <div className="relative pt-[6.75rem]">
+              {/* Open ErrorSpan popover — side="top", arrow pointing at mistake ① */}
+              <div className="absolute inset-x-2 top-0 z-20 rounded-xl border bg-popover p-2.5 text-popover-foreground shadow-xl">
+                <p className="text-[9px] font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+                  Subject-verb agreement{" "}
+                  <span className="font-semibold text-indigo-400">(1)</span>
+                </p>
+                <div className="mt-1.5 rounded-lg bg-muted px-2 py-1 text-[10px]">
+                  <span className="font-medium text-muted-foreground">Correction:</span>{" "}
+                  <span className="font-semibold text-green-700 dark:text-green-400">knows</span>
+                </div>
+                <p className="mt-1.5 text-[10px] leading-snug">
+                  “Everyone” is singular, so the verb takes -s: everyone knows. Chinese verbs never
+                  change form, so the -s is easy to drop.
+                </p>
+                <span className="absolute bottom-[-4px] left-6 h-2 w-2 rotate-45 border-b border-r border-border bg-popover" />
+              </div>
+
+              <p className="whitespace-pre-wrap break-words text-[11.5px] leading-[1.7rem]" lang="en">
+                Everyone <LcSpan cat="svo" n={1} active>know</LcSpan> that plastic takes hundreds of
+                years to break down. Every year, <LcSpan cat="plural" n={2}>million of</LcSpan>{" "}
+                plastic bottles are thrown away and we continue to{" "}
+                <LcSpan cat="chinglish" n={3}>cause serious pollution to the environment</LcSpan>.
+                The government should introduce a levy on plastic bags as soon as possible.
+                {"\n\n"}
+                However, many citizens think recycling is troublesome.{" "}
+                <LcSpan cat="choice" n={4}>They rather throw</LcSpan> everything into one bin than
+                wash and separate their rubbish. If we do not act now, the situation will become{" "}
+                <LcSpan cat="wform" n={5}>more and more worse</LcSpan>.
+              </p>
+            </div>
+          </div>
+
+          {/* CorrectionCard column — cross-linked to the highlights */}
+          <div className="flex min-w-0 flex-col gap-2">
+            {/* Card ① — active (selected from the highlight above) */}
+            <div
+              className="rounded-xl border border-l-4 bg-card p-2.5 shadow-sm ring-2 ring-primary"
+              style={{ borderLeftColor: "#ef4444" }}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[8px] font-bold text-white">
+                  1
+                </span>
+                <p className="text-[10px] font-medium text-muted-foreground">
+                  Subject-verb agreement
+                </p>
+              </div>
+              <p className="mt-1.5 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
+                Original
+              </p>
+              <p className="mt-0.5 text-[10px] leading-snug">
+                Everyone{" "}
+                <span className="rounded bg-red-100 px-0.5 font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">
+                  know
+                </span>{" "}
+                that plastic takes hundreds of years to break down.
+              </p>
+              <div className="mt-1.5 flex items-center gap-1.5 text-[10px]">
+                <span className="rounded bg-red-100 px-1 py-0.5 font-semibold text-red-700 line-through decoration-red-700/70 dark:bg-red-950 dark:text-red-300">
+                  know
+                </span>
+                <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+                <span className="rounded bg-green-100 px-1 py-0.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
+                  knows
+                </span>
+              </div>
+              <p className="mt-1.5 text-[8px] font-bold uppercase tracking-wider text-green-700 dark:text-green-400">
+                Corrections
+              </p>
+              <p className="mt-0.5 text-[10px] leading-snug text-green-700 dark:text-green-400">
+                Everyone <span className="font-semibold">knows</span> that plastic takes hundreds of
+                years to break down.
+              </p>
+              <p className="mt-1.5 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
+                Explanation
+              </p>
+              <p className="mt-0.5 text-[10px] leading-snug">
+                Chinese verbs never change form, so the third-person -s is easy to drop.
+              </p>
+            </div>
+
+            {/* Card ② */}
+            <div className="rounded-xl border border-l-4 bg-card p-2.5 shadow-sm" style={{ borderLeftColor: "#eab308" }}>
+              <div className="flex items-center gap-1.5">
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-yellow-600 px-1 text-[8px] font-bold text-white">
+                  2
+                </span>
+                <p className="text-[10px] font-medium text-muted-foreground">Plurals & countability</p>
+              </div>
+              <p className="mt-1.5 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
+                Original
+              </p>
+              <p className="mt-0.5 text-[10px] leading-snug">
+                Every year,{" "}
+                <span className="rounded bg-red-100 px-0.5 font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">
+                  million of
+                </span>{" "}
+                plastic bottles are thrown away…
+              </p>
+              <div className="mt-1.5 flex items-center gap-1.5 text-[10px]">
+                <span className="rounded bg-red-100 px-1 py-0.5 font-semibold text-red-700 line-through decoration-red-700/70 dark:bg-red-950 dark:text-red-300">
+                  million
+                </span>
+                <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+                <span className="rounded bg-green-100 px-1 py-0.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
+                  millions
+                </span>
+              </div>
+              <p className="mt-1.5 text-[8px] font-bold uppercase tracking-wider text-green-700 dark:text-green-400">
+                Corrections
+              </p>
+              <p className="mt-0.5 text-[10px] leading-snug text-green-700 dark:text-green-400">
+                Every year, <span className="font-semibold">millions of</span> plastic bottles are
+                thrown away…
+              </p>
+              <p className="mt-1.5 text-[10px] leading-snug">
+                “Millions of” is the fixed plural form for large, unspecified numbers.
+              </p>
+            </div>
+
+            {/* Card ③ — suggestion tier, cropped by the scroll edge */}
+            <div className="overflow-hidden rounded-xl border border-l-4 bg-card p-2.5 shadow-sm" style={{ borderLeftColor: "#b6209b", maxHeight: "2.6rem" }}>
+              <div className="flex items-center gap-1.5">
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#8b1876] px-1 text-[8px] font-bold text-white">
+                  3
+                </span>
+                <p className="text-[10px] font-medium text-muted-foreground">
+                  Chinglish (literal translation)
+                </p>
+                <span className="ml-auto rounded-full border border-dashed px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Suggestion
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Learn-session chrome shared by slides 3-5 — LearnWorkspace header
+   (LearnContainer.tsx) + LearnPath sidebar. ────────────────────────────── */
+const LEARN_STAGE_ICONS = { lesson: BookOpen, practice: PenLine, quiz: Trophy } as const;
+
+function LearnPathMock({
+  active,
+  practicePct = null,
+  lessonDone = false,
+  practiceDone = false,
+}: {
+  active: { unit: number; stage: keyof typeof LEARN_STAGE_ICONS };
+  /** Practice % shown beside unit 0's practice row (null = not finished). */
+  practicePct?: number | null;
+  lessonDone?: boolean;
+  practiceDone?: boolean;
+}) {
+  const units: { cat: LcCategory; label: string }[] = [
+    { cat: "svo", label: "Subject-verb agreement" },
+    { cat: "tense", label: "Tense / time frame" },
+    { cat: "chinglish", label: "Chinglish (literal trans.)" },
+  ];
+  const stages: (keyof typeof LEARN_STAGE_ICONS)[] = ["lesson", "practice", "quiz"];
+
+  return (
+    <nav className="space-y-1.5" aria-label="Learning path">
+      <ol className="space-y-1.5">
+        {units.map((u, ui) => {
+          const unitActive = ui === active.unit;
+          return (
+            <li
+              key={u.cat}
+              className={`rounded-xl border bg-card p-1.5 ${
+                unitActive ? "shadow-md ring-1 ring-primary/40" : ""
+              }`}
+            >
+              <p className="mb-1 flex items-center gap-1 text-[9px] font-semibold text-[var(--lp-ink)]">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${LC_STYLE[u.cat].dot}`} />
+                <span className="min-w-0 flex-1 truncate">{u.label}</span>
+              </p>
+              <ul className="space-y-0.5">
+                {stages.map((stage) => {
+                  const Icon = LEARN_STAGE_ICONS[stage];
+                  const isActive = unitActive && active.stage === stage;
+                  // Stage locks: lesson opens freely; practice follows it;
+                  // quiz opens only once practice is done (stageUnlocked()).
+                  const unlocked =
+                    stage === "lesson" ||
+                    (ui === 0 && (stage === "practice" || (stage === "quiz" && practiceDone)));
+                  const done =
+                    ui === 0 &&
+                    ((stage === "lesson" && lessonDone) ||
+                      (stage === "practice" && practiceDone));
+                  const pct = ui === 0 && stage === "practice" ? practicePct : null;
+                  return (
+                    <li key={stage}>
+                      <span
+                        className={`flex w-full items-center gap-1 rounded-lg px-1.5 py-1 text-left text-[9px] ${
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : unlocked
+                              ? "text-[var(--lp-ink)]"
+                              : "text-muted-foreground/60"
+                        }`}
+                      >
+                        {unlocked ? (
+                          <Icon className="h-2.5 w-2.5 shrink-0" />
+                        ) : (
+                          <Lock className="h-2.5 w-2.5 shrink-0" />
+                        )}
+                        <span className="flex-1 capitalize">{stage}</span>
+                        {pct !== null && (
+                          <span className="text-[8px] font-semibold tabular-nums">{pct}%</span>
+                        )}
+                        {done && pct === null && <Check className="h-2.5 w-2.5 shrink-0" />}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </li>
+          );
+        })}
+      </ol>
+      <span className="flex w-full items-center gap-1.5 rounded-xl border px-2 py-1.5 text-[9px] font-semibold text-muted-foreground/60">
+        <Lock className="h-2.5 w-2.5" />
+        Summary
+      </span>
+    </nav>
+  );
+}
+
+function LearnChrome({
+  path,
+  children,
+}: {
+  path: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2.5">
+      {/* Workspace header */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="inline-flex items-center gap-1 text-[9px] text-muted-foreground">
+          <ArrowLeft className="h-3 w-3" />
+          Back to results
+        </span>
+        <div className="flex min-w-[7rem] flex-1 items-center gap-1.5">
+          <GraduationCap className="h-3.5 w-3.5 shrink-0 text-primary" />
+          <div className="min-w-0">
+            <p className="truncate text-[10px] font-bold leading-tight text-[var(--lp-ink)]">
+              Learn from your mistakes
+            </p>
+            <p className="truncate text-[8px] text-muted-foreground">
+              The Problem with Plastic · Secondary 4
+            </p>
+          </div>
+        </div>
+        <span className="text-[8px] text-muted-foreground">Saved</span>
+        <span className="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[8.5px] font-medium text-[var(--lp-ink)]">
+          <FileDown className="h-3 w-3" />
+          Export to Word
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full border bg-card px-2 py-0.5 text-[8.5px] text-[var(--lp-ink)]">
+          <span className="font-semibold">English</span>
+          <span className="inline-flex h-3 w-5 items-center rounded-full bg-muted-foreground/30 px-0.5">
+            <span className="h-2 w-2 rounded-full bg-white" />
+          </span>
+          <span className="text-muted-foreground">繁體中文</span>
+        </span>
+      </div>
+      <div className="grid grid-cols-[7.75rem_minmax(0,1fr)] gap-2.5">
+        {path}
+        <div className="min-w-0">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── 06 · 3. LEARN — the lesson stage (faithful, static) ──
+   Mirrors LessonView.tsx: header card, the learner's own mistakes with marked
+   sentences + diff chips, the rule with pattern + examples, a wrong/right
+   contrast, and the "Start practice" button. */
+export function LearnLessonMockup() {
+  return (
+    <MockupFrame label="LEARN FROM YOUR MISTAKES · Mr.🆖 ProReader">
+      <LearnChrome
+        path={
+          <LearnPathMock
+            active={{ unit: 0, stage: "lesson" }}
+            lessonDone={false}
+            practiceDone={false}
+          />
+        }
+      >
+        <div className="space-y-2.5">
+          {/* Lesson header card */}
+          <header className="space-y-1.5 rounded-2xl border border-l-8 bg-card p-3" style={{ borderLeftColor: "#ef4444" }}>
+            <p className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
+              Lesson · Subject-verb agreement
+            </p>
+            <h3 className="text-sm font-bold leading-tight text-[var(--lp-ink)]">
+              Everyone is singular
+            </h3>
+            <p className="flex items-start gap-1.5 text-[10.5px] leading-snug text-[var(--lp-ink)]">
+              <Target className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+              <span>
+                With <em>everyone</em>, <em>each</em> and <em>every one</em>, the verb is singular.
+              </span>
+            </p>
+            <p className="text-[9px] text-muted-foreground">
+              This single mark covers many of the points lost in the Language domain.
+            </p>
+          </header>
+
+          {/* Your mistakes — start from the learner's own sentences */}
+          <section className="space-y-1.5">
+            <h4 className="flex items-center gap-1.5 text-[8.5px] font-bold uppercase tracking-wider text-muted-foreground">
+              <TriangleAlert className="h-3 w-3 text-rose-500" />
+              Your 3 mistakes
+            </h4>
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="space-y-1 rounded-xl border bg-card p-2">
+                <p className="text-[9.5px] leading-snug text-muted-foreground" lang="en">
+                  “My teacher always{" "}
+                  <span className="font-medium text-[var(--lp-ink)] underline decoration-red-500 decoration-2 underline-offset-2">
+                    give
+                  </span>{" "}
+                  us homework.”
+                </p>
+                <div className="flex items-center gap-1 text-[9px]">
+                  <span className="rounded bg-red-100 px-1 py-0.5 font-semibold text-red-700 line-through decoration-red-700/70 dark:bg-red-950 dark:text-red-300">
+                    give
+                  </span>
+                  <ArrowRight className="h-2.5 w-2.5 shrink-0 text-muted-foreground" />
+                  <span className="rounded bg-green-100 px-1 py-0.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
+                    gives
+                  </span>
+                </div>
+                <p className="text-[8.5px] leading-snug">
+                  <em>My teacher</em> is third-person singular.
+                </p>
+              </div>
+              <div className="space-y-1 rounded-xl border bg-card p-2">
+                <p className="text-[9.5px] leading-snug text-muted-foreground" lang="en">
+                  “Everyone{" "}
+                  <span className="font-medium text-[var(--lp-ink)] underline decoration-red-500 decoration-2 underline-offset-2">
+                    know
+                  </span>{" "}
+                  the answer.”
+                </p>
+                <div className="flex items-center gap-1 text-[9px]">
+                  <span className="rounded bg-red-100 px-1 py-0.5 font-semibold text-red-700 line-through decoration-red-700/70 dark:bg-red-950 dark:text-red-300">
+                    know
+                  </span>
+                  <ArrowRight className="h-2.5 w-2.5 shrink-0 text-muted-foreground" />
+                  <span className="rounded bg-green-100 px-1 py-0.5 font-medium text-green-800 dark:bg-green-950 dark:text-green-300">
+                    knows
+                  </span>
+                </div>
+                <p className="text-[8.5px] leading-snug">
+                  <em>Everyone</em> feels plural but takes a singular verb.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* The rule */}
+          <section className="space-y-1.5">
+            <h4 className="flex items-center gap-1.5 text-[8.5px] font-bold uppercase tracking-wider text-muted-foreground">
+              <BookOpenCheck className="h-3 w-3 text-primary" />
+              The rule
+            </h4>
+            <div className="space-y-1.5 rounded-xl border bg-card p-2.5">
+              <div className="flex items-start gap-1.5">
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">
+                  1
+                </span>
+                <div className="min-w-0 space-y-1">
+                  <p className="text-[10px] font-semibold text-[var(--lp-ink)]">
+                    Singular subjects take a singular verb
+                  </p>
+                  <p className="text-[9.5px] leading-snug text-[var(--lp-ink)]">
+                    Third-person singular subjects — he, she, it, everyone, each — add -s to the
+                    present-simple verb.
+                  </p>
+                </div>
+              </div>
+              <p className="rounded-lg bg-muted px-2 py-1 font-mono text-[9px]" lang="en">
+                Everyone / Each / Every one + verb-s
+              </p>
+              <ul className="space-y-1">
+                <li
+                  lang="en"
+                  className="rounded-md border-l-4 border-green-500 bg-green-50 px-2 py-1 text-[10px] dark:bg-green-950/30"
+                >
+                  Everyone knows the answer.
+                </li>
+                <li
+                  lang="en"
+                  className="rounded-md border-l-4 border-green-500 bg-green-50 px-2 py-1 text-[10px] dark:bg-green-950/30"
+                >
+                  My teacher gives us homework every day.
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Common mistakes — wrong / right contrast */}
+          <section className="space-y-1.5">
+            <h4 className="flex items-center gap-1.5 text-[8.5px] font-bold uppercase tracking-wider text-muted-foreground">
+              <TriangleAlert className="h-3 w-3 text-amber-500" />
+              Common mistakes
+            </h4>
+            <div className="overflow-hidden rounded-xl border text-[10px]" lang="en">
+              <p className="flex items-start gap-1.5 bg-red-50 px-2.5 py-1.5 dark:bg-red-950/40">
+                <span className="mt-0.5 text-[7px] font-bold uppercase text-red-600 dark:text-red-400">
+                  Wrong
+                </span>
+                <span className="text-muted-foreground line-through">Everyone know the answer.</span>
+              </p>
+              <p className="flex items-start gap-1.5 bg-green-50 px-2.5 py-1.5 dark:bg-green-950/40">
+                <span className="mt-0.5 text-[7px] font-bold uppercase text-green-600 dark:text-green-400">
+                  Right
+                </span>
+                <span className="font-medium">Everyone knows the answer.</span>
+              </p>
+              <p className="border-t bg-card px-2.5 py-1.5 text-[9px] text-muted-foreground">
+                Chinese verbs never change form — English adds -s after he / she / it and everyone.
+              </p>
+            </div>
+          </section>
+
+          <div className="flex justify-end pt-0.5">
+            <span className="inline-flex items-center rounded-md bg-primary px-2.5 py-1.5 text-[10px] font-medium text-primary-foreground">
+              Start practice
+              <ArrowRight className="ml-1 h-3 w-3" />
+            </span>
+          </div>
+        </div>
+      </LearnChrome>
+    </MockupFrame>
+  );
+}
+
+/* ── 06 · 4. LEARN — practice stage (faithful, static) ──
+   Mirrors PracticePlayer + ExerciseCard in practice mode: progress row, type
+   pills, fill-blank input graded wrong, hint, "Not quite" feedback with model
+   answer, Try again / Show answer. */
+export function LearnPracticeMockup() {
+  return (
+    <MockupFrame label="LEARN FROM YOUR MISTAKES · Mr.🆖 ProReader">
+      <LearnChrome
+        path={
+          <LearnPathMock
+            active={{ unit: 0, stage: "practice" }}
+            lessonDone
+            practiceDone={false}
+          />
+        }
+      >
+        <div className="space-y-2">
+          {/* Progress row */}
+          <div className="flex items-center gap-2">
+            <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted-foreground/20">
+              <span className="block h-full rounded-full bg-primary" style={{ width: "20%" }} />
+            </span>
+            <span className="text-[9px] font-medium tabular-nums text-muted-foreground">1/5</span>
+          </div>
+
+          {/* ExerciseCard — practice mode, graded wrong on the first try */}
+          <article className="space-y-2 rounded-2xl border bg-card p-3 shadow-sm">
+            <header className="flex flex-wrap items-center gap-1.5 text-[8.5px]">
+              <span className="rounded-full bg-muted px-2 py-0.5 font-semibold tabular-nums text-[var(--lp-ink)]">
+                1 of 5
+              </span>
+              <span className="rounded-full border px-2 py-0.5 text-muted-foreground">
+                Fill in the blank
+              </span>
+            </header>
+
+            <p className="text-[9px] font-medium text-muted-foreground">
+              Type the missing word or words.
+            </p>
+
+            {/* FillBlankInput — the typed answer was marked wrong (red) */}
+            <p className="text-[12px] leading-[2rem] text-[var(--lp-ink)]" lang="en">
+              Everyone{" "}
+              <span className="mx-0.5 inline-block min-w-[3.5rem] rounded-md border-0 border-b-2 border-red-500 bg-red-100 px-1 py-0.5 text-center text-[11px] dark:bg-red-950/50">
+                know
+              </span>{" "}
+              the answer to this question.
+            </p>
+
+            {/* Hint — shown after a wrong attempt */}
+            <p className="flex items-start gap-1.5 rounded-lg bg-amber-50 px-2 py-1.5 text-[9.5px] text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+              <Lightbulb className="mt-0.5 h-3 w-3 shrink-0" />
+              <span>Third-person singular subjects need verb + -s.</span>
+            </p>
+
+            {/* Feedback — "Not quite" + model answer */}
+            <div className="space-y-1.5 rounded-xl border border-red-500/60 bg-red-50 p-2.5 dark:bg-red-950/30">
+              <p className="flex items-center gap-1.5 text-[10px] font-semibold text-[var(--lp-ink)]">
+                <CircleAlert className="h-3.5 w-3.5 text-red-600" />
+                Not quite
+              </p>
+              <p className="text-[9.5px]">
+                <span className="font-semibold">Model answer: </span>
+                <span lang="en" className="font-medium">
+                  knows
+                </span>
+              </p>
+              <p className="text-[9px] text-muted-foreground">
+                “Everyone” is singular, so the verb takes -s: everyone knows.
+              </p>
+            </div>
+
+            <footer className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center rounded-md border px-2 py-1 text-[9.5px] font-medium text-[var(--lp-ink)]">
+                <RotateCcw className="mr-1 h-3 w-3" />
+                Try again
+              </span>
+              <span className="inline-flex items-center gap-1 px-1.5 py-1 text-[9.5px] text-muted-foreground">
+                <Eye className="h-3 w-3" />
+                Show answer
+              </span>
+            </footer>
+          </article>
+
+          <span className="inline-flex items-center px-1 py-0.5 text-[9px] text-muted-foreground">
+            Previous exercise
+          </span>
+        </div>
+      </LearnChrome>
+    </MockupFrame>
+  );
+}
+
+/* ── 06 · 5. LEARN — quiz stage (faithful, static) ──
+   Mirrors QuizPlayer + ExerciseCard in quiz mode: progress row, choice
+   question with a picked option, and a single "Submit answer" — no hints,
+   no feedback until the review at the end. */
+export function LearnQuizMockup() {
+  const options = ["take", "takes", "taking", "took"];
+  const picked = "take";
+  return (
+    <MockupFrame label="LEARN FROM YOUR MISTAKES · Mr.🆖 ProReader">
+      <LearnChrome
+        path={
+          <LearnPathMock
+            active={{ unit: 0, stage: "quiz" }}
+            lessonDone
+            practiceDone
+            practicePct={100}
+          />
+        }
+      >
+        <div className="space-y-2">
+          {/* Progress row */}
+          <div className="flex items-center gap-2">
+            <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted-foreground/20">
+              <span className="block h-full rounded-full bg-primary" style={{ width: "50%" }} />
+            </span>
+            <span className="text-[9px] font-medium tabular-nums text-muted-foreground">3/6</span>
+          </div>
+
+          {/* ExerciseCard — quiz mode: one submission, no hint */}
+          <article className="space-y-2 rounded-2xl border bg-card p-3 shadow-sm">
+            <header className="flex flex-wrap items-center gap-1.5 text-[8.5px]">
+              <span className="rounded-full bg-muted px-2 py-0.5 font-semibold tabular-nums text-[var(--lp-ink)]">
+                3 of 6
+              </span>
+              <span className="rounded-full border px-2 py-0.5 text-muted-foreground">Choose</span>
+            </header>
+
+            <p className="text-[9px] font-medium text-muted-foreground">Choose the best answer.</p>
+
+            {/* Prompt with a BlankText gap */}
+            <p className="text-[12px] font-medium leading-relaxed text-[var(--lp-ink)]" lang="en">
+              Everyone in my class{" "}
+              <span
+                aria-label="blank"
+                className="mx-0.5 inline-block w-12 translate-y-0.5 border-b-2 border-[var(--lp-ink)]/60"
+              />{" "}
+              part in the beach clean-up.
+            </p>
+
+            {/* ChoiceInput radiogroup — one option picked */}
+            <div className="grid gap-1.5">
+              {options.map((option, i) => {
+                const isPicked = option === picked;
+                const letter = String.fromCharCode(65 + i);
+                return (
+                  <span
+                    key={option}
+                    className={`flex w-full items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left text-[11px] text-[var(--lp-ink)] ${
+                      isPicked ? "border-primary bg-primary/10" : ""
+                    }`}
+                  >
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[9px] font-semibold ${
+                        isPicked ? "border-primary bg-primary text-primary-foreground" : ""
+                      }`}
+                    >
+                      {letter}
+                    </span>
+                    <span className="min-w-0 flex-1 break-words">{option}</span>
+                  </span>
+                );
+              })}
+            </div>
+
+            <footer className="flex flex-wrap items-center">
+              <span className="ml-auto inline-flex items-center rounded-md bg-primary px-2.5 py-1.5 text-[9.5px] font-medium text-primary-foreground">
+                Submit answer
+              </span>
+            </footer>
+          </article>
+        </div>
+      </LearnChrome>
+    </MockupFrame>
+  );
+}
+
+/* ── 06 · 6. LANGUAGE CHECK — Student learning overview (faithful, static) ──
+   Mirrors /language-check?view=students&tab=learning: scope switch, section
+   tabs, staff filter bar, Overview/Sessions/Activity tabs + range, the stat
+   grid, the activity chart and the per-topic + per-student tables. */
+export function LanguageCheckStaffOverviewMockup() {
+  /* Activity per day — stacked practice/quizzes bars + average-quiz line.
+     Colours mirror CHART_COLORS in LearnDashboardView.tsx. */
+  const days = ["10-25", "10-26", "10-27", "10-28", "10-29", "10-30", "10-31"];
+  const practice = [12, 8, 15, 9, 18, 14, 11];
+  const quizzes = [3, 2, 4, 2, 5, 3, 4];
+  const avgLine = "18,30.4 54,29 90,26.2 126,28.3 162,22.7 198,24.1 234,21.3";
+
+  const topics = [
+    { cat: "svo" as LcCategory, learners: 14, quizzes: 22, latest: 87, delta: 9, acc: 81, bar: [12, 2, 0] },
+    { cat: "tense" as LcCategory, learners: 11, quizzes: 15, latest: 72, delta: 6, acc: 74, bar: [7, 4, 1] },
+    { cat: "chinglish" as LcCategory, learners: 9, quizzes: 12, latest: 55, delta: 4, acc: 66, bar: [3, 5, 3] },
+  ];
+  const students = [
+    { name: "Chloe Chan", email: "chloe.chan@school.edu", sessions: "5/6", quizzes: 9, avg: 88, delta: 12, acc: 84, weak: "Tense / time frame", weakPct: 72, weakCat: "tense" as LcCategory, time: "2 h 41 min", last: "31/10 14:32" },
+    { name: "Marcus Wong", email: "marcus.wong@school.edu", sessions: "4/5", quizzes: 8, avg: 76, delta: 8, acc: 79, weak: "Chinglish (literal trans.)", weakPct: 55, weakCat: "chinglish" as LcCategory, time: "1 h 58 min", last: "30/10 16:05" },
+    { name: "Ka Yan Lam", email: "kayan.lam@school.edu", sessions: "4/4", quizzes: 6, avg: 64, delta: 5, acc: 71, weak: "Chinglish (literal trans.)", weakPct: 58, weakCat: "chinglish" as LcCategory, time: "1 h 12 min", last: "29/10 09:47" },
+  ];
+
+  const stats: { icon: typeof BookOpenCheck; tone: string; label: string; value: string; hint?: string }[] = [
+    { icon: BookOpenCheck, tone: "text-primary", label: "Sessions started", value: "24", hint: "18 completed" },
+    { icon: PenLine, tone: "text-sky-500", label: "Practice answers", value: "312", hint: "78% right first time" },
+    { icon: Trophy, tone: "text-indigo-500", label: "Quizzes finished", value: "41", hint: "average 76%" },
+    { icon: TrendingUp, tone: "text-green-500", label: "Improvement", value: "+12", hint: "points gained on retaken topics" },
+    { icon: Award, tone: "text-green-500", label: "Secure topics", value: "9", hint: "4 developing · 2 need review" },
+    { icon: Target, tone: "text-amber-500", label: "Lessons read", value: "35" },
+    { icon: Activity, tone: "text-rose-500", label: "Active days", value: "12" },
+    { icon: Clock, tone: "text-violet-500", label: "Time on task", value: "6 h 24 min", hint: "estimated from activity" },
+  ];
+
+  return (
+    <MockupFrame label="STUDENT LEARNING · Mr.🆖 ProReader">
+      <div className="space-y-2">
+        {/* Page header + staff scope switch */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--lp-ink)]">
+            <SpellCheck className="h-4 w-4 text-primary" />
+            Language Check
+          </h3>
+          <div className="flex gap-1 rounded-lg bg-muted p-1">
+            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+              My work
+            </span>
+            <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
+              My students
+            </span>
+          </div>
+        </div>
+
+        {/* Section tabs */}
+        <div className="flex items-center gap-1 border-b">
+          <span className="-mb-px flex items-center gap-1 border-b-2 border-transparent px-2.5 py-1.5 text-[10px] font-medium text-muted-foreground">
+            <FileText className="h-3 w-3" />
+            Student essays
+          </span>
+          <span className="-mb-px flex items-center gap-1 border-b-2 border-primary px-2.5 py-1.5 text-[10px] font-medium text-[var(--lp-ink)]">
+            <GraduationCap className="h-3 w-3" />
+            Student learning
+          </span>
+        </div>
+
+        {/* Shared staff filter bar */}
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card px-2 py-1.5">
+          <span className="flex items-center gap-1 text-[8.5px] font-medium text-muted-foreground">
+            <Users className="h-3 w-3" />
+            Students in your classes
+          </span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className="inline-flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+              My Classes
+              <ChevronsUpDown className="h-2.5 w-2.5 text-muted-foreground" />
+            </span>
+            <span className="inline-flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+              All students
+              <ChevronsUpDown className="h-2.5 w-2.5 text-muted-foreground" />
+            </span>
+          </div>
+        </div>
+
+        {/* Overview / Sessions / Activity + time range */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex gap-1 rounded-lg bg-muted p-1">
+            <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
+              Overview
+            </span>
+            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+              Sessions
+            </span>
+            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+              Activity
+            </span>
+          </div>
+          <div className="flex gap-1 rounded-lg bg-muted p-1">
+            {["All time", "7 days", "30 days", "90 days"].map((r, i) => (
+              <span
+                key={r}
+                className={`rounded-md px-2 py-1 text-[8.5px] font-medium ${
+                  i === 2
+                    ? "bg-background text-[var(--lp-ink)] shadow-sm"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {r}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Stat grid */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {stats.map((s) => (
+            <div key={s.label} className="rounded-lg border bg-muted/40 px-2 py-1.5">
+              <p className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                <s.icon className={`h-2.5 w-2.5 ${s.tone}`} />
+                {s.label}
+              </p>
+              <p className="mt-0.5 text-[13px] font-semibold leading-tight tabular-nums text-[var(--lp-ink)]">
+                {s.value}
+              </p>
+              {s.hint && <p className="text-[7.5px] leading-tight text-muted-foreground">{s.hint}</p>}
+            </div>
+          ))}
+        </div>
+
+        {/* Activity per day — stacked bars + average line */}
+        <div className="rounded-lg border p-2">
+          <p className="mb-1 text-[9.5px] font-semibold text-muted-foreground">Activity per day</p>
+          <svg viewBox="0 0 264 96" className="w-full">
+            {[20, 42, 64].map((y) => (
+              <line key={y} x1="6" y1={y} x2="258" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.5" opacity="0.6" />
+            ))}
+            <line x1="6" y1="78" x2="258" y2="78" stroke="var(--lp-rule)" strokeWidth="0.7" />
+            {practice.map((p, i) => {
+              const x = 10 + i * 36;
+              const hP = p * 2.4;
+              const hQ = quizzes[i] * 2.4;
+              return (
+                <g key={i}>
+                  <rect x={x} y={78 - hP} width="16" height={hP} fill="#38bdf8" rx="1" />
+                  <rect x={x} y={78 - hP - hQ} width="16" height={hQ} fill="#6366f1" rx="1" />
+                </g>
+              );
+            })}
+            <polyline points={avgLine} fill="none" stroke="#f97316" strokeWidth="1.6" />
+            {days.map((d, i) => (
+              <text key={d} x={18 + i * 36} y={88} textAnchor="middle" fontSize="6" fill="var(--lp-ink-soft)">
+                {d}
+              </text>
+            ))}
+          </svg>
+          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+            {[
+              { c: "#38bdf8", l: "Practice answers" },
+              { c: "#6366f1", l: "Quizzes finished" },
+              { c: "#f97316", l: "Average quiz score" },
+            ].map((x) => (
+              <span key={x.l} className="inline-flex items-center gap-0.5 text-[7.5px] text-[var(--lp-ink-soft)]">
+                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: x.c }} />
+                {x.l}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Per-topic mastery table */}
+        <div className="overflow-hidden rounded-lg border">
+          <table className="w-full text-[8.5px]">
+            <thead>
+              <tr className="border-b bg-muted/40 text-left uppercase tracking-wide text-muted-foreground">
+                <th className="px-2 py-1 font-medium">Topic</th>
+                <th className="px-2 py-1 font-medium">Learners</th>
+                <th className="px-2 py-1 font-medium">Quizzes</th>
+                <th className="px-2 py-1 font-medium">Latest score</th>
+                <th className="px-2 py-1 font-medium">Impr.</th>
+                <th className="px-2 py-1 font-medium">Practice</th>
+                <th className="px-2 py-1 font-medium">Mastery</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topics.map((t) => {
+                const total = t.bar[0] + t.bar[1] + t.bar[2];
+                return (
+                  <tr key={t.cat} className="border-b last:border-0">
+                    <td className="px-2 py-1">
+                      <span className="flex items-center gap-1 font-medium text-[var(--lp-ink)]">
+                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${LC_STYLE[t.cat].dot}`} />
+                        {LC_STYLE[t.cat].label}
+                      </span>
+                    </td>
+                    <td className="px-2 py-1 tabular-nums">{t.learners}</td>
+                    <td className="px-2 py-1 tabular-nums">{t.quizzes}</td>
+                    <td className="px-2 py-1">
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[8px] font-semibold tabular-nums ${
+                          t.latest >= 80
+                            ? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
+                            : t.latest >= 50
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                              : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+                        }`}
+                      >
+                        {t.latest}%
+                      </span>
+                    </td>
+                    <td className="px-2 py-1 font-medium tabular-nums text-green-600 dark:text-green-400">
+                      +{t.delta}
+                    </td>
+                    <td className="px-2 py-1 tabular-nums">{t.acc}%</td>
+                    <td className="px-2 py-1">
+                      <span className="flex h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+                        <span style={{ width: `${(t.bar[0] / total) * 100}%`, background: "#22c55e" }} />
+                        <span style={{ width: `${(t.bar[1] / total) * 100}%`, background: "#f59e0b" }} />
+                        <span style={{ width: `${(t.bar[2] / total) * 100}%`, background: "#ef4444" }} />
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Per-student table */}
+        <div className="overflow-hidden rounded-lg border">
+          <table className="w-full text-[8.5px]">
+            <thead>
+              <tr className="border-b bg-muted/40 text-left uppercase tracking-wide text-muted-foreground">
+                <th className="px-2 py-1 font-medium">Student</th>
+                <th className="px-2 py-1 font-medium">Sessions</th>
+                <th className="px-2 py-1 font-medium">Quizzes</th>
+                <th className="px-2 py-1 font-medium">Average</th>
+                <th className="px-2 py-1 font-medium">Impr.</th>
+                <th className="px-2 py-1 font-medium">Practice</th>
+                <th className="px-2 py-1 font-medium">Weakest topic</th>
+                <th className="px-2 py-1 font-medium">Time on task</th>
+                <th className="px-2 py-1 font-medium">Last active</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((s) => (
+                <tr key={s.name} className="border-b last:border-0">
+                  <td className="max-w-[6.5rem] px-2 py-1">
+                    <span className="block truncate font-medium text-[var(--lp-ink)]">{s.name}</span>
+                    <span className="block truncate text-[7.5px] text-muted-foreground">{s.email}</span>
+                  </td>
+                  <td className="px-2 py-1 tabular-nums">{s.sessions}</td>
+                  <td className="px-2 py-1 tabular-nums">{s.quizzes}</td>
+                  <td className="px-2 py-1">
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 text-[8px] font-semibold tabular-nums ${
+                        s.avg >= 80
+                          ? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
+                          : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                      }`}
+                    >
+                      {s.avg}%
+                    </span>
+                  </td>
+                  <td className="px-2 py-1 font-medium tabular-nums text-green-600 dark:text-green-400">
+                    +{s.delta}
+                  </td>
+                  <td className="px-2 py-1 tabular-nums">{s.acc}%</td>
+                  <td className="px-2 py-1">
+                    <span className="flex items-center gap-1 text-[8px]">
+                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${LC_STYLE[s.weakCat].dot}`} />
+                      <span className="truncate">{s.weak}</span>
+                      <span className="tabular-nums text-muted-foreground">{s.weakPct}%</span>
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-2 py-1 text-[8px]">{s.time}</td>
+                  <td className="whitespace-nowrap px-2 py-1 text-[8px] text-muted-foreground">{s.last}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Legend + practice note */}
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[7.5px] text-[var(--lp-ink-soft)]">
+          {[
+            { c: "#22c55e", l: "Secure" },
+            { c: "#f59e0b", l: "Developing" },
+            { c: "#ef4444", l: "Needs review" },
+          ].map((m) => (
+            <span key={m.l} className="inline-flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: m.c }} />
+              {m.l}
+            </span>
+          ))}
+          <span>
+            Practice accuracy is self-reported by the learner&apos;s browser; quiz scores are
+            re-marked by the server.
+          </span>
+        </p>
       </div>
     </MockupFrame>
   );

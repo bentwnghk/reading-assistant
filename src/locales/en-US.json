@@ -494,6 +494,32 @@
           "goTo": "Go to slide {{n}} of {{count}}: {{label}}",
           "indicator": "Slide {{n}} of {{count}}: {{label}}"
         }
+      },
+      "writing": {
+        "eyebrow": "Language Check",
+        "title": "From reading to writing.",
+        "lede": "Photograph a handwritten essay and Language Check transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, then turn every mistake into a lesson, practice and quiz built from your own words. Teachers watch the whole class learn from their mistakes in one dashboard.",
+        "bullets": [
+          "Verbatim transcription you review beside the original scan",
+          "Inline corrections with explanations — errors vs. suggestions",
+          "Learn from your mistakes: lesson → practice → quiz",
+          "Saved sessions resume on any device, exportable to Word",
+          "Student learning dashboards for every class"
+        ],
+        "carousel": {
+          "label": "Language Check features",
+          "slideCount": "{{count}} slides",
+          "transcribe": "Transcription review",
+          "results": "Corrections & popover",
+          "lesson": "Learn · lesson",
+          "practice": "Learn · practice",
+          "quiz": "Learn · quiz",
+          "staffOverview": "Student learning overview",
+          "prev": "Previous slide",
+          "next": "Next slide",
+          "goTo": "Go to slide {{n}} of {{count}}: {{label}}",
+          "indicator": "Slide {{n}} of {{count}}: {{label}}"
+        }
       }
     },
     "classrooms": {

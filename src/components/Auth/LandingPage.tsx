@@ -45,6 +45,12 @@ import {
   SpellingSetupMockup,
   DashboardMockup,
   AssignmentsMockup,
+  LanguageCheckTranscribeMockup,
+  LanguageCheckResultsMockup,
+  LearnLessonMockup,
+  LearnPracticeMockup,
+  LearnQuizMockup,
+  LanguageCheckStaffOverviewMockup,
 } from "@/components/Auth/landing/Mockups";
 import { FeaturesShowcase } from "@/components/Auth/landing/FeaturesShowcase";
 import { Footer } from "@/components/Internal/Footer";
@@ -428,9 +434,147 @@ function PracticeCarousel() {
   );
 }
 
-/* Understand carousel (Chapter 02) — mirrors MasterCarousel, cycling 6 views. */
-function UnderstandCarousel() {
+/* Language Check carousel (Chapter 06) — mirrors MasterCarousel, cycling the
+   6 Language Check views: transcription review, checked results, the three
+   "Learn from your mistakes" stages and the staff student-learning overview. */
+function LanguageCheckCarousel() {
   const { t } = useTranslation();
+  const slides = [
+    { key: "transcribe", label: t("landing.chapters.writing.carousel.transcribe"), node: <LanguageCheckTranscribeMockup /> },
+    { key: "results", label: t("landing.chapters.writing.carousel.results"), node: <LanguageCheckResultsMockup /> },
+    { key: "lesson", label: t("landing.chapters.writing.carousel.lesson"), node: <LearnLessonMockup /> },
+    { key: "practice", label: t("landing.chapters.writing.carousel.practice"), node: <LearnPracticeMockup /> },
+    { key: "quiz", label: t("landing.chapters.writing.carousel.quiz"), node: <LearnQuizMockup /> },
+    { key: "staffOverview", label: t("landing.chapters.writing.carousel.staffOverview"), node: <LanguageCheckStaffOverviewMockup /> },
+  ];
+  const count = slides.length;
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(carouselRef);
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  const goTo = useCallback(
+    (i: number) => {
+      const normalized = ((i % count) + count) % count;
+      setIndex(normalized);
+    },
+    [count],
+  );
+  const next = useCallback(() => goTo(index + 1), [goTo, index]);
+  const prev = useCallback(() => goTo(index - 1), [goTo, index]);
+
+  // Autoplay — resets whenever the index changes or pause toggles.
+  // Also pauses when the carousel is scrolled out of view.
+  useEffect(() => {
+    if (!inView || paused || count <= 1) return;
+    const id = setTimeout(() => setIndex((i) => (i + 1) % count), CAROUSEL_AUTOPLAY_MS);
+    return () => clearTimeout(id);
+  }, [index, inView, paused, count]);
+
+  // Keyboard arrow navigation when the carousel region is focused.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      prev();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      next();
+    }
+  };
+
+  const currentLabel = slides[index].label;
+
+  return (
+    <div
+      ref={carouselRef}
+      className="relative"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={t("landing.chapters.writing.carousel.label")}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      {/* Slide stage */}
+      <div className="relative" aria-live="polite">
+        <AnimatePresence initial={false} mode="wait">
+          <motion.div
+            key={slides[index].key}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: easeOut }}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={t("landing.chapters.writing.carousel.indicator", {
+              n: index + 1,
+              count,
+              label: currentLabel,
+            })}
+          >
+            {slides[index].node}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Controls */}
+      <div className="mt-5 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={prev}
+          aria-label={t("landing.chapters.writing.carousel.prev")}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] text-[var(--lp-ink-soft)] transition-colors hover:border-[var(--lp-accent)] hover:text-[var(--lp-accent)]"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          {slides.map((s, i) => (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={t("landing.chapters.writing.carousel.goTo", { n: i + 1, count, label: s.label })}
+              aria-current={i === index ? "true" : undefined}
+              className={cn(
+                "h-2 rounded-full transition-all duration-300",
+                i === index
+                  ? "w-7 bg-[var(--lp-accent)]"
+                  : "w-2 bg-[var(--lp-rule)] hover:bg-[var(--lp-ink-soft)]",
+              )}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={next}
+          aria-label={t("landing.chapters.writing.carousel.next")}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--lp-rule)] bg-[var(--lp-surface)] text-[var(--lp-ink-soft)] transition-colors hover:border-[var(--lp-accent)] hover:text-[var(--lp-accent)]"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Current-slide label + position counter */}
+      <p className="mt-2.5 text-center text-xs font-medium text-[var(--lp-ink-soft)]">
+        <span className="text-[var(--lp-ink)]">{currentLabel}</span>
+        <span className="mx-2 text-[var(--lp-rule)]" aria-hidden="true">·</span>
+        <span className="font-mono tabular-nums">
+          {index + 1}
+          <span className="mx-0.5 text-[var(--lp-rule)]">/</span>
+          {count}
+        </span>
+      </p>
+    </div>
+  );
+}
+
+/* Understand carousel (Chapter 02) — mirrors MasterCarousel, cycling 6 views. */
+function UnderstandCarousel() {  const { t } = useTranslation();
   const slides = [
     { key: "mindmap", label: t("landing.chapters.understand.carousel.mindmap"), node: <UnderstandMindMapMockup /> },
     { key: "visualization", label: t("landing.chapters.understand.carousel.visualization"), node: <UnderstandVisualizationMockup /> },
@@ -648,6 +792,12 @@ export function LandingPage() {
       key: "master",
       num: "05",
       mockup: <MasterCarousel />,
+    },
+    {
+      key: "writing",
+      num: "06",
+      mockup: <LanguageCheckCarousel />,
+      flip: true,
     },
   ];
 
