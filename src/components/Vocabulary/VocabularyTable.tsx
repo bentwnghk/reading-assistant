@@ -310,7 +310,7 @@ function VocabularyTable() {
             variant={filterSource !== "all" ? "default" : "outline"}
             size="sm"
             onClick={() => {
-              const options: Array<"all" | "own" | "teacher"> = ["all", "own", "teacher"];
+              const options: Array<"all" | "own" | "teacher" | "student"> = ["all", "own", "teacher", "student"];
               const idx = options.indexOf(filterSource);
               setFilterSource(options[(idx + 1) % options.length]);
               resetPage();
@@ -322,7 +322,9 @@ function VocabularyTable() {
               ? t("vocabulary.allSources")
               : filterSource === "own"
                 ? t("vocabulary.ownOnly")
-                : t("vocabulary.teacherOnly")}
+                : filterSource === "teacher"
+                  ? t("vocabulary.teacherOnly")
+                  : t("vocabulary.studentOnly")}
           </Button>
           {hasActiveFilters && (
             <Button
@@ -500,7 +502,9 @@ function VocabularyTable() {
                     "inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-medium",
                     w.source === "teacher"
                       ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                      : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                      : w.source === "student"
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                   )}>
                     {t(`vocabulary.sourceLabels.${w.source}`)}
                   </span>

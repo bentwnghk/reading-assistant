@@ -192,6 +192,7 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
       totalWords: phrases.length,
       ownWords: phrases.filter((w) => w.source === "own").length,
       teacherWords: phrases.filter((w) => w.source === "teacher").length,
+      studentWords: phrases.filter((w) => w.source === "student").length,
       dueForReview: phrases.filter(isDueForReview).length,
       mastered: phrases.filter((w) => w.masteryLevel === 5).length,
       newWords: phrases.filter(
@@ -298,7 +299,7 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
   const handleCardFilter = useCallback(
     (opts: {
       mastery?: "all" | "due" | "new" | "mastered";
-      source?: "all" | "own" | "teacher";
+      source?: "all" | "own" | "teacher" | "student";
     }) => {
       setSearchQuery("");
       setFilterRating("all");
@@ -509,7 +510,7 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
                 </div>
                 <div className="text-2xl font-bold">{displayStats.totalWords}</div>
               </button>
-              <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+              <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
                 <button
                   type="button"
                   onClick={() => handleCardFilter({ source: "own" })}
@@ -539,6 +540,21 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
                   )}
                 >
                   {t("vocabulary.stats.teacher")}: {displayStats.teacherWords}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCardFilter({ source: "student" })}
+                  title={t(
+                    isPhraseContext
+                      ? "vocabulary.stats.studentHintPhrase"
+                      : "vocabulary.stats.studentHint"
+                  )}
+                  className={cn(
+                    "cursor-pointer hover:text-foreground transition-colors",
+                    filterSource === "student" && "text-foreground font-medium underline underline-offset-2"
+                  )}
+                >
+                  {t("vocabulary.stats.student")}: {displayStats.studentWords}
                 </button>
               </div>
             </div>

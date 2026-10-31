@@ -2,6 +2,22 @@ import { getPool } from "./db";
 import type { PoolClient } from "pg";
 import { logVocabularyActivity } from "./vocabulary-activity";
 
+/**
+ * Derives the source label from the sharer provenance. `shared_by IS NULL`
+ * means the learner collected the word themselves ("own"); otherwise the
+ * sharer's role decides the label — students (including classmates sharing
+ * review lists) map to "student", staff roles map to "teacher".
+ * Requires the query to expose a `sharer_role` column (LEFT JOIN user_roles
+ * with COALESCE(..., 'student')); missing role info defaults to "student".
+ */
+function deriveVocabularySource(
+  sharedBy: string | null,
+  sharerRole: string | null | undefined
+): VocabularySource {
+  if (!sharedBy) return "own";
+  return (sharerRole ?? "student") === "student" ? "student" : "teacher";
+}
+
 function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
   const rawCounts = row.srs_counts as { hard?: number; medium?: number } | null;
   return {
@@ -25,7 +41,10 @@ function rowToVocabularyWord(row: Record<string, unknown>): VocabularyWord {
     sourceSessionIds: Array.isArray(row.source_session_ids)
       ? (row.source_session_ids as string[])
       : [],
-    source: row.shared_by ? "teacher" : "own",
+    source: deriveVocabularySource(
+      (row.shared_by as string) || null,
+      row.sharer_role as string | null | undefined
+    ),
     entryType: ((row.entry_type as string) || "word") as "word" | "phrase",
     sharedBy: (row.shared_by as string) || null,
     createdAt: Number(row.created_at) || 0,
@@ -44,7 +63,11 @@ export async function getUserVocabulary(
 ): Promise<VocabularyWord[]> {
   const pool = getPool();
   const { rows } = await pool.query(
-    `SELECT * FROM user_vocabulary WHERE user_id = $1 AND hidden_at = 0 ORDER BY word ASC`,
+    `SELECT uv.*, COALESCE(ur.role, 'student') AS sharer_role
+     FROM user_vocabulary uv
+     LEFT JOIN user_roles ur ON ur.user_id = uv.shared_by
+     WHERE uv.user_id = $1 AND uv.hidden_at = 0
+     ORDER BY uv.word ASC`,
     [userId]
   );
   return rows.map(rowToVocabularyWord);
@@ -57,9 +80,12 @@ export async function getVocabularyDueForReview(
   const pool = getPool();
   const now = Date.now();
   const { rows } = await pool.query(
-    `SELECT * FROM user_vocabulary
-     WHERE user_id = $1 AND entry_type = 'word' AND hidden_at = 0 AND next_review_at > 0 AND next_review_at <= $2
-     ORDER BY next_review_at ASC, mastery_level ASC
+    `SELECT uv.*, COALESCE(ur.role, 'student') AS sharer_role
+     FROM user_vocabulary uv
+     LEFT JOIN user_roles ur ON ur.user_id = uv.shared_by
+     WHERE uv.user_id = $1 AND uv.entry_type = 'word' AND uv.hidden_at = 0
+       AND uv.next_review_at > 0 AND uv.next_review_at <= $2
+     ORDER BY uv.next_review_at ASC, uv.mastery_level ASC
      LIMIT $3`,
     [userId, now, limit]
   );
@@ -74,16 +100,19 @@ export async function getVocabularyStats(
   const { rows } = await pool.query(
     `SELECT
         COUNT(*) AS total_words,
-        COUNT(*) FILTER (WHERE shared_by IS NULL) AS own_words,
-        COUNT(*) FILTER (WHERE shared_by IS NOT NULL) AS teacher_words,
-        COUNT(*) FILTER (WHERE next_review_at = 0 OR next_review_at <= $2) AS due_for_review,
-        COUNT(*) FILTER (WHERE mastery_level = 5) AS mastered,
-        COUNT(*) FILTER (WHERE mastery_level = 0 AND review_count = 0) AS new_words,
-        COUNT(*) FILTER (WHERE rating = 'hard') AS hard,
-        COUNT(*) FILTER (WHERE rating = 'medium') AS medium,
-        COUNT(*) FILTER (WHERE rating = 'easy') AS easy,
-        COUNT(*) FILTER (WHERE rating IS NULL) AS unrated
-      FROM user_vocabulary WHERE user_id = $1 AND entry_type = 'word' AND hidden_at = 0`,
+        COUNT(*) FILTER (WHERE uv.shared_by IS NULL) AS own_words,
+        COUNT(*) FILTER (WHERE uv.shared_by IS NOT NULL AND COALESCE(ur.role, 'student') <> 'student') AS teacher_words,
+        COUNT(*) FILTER (WHERE uv.shared_by IS NOT NULL AND COALESCE(ur.role, 'student') = 'student') AS student_words,
+        COUNT(*) FILTER (WHERE uv.next_review_at = 0 OR uv.next_review_at <= $2) AS due_for_review,
+        COUNT(*) FILTER (WHERE uv.mastery_level = 5) AS mastered,
+        COUNT(*) FILTER (WHERE uv.mastery_level = 0 AND uv.review_count = 0) AS new_words,
+        COUNT(*) FILTER (WHERE uv.rating = 'hard') AS hard,
+        COUNT(*) FILTER (WHERE uv.rating = 'medium') AS medium,
+        COUNT(*) FILTER (WHERE uv.rating = 'easy') AS easy,
+        COUNT(*) FILTER (WHERE uv.rating IS NULL) AS unrated
+      FROM user_vocabulary uv
+      LEFT JOIN user_roles ur ON ur.user_id = uv.shared_by
+      WHERE uv.user_id = $1 AND uv.entry_type = 'word' AND uv.hidden_at = 0`,
     [userId, now]
   );
   const r = rows[0];
@@ -91,6 +120,7 @@ export async function getVocabularyStats(
     totalWords: Number(r.total_words),
     ownWords: Number(r.own_words),
     teacherWords: Number(r.teacher_words),
+    studentWords: Number(r.student_words),
     dueForReview: Number(r.due_for_review),
     mastered: Number(r.mastered),
     newWords: Number(r.new_words),
@@ -291,7 +321,8 @@ export async function recordSRSAction(
        srs_counts = jsonb_set(srs_counts, ARRAY[$3], ((COALESCE((srs_counts->>$3)::int, 0) + 1)::text)::jsonb),
        updated_at = $4
      WHERE user_id = $1 AND word = $2
-     RETURNING id, srs_counts, shared_by`,
+     RETURNING id, srs_counts, shared_by,
+       (SELECT COALESCE(ur.role, 'student') FROM user_roles ur WHERE ur.user_id = user_vocabulary.shared_by) AS sharer_role`,
     [userId, normalizedWord, ratingKey, now]
   );
 
@@ -328,7 +359,10 @@ export async function recordSRSAction(
   const srsCounts = counts ? { hard: counts.hard ?? 0, medium: counts.medium ?? 0 } : { hard: 0, medium: 0 };
   const rating = deriveRatingFromCounts(srsCounts);
   const rowId = rows[0]?.id as string;
-  const source: VocabularySource = rows[0]?.shared_by ? "teacher" : "own";
+  const source: VocabularySource = deriveVocabularySource(
+    (rows[0]?.shared_by as string) || null,
+    rows[0]?.sharer_role as string | null | undefined
+  );
 
   await pool.query(
     `UPDATE user_vocabulary SET rating = $3 WHERE user_id = $1 AND word = $2`,

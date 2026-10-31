@@ -30,6 +30,7 @@ function computeWordStats(words: VocabularyWord[]): VocabularyStats {
     totalWords: pool.length,
     ownWords: pool.filter((w) => w.source === "own").length,
     teacherWords: pool.filter((w) => w.source === "teacher").length,
+    studentWords: pool.filter((w) => w.source === "student").length,
     dueForReview: pool.filter((w) => w.nextReviewAt === 0 || w.nextReviewAt <= now)
       .length,
     mastered: pool.filter((w) => w.masteryLevel === 5).length,
@@ -52,7 +53,7 @@ interface VocabularyStoreState {
   sortOrder: SortOrder;
   filterRating: GlossaryRating | "all";
   filterMastery: "all" | "due" | "new" | "mastered";
-  filterSource: "all" | "own" | "teacher";
+  filterSource: "all" | "own" | "teacher" | "student";
   isLoading: boolean;
   dueForReviewCount: number;
   pendingReviewListShares: SharedReviewList[];
@@ -100,7 +101,7 @@ interface VocabularyStoreActions {
   setSortOrder: (order: SortOrder) => void;
   setFilterRating: (filter: GlossaryRating | "all") => void;
   setFilterMastery: (filter: "all" | "due" | "new" | "mastered") => void;
-  setFilterSource: (filter: "all" | "own" | "teacher") => void;
+  setFilterSource: (filter: "all" | "own" | "teacher" | "student") => void;
   setPendingReviewListShares: (shares: SharedReviewList[] | ((prev: SharedReviewList[]) => SharedReviewList[])) => void;
   setPendingReviewListShareCount: (count: number) => void;
   setShowReviewListShareDialog: (open: boolean) => void;
@@ -121,6 +122,7 @@ export const useVocabularyStore = create<
     totalWords: 0,
     ownWords: 0,
     teacherWords: 0,
+    studentWords: 0,
     dueForReview: 0,
     mastered: 0,
     newWords: 0,
@@ -176,6 +178,7 @@ export const useVocabularyStore = create<
           totalWords: 0,
           ownWords: 0,
           teacherWords: 0,
+          studentWords: 0,
           dueForReview: 0,
           mastered: 0,
           newWords: 0,

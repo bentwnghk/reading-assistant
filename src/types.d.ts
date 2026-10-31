@@ -971,7 +971,7 @@ type VocabularyMasteryLevel = 0 | 1 | 2 | 3 | 4 | 5;
 
 type VocabularySelectionStrategy = "due" | "hardest" | "newest" | "random" | "weakest";
 
-type VocabularySource = "own" | "teacher";
+type VocabularySource = "own" | "teacher" | "student";
 
 interface VocabularyWord {
   id: string;
@@ -1000,6 +1000,7 @@ interface VocabularyStats {
   totalWords: number;
   ownWords: number;
   teacherWords: number;
+  studentWords: number;
   dueForReview: number;
   mastered: number;
   newWords: number;

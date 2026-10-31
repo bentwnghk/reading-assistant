@@ -2310,11 +2310,13 @@
     "source": "來源",
     "sourceLabels": {
       "own": "自己",
-      "teacher": "老師"
+      "teacher": "老師",
+      "student": "學生"
     },
     "allSources": "全部來源",
     "ownOnly": "自己",
     "teacherOnly": "老師",
+    "studentOnly": "學生",
     "share": {
       "button": "分享",
       "title": "分享單詞",
@@ -2424,15 +2426,18 @@
       "total": "單詞總數",
       "own": "自己",
       "teacher": "老師",
+      "student": "學生",
       "due": "待複習",
       "mastered": "已掌握",
       "new": "新單詞",
       "clickToFilter": "點擊以篩選表格",
       "ownHint": "顯示自己閱讀所得的單詞",
       "teacherHint": "顯示老師分享的單詞",
+      "studentHint": "顯示學生分享的單詞",
       "totalPhrase": "詞組總數",
       "ownHintPhrase": "顯示自己閱讀所得的詞組",
       "teacherHintPhrase": "顯示老師分享的詞組",
+      "studentHintPhrase": "顯示學生分享的詞組",
       "newPhrase": "新詞組"
     },
     "export": {
