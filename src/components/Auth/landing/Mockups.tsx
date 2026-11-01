@@ -1255,272 +1255,661 @@ export function LeaderboardMockup() {
   );
 }
 
-/* ── 6. CLASSROOMS — teacher dashboard with 4 real charts ── */
-export function DashboardMockup() {
-  // Chart 1: Daily Learning Activity — stacked bars (5 series)
-  const dailyData = [
-    { name: "Chloe", segs: [12, 9, 7, 5, 3] },
-    { name: "Marcus", segs: [8, 7, 5, 4] },
-    { name: "Priya", segs: [6, 5, 4, 3] },
-    { name: "Ethan", segs: [10, 8, 6, 4, 2] },
-    { name: "Sofia", segs: [11, 9, 7, 6, 4] },
-  ];
-  const dailyColors = ["#3b82f6", "#8b5cf6", "#22c55e", "#f97316", "#eab308"];
-  const dailyLabels = ["Read", "Summary", "Mind Map", "Glossary", "Test"];
+/* ── 6. CLASSROOMS — Teacher Dashboard, five faithful static slides mirroring
+      the real TeacherDashboard dialog one chart-card at a time: the dialog
+      header + class filter + Export row, then 3 of the 14 charts per slide
+      (2 on the last) for a 10-student class. Each card mirrors its live
+      component (DailyActivityChart, ReadingTextsChart, ScoreDistChart,
+      GrammarGameChart, SpellingScore/Accuracy, VocabularyGrowth,
+      SkillAveragesChart): same series colors, buckets, quartile shading,
+      dashed class-average ReferenceLines and rotated student axis. ── */
 
-  // Chart 2: Vocabulary Growth — multi-line area
-  const vocabLines = [
-    { color: "#3b82f6", name: "Chloe", pts: "10,85 45,75 80,62 115,48 150,35 185,20" },
-    { color: "#22c55e", name: "Sofia", pts: "10,87 45,80 80,70 115,58 150,45 185,32" },
-    { color: "#ef4444", name: "Ethan", pts: "10,89 45,84 80,78 115,70 150,62 185,52" },
-  ];
+// The class roster — 10 students, shared by every slide so scores tell a
+// consistent story across charts (same students lead/lag everywhere).
+const TD_STUDENTS = ["Chloe", "Marcus", "Priya", "Ethan", "Sofia", "Liam", "Ava", "Noah", "Isabella", "Ryan"];
 
-  // Chart 3: Reading Texts — quartile-colored bars
-  const readingData = [
-    { name: "Chloe", val: 88, q: 4 },
-    { name: "Marcus", val: 72, q: 3 },
-    { name: "Priya", val: 42, q: 2 },
-    { name: "Ethan", val: 55, q: 3 },
-    { name: "Sofia", val: 95, q: 4 },
-  ];
-  const quartileColors = ["#ef4444", "#f97316", "#22c55e", "#3b82f6"];
+// Colors/buckets mirror utils/teacherDashboardMetrics.ts.
+const TD_QUARTILE_COLORS = ["#ef4444", "#f97316", "#22c55e", "#3b82f6"];
+const TD_QUARTILE_LEGEND = [
+  { label: "Q1 (0-25%)", color: "#ef4444" },
+  { label: "Q2 (25-50%)", color: "#f97316" },
+  { label: "Q3 (50-75%)", color: "#22c55e" },
+  { label: "Q4 (75-100%)", color: "#3b82f6" },
+];
+const TD_SCORE_BUCKETS = [
+  { range: "0-25%", fill: "#ef4444" },
+  { range: "26-50%", fill: "#f97316" },
+  { range: "51-75%", fill: "#22c55e" },
+  { range: "76-100%", fill: "#3b82f6" },
+];
+// DAILY_ACTIVITY_KEYS + DAILY_ACTIVITY_COLORS (labels mirror dashboard.activities.*).
+const TD_DAILY_SERIES = [
+  { label: "Read Text", color: "#3b82f6" },
+  { label: "Before You Read", color: "#f43f5e" },
+  { label: "Summary", color: "#6366f1" },
+  { label: "Mind Map", color: "#8b5cf6" },
+  { label: "Text Visualization", color: "#0ea5e9" },
+  { label: "Adapted Text", color: "#22c55e" },
+  { label: "Simplified Text", color: "#14b8a6" },
+  { label: "Sentence Analysis", color: "#f97316" },
+  { label: "Glossary", color: "#eab308" },
+  { label: "Phrases & Collocations", color: "#10b981" },
+  { label: "Flashcard Review", color: "#f59e0b" },
+  { label: "Spelling Game", color: "#ec4899" },
+  { label: "Vocab Quiz", color: "#06b6d4" },
+  { label: "Reading Test", color: "#ef4444" },
+  { label: "Grammar Quiz", color: "#d946ef" },
+  { label: "Grammar Game", color: "#84cc16" },
+  { label: "AI Tutor", color: "#a855f7" },
+];
+// AI_USAGE_KEYS + AI_USAGE_COLORS (labels mirror dashboard.features.*).
+const TD_AI_SERIES = [
+  { label: "Before You Read", color: "#f43f5e" },
+  { label: "Summary", color: "#3b82f6" },
+  { label: "Mind Map", color: "#8b5cf6" },
+  { label: "Text Visualization", color: "#0ea5e9" },
+  { label: "Adapted Text", color: "#22c55e" },
+  { label: "Simplified Text", color: "#14b8a6" },
+  { label: "Sentence Analysis", color: "#f97316" },
+  { label: "Generate Glossary", color: "#eab308" },
+  { label: "Phrases & Collocations", color: "#10b981" },
+  { label: "Grammar Analysis", color: "#d946ef" },
+  { label: "AI Tutor", color: "#a855f7" },
+];
+// VocabularyGrowthChart's STUDENT_COLORS, indexed by student order.
+const TD_GROWTH_COLORS = ["#3b82f6", "#ef4444", "#22c55e", "#f97316", "#8b5cf6", "#14b8a6", "#ec4899", "#eab308", "#06b6d4", "#a855f7"];
 
-  // Chart 4: AI Features Usage — stacked bars (4 series)
-  const aiData = [
-    { name: "Chloe", segs: [8, 5, 4, 3] },
-    { name: "Marcus", segs: [6, 4, 3, 2] },
-    { name: "Priya", segs: [4, 3, 2, 2] },
-    { name: "Ethan", segs: [7, 5, 4, 3] },
-    { name: "Sofia", segs: [9, 6, 5, 4] },
-  ];
-  const aiColors = ["#3b82f6", "#8b5cf6", "#0ea5e9", "#22c55e"];
-  const aiLabels = ["Summary", "Mind Map", "Adapted", "Glossary"];
+/** Mirrors getQuartileColor in utils/teacherDashboardMetrics.ts. */
+function tdQuartileColors(values: number[]): string[] {
+  const sorted = values.map((v, i) => ({ v, i })).sort((a, b) => a.v - b.v);
+  const out = new Array<string>(values.length);
+  sorted.forEach((s, i) => {
+    out[s.i] = TD_QUARTILE_COLORS[Math.min(3, Math.floor((i * 4) / values.length))];
+  });
+  return out;
+}
 
-  const gridLines = [15, 38, 61];
-  const studentNames = dailyData.map((d) => d.name);
+/* Mini recharts scaffold — 320×150 viewBox with margins for the y tick labels
+   (left) and the -45°-rotated student names (bottom), like the live charts'
+   XAxis angle={-45} textAnchor="end". */
+const TD_PLOT = { x0: 30, x1: 314, top: 10, base: 116, labelY: 126 };
+const TD_BAR_W = 17;
+const TD_STEP = (TD_PLOT.x1 - TD_PLOT.x0) / TD_STUDENTS.length;
+const tdBarX = (i: number) => TD_PLOT.x0 + i * TD_STEP + (TD_STEP - TD_BAR_W) / 2;
+const tdBarCX = (i: number) => tdBarX(i) + TD_BAR_W / 2;
+const tdY = (v: number, max: number) => TD_PLOT.base - (v / max) * (TD_PLOT.base - TD_PLOT.top);
 
+/** CartesianGrid (dashed) + YAxis ticks + rotated XAxis student names. */
+function TdChartAxes({ yMax, yTicks }: { yMax: number; yTicks: number[] }) {
+  return (
+    <g>
+      {TD_STUDENTS.map((_, i) => (
+        <line key={`v${i}`} x1={tdBarCX(i)} y1={TD_PLOT.top} x2={tdBarCX(i)} y2={TD_PLOT.base} stroke="var(--lp-rule)" strokeWidth="0.4" opacity="0.3" />
+      ))}
+      {yTicks.map((tick) => (
+        <g key={`h${tick}`}>
+          <line x1={TD_PLOT.x0} y1={tdY(tick, yMax)} x2={TD_PLOT.x1} y2={tdY(tick, yMax)} stroke="var(--lp-rule)" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.55" />
+          <text x={TD_PLOT.x0 - 3} y={tdY(tick, yMax) + 2} textAnchor="end" fontSize="5.5" fill="var(--lp-ink-soft)">
+            {tick}
+          </text>
+        </g>
+      ))}
+      <line x1={TD_PLOT.x0} y1={TD_PLOT.base} x2={TD_PLOT.x1} y2={TD_PLOT.base} stroke="var(--lp-rule)" strokeWidth="0.7" />
+      {TD_STUDENTS.map((name, i) => (
+        <text
+          key={name}
+          x={tdBarCX(i)}
+          y={TD_PLOT.labelY}
+          textAnchor="end"
+          fontSize="6"
+          fill="var(--lp-ink-soft)"
+          transform={`rotate(-45 ${tdBarCX(i)} ${TD_PLOT.labelY})`}
+        >
+          {name}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+/** Stacked Bars (stackId="a") — rows[student][series]; zero series paint nothing. */
+function TdStackedBars({ rows, colors, yMax }: { rows: number[][]; colors: string[]; yMax: number }) {
+  const unit = (TD_PLOT.base - TD_PLOT.top) / yMax;
+  return (
+    <g>
+      {rows.map((row, si) => {
+        let cum = 0;
+        return row.map((v, ki) => {
+          if (v <= 0) return null;
+          const y = TD_PLOT.base - (cum + v) * unit;
+          cum += v;
+          return <rect key={`${si}-${ki}`} x={tdBarX(si)} y={y} width={TD_BAR_W} height={v * unit} fill={colors[ki]} />;
+        });
+      })}
+    </g>
+  );
+}
+
+/** Single-series Bar — optional per-student Cell colors and rounded tops. */
+function TdSingleBars({ values, yMax, fill, colors, rounded = false }: { values: number[]; yMax: number; fill?: string; colors?: string[]; rounded?: boolean }) {
+  const unit = (TD_PLOT.base - TD_PLOT.top) / yMax;
+  return (
+    <g>
+      {values.map((v, i) =>
+        v <= 0 ? null : (
+          <rect key={i} x={tdBarX(i)} y={TD_PLOT.base - v * unit} width={TD_BAR_W} height={v * unit} rx={rounded ? 2 : 0} fill={colors?.[i] ?? fill} />
+        ),
+      )}
+    </g>
+  );
+}
+
+/** Dashed class-average ReferenceLine (y = the rounded classAvg, as live). */
+function TdAvgLine({ avg, yMax }: { avg: number; yMax: number }) {
+  return (
+    <line
+      x1={TD_PLOT.x0}
+      y1={tdY(avg, yMax)}
+      x2={TD_PLOT.x1}
+      y2={tdY(avg, yMax)}
+      stroke="var(--lp-ink)"
+      strokeWidth="0.6"
+      strokeDasharray="3 2"
+      opacity="0.45"
+    />
+  );
+}
+
+/** Wrapped legend chips — the rounded-sm color squares the live charts use. */
+function TdLegend({ items }: { items: Array<{ label: string; color: string }> }) {
+  return (
+    <div className="mt-1.5 flex flex-wrap gap-x-2 gap-y-1">
+      {items.map((it) => (
+        <span key={it.label} className="inline-flex items-center gap-1 text-[7px] leading-none text-[var(--lp-ink-soft)]">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-sm" style={{ background: it.color }} />
+          {it.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** The small period / time-range pill buttons (variant default = filled). */
+function TdPills({ options, active }: { options: string[]; active: string }) {
+  return (
+    <div className="mb-1.5 flex flex-wrap gap-1">
+      {options.map((o) => (
+        <span
+          key={o}
+          className={`rounded-md border px-1.5 py-0.5 text-[7px] font-medium leading-none ${
+            o === active
+              ? "border-transparent bg-[var(--lp-accent)] text-white"
+              : "border-[var(--lp-rule)] text-[var(--lp-ink-soft)]"
+          }`}
+        >
+          {o}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** Chart card — mirrors the live `rounded-xl border bg-card p-4` cards. */
+function TdCard({ title, headerRight, children }: { title: string; headerRight?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-[var(--lp-rule)] p-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-semibold text-[var(--lp-ink-soft)]">{title}</p>
+        {headerRight != null && <p className="text-[9px] text-[var(--lp-ink-soft)]">{headerRight}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** The Total/Avg strip under the titles of ReadingTexts/TotalVocabulary/AiFeatures. */
+function TdTotalAvgRow({ total, avg }: { total: string; avg: string }) {
+  return (
+    <p className="mb-1.5 mt-0.5 flex items-center justify-between text-[8px] text-[var(--lp-ink-soft)]">
+      <span>
+        Total: <strong className="font-semibold tabular-nums text-[var(--lp-ink)]">{total}</strong>
+      </span>
+      <span>
+        Avg: <strong className="font-semibold tabular-nums text-[var(--lp-ink)]">{avg}</strong>
+      </span>
+    </p>
+  );
+}
+
+/** The "Avg: N" header chip used by ScoreDist/GrammarGame/Spelling cards. */
+function TdAvgChip({ value, percent = false }: { value: string; percent?: boolean }) {
+  return (
+    <span>
+      Avg: <strong className="font-semibold tabular-nums text-[var(--lp-ink)]">{value}{percent ? "%" : ""}</strong>
+    </span>
+  );
+}
+
+/** Shared slide chrome — the dialog header, description and filter row
+    (class combobox + Export to Excel) every live chart sits under. */
+function TeacherDashboardSlide({ children }: { children: React.ReactNode }) {
   return (
     <MockupFrame label="TEACHER DASHBOARD · Mr.🆖 ProReader">
-      {/* header / filter bar */}
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-[var(--lp-accent)]" />
-          <span className="text-xs font-semibold text-[var(--lp-ink)]">Form 3B</span>
-          <span className="font-mono text-[10px] text-[var(--lp-ink-soft)]">28 students</span>
-        </div>
+      <div className="flex items-center gap-1.5">
+        <GraduationCap className="h-4 w-4 text-[var(--lp-accent)]" />
+        <span className="text-xs font-semibold text-[var(--lp-ink)]">Teacher Dashboard</span>
+        <HelpCircle className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
+      </div>
+      <p className="mt-0.5 text-[9px] leading-snug text-[var(--lp-ink-soft)]">
+        Track your students&apos; reading and learning activity, AI usage, scores, and vocabulary growth over time.
+      </p>
+      <div className="mb-3 mt-2 flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] px-2.5 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+          Form 3B
+          <ChevronsUpDown className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+        </span>
         <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] px-2 py-1 text-[10px] font-medium text-[var(--lp-ink-soft)]">
-          <FileDown className="h-3 w-3" /> Export
+          <FileDown className="h-3 w-3" />
+          Export to Excel
         </span>
       </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {/* ── Chart 1: Daily Learning Activity ── */}
-        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
-          <p className="text-xs font-semibold text-[var(--lp-ink)]">Daily Learning Activity</p>
-          <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">
-            Total: <span className="font-bold text-[var(--lp-ink)]">247</span>
-          </p>
-          <svg viewBox="0 0 200 110" className="w-full">
-            {gridLines.map((y) => (
-              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
-            ))}
-            <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
-            {dailyData.map((student, si) => {
-              let cumY = 95;
-              const barX = si * 36 + 14;
-              return student.segs.map((h, hi) => {
-                cumY -= h;
-                return (
-                  <rect
-                    key={`d-${si}-${hi}`}
-                    x={barX}
-                    y={cumY}
-                    width={20}
-                    height={h}
-                    fill={dailyColors[hi]}
-                  />
-                );
-              });
-            })}
-            {studentNames.map((nm, si) => (
-              <text
-                key={nm}
-                x={si * 36 + 24}
-                y={106}
-                textAnchor="end"
-                fontSize="6"
-                fill="var(--lp-ink-soft)"
-                transform={`rotate(-30 ${si * 36 + 24} 106)`}
-              >
-                {nm}
-              </text>
-            ))}
-          </svg>
-          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
-            {dailyLabels.map((l, i) => (
-              <span key={l} className="inline-flex items-center gap-0.5 text-[8px] text-[var(--lp-ink-soft)]">
-                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: dailyColors[i] }} />
-                {l}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Chart 2: Vocabulary Growth ── */}
-        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
-          <p className="text-xs font-semibold text-[var(--lp-ink)]">Vocabulary Growth</p>
-          <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">Last 30 days</p>
-          <svg viewBox="0 0 200 110" className="w-full">
-            {gridLines.map((y) => (
-              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
-            ))}
-            <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
-            {/* area fills */}
-            {vocabLines.map((line) => (
-              <polygon
-                key={`fill-${line.name}`}
-                points={`${line.pts} 185,95 10,95`}
-                fill={line.color}
-                opacity="0.08"
-              />
-            ))}
-            {/* trend lines */}
-            {vocabLines.map((line) => (
-              <polyline
-                key={`line-${line.name}`}
-                points={line.pts}
-                fill="none"
-                stroke={line.color}
-                strokeWidth="1.5"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-              />
-            ))}
-            {/* endpoint dots */}
-            {vocabLines.map((line) => {
-              const lastPt = line.pts.split(" ").pop()!.split(",");
-              return <circle key={`dot-${line.name}`} cx={lastPt[0]} cy={lastPt[1]} r="2" fill={line.color} />;
-            })}
-            <text x="10" y="106" textAnchor="middle" fontSize="5" fill="var(--lp-ink-soft)">Jun 1</text>
-            <text x="80" y="106" textAnchor="middle" fontSize="5" fill="var(--lp-ink-soft)">Jun 10</text>
-            <text x="150" y="106" textAnchor="middle" fontSize="5" fill="var(--lp-ink-soft)">Jun 20</text>
-          </svg>
-          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
-            {vocabLines.map((line) => (
-              <span key={line.name} className="inline-flex items-center gap-0.5 text-[8px] text-[var(--lp-ink-soft)]">
-                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: line.color }} />
-                {line.name}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Chart 3: Reading Test Score ── */}
-        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
-          <p className="text-xs font-semibold text-[var(--lp-ink)]">Reading Test Score</p>
-          <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">
-            Avg: <span className="font-bold text-[var(--lp-ink)]">70</span>
-          </p>
-          <svg viewBox="0 0 200 110" className="w-full">
-            {gridLines.map((y) => (
-              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
-            ))}
-            {/* dashed class-average reference line */}
-            <line x1="0" y1="39" x2="200" y2="39" stroke="var(--lp-ink)" strokeDasharray="4 3" strokeWidth="0.6" opacity="0.4" />
-            <text x="197" y="37" textAnchor="end" fontSize="5" fill="var(--lp-ink-soft)">avg 70</text>
-            <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
-            {readingData.map((s, si) => {
-              const barH = s.val * 0.8;
-              return (
-                <rect
-                  key={s.name}
-                  x={si * 36 + 14}
-                  y={95 - barH}
-                  width={20}
-                  height={barH}
-                  fill={quartileColors[s.q - 1]}
-                  rx={2}
-                />
-              );
-            })}
-            {readingData.map((s, si) => (
-              <text
-                key={s.name}
-                x={si * 36 + 24}
-                y={106}
-                textAnchor="end"
-                fontSize="6"
-                fill="var(--lp-ink-soft)"
-                transform={`rotate(-30 ${si * 36 + 24} 106)`}
-              >
-                {s.name}
-              </text>
-            ))}
-          </svg>
-          <div className="mt-1 flex flex-wrap gap-x-1.5 gap-y-0.5">
-            {["Q1", "Q2", "Q3", "Q4"].map((l, i) => (
-              <span key={l} className="inline-flex items-center gap-0.5 text-[7px] text-[var(--lp-ink-soft)]">
-                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: quartileColors[i] }} />
-                {l}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Chart 4: AI Features Usage ── */}
-        <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
-          <p className="text-xs font-semibold text-[var(--lp-ink)]">AI Features Usage</p>
-          <p className="mb-2 text-[10px] text-[var(--lp-ink-soft)]">
-            Total: <span className="font-bold text-[var(--lp-ink)]">189</span>
-          </p>
-          <svg viewBox="0 0 200 110" className="w-full">
-            {gridLines.map((y) => (
-              <line key={y} x1="0" y1={y} x2="200" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.4" opacity="0.6" />
-            ))}
-            <line x1="0" y1="95" x2="200" y2="95" stroke="var(--lp-rule)" strokeWidth="0.6" />
-            {aiData.map((student, si) => {
-              let cumY = 95;
-              const barX = si * 36 + 14;
-              return student.segs.map((h, hi) => {
-                const scaledH = h * 2;
-                cumY -= scaledH;
-                return (
-                  <rect
-                    key={`a-${si}-${hi}`}
-                    x={barX}
-                    y={cumY}
-                    width={20}
-                    height={scaledH}
-                    fill={aiColors[hi]}
-                  />
-                );
-              });
-            })}
-            {studentNames.map((nm, si) => (
-              <text
-                key={nm}
-                x={si * 36 + 24}
-                y={106}
-                textAnchor="end"
-                fontSize="6"
-                fill="var(--lp-ink-soft)"
-                transform={`rotate(-30 ${si * 36 + 24} 106)`}
-              >
-                {nm}
-              </text>
-            ))}
-          </svg>
-          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
-            {aiLabels.map((l, i) => (
-              <span key={l} className="inline-flex items-center gap-0.5 text-[8px] text-[var(--lp-ink-soft)]">
-                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: aiColors[i] }} />
-                {l}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
+      <div className="space-y-3">{children}</div>
     </MockupFrame>
+  );
+}
+
+/* Slide 1/5 — Daily Learning Activity · Reading Texts · Total Vocabulary */
+export function TeacherDashboardActivityMockup() {
+  // Per-student activity counts on the picked day (TD_DAILY_SERIES order);
+  // only non-zero series paint, like the live stacked BarChart.
+  const dailyRows = [
+    [3, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0], // Chloe
+    [2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0], // Marcus
+    [2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], // Priya
+    [3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1], // Ethan
+    [3, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], // Sofia
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], // Liam
+    [2, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0], // Ava
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Noah
+    [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], // Isabella
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], // Ryan
+  ];
+  const readingValues = [14, 11, 9, 10, 15, 7, 12, 5, 9, 4]; // total 96, avg 10
+  const vocabValues = [186, 132, 104, 121, 172, 76, 158, 61, 98, 48]; // total 1156, avg 116
+
+  return (
+    <TeacherDashboardSlide>
+      {/* DailyActivityChart: title + ‹ date › nav (forward disabled on today) */}
+      <TdCard
+        title="Daily Learning Activity"
+        headerRight={
+          <span className="inline-flex items-center gap-1">
+            <ChevronLeft className="h-3 w-3" />
+            <Calendar className="h-2.5 w-2.5 opacity-70" />
+            <span className="tabular-nums">Nov 1, 2026</span>
+            <ChevronRight className="h-3 w-3 opacity-30" />
+          </span>
+        }
+      >
+        <svg viewBox="0 0 320 150" className="mt-1 w-full">
+          <TdChartAxes yMax={8} yTicks={[0, 2, 4, 6, 8]} />
+          <TdStackedBars rows={dailyRows} colors={TD_DAILY_SERIES.map((s) => s.color)} yMax={8} />
+        </svg>
+        <TdLegend items={TD_DAILY_SERIES} />
+      </TdCard>
+
+      {/* ReadingTextsChart: Total/Avg strip, period pills, quartile bars + avg line */}
+      <TdCard title="Reading Texts">
+        <TdTotalAvgRow total="96" avg="10" />
+        <TdPills options={["All", "1W", "2W", "1M", "2M", "3M", "6M", "9M", "1Y"]} active="All" />
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={16} yTicks={[0, 4, 8, 12, 16]} />
+          <TdAvgLine avg={10} yMax={16} />
+          <TdSingleBars values={readingValues} yMax={16} colors={tdQuartileColors(readingValues)} rounded />
+        </svg>
+        <TdLegend items={TD_QUARTILE_LEGEND} />
+      </TdCard>
+
+      {/* TotalVocabularyChart: same layout, no period pills */}
+      <TdCard title="Total Vocabulary">
+        <TdTotalAvgRow total="1156" avg="116" />
+        <svg viewBox="0 0 320 150" className="mt-2 w-full">
+          <TdChartAxes yMax={200} yTicks={[0, 50, 100, 150, 200]} />
+          <TdAvgLine avg={116} yMax={200} />
+          <TdSingleBars values={vocabValues} yMax={200} colors={tdQuartileColors(vocabValues)} rounded />
+        </svg>
+        <TdLegend items={TD_QUARTILE_LEGEND} />
+      </TdCard>
+    </TeacherDashboardSlide>
+  );
+}
+
+/* Slide 2/5 — Avg Learning Progress · AI Features Usage · Reading Test Score */
+export function TeacherDashboardProgressMockup() {
+  const progressValues = [92, 78, 63, 74, 88, 52, 85, 41, 66, 38]; // avg 68%
+  // Per-student AI usage (TD_AI_SERIES order); totals 82, avg 8.
+  const aiRows = [
+    [0, 6, 4, 0, 0, 0, 0, 5, 0, 0, 3], // Chloe
+    [0, 4, 0, 0, 3, 0, 0, 0, 0, 2, 0], // Marcus
+    [0, 3, 0, 0, 0, 0, 0, 2, 0, 0, 0], // Priya
+    [0, 4, 3, 0, 0, 0, 0, 0, 0, 2, 3], // Ethan
+    [2, 5, 0, 4, 0, 0, 0, 4, 0, 0, 0], // Sofia
+    [0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0], // Liam
+    [0, 4, 2, 0, 2, 0, 0, 0, 3, 0, 0], // Ava
+    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], // Noah
+    [0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 2], // Isabella
+    [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0], // Ryan
+  ];
+  // Reading Test scores per bucket (0-25/26-50/51-75/76-100) per student.
+  const testDistRows = [
+    [0, 0, 1, 4],
+    [0, 1, 2, 2],
+    [0, 1, 3, 1],
+    [0, 0, 3, 2],
+    [0, 0, 1, 4],
+    [1, 2, 2, 0],
+    [0, 1, 2, 2],
+    [2, 2, 1, 0],
+    [0, 1, 3, 1],
+    [2, 2, 1, 0],
+  ];
+
+  return (
+    <TeacherDashboardSlide>
+      {/* AvgProgressChart: Avg in the title row, quartile bars, 0-100 domain */}
+      <TdCard title="Avg Learning Progress" headerRight={<TdAvgChip value="68" percent />}>
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={100} yTicks={[0, 25, 50, 75, 100]} />
+          <TdAvgLine avg={68} yMax={100} />
+          <TdSingleBars values={progressValues} yMax={100} colors={tdQuartileColors(progressValues)} rounded />
+        </svg>
+        <TdLegend items={TD_QUARTILE_LEGEND} />
+      </TdCard>
+
+      {/* AiFeaturesChart: Total/Avg strip, stacked bars (11 series) + avg line */}
+      <TdCard title="AI Features Usage">
+        <TdTotalAvgRow total="82" avg="8" />
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={20} yTicks={[0, 5, 10, 15, 20]} />
+          <TdAvgLine avg={8.2} yMax={20} />
+          <TdStackedBars rows={aiRows} colors={TD_AI_SERIES.map((s) => s.color)} yMax={20} />
+        </svg>
+        <TdLegend items={TD_AI_SERIES} />
+      </TdCard>
+
+      {/* ScoreDistChart (Reading Test): stacked bucket counts, no ref line */}
+      <TdCard title="Reading Test Score" headerRight={<TdAvgChip value="72" />}>
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={6} yTicks={[0, 2, 4, 6]} />
+          <TdStackedBars rows={testDistRows} colors={TD_SCORE_BUCKETS.map((b) => b.fill)} yMax={6} />
+        </svg>
+        <TdLegend items={TD_SCORE_BUCKETS.map((b) => ({ label: b.range, color: b.fill }))} />
+      </TdCard>
+    </TeacherDashboardSlide>
+  );
+}
+
+/* Slide 3/5 — Vocab Quiz Score · Grammar Quiz Score · Grammar Game Score */
+export function TeacherDashboardQuizScoresMockup() {
+  const quizDistRows = [
+    [0, 0, 1, 5],
+    [0, 1, 2, 2],
+    [0, 1, 3, 1],
+    [0, 1, 2, 2],
+    [0, 0, 2, 4],
+    [1, 2, 1, 0],
+    [0, 1, 2, 2],
+    [2, 1, 1, 0],
+    [0, 1, 3, 1],
+    [1, 2, 1, 0],
+  ];
+  const grammarQuizDistRows = [
+    [0, 1, 2, 2],
+    [0, 1, 3, 1],
+    [1, 2, 2, 0],
+    [0, 1, 2, 1],
+    [0, 1, 2, 2],
+    [1, 2, 1, 0],
+    [0, 1, 2, 2],
+    [2, 2, 0, 0],
+    [1, 2, 1, 0],
+    [2, 2, 0, 0],
+  ];
+  // GrammarGameChart: per-student avg game score, lime bars + avg line, no legend.
+  const gameScores = [88, 72, 55, 66, 84, 47, 81, 39, 58, 35]; // avg 63
+
+  return (
+    <TeacherDashboardSlide>
+      <TdCard title="Vocab Quiz Score" headerRight={<TdAvgChip value="74" />}>
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={6} yTicks={[0, 2, 4, 6]} />
+          <TdStackedBars rows={quizDistRows} colors={TD_SCORE_BUCKETS.map((b) => b.fill)} yMax={6} />
+        </svg>
+        <TdLegend items={TD_SCORE_BUCKETS.map((b) => ({ label: b.range, color: b.fill }))} />
+      </TdCard>
+
+      <TdCard title="Grammar Quiz Score" headerRight={<TdAvgChip value="65" />}>
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={5} yTicks={[0, 1, 2, 3, 4, 5]} />
+          <TdStackedBars rows={grammarQuizDistRows} colors={TD_SCORE_BUCKETS.map((b) => b.fill)} yMax={5} />
+        </svg>
+        <TdLegend items={TD_SCORE_BUCKETS.map((b) => ({ label: b.range, color: b.fill }))} />
+      </TdCard>
+
+      <TdCard title="Grammar Game Score" headerRight={<TdAvgChip value="63" />}>
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={100} yTicks={[0, 25, 50, 75, 100]} />
+          <TdAvgLine avg={63} yMax={100} />
+          <TdSingleBars values={gameScores} yMax={100} fill="#84cc16" rounded />
+        </svg>
+      </TdCard>
+    </TeacherDashboardSlide>
+  );
+}
+
+/* Slide 4/5 — Grammar Game Accuracy · Spelling Score · Spelling Accuracy */
+export function TeacherDashboardSpellingMockup() {
+  const gameAccDistRows = [
+    [0, 0, 1, 3],
+    [0, 1, 2, 1],
+    [0, 2, 2, 0],
+    [0, 1, 2, 1],
+    [0, 0, 2, 2],
+    [1, 2, 1, 0],
+    [0, 1, 2, 1],
+    [2, 1, 1, 0],
+    [1, 2, 1, 0],
+    [1, 2, 1, 0],
+  ];
+  // SpellingScoreChart / SpellingAccuracyChart: single bars + avg line, no legend.
+  const spellingScores = [92, 76, 61, 70, 85, 52, 82, 44, 64, 40]; // avg 67
+  const spellingAccuracies = [95, 82, 68, 76, 90, 58, 88, 49, 70, 45]; // avg 72%
+
+  return (
+    <TeacherDashboardSlide>
+      <TdCard title="Grammar Game Accuracy" headerRight={<TdAvgChip value="68" />}>
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={4} yTicks={[0, 1, 2, 3, 4]} />
+          <TdStackedBars rows={gameAccDistRows} colors={TD_SCORE_BUCKETS.map((b) => b.fill)} yMax={4} />
+        </svg>
+        <TdLegend items={TD_SCORE_BUCKETS.map((b) => ({ label: b.range, color: b.fill }))} />
+      </TdCard>
+
+      <TdCard title="Spelling Score" headerRight={<TdAvgChip value="67" />}>
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={100} yTicks={[0, 25, 50, 75, 100]} />
+          <TdAvgLine avg={67} yMax={100} />
+          <TdSingleBars values={spellingScores} yMax={100} fill="#a855f7" rounded />
+        </svg>
+      </TdCard>
+
+      <TdCard title="Spelling Accuracy" headerRight={<TdAvgChip value="72" percent />}>
+        <svg viewBox="0 0 320 150" className="w-full">
+          <TdChartAxes yMax={100} yTicks={[0, 25, 50, 75, 100]} />
+          <TdAvgLine avg={72} yMax={100} />
+          <TdSingleBars values={spellingAccuracies} yMax={100} fill="#ec4899" rounded />
+        </svg>
+      </TdCard>
+    </TeacherDashboardSlide>
+  );
+}
+
+/* Slide 5/5 — Vocabulary Growth · Class Reading Comprehension Skill Profile */
+
+/** Monotone-ish 30-day growth series (8 weekly-ish points, deterministic). */
+function tdGrowLine(start: number, end: number): number[] {
+  const pts: number[] = [];
+  for (let i = 0; i < 8; i++) {
+    const t = i / 7;
+    const wobble = ((i * 7 + start) % 5) - 2; // deterministic -2..2 wiggle
+    pts.push(Math.max(0, Math.round(start + (end - start) * t + wobble * (1 - t))));
+  }
+  pts[7] = end;
+  return pts;
+}
+
+/** Catmull-Rom → cubic Bézier, approximating recharts' type="monotone". */
+function tdSmoothPath(pts: Array<{ x: number; y: number }>): string {
+  if (pts.length < 2) return "";
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    const c1x = (p1.x + (p2.x - p0.x) / 6).toFixed(1);
+    const c1y = (p1.y + (p2.y - p0.y) / 6).toFixed(1);
+    const c2x = (p2.x - (p3.x - p1.x) / 6).toFixed(1);
+    const c2y = (p2.y - (p3.y - p1.y) / 6).toFixed(1);
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+
+const TD_RADAR_CX = 160;
+const TD_RADAR_CY = 70;
+const TD_RADAR_R = 52;
+const TD_SKILL_LABELS = ["Main Idea", "Detail", "Inference", "Vocabulary", "Author's Purpose"];
+const TD_SKILL_VALUES = [78, 71, 58, 81, 66]; // weakest → Inference
+
+function tdRadarPoint(i: number, r: number): { x: number; y: number } {
+  const ang = ((-90 + i * 72) * Math.PI) / 180;
+  return { x: TD_RADAR_CX + r * Math.cos(ang), y: TD_RADAR_CY + r * Math.sin(ang) };
+}
+
+function tdRadarPoly(values: number[], max = 100): string {
+  return values
+    .map((v, i) => {
+      const p = tdRadarPoint(i, (v / max) * TD_RADAR_R);
+      return `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+    })
+    .join(" ");
+}
+
+export function TeacherDashboardGrowthMockup() {
+  // Vocabulary totals at Nov 1 with their 30-day starting points.
+  const growthSeries = [
+    { name: "Chloe", start: 154, end: 186 },
+    { name: "Marcus", start: 111, end: 132 },
+    { name: "Priya", start: 88, end: 104 },
+    { name: "Ethan", start: 103, end: 121 },
+    { name: "Sofia", start: 143, end: 172 },
+    { name: "Liam", start: 68, end: 76 },
+    { name: "Ava", start: 133, end: 158 },
+    { name: "Noah", start: 56, end: 61 },
+    { name: "Isabella", start: 84, end: 98 },
+    { name: "Ryan", start: 44, end: 48 },
+  ];
+  const growthXs = Array.from({ length: 8 }, (_, i) => TD_PLOT.x0 + (i * (TD_PLOT.x1 - TD_PLOT.x0)) / 7);
+  const growthPaths = growthSeries.map((s) => {
+    const pts = tdGrowLine(s.start, s.end).map((v, i) => ({ x: growthXs[i], y: tdY(v, 200) }));
+    return { name: s.name, line: tdSmoothPath(pts), area: `${tdSmoothPath(pts)} L ${TD_PLOT.x1} ${TD_PLOT.base} L ${TD_PLOT.x0} ${TD_PLOT.base} Z` };
+  });
+
+  return (
+    <TeacherDashboardSlide>
+      {/* VocabularyGrowthChart: 13 time-range pills ("1M" active), smooth
+          monotone areas (fillOpacity 0.1), toggle-chip legend */}
+      <TdCard title="Vocabulary Growth">
+        <TdPills options={["1W", "2W", "3W", "1M", "2M", "3M", "4M", "5M", "6M", "9M", "1Y", "2Y", "3Y"]} active="1M" />
+        <svg viewBox="0 0 320 134" className="w-full">
+          {[0, 50, 100, 150, 200].map((tick) => (
+            <g key={tick}>
+              <line x1={TD_PLOT.x0} y1={tdY(tick, 200)} x2={TD_PLOT.x1} y2={tdY(tick, 200)} stroke="var(--lp-rule)" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.55" />
+              <text x={TD_PLOT.x0 - 3} y={tdY(tick, 200) + 2} textAnchor="end" fontSize="5.5" fill="var(--lp-ink-soft)">
+                {tick}
+              </text>
+            </g>
+          ))}
+          <line x1={TD_PLOT.x0} y1={TD_PLOT.base} x2={TD_PLOT.x1} y2={TD_PLOT.base} stroke="var(--lp-rule)" strokeWidth="0.7" />
+          {growthPaths.map((g) => (
+            <path key={`a-${g.name}`} d={g.area} fill={TD_GROWTH_COLORS[TD_STUDENTS.indexOf(g.name)]} opacity="0.1" />
+          ))}
+          {growthPaths.map((g) => (
+            <path key={`l-${g.name}`} d={g.line} fill="none" stroke={TD_GROWTH_COLORS[TD_STUDENTS.indexOf(g.name)]} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          ))}
+          {[
+            { label: "Oct 3", x: TD_PLOT.x0, anchor: "start" as const },
+            { label: "Oct 10", x: 101, anchor: "middle" as const },
+            { label: "Oct 17", x: 172, anchor: "middle" as const },
+            { label: "Oct 24", x: 243, anchor: "middle" as const },
+            { label: "Oct 31", x: TD_PLOT.x1, anchor: "end" as const },
+          ].map((d) => (
+            <text key={d.label} x={d.x} y={126} textAnchor={d.anchor} fontSize="6" fill="var(--lp-ink-soft)">
+              {d.label}
+            </text>
+          ))}
+        </svg>
+        <TdLegend items={TD_STUDENTS.map((name, i) => ({ label: name, color: TD_GROWTH_COLORS[i] }))} />
+      </TdCard>
+
+      {/* SkillAveragesChart: dashed pentagon PolarGrid, teal radar (0.4 fill),
+          "Students: 10" chip and the "Focus area" footer */}
+      <TdCard
+        title="Class Reading Comprehension Skill Profile"
+        headerRight={
+          <span>
+            Students: <strong className="font-semibold tabular-nums text-[var(--lp-ink)]">10</strong>
+          </span>
+        }
+      >
+        <svg viewBox="0 0 320 134" className="w-full">
+          {/* concentric rings (0/25/50/75/100%) + spokes, dashed like PolarGrid */}
+          {[13, 26, 39, 52].map((r) => (
+            <polygon
+              key={r}
+              points={[0, 1, 2, 3, 4].map((i) => { const p = tdRadarPoint(i, r); return `${p.x.toFixed(1)},${p.y.toFixed(1)}`; }).join(" ")}
+              fill="none"
+              stroke="var(--lp-rule)"
+              strokeWidth="0.5"
+              strokeDasharray="2 2"
+              opacity="0.7"
+            />
+          ))}
+          {[0, 1, 2, 3, 4].map((i) => {
+            const p = tdRadarPoint(i, TD_RADAR_R);
+            return <line key={`spoke${i}`} x1={TD_RADAR_CX} y1={TD_RADAR_CY} x2={p.x} y2={p.y} stroke="var(--lp-rule)" strokeWidth="0.5" opacity="0.7" />;
+          })}
+          <polygon points={tdRadarPoly(TD_SKILL_VALUES)} fill="#14b8a6" fillOpacity="0.4" stroke="#14b8a6" strokeWidth="1.2" strokeLinejoin="round" />
+          {TD_SKILL_LABELS.map((label, i) => {
+            const p = tdRadarPoint(i, TD_RADAR_R);
+            const cos = Math.cos(((-90 + i * 72) * Math.PI) / 180);
+            const sin = Math.sin(((-90 + i * 72) * Math.PI) / 180);
+            const anchor = cos > 0.3 ? "start" : cos < -0.3 ? "end" : "middle";
+            const x = anchor === "start" ? p.x + 5 : anchor === "end" ? p.x - 5 : p.x;
+            const y = i === 0 ? p.y - 6 : sin > 0.5 ? p.y + 9 : p.y + 3;
+            return (
+              <text key={label} x={x} y={y} textAnchor={anchor} fontSize="6" fill="var(--lp-ink-soft)">
+                {label}
+              </text>
+            );
+          })}
+        </svg>
+        <p className="mt-0.5 text-center text-[8px] text-[var(--lp-ink-soft)]">
+          Focus area: <span className="font-medium text-[var(--lp-ink)]">Inference</span>
+        </p>
+      </TdCard>
+    </TeacherDashboardSlide>
   );
 }
 

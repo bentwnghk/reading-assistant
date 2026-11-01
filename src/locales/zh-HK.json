@@ -563,7 +563,19 @@
           "觀察整個學期的詞彙增長",
           "按程度分布查看閱讀測驗成績",
           "監察每位學生的 AI 功能使用情況"
-        ]
+        ],
+        "carousel": {
+          "label": "教師儀表板預覽",
+          "activity": "每日活動與閱讀文本",
+          "progress": "學習進度與 AI 使用",
+          "quizScores": "測驗成績分布",
+          "spelling": "語法遊戲與拼字",
+          "growth": "詞彙增長與能力分析",
+          "prev": "上一張",
+          "next": "下一張",
+          "goTo": "跳至第 {{n}} / {{count}} 張：{{label}}",
+          "indicator": "第 {{n}} / {{count}} 張：{{label}}"
+        }
       }
     },
     "features": {
