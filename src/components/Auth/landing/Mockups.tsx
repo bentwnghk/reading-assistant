@@ -69,6 +69,8 @@ import {
   Eye,
   Languages,
   Medal,
+  Network,
+  FileCheck,
   ChevronsUpDown,
   Flame,
   Coins,
@@ -914,39 +916,57 @@ export function TargetedPracticeMockup() {
 }
 
 /* ── 5c. MASTER — achievements screen (faithful, static) ── */
-// Mirrors AchievementsTab + AchievementMedal: overall progress banner + medal
-// grid with progress rings, milestone dots. Uses real ACHIEVEMENT_CONFIG types.
+// Mirrors AchievementsTab + AchievementMedal: overall progress banner, a 3×3
+// medal grid with progress rings / milestone dots, and the legend row. Medals
+// are real ACHIEVEMENT_CONFIG entries (icon + color + name), each showing one
+// of the three real states: unlocked-and-progressing (full ring, bar toward
+// the next milestone), fully complete ("N unlocked"), or locked (partial ring).
 export function AchievementsMockup() {
-  // Color maps — mirror AchievementMedal.tsx
+  // Color maps — mirror AchievementMedal.tsx (keys used by the medals shown)
   const colorBg: Record<string, string> = {
-    blue: "bg-blue-500", green: "bg-green-500", indigo: "bg-indigo-500", cyan: "bg-cyan-500",
-    purple: "bg-purple-500", amber: "bg-amber-500", teal: "bg-teal-500", pink: "bg-pink-500",
+    blue: "bg-blue-500", green: "bg-green-500", indigo: "bg-indigo-500", purple: "bg-purple-500",
+    sky: "bg-sky-500", fuchsia: "bg-fuchsia-500", rose: "bg-rose-500", amber: "bg-amber-500",
+    cyan: "bg-cyan-500",
   };
   const colorRing: Record<string, string> = {
-    blue: "stroke-blue-500", green: "stroke-green-500", indigo: "stroke-indigo-500", cyan: "stroke-cyan-500",
-    purple: "stroke-purple-500", amber: "stroke-amber-500", teal: "stroke-teal-500", pink: "stroke-pink-500",
+    blue: "stroke-blue-500", green: "stroke-green-500", indigo: "stroke-indigo-500", purple: "stroke-purple-500",
+    sky: "stroke-sky-500", fuchsia: "stroke-fuchsia-500", rose: "stroke-rose-500", amber: "stroke-amber-500",
+    cyan: "stroke-cyan-500",
   };
   const colorText: Record<string, string> = {
     blue: "text-blue-600 dark:text-blue-400", green: "text-green-600 dark:text-green-400",
-    indigo: "text-indigo-600 dark:text-indigo-400", cyan: "text-cyan-600 dark:text-cyan-400",
-    purple: "text-purple-600 dark:text-purple-400", amber: "text-amber-600 dark:text-amber-400",
-    teal: "text-teal-600 dark:text-teal-400", pink: "text-pink-600 dark:text-pink-400",
+    indigo: "text-indigo-600 dark:text-indigo-400", purple: "text-purple-600 dark:text-purple-400",
+    sky: "text-sky-600 dark:text-sky-400", fuchsia: "text-fuchsia-600 dark:text-fuchsia-400",
+    rose: "text-rose-600 dark:text-rose-400", amber: "text-amber-600 dark:text-amber-400",
+    cyan: "text-cyan-600 dark:text-cyan-400",
   };
   const colorGlow: Record<string, string> = {
-    blue: "shadow-blue-400/50", green: "shadow-green-400/50", indigo: "shadow-indigo-400/50", cyan: "shadow-cyan-400/50",
-    purple: "shadow-purple-400/50", amber: "shadow-amber-400/50", teal: "shadow-teal-400/50", pink: "shadow-pink-400/50",
+    blue: "shadow-blue-400/50", green: "shadow-green-400/50", indigo: "shadow-indigo-400/50", purple: "shadow-purple-400/50",
+    sky: "shadow-sky-400/50", fuchsia: "shadow-fuchsia-400/50", rose: "shadow-rose-400/50", amber: "shadow-amber-400/50",
+    cyan: "shadow-cyan-400/50",
   };
 
-  // Real achievement types from ACHIEVEMENT_CONFIG (achievements.ts)
+  // Real achievement types from ACHIEVEMENT_CONFIG (achievements.ts), with
+  // milestone ladders that double from the initial target (5 → 10 → 20 …, 7
+  // per achievement). `progress` mirrors AchievementMedal's percent toward
+  // the next milestone; `complete` = every milestone unlocked (the real card
+  // swaps its bar for an "N unlocked" caption). Labels are the real i18n
+  // descriptions at the shown target count.
   const medals = [
-    { type: "Avid Reader", icon: BookOpen, color: "blue", unlocked: true, progress: 100, current: 12, nextTarget: 0, label: "Read 10 texts", dotsUnlocked: 2 },
-    { type: "Word Collector", icon: BookText, color: "green", unlocked: true, progress: 100, current: 72, nextTarget: 0, label: "Collect 50 words", dotsUnlocked: 1 },
-    { type: "Flashcard Reviews", icon: Layers, color: "indigo", unlocked: false, progress: 64, current: 32, nextTarget: 50, label: "Review 50 cards", dotsUnlocked: 0 },
-    { type: "Curious Learner", icon: Sparkles, color: "cyan", unlocked: false, progress: 47, current: 14, nextTarget: 30, label: "Ask 30 questions", dotsUnlocked: 0 },
+    { type: "Avid Reader", icon: BookOpen, color: "blue", unlocked: true, complete: false, progress: 20, current: 12, nextTarget: 20, label: "Read 20 texts", dotsUnlocked: 2 },
+    { type: "Word Collector", icon: BookText, color: "green", unlocked: true, complete: false, progress: 44, current: 72, nextTarget: 100, label: "Collect 100 vocabulary items", dotsUnlocked: 1 },
+    { type: "Memory Master", icon: Layers, color: "indigo", unlocked: false, complete: false, progress: 64, current: 32, nextTarget: 50, label: "Complete 50 flashcard reviews", dotsUnlocked: 0 },
+    { type: "Visual Thinker", icon: Network, color: "purple", unlocked: false, complete: false, progress: 60, current: 3, nextTarget: 5, label: "Generate 5 mind maps", dotsUnlocked: 0 },
+    { type: "Test Champion", icon: FileCheck, color: "sky", unlocked: false, complete: false, progress: 60, current: 3, nextTarget: 5, label: "Complete 5 reading tests", dotsUnlocked: 0 },
+    { type: "Battle Champion", icon: Swords, color: "fuchsia", unlocked: true, complete: false, progress: 0, current: 1, nextTarget: 2, label: "Win 2 multiplayer spelling battles", dotsUnlocked: 1 },
+    { type: "On Fire", icon: Flame, color: "rose", unlocked: true, complete: true, progress: 100, current: 64, nextTarget: 0, label: "Achieve a 5+ answer streak 64 times", dotsUnlocked: 7 },
+    { type: "Grammar Gamer", icon: Gamepad2, color: "amber", unlocked: false, complete: false, progress: 60, current: 12, nextTarget: 20, label: "Play 20 grammar games", dotsUnlocked: 0 },
+    { type: "Curious Learner", icon: Sparkles, color: "cyan", unlocked: false, complete: false, progress: 70, current: 14, nextTarget: 20, label: "Ask AI Tutor 20 questions", dotsUnlocked: 0 },
   ];
 
-  const totalUnlocked = 3;
-  const totalMilestones = 105;
+  // Banner totals: 11 milestones unlocked of 126 (18 achievements × 7 each)
+  const totalUnlocked = 11;
+  const totalMilestones = 126;
   const pct = Math.round((totalUnlocked / totalMilestones) * 100);
 
   return (
@@ -961,7 +981,7 @@ export function AchievementsMockup() {
               </div>
               <div>
                 <p className="text-sm font-semibold">Achievements</p>
-                <p className="text-xs text-muted-foreground">Milestones you&apos;ve unlocked</p>
+                <p className="text-xs text-muted-foreground">Celebrate your learning milestones</p>
               </div>
             </div>
             <div className="text-right">
@@ -979,12 +999,12 @@ export function AchievementsMockup() {
             />
           </div>
           <p className="mt-1.5 text-xs text-muted-foreground">
-            {totalUnlocked} of {totalMilestones} milestones unlocked
+            {totalUnlocked} / {totalMilestones} milestones unlocked
           </p>
         </div>
 
-        {/* Medal grid — faithful to AchievementMedal */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Medal grid — faithful to AchievementMedal (3×3, compact scale) */}
+        <div className="grid grid-cols-3 gap-2">
           {medals.map((m) => {
             const cBg = colorBg[m.color];
             const cRing = colorRing[m.color];
@@ -996,7 +1016,7 @@ export function AchievementsMockup() {
             return (
               <div
                 key={m.type}
-                className={`relative flex flex-col items-center rounded-2xl border-2 p-3 ${
+                className={`relative flex flex-col items-center rounded-2xl border-2 p-2.5 ${
                   m.unlocked
                     ? "border-transparent bg-gradient-to-b from-card to-card/80 shadow-lg"
                     : "border-border/50 bg-card/60"
@@ -1006,7 +1026,7 @@ export function AchievementsMockup() {
                   <div className={`absolute inset-0 rounded-2xl opacity-10 blur-xl ${cBg}`} />
                 )}
                 {/* Medal circle with progress ring */}
-                <div className="relative mb-2 h-16 w-16">
+                <div className="relative mb-2 h-14 w-14">
                   <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full -rotate-90">
                     <circle cx="50" cy="50" r="44" fill="none" strokeWidth="5" className="stroke-muted-foreground/20" />
                     {m.unlocked ? (
@@ -1025,43 +1045,49 @@ export function AchievementsMockup() {
                     }`}
                   >
                     {m.unlocked ? (
-                      <Icon className="h-7 w-7 text-white" />
+                      <Icon className="h-6 w-6 text-white" />
                     ) : (
-                      <Lock className="h-6 w-6 text-muted-foreground/50" />
+                      <Lock className="h-5 w-5 text-muted-foreground/50" />
                     )}
                   </div>
                   {m.unlocked && (
                     <div className="absolute -bottom-1 -right-1 rounded-full bg-background p-0.5">
-                      <CheckCircle2 className={`h-5 w-5 ${cText}`} />
+                      <CheckCircle2 className={`h-4 w-4 ${cText}`} />
                     </div>
                   )}
                 </div>
                 <p
-                  className={`text-center text-sm font-bold leading-tight ${
+                  className={`text-center text-xs font-bold leading-tight ${
                     m.unlocked ? "text-foreground" : "text-muted-foreground"
                   }`}
                 >
                   {m.type}
                 </p>
                 <p
-                  className={`text-center text-xs leading-tight ${
+                  className={`text-center text-[10px] leading-tight ${
                     m.unlocked ? cText : "text-muted-foreground/70"
                   }`}
                 >
                   {m.label}
                 </p>
-                {/* Progress bar + count */}
-                <div className="mt-2 w-full">
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={`h-full rounded-full ${m.unlocked ? cBg : "bg-muted-foreground/40"}`}
-                      style={{ width: `${m.progress}%` }}
-                    />
-                  </div>
-                  <p className="mt-1 text-center text-[10px] text-muted-foreground">
-                    {m.unlocked ? `${m.dotsUnlocked} unlocked` : `${m.current} / ${m.nextTarget}`}
+                {/* Progress bar + count — fully completed medals show "N unlocked" */}
+                {m.complete ? (
+                  <p className="mt-1 text-center text-[9px] text-muted-foreground">
+                    {m.dotsUnlocked} unlocked
                   </p>
-                </div>
+                ) : (
+                  <div className="mt-2 w-full">
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={`h-full rounded-full ${m.unlocked ? cBg : "bg-muted-foreground/40"}`}
+                        style={{ width: `${m.progress}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-center text-[9px] text-muted-foreground">
+                      {m.current} / {m.nextTarget}
+                    </p>
+                  </div>
+                )}
                 {/* Milestone dots */}
                 <div className="mt-2 flex justify-center gap-1">
                   {Array.from({ length: 7 }).map((_, i) => (
@@ -1076,6 +1102,31 @@ export function AchievementsMockup() {
               </div>
             );
           })}
+        </div>
+
+        {/* Legend — mirrors AchievementsTab */}
+        <div className="flex items-center gap-4 pt-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <div className="h-3 w-3 rounded-full bg-primary/40" />
+            <span>Locked</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="h-3 w-3 rounded-full bg-green-500" />
+            <span>Unlocked!</span>
+          </div>
+          <div className="ml-auto flex items-center gap-1.5">
+            <div className="flex gap-0.5">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    i < 2 ? "bg-primary" : "bg-muted-foreground/30"
+                  }`}
+                />
+              ))}
+            </div>
+            <span>= milestones</span>
+          </div>
         </div>
       </div>
     </MockupFrame>
