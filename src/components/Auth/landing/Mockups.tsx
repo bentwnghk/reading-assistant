@@ -3277,13 +3277,101 @@ export function SpellingSetupMockup() {
   );
 }
 
-/* ── 8c. VOCABULARY — Student analytics (faithful, static) ── */
-// Mirrors /vocabulary?view=analytics (staff view) with the Overview tab active:
-// page header + My vocabulary/Student analytics switch, the staff filter bar
-// (class + student pickers), Overview/Review sessions/Activity tabs + time
-// range, the 8 stat cards, daily-activity chart, mastery distribution +
-// review modes, accuracy history, most-missed words, and the per-student table.
-export function VocabularyAnalyticsMockup() {
+/* ── 8c. VOCABULARY — Student analytics (faithful, static) ──
+// Mirrors /vocabulary?view=analytics (staff view) with the Overview tab
+// active, split across two shorter slides: shared chrome (page header +
+// My vocabulary/Student analytics switch, the staff filter bar, the
+// Overview/Review sessions/Activity tabs + time range), then the top half of
+// the Overview tab per slide — stat cards, the daily-activity chart, the
+// mastery distribution and review modes, then review-accuracy history,
+// most-missed words and the per-student table with the footnote. */
+
+/** Shared slide chrome — page header, scope switch, staff filter bar and the
+    tab row (Overview active) every Overview-tab card sits under. */
+function VocabularyAnalyticsSlide({ children }: { children: React.ReactNode }) {
+  return (
+    <MockupFrame label="STUDENT ANALYTICS · Mr.🆖 ProReader">
+      {/* Page header + My vocabulary / Student analytics switch (SegmentedTabs) */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--lp-ink)]">
+          <BarChart3 className="h-4 w-4 text-indigo-500" />
+          Student analytics
+          <HelpCircle className="h-3 w-3 text-muted-foreground" />
+        </h3>
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            My vocabulary
+          </span>
+          <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
+            Student analytics
+          </span>
+        </div>
+      </div>
+
+      {/* Staff filter bar — scope label + class & student pickers */}
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card px-2 py-1.5">
+        <span className="flex items-center gap-1 text-[8.5px] font-medium text-muted-foreground">
+          <Users className="h-3 w-3" />
+          Students in your classes
+        </span>
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="inline-flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+            My Classes
+            <ChevronsUpDown className="h-2.5 w-2.5 text-muted-foreground" />
+          </span>
+          <span className="inline-flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+            All students
+            <ChevronsUpDown className="h-2.5 w-2.5 text-muted-foreground" />
+          </span>
+        </div>
+      </div>
+
+      {/* Overview / Review sessions / Activity + time range */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
+          <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
+            Overview
+          </span>
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            Review sessions
+          </span>
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            Activity
+          </span>
+        </div>
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
+          {["All time", "7 days", "30 days", "90 days"].map((r, i) => (
+            <span
+              key={r}
+              className={`rounded-md px-2 py-1 text-[8.5px] font-medium ${
+                i === 2
+                  ? "bg-background text-[var(--lp-ink)] shadow-sm"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {r}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">{children}</div>
+    </MockupFrame>
+  );
+}
+
+/** Percent badge — green ≥ 80, amber ≥ 50, red below. */
+const vaPctBadge = (v: number) =>
+  `rounded-full px-1.5 py-0.5 text-[8px] font-semibold tabular-nums ${
+    v >= 80
+      ? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
+      : v >= 50
+        ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+        : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+  }`;
+
+/* Slide 1/2 — stat cards · Daily activity · Mastery levels + Review modes */
+export function VocabularyAnalyticsOverviewMockup() {
   // 8 overview stat cards — mirrors Stat in LearnDashboardView.tsx + the icon/
   // tone choices in VocabularyDashboardView.tsx.
   const stats: { icon: typeof BookMarked; tone: string; label: string; value: string; hint?: string }[] = [
@@ -3321,99 +3409,8 @@ export function VocabularyAnalyticsMockup() {
     { mode: "Spelling", icon: SpellCheck, sessions: 25, reviewed: 216, acc: 76 },
   ];
 
-  // Accuracy-over-time line (per review session).
-  const historyPts = [72, 78, 69, 81, 76, 84, 79, 86];
-
-  // Most missed words (checkbox + accuracy PercentBadge).
-  const hardWords = [
-    { word: "necessary", wrong: 9, attempts: 14, learners: 6 },
-    { word: "receive", wrong: 7, attempts: 11, learners: 5 },
-    { word: "rhythm", wrong: 6, attempts: 8, learners: 3 },
-    { word: "beautiful", wrong: 3, attempts: 8, learners: 3 },
-  ];
-
-  // Per-student table — Due > 0 renders orange, Trend green, ghost "Vocabulary" action.
-  const students = [
-    { name: "Chloe Chan", email: "chloe.chan@school.edu.hk", bank: "96", phrases: "3 phrases", mastered: 34, due: 6, sessions: 22, acc: 84, trend: "+6", last: "31/10 14:32" },
-    { name: "Marcus Wong", email: "marcus.wong@school.edu.hk", bank: "88", phrases: "5 phrases", mastered: 25, due: 9, sessions: 18, acc: 76, trend: "+4", last: "30/10 16:05" },
-    { name: "Ka Yan Lam", email: "kayan.lam@school.edu.hk", bank: "74", phrases: null, mastered: 19, due: 12, sessions: 14, acc: 63, trend: "+2", last: "29/10 09:47" },
-  ];
-
-  const pctBadge = (v: number) =>
-    `rounded-full px-1.5 py-0.5 text-[8px] font-semibold tabular-nums ${
-      v >= 80
-        ? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
-        : v >= 50
-          ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-          : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-    }`;
-
   return (
-    <MockupFrame label="STUDENT ANALYTICS · Mr.🆖 ProReader">
-      <div className="space-y-2">
-        {/* Page header + My vocabulary / Student analytics switch (SegmentedTabs) */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--lp-ink)]">
-            <BarChart3 className="h-4 w-4 text-indigo-500" />
-            Student analytics
-            <HelpCircle className="h-3 w-3 text-muted-foreground" />
-          </h3>
-          <div className="flex gap-1 rounded-lg bg-muted p-1">
-            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
-              My vocabulary
-            </span>
-            <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
-              Student analytics
-            </span>
-          </div>
-        </div>
-
-        {/* Staff filter bar — scope label + class & student pickers */}
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card px-2 py-1.5">
-          <span className="flex items-center gap-1 text-[8.5px] font-medium text-muted-foreground">
-            <Users className="h-3 w-3" />
-            Students in your classes
-          </span>
-          <div className="ml-auto flex items-center gap-1.5">
-            <span className="inline-flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1 text-[9px] text-[var(--lp-ink)]">
-              My Classes
-              <ChevronsUpDown className="h-2.5 w-2.5 text-muted-foreground" />
-            </span>
-            <span className="inline-flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1 text-[9px] text-[var(--lp-ink)]">
-              All students
-              <ChevronsUpDown className="h-2.5 w-2.5 text-muted-foreground" />
-            </span>
-          </div>
-        </div>
-
-        {/* Overview / Review sessions / Activity + time range */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex gap-1 rounded-lg bg-muted p-1">
-            <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
-              Overview
-            </span>
-            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
-              Review sessions
-            </span>
-            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
-              Activity
-            </span>
-          </div>
-          <div className="flex gap-1 rounded-lg bg-muted p-1">
-            {["All time", "7 days", "30 days", "90 days"].map((r, i) => (
-              <span
-                key={r}
-                className={`rounded-md px-2 py-1 text-[8.5px] font-medium ${
-                  i === 2
-                    ? "bg-background text-[var(--lp-ink)] shadow-sm"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {r}
-              </span>
-            ))}
-          </div>
-        </div>
+    <VocabularyAnalyticsSlide>
 
         {/* Stat grid */}
         <div className="grid grid-cols-4 gap-1.5">
@@ -3520,7 +3517,7 @@ export function VocabularyAnalyticsMockup() {
                       <td className="py-1 pr-2 tabular-nums">{m.sessions}</td>
                       <td className="py-1 pr-2 tabular-nums">{m.reviewed}</td>
                       <td className="py-1">
-                        <span className={pctBadge(m.acc)}>{m.acc}%</span>
+                        <span className={vaPctBadge(m.acc)}>{m.acc}%</span>
                       </td>
                     </tr>
                   );
@@ -3529,7 +3526,32 @@ export function VocabularyAnalyticsMockup() {
             </table>
           </div>
         </div>
+    </VocabularyAnalyticsSlide>
+  );
+}
 
+/* Slide 2/2 — Review accuracy · Most missed words · Per-student table */
+export function VocabularyAnalyticsStudentsMockup() {
+  // Accuracy-over-time line (per review session).
+  const historyPts = [72, 78, 69, 81, 76, 84, 79, 86];
+
+  // Most missed words (checkbox + accuracy PercentBadge).
+  const hardWords = [
+    { word: "necessary", wrong: 9, attempts: 14, learners: 6 },
+    { word: "receive", wrong: 7, attempts: 11, learners: 5 },
+    { word: "rhythm", wrong: 6, attempts: 8, learners: 3 },
+    { word: "beautiful", wrong: 3, attempts: 8, learners: 3 },
+  ];
+
+  // Per-student table — Due > 0 renders orange, Trend green, ghost "Vocabulary" action.
+  const students = [
+    { name: "Chloe Chan", email: "chloe.chan@school.edu.hk", bank: "96", phrases: "3 phrases", mastered: 34, due: 6, sessions: 22, acc: 84, trend: "+6", last: "31/10 14:32" },
+    { name: "Marcus Wong", email: "marcus.wong@school.edu.hk", bank: "88", phrases: "5 phrases", mastered: 25, due: 9, sessions: 18, acc: 76, trend: "+4", last: "30/10 16:05" },
+    { name: "Ka Yan Lam", email: "kayan.lam@school.edu.hk", bank: "74", phrases: null, mastered: 19, due: 12, sessions: 14, acc: 63, trend: "+2", last: "29/10 09:47" },
+  ];
+
+  return (
+    <VocabularyAnalyticsSlide>
         {/* Review accuracy over time */}
         <div className="rounded-lg border p-2">
           <p className="mb-1 text-[9.5px] font-semibold text-muted-foreground">
@@ -3590,7 +3612,7 @@ export function VocabularyAnalyticsMockup() {
                   <td className="px-2 py-1 tabular-nums">{w.wrong}/{w.attempts}</td>
                   <td className="px-2 py-1 tabular-nums">{w.learners}</td>
                   <td className="px-2 py-1">
-                    <span className={pctBadge(Math.round(((w.attempts - w.wrong) / w.attempts) * 100))}>
+                    <span className={vaPctBadge(Math.round(((w.attempts - w.wrong) / w.attempts) * 100))}>
                       {Math.round(((w.attempts - w.wrong) / w.attempts) * 100)}%
                     </span>
                   </td>
@@ -3635,7 +3657,7 @@ export function VocabularyAnalyticsMockup() {
                     </td>
                     <td className="px-2 py-1 tabular-nums">{s.sessions}</td>
                     <td className="px-2 py-1">
-                      <span className={pctBadge(s.acc)}>{s.acc}%</span>
+                      <span className={vaPctBadge(s.acc)}>{s.acc}%</span>
                     </td>
                     <td className="px-2 py-1 font-medium tabular-nums text-green-600 dark:text-green-400">
                       {s.trend}
@@ -3660,8 +3682,7 @@ export function VocabularyAnalyticsMockup() {
           accuracy and activity cover the selected time range. Accuracy is the share of correct
           answers across review sessions.
         </p>
-      </div>
-    </MockupFrame>
+    </VocabularyAnalyticsSlide>
   );
 }
 
