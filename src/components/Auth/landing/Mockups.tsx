@@ -1255,6 +1255,466 @@ export function LeaderboardMockup() {
   );
 }
 
+/* ── 5b. MASTER — the student "Learning Journey" dashboard dialog in two
+      faithful static slides, mirroring the real Dashboard dialog one card at
+      a time: the dialog header + Overview/Sessions tab list, the three
+      summary StatCards (Reading Texts · Total Vocabulary · Avg Learning
+      Progress), the stacked Daily Learning Activity chart with its time-range
+      pills and 17-series legend, the 2-col Reading Activity + AI Features
+      Usage row (horizontal stacked bars with the Mind Map ZH/EN split), the
+      bucket-coloured score distributions with "Avg:" header chips,
+      Spelling/Grammar trend lines with dashed average ReferenceLines, the
+      gradient Vocabulary Growth area with its 13 pills, and the teal Skill
+      Profile radar with the "Focus area" caption. ── */
+
+/* Full-width time-series scaffold (320×126 viewBox) — dashed CartesianGrid,
+   y tick labels and HORIZONTAL date ticks below, like the live charts'
+   fontSize-10 XAxis (the student dashboard plots dates, not students). */
+const SD_PLOT = { x0: 28, x1: 314, top: 8, base: 104, labelY: 116 };
+const SD_BAR_W = 13;
+const SD_STEP = (SD_PLOT.x1 - SD_PLOT.x0) / 14;
+const sdBarX = (i: number) => SD_PLOT.x0 + i * SD_STEP + (SD_STEP - SD_BAR_W) / 2;
+const sdY = (v: number, max: number) => SD_PLOT.base - (v / max) * (SD_PLOT.base - SD_PLOT.top);
+
+/* Half-width scaffold for the 2-col score grid (152×108 viewBox, 4 slots). */
+const SD_HALF = { x0: 24, x1: 148, top: 6, base: 88, labelY: 98 };
+const SD_HALF_STEP = (SD_HALF.x1 - SD_HALF.x0) / 4;
+const sdHalfY = (v: number, max: number) =>
+  SD_HALF.base - (v / max) * (SD_HALF.base - SD_HALF.top);
+
+/** Dashed CartesianGrid + YAxis ticks + baseline for the full-width charts. */
+function SdGrid({ yMax, yTicks }: { yMax: number; yTicks: number[] }) {
+  return (
+    <g>
+      {yTicks.map((tick) => (
+        <g key={tick}>
+          <line x1={SD_PLOT.x0} y1={sdY(tick, yMax)} x2={SD_PLOT.x1} y2={sdY(tick, yMax)} stroke="var(--lp-rule)" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.55" />
+          <text x={SD_PLOT.x0 - 3} y={sdY(tick, yMax) + 2} textAnchor="end" fontSize="5.5" fill="var(--lp-ink-soft)">
+            {tick}
+          </text>
+        </g>
+      ))}
+      <line x1={SD_PLOT.x0} y1={SD_PLOT.base} x2={SD_PLOT.x1} y2={SD_PLOT.base} stroke="var(--lp-rule)" strokeWidth="0.7" />
+    </g>
+  );
+}
+
+/** Stacked Bars (stackId="a") over the 14 day slots — rows[day][series]. */
+function SdStackedDays({ rows, colors, yMax }: { rows: number[][]; colors: string[]; yMax: number }) {
+  const unit = (SD_PLOT.base - SD_PLOT.top) / yMax;
+  return (
+    <g>
+      {rows.map((row, di) => {
+        let cum = 0;
+        return row.map((v, ki) => {
+          if (v <= 0) return null;
+          const y = SD_PLOT.base - (cum + v) * unit;
+          cum += v;
+          return <rect key={`${di}-${ki}`} x={sdBarX(di)} y={y} width={SD_BAR_W} height={v * unit} fill={colors[ki]} />;
+        });
+      })}
+    </g>
+  );
+}
+
+/** Dashed grid + y ticks + baseline + category x labels for the half charts. */
+function SdHalfAxes({ yMax, yTicks, labels }: { yMax: number; yTicks: number[]; labels: string[] }) {
+  return (
+    <g>
+      {yTicks.map((tick) => (
+        <g key={tick}>
+          <line x1={SD_HALF.x0} y1={sdHalfY(tick, yMax)} x2={SD_HALF.x1} y2={sdHalfY(tick, yMax)} stroke="var(--lp-rule)" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.55" />
+          <text x={SD_HALF.x0 - 3} y={sdHalfY(tick, yMax) + 2} textAnchor="end" fontSize="5" fill="var(--lp-ink-soft)">
+            {tick}
+          </text>
+        </g>
+      ))}
+      <line x1={SD_HALF.x0} y1={SD_HALF.base} x2={SD_HALF.x1} y2={SD_HALF.base} stroke="var(--lp-rule)" strokeWidth="0.7" />
+      {labels.map((l, i) => (
+        <text
+          key={l}
+          x={SD_HALF.x0 + i * SD_HALF_STEP + SD_HALF_STEP / 2}
+          y={SD_HALF.labelY}
+          textAnchor="middle"
+          fontSize="4.6"
+          fill="var(--lp-ink-soft)"
+        >
+          {l}
+        </text>
+      ))}
+    </g>
+  );
+}
+
+/** Bucket Bars with rounded tops (radius [4,4,0,0]) + per-bucket Cell colors. */
+function SdBucketBars({ counts, yMax }: { counts: number[]; yMax: number }) {
+  const unit = (SD_HALF.base - SD_HALF.top) / yMax;
+  const w = 20;
+  return (
+    <g>
+      {counts.map((c, i) =>
+        c <= 0 ? null : (
+          <rect
+            key={i}
+            x={SD_HALF.x0 + i * SD_HALF_STEP + (SD_HALF_STEP - w) / 2}
+            y={SD_HALF.base - c * unit}
+            width={w}
+            height={c * unit}
+            rx="1.5"
+            fill={TD_SCORE_BUCKETS[i].fill}
+          />
+        ),
+      )}
+    </g>
+  );
+}
+
+/** Smooth monotone Line + r-3 dots (scaled down) in the chart's color. */
+function SdTrendLine({ values, yMax, color }: { values: number[]; yMax: number; color: string }) {
+  const step = (SD_HALF.x1 - SD_HALF.x0) / (values.length - 1);
+  const pts = values.map((v, i) => ({ x: SD_HALF.x0 + i * step, y: sdHalfY(v, yMax) }));
+  return (
+    <g>
+      <path d={tdSmoothPath(pts)} fill="none" stroke={color} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      {pts.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r="1.4" fill={color} />
+      ))}
+    </g>
+  );
+}
+
+/** Dashed #94a3b8 ReferenceLine with the "Avg: N" label inside top right. */
+function SdAvgRef({ avg, yMax }: { avg: number; yMax: number }) {
+  const y = sdHalfY(avg, yMax);
+  return (
+    <g>
+      <line x1={SD_HALF.x0} y1={y} x2={SD_HALF.x1} y2={y} stroke="#94a3b8" strokeWidth="0.6" strokeDasharray="2.5 1.8" />
+      <text x={SD_HALF.x1} y={y - 1.5} textAnchor="end" fontSize="4.5" fill="#94a3b8">
+        Avg: {avg}
+      </text>
+    </g>
+  );
+}
+
+/* AI Features Usage — half-width horizontal bars (152×108 viewBox). 11
+   feature rows (TD_AI_SERIES = AI_USAGE_KEYS + colors); the Mind Map row
+   stacks Chinese (#a78bfa fill2) then English (#8b5cf6) segments like the
+   live stacked BarChart (zh → en → value). No legend, like the live chart. */
+const SD_AI = { x0: 48, x1: 146, top: 6, base: 96, tickY: 104 };
+const SD_AI_UNIT = (SD_AI.x1 - SD_AI.x0) / 25;
+
+function SdAiBars({ rows }: { rows: Array<{ zh?: number; en?: number; value: number }> }) {
+  const pitch = (SD_AI.base - SD_AI.top) / rows.length;
+  return (
+    <g>
+      {rows.map((r, i) => {
+        const cy = SD_AI.top + pitch * i + pitch / 2;
+        const segs = [
+          { v: r.zh ?? 0, fill: "#a78bfa" },
+          { v: r.en ?? 0, fill: TD_AI_SERIES[i].color },
+          { v: r.value, fill: TD_AI_SERIES[i].color },
+        ];
+        let x = SD_AI.x0;
+        return (
+          <g key={TD_AI_SERIES[i].label}>
+            {segs.map((s, si) => {
+              if (s.v <= 0) return null;
+              const rect = <rect key={si} x={x} y={cy - 2.2} width={s.v * SD_AI_UNIT} height={4.4} fill={s.fill} />;
+              x += s.v * SD_AI_UNIT;
+              return rect;
+            })}
+            <text x={SD_AI.x0 - 2} y={cy + 1.5} textAnchor="end" fontSize="4.2" fill="var(--lp-ink-soft)">
+              {TD_AI_SERIES[i].label}
+            </text>
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Gradient Area + 2px stroke — gradSessions (#3b82f6) / gradVocab (#6366f1). */
+function SdArea({ pts, baseY, color, gradId, strokeW = 1.4 }: { pts: Array<{ x: number; y: number }>; baseY: number; color: string; gradId: string; strokeW?: number }) {
+  const line = tdSmoothPath(pts);
+  return (
+    <g>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+          <stop offset="95%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={`${line} L ${pts[pts.length - 1].x} ${baseY} L ${pts[0].x} ${baseY} Z`} fill={`url(#${gradId})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth={strokeW} strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** StatCard / HighlightedStatCard — rounded-xl border bg-card p-4 (primary
+    border + tint + value when highlighted). */
+function SdStatCard({ icon: Icon, tone, label, value, sub, highlight = false }: {
+  icon: typeof BookOpen;
+  tone: string;
+  label: string;
+  value: string;
+  sub?: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div className={`flex flex-col gap-0.5 rounded-xl border p-2 ${highlight ? "border-primary/30 bg-primary/5" : "border-[var(--lp-rule)] bg-card"}`}>
+      <p className="flex items-center gap-1 text-[8px] leading-tight text-muted-foreground">
+        <Icon className={`h-2.5 w-2.5 shrink-0 ${tone}`} />
+        {label}
+      </p>
+      <p className={`text-[15px] font-bold leading-none tabular-nums ${highlight ? "text-primary" : "text-[var(--lp-ink)]"}`}>{value}</p>
+      {sub && <p className="text-[7px] leading-tight text-muted-foreground">{sub}</p>}
+    </div>
+  );
+}
+
+/* Shared slide chrome — the Learning Journey dialog header, description and
+   the full-width Overview/Sessions tab list every live chart sits under. */
+function StudentDashboardSlide({ children }: { children: React.ReactNode }) {
+  return (
+    <MockupFrame label="LEARNING JOURNEY · Mr.🆖 ProReader">
+      <div className="flex items-center gap-1.5">
+        <BarChart3 className="h-4 w-4 text-[var(--lp-accent)]" />
+        <span className="text-xs font-semibold text-[var(--lp-ink)]">Learning Journey</span>
+        <HelpCircle className="h-3.5 w-3.5 text-[var(--lp-ink-soft)]" />
+      </div>
+      <p className="mt-0.5 text-[9px] leading-snug text-[var(--lp-ink-soft)]">
+        Track your reading and learning activity, scores, and vocabulary growth, and manage or share your reading sessions.
+      </p>
+      <div className="mb-3 mt-2 flex gap-1 rounded-lg bg-muted p-1">
+        <span className="flex flex-1 items-center justify-center gap-1 rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
+          <BarChart3 className="h-2.5 w-2.5" />
+          Overview
+        </span>
+        <span className="flex flex-1 items-center justify-center gap-1 rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+          <Clock className="h-2.5 w-2.5" />
+          Sessions
+        </span>
+      </div>
+      <div className="space-y-3">{children}</div>
+    </MockupFrame>
+  );
+}
+
+/* Slide 1/2 — stat cards · Daily Learning Activity · Reading Activity + AI
+   Features Usage (the live 2-col row) */
+export function StudentDashboardOverviewMockup() {
+  // Per-day activity counts (TD_DAILY_SERIES = DAILY_ACTIVITY_KEYS order);
+  // only non-zero series paint, like the live stacked BarChart.
+  const dailyRows = [
+    [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], // Oct 19
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1], // Oct 20
+    [0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0], // Oct 21
+    [1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0], // Oct 22
+    [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0], // Oct 23
+    [1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0], // Oct 24
+    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0], // Oct 25
+    [1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1], // Oct 26
+    [0, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0], // Oct 27
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0], // Oct 28
+    [0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0], // Oct 29
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 2, 0, 0, 0, 0, 0], // Oct 30
+    [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0], // Oct 31
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1], // Nov 1
+  ];
+  const dates = ["Oct 19", "Oct 20", "Oct 21", "Oct 22", "Oct 23", "Oct 24", "Oct 25", "Oct 26", "Oct 27", "Oct 28", "Oct 29", "Oct 30", "Oct 31", "Nov 1"];
+  // Sessions started per week — totals 24, matching the Reading Texts card.
+  const weeklyValues = [2, 3, 1, 4, 2, 5, 7];
+  const weekLabels = ["Sep 14", "Sep 28", "Oct 12", "Oct 26"];
+  const weeklyStep = (SD_HALF.x1 - SD_HALF.x0) / (weeklyValues.length - 1);
+  const weeklyPts = weeklyValues.map((v, i) => ({ x: SD_HALF.x0 + i * weeklyStep, y: sdHalfY(v, 8) }));
+  // Generated-artifact counts per AI feature (TD_AI_SERIES order); the Mind
+  // Map row stacks its Chinese + English counts in place of `value`.
+  const aiRows: Array<{ zh?: number; en?: number; value: number }> = [
+    { value: 18 }, // Before You Read
+    { value: 21 }, // Summary
+    { zh: 6, en: 9, value: 0 }, // Mind Map (ZH + EN stacked)
+    { value: 9 }, // Text Visualization
+    { value: 12 }, // Adapted Text
+    { value: 5 }, // Simplified Text
+    { value: 24 }, // Sentence Analysis
+    { value: 22 }, // Generate Glossary
+    { value: 8 }, // Phrases & Collocations
+    { value: 11 }, // Grammar Analysis
+    { value: 17 }, // AI Tutor
+  ];
+
+  return (
+    <StudentDashboardSlide>
+      {/* Summary Cards Grid: HighlightedStatCard + two StatCards */}
+      <div className="grid grid-cols-3 gap-2">
+        <SdStatCard
+          icon={BookOpen}
+          tone="text-primary"
+          highlight
+          label="Reading Texts"
+          value="24"
+          sub="12 from uploaded · 9 from repository · 2 from AI · 1 from shared"
+        />
+        <SdStatCard icon={BookMarked} tone="text-indigo-500" label="Total Vocabulary" value="312" />
+        <SdStatCard icon={TrendingUp} tone="text-emerald-500" label="Avg Learning Progress" value="78%" />
+      </div>
+
+      {/* Daily Learning Activity: time pills, stacked bars + 17-series legend */}
+      <TdCard title="Daily Learning Activity">
+        <TdPills options={["7d", "14d", "30d", "60d", "90d", "180d", "270d", "360d"]} active="14d" />
+        <svg viewBox="0 0 320 126" className="w-full">
+          <SdGrid yMax={8} yTicks={[0, 2, 4, 6, 8]} />
+          <SdStackedDays rows={dailyRows} colors={TD_DAILY_SERIES.map((s) => s.color)} yMax={8} />
+          {dates.map((d, i) => (
+            <text key={d} x={sdBarX(i) + SD_BAR_W / 2} y={SD_PLOT.labelY} textAnchor="middle" fontSize="4.8" fill="var(--lp-ink-soft)">
+              {d}
+            </text>
+          ))}
+        </svg>
+        <TdLegend items={TD_DAILY_SERIES} />
+      </TdCard>
+
+      {/* Charts Row 1: Reading Activity + AI Features Usage (the live
+          md:grid-cols-2 row) */}
+      <div className="grid grid-cols-2 gap-2">
+        {/* Reading Activity: weekly gradient area (gradSessions blue) */}
+        <TdCard title="Reading Activity">
+          <svg viewBox="0 0 152 108" className="w-full">
+            <SdHalfAxes yMax={8} yTicks={[0, 2, 4, 6, 8]} labels={[]} />
+            <SdArea pts={weeklyPts} baseY={SD_HALF.base} color="#3b82f6" gradId="sdGradSessions" strokeW={1.2} />
+            {[0, 2, 4, 6].map((i, li) => (
+              <text key={i} x={SD_HALF.x0 + i * weeklyStep} y={SD_HALF.labelY} textAnchor={i === 0 ? "start" : i === 6 ? "end" : "middle"} fontSize="4.4" fill="var(--lp-ink-soft)">
+                {weekLabels[li]}
+              </text>
+            ))}
+          </svg>
+        </TdCard>
+        {/* AI Features Usage: horizontal stacked bars, Mind Map ZH+EN split */}
+        <TdCard title="AI Features Usage">
+          <svg viewBox="0 0 152 108" className="w-full">
+            {[0, 5, 10, 15, 20, 25].map((t) => (
+              <g key={t}>
+                <line x1={SD_AI.x0 + t * SD_AI_UNIT} y1={SD_AI.top} x2={SD_AI.x0 + t * SD_AI_UNIT} y2={SD_AI.base} stroke="var(--lp-rule)" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.55" />
+                <text x={SD_AI.x0 + t * SD_AI_UNIT} y={SD_AI.tickY} textAnchor="middle" fontSize="4.5" fill="var(--lp-ink-soft)">
+                  {t}
+                </text>
+              </g>
+            ))}
+            <line x1={SD_AI.x0} y1={SD_AI.top} x2={SD_AI.x0} y2={SD_AI.base} stroke="var(--lp-rule)" strokeWidth="0.7" />
+            <SdAiBars rows={aiRows} />
+          </svg>
+        </TdCard>
+      </div>
+    </StudentDashboardSlide>
+  );
+}
+
+/* Slide 2/2 — score distributions & trends · Vocabulary Growth · Skill Profile */
+export function StudentDashboardChartsMockup() {
+  const spellingValues = [62, 58, 71, 66, 78, 84, 80, 88]; // avg 73
+  const grammarValues = [45, 52, 61, 58, 70, 74, 82]; // avg 63
+  // Cumulative vocabulary over the picked 3M window — ends at 312, matching
+  // the Total Vocabulary stat card.
+  const vocabValues = [118, 142, 163, 184, 203, 221, 242, 258, 274, 289, 301, 312];
+  const vocabLabels = ["Aug 10", "Sep 7", "Oct 5", "Oct 26"];
+  const vocabStep = (SD_PLOT.x1 - SD_PLOT.x0) / (vocabValues.length - 1);
+  const vocabPts = vocabValues.map((v, i) => ({ x: SD_PLOT.x0 + i * vocabStep, y: sdY(v, 350) }));
+  const skillValues = [82, 76, 58, 84, 69]; // weakest → Inference
+
+  return (
+    <StudentDashboardSlide>
+      {/* Score Charts 2×2 grid: two bucket distributions + two trends */}
+      <div className="grid grid-cols-2 gap-2">
+        {/* ScoreDistributionChart — Avg header chip, bucket Cells, no ref line */}
+        <TdCard title="Reading Test Score" headerRight={<TdAvgChip value="69" />}>
+          <svg viewBox="0 0 152 108" className="w-full">
+            <SdHalfAxes yMax={9} yTicks={[0, 3, 6, 9]} labels={TD_SCORE_BUCKETS.map((b) => b.range)} />
+            <SdBucketBars counts={[1, 2, 6, 8]} yMax={9} />
+          </svg>
+        </TdCard>
+        <TdCard title="Vocab Quiz Score" headerRight={<TdAvgChip value="68" />}>
+          <svg viewBox="0 0 152 108" className="w-full">
+            <SdHalfAxes yMax={12} yTicks={[0, 4, 8, 12]} labels={TD_SCORE_BUCKETS.map((b) => b.range)} />
+            <SdBucketBars counts={[2, 3, 7, 12]} yMax={12} />
+          </svg>
+        </TdCard>
+        {/* SpellingTrendChart — dashed avg ReferenceLine, no header chip */}
+        <TdCard title="Spelling Score">
+          <svg viewBox="0 0 152 108" className="w-full">
+            <SdHalfAxes yMax={100} yTicks={[0, 25, 50, 75, 100]} labels={spellingValues.map((_, i) => String(i + 1))} />
+            <SdTrendLine values={spellingValues} yMax={100} color="#a855f7" />
+            <SdAvgRef avg={73} yMax={100} />
+          </svg>
+        </TdCard>
+        <TdCard title="Grammar Game Score">
+          <svg viewBox="0 0 152 108" className="w-full">
+            <SdHalfAxes yMax={100} yTicks={[0, 25, 50, 75, 100]} labels={grammarValues.map((_, i) => String(i + 1))} />
+            <SdTrendLine values={grammarValues} yMax={100} color="#84cc16" />
+            <SdAvgRef avg={63} yMax={100} />
+          </svg>
+        </TdCard>
+      </div>
+
+      {/* Vocabulary Growth: 13 time pills, indigo gradient cumulative area */}
+      <TdCard title="Vocabulary Growth">
+        <TdPills options={["1W", "2W", "3W", "1M", "2M", "3M", "4M", "5M", "6M", "9M", "1Y", "2Y", "3Y"]} active="3M" />
+        <svg viewBox="0 0 320 126" className="w-full">
+          <SdGrid yMax={350} yTicks={[0, 100, 200, 300]} />
+          <SdArea pts={vocabPts} baseY={SD_PLOT.base} color="#6366f1" gradId="sdGradVocab" />
+          {[0, 4, 8, 11].map((i, li) => (
+            <text key={i} x={SD_PLOT.x0 + i * vocabStep} y={SD_PLOT.labelY} textAnchor={i === 0 ? "start" : i === 11 ? "end" : "middle"} fontSize="5.5" fill="var(--lp-ink-soft)">
+              {vocabLabels[li]}
+            </text>
+          ))}
+        </svg>
+      </TdCard>
+
+      {/* Skill Profile: dashed pentagon PolarGrid, teal radar (0.4 fill) +
+          the "Focus area" caption from SkillProfileCard */}
+      <div className="rounded-xl border border-[var(--lp-rule)] p-2.5">
+        <h3 className="flex items-center gap-1.5 text-[10px] font-semibold text-[var(--lp-ink)]">
+          <Target className="h-3 w-3 text-primary" />
+          Reading Comprehension Skill Profile
+        </h3>
+        <svg viewBox="0 0 320 134" className="mt-1 w-full">
+          {[13, 26, 39, 52].map((r) => (
+            <polygon
+              key={r}
+              points={[0, 1, 2, 3, 4].map((i) => { const p = tdRadarPoint(i, r); return `${p.x.toFixed(1)},${p.y.toFixed(1)}`; }).join(" ")}
+              fill="none"
+              stroke="var(--lp-rule)"
+              strokeWidth="0.5"
+              strokeDasharray="2 2"
+              opacity="0.7"
+            />
+          ))}
+          {[0, 1, 2, 3, 4].map((i) => {
+            const p = tdRadarPoint(i, TD_RADAR_R);
+            return <line key={`spoke${i}`} x1={TD_RADAR_CX} y1={TD_RADAR_CY} x2={p.x} y2={p.y} stroke="var(--lp-rule)" strokeWidth="0.5" opacity="0.7" />;
+          })}
+          <polygon points={tdRadarPoly(skillValues)} fill="#14b8a6" fillOpacity="0.4" stroke="#14b8a6" strokeWidth="1.2" strokeLinejoin="round" />
+          {TD_SKILL_LABELS.map((label, i) => {
+            const p = tdRadarPoint(i, TD_RADAR_R);
+            const cos = Math.cos(((-90 + i * 72) * Math.PI) / 180);
+            const sin = Math.sin(((-90 + i * 72) * Math.PI) / 180);
+            const anchor = cos > 0.3 ? "start" : cos < -0.3 ? "end" : "middle";
+            const x = anchor === "start" ? p.x + 5 : anchor === "end" ? p.x - 5 : p.x;
+            const y = i === 0 ? p.y - 6 : sin > 0.5 ? p.y + 9 : p.y + 3;
+            return (
+              <text key={label} x={x} y={y} textAnchor={anchor} fontSize="6" fill="var(--lp-ink-soft)">
+                {label}
+              </text>
+            );
+          })}
+        </svg>
+        <p className="mt-0.5 text-center text-[8px] text-[var(--lp-ink-soft)]">
+          Focus area: <span className="font-medium text-[var(--lp-ink)]">Inference</span>
+        </p>
+      </div>
+    </StudentDashboardSlide>
+  );
+}
+
 /* ── 6. CLASSROOMS — Teacher Dashboard, five faithful static slides mirroring
       the real TeacherDashboard dialog one chart-card at a time: the dialog
       header + class filter + Export row, then 3 of the 14 charts per slide

@@ -43,6 +43,8 @@ import {
   LeaderboardMockup,
   WordsTableMockup,
   SpellingSetupMockup,
+  StudentDashboardOverviewMockup,
+  StudentDashboardChartsMockup,
   VocabularyAnalyticsMockup,
   TeacherDashboardActivityMockup,
   TeacherDashboardProgressMockup,
@@ -172,6 +174,8 @@ function MasterCarousel() {
     { key: "leaderboard", label: t("landing.chapters.master.carousel.leaderboard"), node: <LeaderboardMockup /> },
     { key: "words", label: t("landing.chapters.master.carousel.words"), node: <WordsTableMockup /> },
     { key: "spelling", label: t("landing.chapters.master.carousel.spelling"), node: <SpellingSetupMockup /> },
+    { key: "journeyOverview", label: t("landing.chapters.master.carousel.journeyOverview"), node: <StudentDashboardOverviewMockup /> },
+    { key: "journeyCharts", label: t("landing.chapters.master.carousel.journeyCharts"), node: <StudentDashboardChartsMockup /> },
     { key: "analytics", label: t("landing.chapters.master.carousel.analytics"), node: <VocabularyAnalyticsMockup /> },
   ];
   const count = slides.length;
