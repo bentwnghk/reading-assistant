@@ -1,5 +1,5 @@
 /**
- * Canonical error taxonomy for the Language Check feature.
+ * Canonical error taxonomy for the Grammar Check feature.
  *
  * Tuned to common HK ESL/EFL error patterns and mapped onto the HKDSE English
  * Writing "Language" domain (grammar & sentence structures, vocabulary,
@@ -328,7 +328,7 @@ export const LANGUAGE_CHECK_DRAFT_RETENTION_DAYS = 7;
 /** Max categories studied in one learning session (each one is a full unit). */
 export const LANGUAGE_CHECK_LEARN_MAX_CATEGORIES = 6;
 
-/** Age used until the learner picks a level (S4 — the Language Check's baseline). */
+/** Age used until the learner picks a level (S4 — the Grammar Check's baseline). */
 export const LANGUAGE_CHECK_LEARN_DEFAULT_AGE = 15;
 export const LANGUAGE_CHECK_LEARN_MIN_AGE = 8;
 export const LANGUAGE_CHECK_LEARN_MAX_AGE = 18;

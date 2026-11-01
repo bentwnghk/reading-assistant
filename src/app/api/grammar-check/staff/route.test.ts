@@ -29,7 +29,7 @@ import { GET } from "./route";
 
 function makeRequest(query: string) {
   return {
-    nextUrl: new URL(`http://localhost/api/language-check/staff?${query}`),
+    nextUrl: new URL(`http://localhost/api/grammar-check/staff?${query}`),
     json: async () => ({}),
   } as unknown as NextRequest;
 }

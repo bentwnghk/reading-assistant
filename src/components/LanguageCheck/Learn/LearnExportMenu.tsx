@@ -24,7 +24,7 @@ interface LearnExportMenuProps {
   status: LearnSessionStatus;
   /** Endpoint returning `{ session }` with the full content (default: the learner's own). */
   endpoint?: string;
-  /** Language of the explanations; defaults to the Language Check preference. */
+  /** Language of the explanations; defaults to the Grammar Check preference. */
   language?: ExplanationLanguage;
   /** Save pending work first (the session open in this browser). */
   flushFirst?: boolean;
@@ -60,7 +60,7 @@ export default function LearnExportMenu({
     setBusy(true);
     try {
       if (flushFirst) await useLanguageCheckLearnStore.getState().flush();
-      const res = await fetch(endpoint ?? `/api/language-check/learn/${sessionId}/export`);
+      const res = await fetch(endpoint ?? `/api/grammar-check/learn/${sessionId}/export`);
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
       await exportLearnDocx({

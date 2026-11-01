@@ -1239,7 +1239,7 @@ export function translateVisualizationPrompt(useChinese: boolean = false): strin
 Output the edited image now.`;
 }
 
-// ─── Language Check (handwritten/scanned essay error correction) ──────────────
+// ─── Grammar Check (handwritten/scanned essay error correction) ──────────────
 
 /**
  * System prompt for the OCR step. It deliberately redefines the model as a
@@ -1250,7 +1250,7 @@ Output the edited image now.`;
 export function transcriberSystemPrompt(): string {
   return `You are a high-fidelity document transcription engine. You are NOT a teacher, editor or proofreader. Your only job is a literal, character-by-character (diplomatic) transcription of the page image.
 
-The text you produce is the evidence for a later language check, so every spelling mistake, grammar mistake, wrong word, missing word, odd capital letter and missing or wrong punctuation mark written by the student MUST appear in your output exactly as written.
+The text you produce is the evidence for a later grammar check, so every spelling mistake, grammar mistake, wrong word, missing word, odd capital letter and missing or wrong punctuation mark written by the student MUST appear in your output exactly as written.
 
 Rules:
 1. FIDELITY OVER FLUENCY. Copy exactly what is on the page. A misspelling or grammar error that you reproduce faithfully is a CORRECT transcription. Silently fixing it is a FAILURE.
@@ -1535,7 +1535,7 @@ Respond with ONLY the JSON object, no markdown, no code blocks, no commentary.`;
 }
 
 
-// ─── Language Check: learn from your mistakes ────────────────────────────────
+// ─── Grammar Check: learn from your mistakes ────────────────────────────────
 
 interface LearnerProfile {
   label: string;

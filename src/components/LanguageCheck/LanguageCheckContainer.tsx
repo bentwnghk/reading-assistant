@@ -154,7 +154,7 @@ export default function LanguageCheckContainer() {
         if (forClassId === "__mine__") qs.set("mine", "1");
         else if (forClassId) qs.set("classId", forClassId);
         const res = await fetch(
-          `/api/language-check/staff/students?${qs.toString()}`,
+          `/api/grammar-check/staff/students?${qs.toString()}`,
           { signal: ac.signal },
         );
         if (!res.ok) return;
@@ -219,7 +219,7 @@ export default function LanguageCheckContainer() {
       }
       setStaged((prev) => [...prev, ...added]);
     } catch (error) {
-      console.error("Language check upload failed:", error);
+      console.error("Grammar check upload failed:", error);
       toast.error(parseError(error));
     } finally {
       setPreparing(false);
@@ -241,7 +241,7 @@ export default function LanguageCheckContainer() {
       // Fire and forget: progress/state live in the store, so it survives navigation.
       void transcribe(essay.id);
     } catch (error) {
-      console.error("Language check upload failed:", error);
+      console.error("Grammar check upload failed:", error);
       toast.error(parseError(error));
     } finally {
       setPreparing(false);

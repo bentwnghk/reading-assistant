@@ -66,7 +66,7 @@ function promptLabel(category: string): string {
   return category.replace(/-/g, " ");
 }
 
-const BASE = "/api/language-check/learn";
+const BASE = "/api/grammar-check/learn";
 
 async function readError(res: Response): Promise<string> {
   try {
@@ -131,7 +131,7 @@ export default function useLanguageCheckLearn() {
     } catch (error) {
       const aborted = isAbort(error) || ac.signal.aborted;
       if (!aborted) {
-        console.error(`Language check learn (${stage}) failed:`, error);
+        console.error(`Grammar check learn (${stage}) failed:`, error);
         store().logEvent(key, {
           type: "generation_failed",
           category: category as LanguageCheckCategory,
@@ -380,7 +380,7 @@ export default function useLanguageCheckLearn() {
       };
     } catch (error) {
       if (!isAbort(error)) {
-        console.error("Language check learn evaluation failed:", error);
+        console.error("Grammar check learn evaluation failed:", error);
         toast.error(i18next.t("languageCheck.learn.errors.evaluate"));
       }
       return null;

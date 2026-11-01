@@ -22,7 +22,7 @@ import type {
  *
  * The DATABASE is the source of truth (a session is reachable from any device
  * and visible to teachers); this store is the in-memory working copy plus a
- * small sync engine that saves deltas to `/api/language-check/learn/[id]`.
+ * small sync engine that saves deltas to `/api/grammar-check/learn/[id]`.
  * Everything that must survive SPA navigation lives here at module scope
  * (AGENTS Architectural Rules §A): generation state, the abort controller and
  * the pending-save queue, so a lesson keeps generating — and keeps being saved —
@@ -266,7 +266,7 @@ interface Pending {
 const SAVE_DEBOUNCE_MS = 700;
 const RETRY_DELAYS_MS = [3_000, 8_000, 20_000, 45_000];
 const KEEPALIVE_LIMIT_CHARS = 60_000;
-const BASE = "/api/language-check/learn";
+const BASE = "/api/grammar-check/learn";
 
 const pending = new Map<string, Pending>();
 let lifecycleWired = false;
@@ -460,7 +460,7 @@ async function send(key: string, p: Pending, opts: { keepalive?: boolean }): Pro
     }
     if (res.status === 400 || res.status === 413) {
       // The server will never accept this delta; retrying would loop forever.
-      console.error("Language check learn save rejected:", res.status);
+      console.error("Grammar check learn save rejected:", res.status);
       p.attempts = 0;
       setSync(key, "error");
       return;

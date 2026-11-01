@@ -116,7 +116,7 @@ beforeEach(() => {
         ],
       } as Response;
     }
-    if (url.pathname === "/api/language-check/staff") {
+    if (url.pathname === "/api/grammar-check/staff") {
       staffRequests.push(url.searchParams.toString());
       return {
         ok: true,

@@ -1,4 +1,4 @@
--- Language Check: handwritten/scanned essay error correction.
+-- Grammar Check: handwritten/scanned essay error correction.
 -- Independent of reading_sessions. images are downscaled JPEG data URLs and
 -- are excluded from the list query (lightweight/full split).
 

@@ -217,7 +217,7 @@ const pageLinks: PageLink[] = [
     labelKey: "assignments.navTitle",
   },
   {
-    href: "/language-check",
+    href: "/grammar-check",
     icon: SpellCheck,
     labelKey: "languageCheck.navTitle",
   },

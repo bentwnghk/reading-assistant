@@ -1,4 +1,4 @@
--- The Language Check Model (languageCheckModel) default is now
+-- The Grammar Check Model (languageCheckModel) default is now
 -- "claude-sonnet-5-5" (defaultValues in src/store/setting.ts), and the field
 -- was removed from RESTRICTED_MODEL_FIELD_NAMES so every user — not just
 -- admins/super-admins/meter-billing — can pick it in the Settings dialog

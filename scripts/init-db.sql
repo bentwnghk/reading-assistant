@@ -859,7 +859,7 @@ CREATE TABLE user_trials (
 
 CREATE INDEX idx_user_trials_expires ON user_trials(expires_at);
 
--- Language Check: handwritten/scanned essay error correction.
+-- Grammar Check: handwritten/scanned essay error correction.
 -- Independent of reading_sessions. images are downscaled JPEG data URLs and
 -- are excluded from the list query (lightweight/full split).
 
@@ -895,7 +895,7 @@ CREATE TRIGGER update_language_check_essays_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Language Check › "Learn from your mistakes": persisted learning sessions,
+-- Grammar Check › "Learn from your mistakes": persisted learning sessions,
 -- archived quiz rounds and an append-only activity ledger.
 -- Independent of reading_sessions / activity_logs / achievements.
 --

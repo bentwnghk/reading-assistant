@@ -1,4 +1,4 @@
--- Language Check › "Learn from your mistakes": persisted learning sessions,
+-- Grammar Check › "Learn from your mistakes": persisted learning sessions,
 -- archived quiz rounds and an append-only activity ledger.
 -- Independent of reading_sessions / activity_logs / achievements.
 --

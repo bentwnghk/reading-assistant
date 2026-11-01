@@ -1,4 +1,4 @@
--- Language Check: teacher-uploaded essays.
+-- Grammar Check: teacher-uploaded essays.
 --
 -- A teacher/admin/super-admin can scan a student's handwritten essay on the
 -- student's behalf. user_id STAYS the student — the essay must behave exactly

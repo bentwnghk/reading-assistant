@@ -47,7 +47,7 @@ function AuthStateManager() {
 
     if (!isAuthenticated || !userId) {
       syncedUserIdRef.current = null
-      // Language Check essays are per-account server data cached in this
+      // Grammar Check essays are per-account server data cached in this
       // store; never let them linger after sign-out.
       useLanguageCheckStore.getState().reset()
       setRestoreComplete(false)

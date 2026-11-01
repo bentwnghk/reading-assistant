@@ -1113,7 +1113,7 @@ interface RepositoryTextListItem {
   updatedAt: number;
 }
 
-// ─── Language Check (essay error correction; independent of reading sessions) ──
+// ─── Grammar Check (essay error correction; independent of reading sessions) ──
 
 /** A resolved error anchored to [start, end) in LanguageCheckEssay.checkedText. */
 interface LanguageCheckError {

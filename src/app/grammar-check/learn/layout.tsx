@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Learn from your mistakes · Language Check",
+  title: "Learn from your mistakes · Grammar Check",
   description:
     "Personalised lessons, practice exercises and quizzes built from the errors in your essay.",
   robots: {

@@ -441,8 +441,8 @@ function PracticeCarousel() {
   );
 }
 
-/* Language Check carousel (Chapter 06) — mirrors MasterCarousel, cycling the
-   6 Language Check views: transcription review, checked results, the three
+/* Grammar Check carousel (Chapter 06) — mirrors MasterCarousel, cycling the
+   6 Grammar Check views: transcription review, checked results, the three
    "Learn from your mistakes" stages and the staff student-learning overview. */
 function LanguageCheckCarousel() {
   const { t } = useTranslation();

@@ -1133,7 +1133,7 @@ export async function getStaffDashboard(
 }
 
 /**
- * Students a staff member can pick on /language-check: everyone in scope who
+ * Students a staff member can pick on /grammar-check: everyone in scope who
  * has an essay or a learning event (so a learner whose essay was deleted but
  * whose learning history survives is still selectable). Narrowed by class only —
  * never by other filters — so the shared picker stays switchable.

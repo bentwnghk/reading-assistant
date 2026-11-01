@@ -53,7 +53,7 @@ interface StaffEssayLogProps {
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 /**
- * Staff "Student essays" tab on /language-check. Renders nothing for students.
+ * Staff "Student essays" tab on /grammar-check. Renders nothing for students.
  * Teachers see their classes' students, admins their school, super-admins
  * everyone. Class and student come from the shared staff filter bar; status
  * and title search are essay-specific and live here.
@@ -107,7 +107,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       if (userId !== "all") params.set("userId", userId);
       if (status !== "all") params.set("status", status);
       if (search) params.set("q", search);
-      const res = await fetch(`/api/language-check/staff?${params.toString()}`);
+      const res = await fetch(`/api/grammar-check/staff?${params.toString()}`);
       const body = await res.json().catch(() => null);
       if (!res.ok) {
         throw new Error(body?.error || `HTTP ${res.status}`);
@@ -133,7 +133,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   async function openDetail(id: string) {
     setDetailLoadingId(id);
     try {
-      const res = await fetch(`/api/language-check/staff/${id}`);
+      const res = await fetch(`/api/grammar-check/staff/${id}`);
       const body = await res.json().catch(() => null);
       if (!res.ok) {
         throw new Error(body?.error || `HTTP ${res.status}`);

@@ -4641,7 +4641,7 @@ export function UnderstandDifficultyMockup() {
 
 /* ════════════════════════════════════════════════════════════════
    CHAPTER 06 — LANGUAGE CHECK (from reading to writing)
-   Faithful, static mockups of /language-check and its "Learn from
+   Faithful, static mockups of /grammar-check and its "Learn from
    your mistakes" session, mirroring:
      1. ReviewStage.tsx + ScanViewer.tsx   — scan ↔ transcript review
      2. ResultsView.tsx + ErrorSpan.tsx + CorrectionCard.tsx
@@ -4797,7 +4797,7 @@ export function LanguageCheckTranscribeMockup() {
             </span>
             <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground">
               <SpellCheck className="mr-1 h-3 w-3" />
-              Run language check
+              Run grammar check
             </span>
           </div>
         </div>
@@ -5543,7 +5543,7 @@ export function LearnQuizMockup() {
 }
 
 /* ── 06 · 6. LANGUAGE CHECK — Student learning overview (faithful, static) ──
-   Mirrors /language-check?view=students&tab=learning: scope switch, section
+   Mirrors /grammar-check?view=students&tab=learning: scope switch, section
    tabs, staff filter bar, Overview/Sessions/Activity tabs + range, the stat
    grid, the activity chart and the per-topic + per-student tables. */
 export function LanguageCheckStaffOverviewMockup() {
@@ -5583,7 +5583,7 @@ export function LanguageCheckStaffOverviewMockup() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--lp-ink)]">
             <SpellCheck className="h-4 w-4 text-primary" />
-            Language Check
+            Grammar Check
           </h3>
           <div className="flex gap-1 rounded-lg bg-muted p-1">
             <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">

@@ -5,9 +5,9 @@ import { useLanguageCheckLearnStore } from "@/store/languageCheckLearn";
 import { countWords } from "@/utils/languageCheck";
 
 /**
- * Language Check store — fully independent of the reading/history stores.
+ * Grammar Check store — fully independent of the reading/history stores.
  *
- * Essays live in PostgreSQL (see /api/language-check); this store is the
+ * Essays live in PostgreSQL (see /api/grammar-check); this store is the
  * client cache + generation state. Only the explanation-language preference is
  * persisted locally. Everything that must survive SPA navigation (generation
  * flags, abort controllers, the essay being processed) is module/store scoped
@@ -70,7 +70,7 @@ interface LanguageCheckActions {
   reset: () => void;
 }
 
-const BASE = "/api/language-check";
+const BASE = "/api/grammar-check";
 
 async function readError(res: Response): Promise<string> {
   try {

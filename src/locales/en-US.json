@@ -269,7 +269,7 @@
         },
         "wordExport": {
           "title": "Word Export",
-          "desc": "Take learning offline! Turn adapted texts, glossaries, quizzes, tests, and grammar practice — even Language Check corrections and Learn-from-your-mistakes worksheets — into polished Word documents."
+          "desc": "Take learning offline! Turn adapted texts, glossaries, quizzes, tests, and grammar practice — even Grammar Check corrections and Learn-from-your-mistakes worksheets — into polished Word documents."
         },
         "grammar": {
           "title": "Grammar Analysis & Quiz",
@@ -284,7 +284,7 @@
           "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Share review lists with your classmates and teachers — teachers and admins can share school-wide!"
         },
         "languageCheck": {
-          "title": "Language Check",
+          "title": "Grammar Check",
           "desc": "AI digitises handwritten essays (image/PDF) and marks them up with colour-coded, HKDSE-aligned corrections and phrasing suggestions. Learn from your mistakes then turns those same errors into lessons, practice and quizzes."
         },
         "assignments": {
@@ -497,9 +497,9 @@
         }
       },
       "writing": {
-        "eyebrow": "Language Check",
+        "eyebrow": "Grammar Check",
         "title": "From reading to writing.",
-        "lede": "Photograph a handwritten essay and Language Check transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, then turn every mistake into a lesson, practice and quiz built from your own essay. Teachers watch the whole class learn from their mistakes in one dashboard.",
+        "lede": "Photograph a handwritten essay and Grammar Check transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, then turn every mistake into a lesson, practice and quiz built from your own essay. Teachers watch the whole class learn from their mistakes in one dashboard.",
         "bullets": [
           "Verbatim transcription you review beside the original scan",
           "Inline corrections with explanations — errors vs. suggestions",
@@ -508,7 +508,7 @@
           "Student learning dashboards for every class"
         ],
         "carousel": {
-          "label": "Language Check features",
+          "label": "Grammar Check features",
           "slideCount": "{{count}} slides",
           "transcribe": "Transcription review",
           "results": "Corrections & popover",
@@ -3232,7 +3232,7 @@
     "tabTTS": "TTS",
     "model": "Model",
     "visionModel": "Vision Model",
-    "ocrModel": "OCR Model (Language Check)",
+    "ocrModel": "OCR Model (Grammar Check)",
     "imageModel": "Visualization Model",
     "prereadingModel": "Pre-reading Model",
     "summaryModel": "Summary Model",
@@ -3246,7 +3246,7 @@
     "sentenceAnalysisModel": "Sentence Analysis Model",
     "grammarModel": "Grammar Model",
     "readingTextModel": "Reading Text Generator Model",
-    "languageCheckModel": "Language Check Model",
+    "languageCheckModel": "Grammar Check Model",
     "tutorModel": "AI Tutor Model",
     "ttsModel": "TTS Model",
     "ttsModelTip": "The TTS model used for all pronunciation and read-aloud playback.",
@@ -4721,8 +4721,8 @@
     "back": "Back"
   },
   "languageCheck": {
-    "navTitle": "Language Check",
-    "title": "Language Check",
+    "navTitle": "Grammar Check",
+    "title": "Grammar Check",
     "subtitle": "Upload a handwritten essay or scanned work. We digitise it, you review the transcript, then get inline corrections with grammar notes aligned with HKDSE writing — and with \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
     "back": "Back",
     "cancel": "Cancel",
@@ -4736,7 +4736,7 @@
       "serverKeyMissing": "The server has no AI provider API key configured. If you host this app yourself, set the provider key in your environment."
     },
     "help": {
-      "title": "Language Check Guide",
+      "title": "Grammar Check Guide",
       "tabs": {
         "overview": "Overview",
         "transcript": "Transcript",
@@ -4744,7 +4744,7 @@
         "learning": "Learning"
       },
       "overview": {
-        "intro": "Language Check digitises handwritten or scanned essays, then marks them with inline corrections and grammar notes aligned with HKDSE writing.",
+        "intro": "Grammar Check digitises handwritten or scanned essays, then marks them with inline corrections and grammar notes aligned with HKDSE writing.",
         "sections": {
           "name": "Two Sections",
           "desc": "\"My essays\" holds the upload area and your saved essays; \"My learning\" holds saved learning sessions, a progress dashboard and an activity log."
@@ -4976,7 +4976,7 @@
       "wordCount_other": "{{count}} words",
       "placeholder": "The transcript will appear here. You can also type or paste the essay.",
       "paragraphHint": "Separate paragraphs with a blank line.",
-      "runCheck": "Run language check",
+      "runCheck": "Run grammar check",
       "backToResults": "Back to results",
       "changedSince": "The transcript was edited after the last check. Run the check again to update the corrections.",
       "page": "Page {{current}} / {{total}}",
@@ -5179,7 +5179,7 @@
           "review": "Needs review"
         },
         "reviewTopic": "Review",
-        "nextStep": "Next step: rewrite your essay using what you learned, then run Language Check again to see how many of these mistakes disappear.",
+        "nextStep": "Next step: rewrite your essay using what you learned, then run Grammar Check again to see how many of these mistakes disappear.",
         "backToEssay": "Back to my essay"
       },
       "errors": {

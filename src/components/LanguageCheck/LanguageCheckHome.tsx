@@ -23,7 +23,7 @@ type Section = "essays" | "learning";
 const SECTIONS: Section[] = ["essays", "learning"];
 
 /**
- * Landing view of /language-check.
+ * Landing view of /grammar-check.
  *
  *   Student   →  [ Essays | Learning ]
  *   Staff     →  [ My work | My students ]  +  [ Essays | Learning ]

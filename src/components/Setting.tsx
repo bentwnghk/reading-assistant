@@ -1304,7 +1304,7 @@ function Setting({ open, onClose }: SettingProps) {
                           </SelectTrigger>
                           <SelectContent>
                             {/* Not filtered by RESTRICTED_MODELS: every user
-                                may pick any Language Check model (same policy
+                                may pick any Grammar Check model (same policy
                                 as ocrModel). */}
                             {READING_TEXT_MODELS.map((m) => (
                               <SelectItem key={m} value={m}>

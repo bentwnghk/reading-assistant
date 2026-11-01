@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Language Check",
+  title: "Grammar Check",
   description:
     "Digitise handwritten or scanned essays and get inline language corrections with grammar notes.",
   robots: {

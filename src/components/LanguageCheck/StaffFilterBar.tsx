@@ -21,7 +21,7 @@ interface StaffFilterBarProps {
   role: string | undefined;
   value: StaffSelection;
   onChange: (next: StaffSelection) => void;
-  /** Student options endpoint (`?classId=`/`?mine=` is appended). Defaults to Language Check's. */
+  /** Student options endpoint (`?classId=`/`?mine=` is appended). Defaults to Grammar Check's. */
   studentsEndpoint?: string;
   /**
    * Offer a "My Classes" option (classes the viewer teaches) and make it the
@@ -43,7 +43,7 @@ export default function StaffFilterBar({
   role,
   value,
   onChange,
-  studentsEndpoint = "/api/language-check/staff/students",
+  studentsEndpoint = "/api/grammar-check/staff/students",
   allowMine = false,
 }: StaffFilterBarProps) {
   const { t } = useTranslation();

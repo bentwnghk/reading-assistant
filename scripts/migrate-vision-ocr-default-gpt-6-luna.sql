@@ -1,4 +1,4 @@
--- Force the Vision Model (visionModel) and the Language Check OCR Model
+-- Force the Vision Model (visionModel) and the Grammar Check OCR Model
 -- (ocrModel) to the new default "gpt-6-luna" for ALL users, regardless of
 -- their current selection. ocrModel was introduced defaulting to
 -- "gpt-5.6-luna"; both defaults now live in defaultValues in

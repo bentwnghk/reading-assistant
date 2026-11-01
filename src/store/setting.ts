@@ -15,7 +15,7 @@ export const VISION_MODELS = ["claude-haiku-5-5", "gpt-6-luna"] as const;
 export type VisionModel = (typeof VISION_MODELS)[number];
 
 /**
- * OCR model for Language Check transcription, separate from visionModel
+ * OCR model for Grammar Check transcription, separate from visionModel
  * (which OCRs reading-assistant uploads). Deliberately NOT in
  * RESTRICTED_MODEL_FIELD_NAMES, so every user can pick any option. The list
  * happens to equal VISION_MODELS today but is kept explicit so the two can

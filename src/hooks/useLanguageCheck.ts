@@ -77,7 +77,7 @@ function getFallbackModel(): Promise<string> {
 }
 
 /**
- * OCR + language-check actions for the Language Check feature. Independent of
+ * OCR + language-check actions for the Grammar Check feature. Independent of
  * useReadingAssistant / the reading store: all state lives in the
  * languageCheck store so it survives SPA navigation.
  */
@@ -234,7 +234,7 @@ export default function useLanguageCheck() {
       if (isAbortError(error) || ac.signal.aborted) {
         toast.warning(i18next.t("languageCheck.cancelled"));
       } else {
-        console.error("Language check OCR failed:", error);
+        console.error("Grammar check OCR failed:", error);
         toast.error(describeGenerationError(error));
       }
       // Keep whatever text was recognised so far for manual completion.
@@ -286,7 +286,7 @@ export default function useLanguageCheck() {
     }
   }
 
-  /** Runs the language check on the essay's current transcript. */
+  /** Runs the grammar check on the essay's current transcript. */
   async function runCheck(essayId: string): Promise<boolean> {
     const store = useLanguageCheckStore.getState();
     if (store.activeGenerations["language-check"]) return false;
@@ -365,7 +365,7 @@ export default function useLanguageCheck() {
       if (isAbortError(error) || ac.signal.aborted) {
         toast.warning(i18next.t("languageCheck.cancelled"));
       } else {
-        console.error("Language check failed:", error);
+        console.error("Grammar check failed:", error);
         toast.error(describeGenerationError(error));
       }
       return false;
