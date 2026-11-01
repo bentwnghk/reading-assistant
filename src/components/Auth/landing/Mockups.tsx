@@ -4640,7 +4640,7 @@ export function UnderstandDifficultyMockup() {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   CHAPTER 06 — LANGUAGE CHECK (from reading to writing)
+   CHAPTER 06 — GRAMMAR CHECK (from reading to writing)
    Faithful, static mockups of /grammar-check and its "Learn from
    your mistakes" session, mirroring:
      1. ReviewStage.tsx + ScanViewer.tsx   — scan ↔ transcript review
@@ -4744,12 +4744,12 @@ const LC_TRANSCRIPT_P1 =
 const LC_TRANSCRIPT_P2 =
   "However, many citizens think recycling is troublesome. They rather throw everything into one bin than wash and separate their rubbish. If we do not act now, the situation will become more and more worse.";
 
-/* ── 06 · 1. LANGUAGE CHECK — transcription review stage (faithful, static) ──
+/* ── 06 · 1. GRAMMAR CHECK — transcription review stage (faithful, static) ──
    Mirrors ReviewStage.tsx: step indicator, hint + verify switch + action row,
    and the scan ↔ transcript split panes. */
 export function LanguageCheckTranscribeMockup() {
   return (
-    <MockupFrame label="LANGUAGE CHECK · Mr.🆖 ProReader">
+    <MockupFrame label="GRAMMAR CHECK · Mr.🆖 ProReader">
       <div className="space-y-2.5">
         {/* Step indicator — Scan ✓ · Review transcript (current) · Corrections */}
         <ol className="flex flex-wrap items-center gap-1.5 text-[11px]">
@@ -4857,12 +4857,12 @@ export function LanguageCheckTranscribeMockup() {
   );
 }
 
-/* ── 06 · 2. LANGUAGE CHECK — checked results + correction popover (faithful) ──
+/* ── 06 · 2. GRAMMAR CHECK — checked results + correction popover (faithful) ──
    Mirrors the results workspace: toolbar, ResultsSummary line, two-tier legend,
    the highlighted essay with an open ErrorSpan popover, and CorrectionCards. */
 export function LanguageCheckResultsMockup() {
   return (
-    <MockupFrame label="LANGUAGE CHECK · Mr.🆖 ProReader">
+    <MockupFrame label="GRAMMAR CHECK · Mr.🆖 ProReader">
       <div className="space-y-2.5">
         {/* Toolbar — ExplanationLanguageToggle · Learn · Export · More */}
         <div className="flex flex-wrap items-center gap-1.5">
@@ -5542,7 +5542,7 @@ export function LearnQuizMockup() {
   );
 }
 
-/* ── 06 · 6. LANGUAGE CHECK — Student learning overview (faithful, static) ──
+/* ── 06 · 6. GRAMMAR CHECK — Student learning overview (faithful, static) ──
    Mirrors /grammar-check?view=students&tab=learning: scope switch, section
    tabs, staff filter bar, Overview/Sessions/Activity tabs + range, the stat
    grid, the activity chart and the per-topic + per-student tables. */
