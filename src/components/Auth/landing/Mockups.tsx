@@ -58,7 +58,6 @@ import {
   Table as TableIcon,
   ListPlus,
   History,
-  Wand2,
   Layers,
   Play,
   Library,
@@ -99,6 +98,7 @@ import {
   ArchiveRestore,
   Trash2,
   Bookmark,
+  AlarmClock,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -2049,11 +2049,13 @@ export function AssignmentsListMockup() {
 
 /* ── 8a. VOCABULARY — Words table screen (faithful, static) ── */
 // Mirrors the My Vocabulary page with the Words tab active: page header (title +
-// stat cards) + 7-tab strip + toolbar + sortable word table + pagination.
+// stat cards) + the Review Auto Select pill toolbar (sits ABOVE the tab strip,
+// left of Export) + 7-tab strip + sortable word table + pagination.
 export function WordsTableMockup() {
   // Overview stat cards (word stats — the page header on the Words tab).
+  // The Total Words card breaks the bank down by source: Own · Teacher · Student.
   const wordStats = [
-    { label: "Total Words", value: "128", icon: BookMarked, color: "text-[var(--lp-ink)]", sub: "Own: 96 · Teacher: 32" },
+    { label: "Total Words", value: "128", icon: BookMarked, color: "text-[var(--lp-ink)]", sub: "Own: 96 · Teacher: 20 · Student: 12" },
     { label: "Due for Review", value: "14", icon: Clock, color: "text-orange-500", sub: null },
     { label: "Mastered", value: "47", icon: CheckCircle2, color: "text-green-500", sub: null },
     { label: "New Words", value: "21", icon: Brain, color: "text-blue-500", sub: null },
@@ -2089,13 +2091,22 @@ export function WordsTableMockup() {
 
   type Level = "0" | "1" | "2" | "3" | "4" | "5";
   type Rating = "easy" | "medium" | "hard" | "none";
-  type Source = "own" | "teacher";
+  type Source = "own" | "teacher" | "student";
+
+  // Source badge styles mirror VocabularyTable.tsx: Own = slate,
+  // Teacher = purple, Student = blue (student-shared words).
+  const sourceStyle: Record<Source, string> = {
+    own: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
+    teacher: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+    student: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  };
+  const sourceLabel: Record<Source, string> = { own: "Own", teacher: "Teacher", student: "Student" };
 
   const wordRows: { word: string; pos: string; def: string; zh: string; source: Source; rating: Rating; level: Level }[] = [
     { word: "flourish", pos: "verb", def: "to grow or develop successfully", zh: "茁壯成長", source: "own", rating: "easy", level: "5" },
     { word: "luminous", pos: "adj.", def: "full of light; brightly glowing", zh: "發光的", source: "own", rating: "medium", level: "4" },
     { word: "inefficient", pos: "adj.", def: "not using time or energy well", zh: "效率低的", source: "teacher", rating: "hard", level: "2" },
-    { word: "defenders", pos: "noun", def: "people who support or protect", zh: "捍衛者", source: "teacher", rating: "hard", level: "1" },
+    { word: "defenders", pos: "noun", def: "people who support or protect", zh: "捍衛者", source: "student", rating: "hard", level: "1" },
     { word: "verdict", pos: "noun", def: "a formal decision or judgment", zh: "裁決", source: "own", rating: "none", level: "0" },
   ];
 
@@ -2122,8 +2133,29 @@ export function WordsTableMockup() {
         ))}
       </div>
 
+      {/* toolbar — Review Auto Select pill (left) + Export (right). On the real
+          page this row renders ABOVE the tab strip, on Words/Phrases tabs only. */}
+      <div className="mt-3 flex items-center gap-2">
+        {/* AutoSelectPanel — primary-tinted pill: BookOpen + "Review" label +
+            a solid primary "Auto Select" trigger with a chevron */}
+        <span className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--lp-accent)]/25 bg-[var(--lp-accent)]/5 py-0.5 pl-2 pr-0.5 shadow-sm">
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-[var(--lp-accent)]">
+            <BookOpen className="h-3 w-3" />
+            Review
+          </span>
+          <span className="inline-flex items-center gap-0.5 rounded-md bg-[var(--lp-accent)] px-1.5 py-1 text-[9px] font-medium text-white shadow-sm">
+            Auto Select
+            <ChevronDown className="h-2.5 w-2.5" />
+          </span>
+        </span>
+        <span className="flex-1" />
+        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
+          <Download className="h-3 w-3" /> Export
+        </span>
+      </div>
+
       {/* tab strip — 7 tabs match the real page; Words active */}
-      <div className="mt-3 flex flex-wrap gap-1 border-b border-[var(--lp-rule)]">
+      <div className="mt-2.5 flex flex-wrap gap-1 border-b border-[var(--lp-rule)]">
         {tabs.map((tb) => {
           const active = tb.key === "table";
           return (
@@ -2140,17 +2172,6 @@ export function WordsTableMockup() {
             </span>
           );
         })}
-      </div>
-
-      {/* toolbar: Auto Select | spacer | Export */}
-      <div className="mt-2.5 flex items-center gap-2">
-        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
-          <Wand2 className="h-3 w-3 text-[var(--lp-accent)]" /> Auto Select
-        </span>
-        <span className="flex-1" />
-        <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2 py-1 text-[10px] text-[var(--lp-ink)]">
-          <Download className="h-3 w-3" /> Export
-        </span>
       </div>
 
       {/* meta row */}
@@ -2191,14 +2212,8 @@ export function WordsTableMockup() {
                 <td className="max-w-[110px] truncate px-1.5 py-1.5">{r.def}</td>
                 <td className="px-1.5 py-1.5 text-[var(--lp-ink-soft)]">{r.zh}</td>
                 <td className="px-1.5 py-1.5 text-center">
-                  <span
-                    className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${
-                      r.source === "teacher"
-                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                    }`}
-                  >
-                    {r.source === "teacher" ? "Teacher" : "Own"}
+                  <span className={`inline-flex rounded px-1.5 py-0.5 text-[8px] font-medium ${sourceStyle[r.source]}`}>
+                    {sourceLabel[r.source]}
                   </span>
                 </td>
                 <td className="px-1.5 py-1.5 text-center">
@@ -2408,6 +2423,394 @@ export function SpellingSetupMockup() {
           <Play className="h-3.5 w-3.5" />
           Start Game
         </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 8c. VOCABULARY — Student analytics (faithful, static) ── */
+// Mirrors /vocabulary?view=analytics (staff view) with the Overview tab active:
+// page header + My vocabulary/Student analytics switch, the staff filter bar
+// (class + student pickers), Overview/Review sessions/Activity tabs + time
+// range, the 8 stat cards, daily-activity chart, mastery distribution +
+// review modes, accuracy history, most-missed words, and the per-student table.
+export function VocabularyAnalyticsMockup() {
+  // 8 overview stat cards — mirrors Stat in LearnDashboardView.tsx + the icon/
+  // tone choices in VocabularyDashboardView.tsx.
+  const stats: { icon: typeof BookMarked; tone: string; label: string; value: string; hint?: string }[] = [
+    { icon: BookMarked, tone: "text-primary", label: "Word bank", value: "372", hint: "358 words · 14 phrases" },
+    { icon: Trophy, tone: "text-green-500", label: "Mastered (L5)", value: "118", hint: "32% of the word bank" },
+    { icon: AlarmClock, tone: "text-orange-500", label: "Due for review", value: "27", hint: "41 rated hard" },
+    { icon: Brain, tone: "text-violet-500", label: "Average level", value: "2.6", hint: "0 (new) to 5 (mastered)" },
+    { icon: Target, tone: "text-indigo-500", label: "Review sessions", value: "146", hint: "78% average accuracy" },
+    { icon: Layers, tone: "text-sky-500", label: "Words reviewed", value: "1,284" },
+    { icon: Plus, tone: "text-emerald-500", label: "Words added", value: "96" },
+    { icon: Activity, tone: "text-rose-500", label: "Active days", value: "18" },
+  ];
+
+  // Daily activity — stacked reviewed/added bars + accuracy line. Colours
+  // mirror COLORS in VocabularyDashboardView.tsx.
+  const days = ["10-18", "10-19", "10-20", "10-21", "10-22", "10-23", "10-24"];
+  const reviewed = [18, 26, 14, 32, 21, 38, 27];
+  const added = [4, 2, 7, 1, 6, 3, 2];
+  const accLine = "12,36 48,30 84,41 120,26 156,33 192,20 228,29";
+
+  // Mastery levels — one bar per level, colours mirror LEVEL_COLORS.
+  const levels = [
+    { label: "New", count: 24, fill: "#9ca3af" },
+    { label: "L1", count: 38, fill: "#ef4444" },
+    { label: "L2", count: 71, fill: "#f97316" },
+    { label: "L3", count: 62, fill: "#eab308" },
+    { label: "L4", count: 59, fill: "#3b82f6" },
+    { label: "L5", count: 118, fill: "#22c55e" },
+  ];
+
+  // Review modes table rows.
+  const modes = [
+    { mode: "Flashcards", icon: Layers, sessions: 82, reviewed: 712, acc: 81 },
+    { mode: "Quiz", icon: ClipboardList, sessions: 39, reviewed: 356, acc: 74 },
+    { mode: "Spelling", icon: SpellCheck, sessions: 25, reviewed: 216, acc: 76 },
+  ];
+
+  // Accuracy-over-time line (per review session).
+  const historyPts = [72, 78, 69, 81, 76, 84, 79, 86];
+
+  // Most missed words (checkbox + accuracy PercentBadge).
+  const hardWords = [
+    { word: "necessary", wrong: 9, attempts: 14, learners: 6 },
+    { word: "receive", wrong: 7, attempts: 11, learners: 5 },
+    { word: "rhythm", wrong: 6, attempts: 8, learners: 3 },
+    { word: "beautiful", wrong: 3, attempts: 8, learners: 3 },
+  ];
+
+  // Per-student table — Due > 0 renders orange, Trend green, ghost "Vocabulary" action.
+  const students = [
+    { name: "Chloe Chan", email: "chloe.chan@school.edu.hk", bank: "96", phrases: "3 phrases", mastered: 34, due: 6, sessions: 22, acc: 84, trend: "+6", last: "31/10 14:32" },
+    { name: "Marcus Wong", email: "marcus.wong@school.edu.hk", bank: "88", phrases: "5 phrases", mastered: 25, due: 9, sessions: 18, acc: 76, trend: "+4", last: "30/10 16:05" },
+    { name: "Ka Yan Lam", email: "kayan.lam@school.edu.hk", bank: "74", phrases: null, mastered: 19, due: 12, sessions: 14, acc: 63, trend: "+2", last: "29/10 09:47" },
+  ];
+
+  const pctBadge = (v: number) =>
+    `rounded-full px-1.5 py-0.5 text-[8px] font-semibold tabular-nums ${
+      v >= 80
+        ? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
+        : v >= 50
+          ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+          : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+    }`;
+
+  return (
+    <MockupFrame label="STUDENT ANALYTICS · Mr.🆖 ProReader">
+      <div className="space-y-2">
+        {/* Page header + My vocabulary / Student analytics switch (SegmentedTabs) */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--lp-ink)]">
+            <BarChart3 className="h-4 w-4 text-indigo-500" />
+            Student analytics
+            <HelpCircle className="h-3 w-3 text-muted-foreground" />
+          </h3>
+          <div className="flex gap-1 rounded-lg bg-muted p-1">
+            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+              My vocabulary
+            </span>
+            <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
+              Student analytics
+            </span>
+          </div>
+        </div>
+
+        {/* Staff filter bar — scope label + class & student pickers */}
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-card px-2 py-1.5">
+          <span className="flex items-center gap-1 text-[8.5px] font-medium text-muted-foreground">
+            <Users className="h-3 w-3" />
+            Students in your classes
+          </span>
+          <div className="ml-auto flex items-center gap-1.5">
+            <span className="inline-flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+              My Classes
+              <ChevronsUpDown className="h-2.5 w-2.5 text-muted-foreground" />
+            </span>
+            <span className="inline-flex items-center justify-between gap-2 rounded-md border bg-background px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+              All students
+              <ChevronsUpDown className="h-2.5 w-2.5 text-muted-foreground" />
+            </span>
+          </div>
+        </div>
+
+        {/* Overview / Review sessions / Activity + time range */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex gap-1 rounded-lg bg-muted p-1">
+            <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-medium text-[var(--lp-ink)] shadow-sm">
+              Overview
+            </span>
+            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+              Review sessions
+            </span>
+            <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+              Activity
+            </span>
+          </div>
+          <div className="flex gap-1 rounded-lg bg-muted p-1">
+            {["All time", "7 days", "30 days", "90 days"].map((r, i) => (
+              <span
+                key={r}
+                className={`rounded-md px-2 py-1 text-[8.5px] font-medium ${
+                  i === 2
+                    ? "bg-background text-[var(--lp-ink)] shadow-sm"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {r}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Stat grid */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {stats.map((s) => (
+            <div key={s.label} className="rounded-lg border bg-muted/40 px-2 py-1.5">
+              <p className="flex items-center gap-1 text-[8px] text-muted-foreground">
+                <s.icon className={`h-2.5 w-2.5 ${s.tone}`} />
+                {s.label}
+              </p>
+              <p className="mt-0.5 text-[13px] font-semibold leading-tight tabular-nums text-[var(--lp-ink)]">
+                {s.value}
+              </p>
+              {s.hint && <p className="text-[7.5px] leading-tight text-muted-foreground">{s.hint}</p>}
+            </div>
+          ))}
+        </div>
+
+        {/* Daily activity — stacked bars (reviewed/added) + accuracy line */}
+        <div className="rounded-lg border p-2">
+          <p className="mb-1 text-[9.5px] font-semibold text-muted-foreground">Daily activity</p>
+          <svg viewBox="0 0 264 96" className="w-full">
+            {[20, 42, 64].map((y) => (
+              <line key={y} x1="6" y1={y} x2="258" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.5" opacity="0.6" />
+            ))}
+            <line x1="6" y1="78" x2="258" y2="78" stroke="var(--lp-rule)" strokeWidth="0.7" />
+            {reviewed.map((rv, i) => {
+              const x = 10 + i * 36;
+              const hR = rv * 1.5;
+              const hA = added[i] * 1.5;
+              return (
+                <g key={i}>
+                  <rect x={x} y={78 - hR} width="16" height={hR} fill="#38bdf8" rx="1" />
+                  <rect x={x} y={78 - hR - hA} width="16" height={hA} fill="#6366f1" rx="1" />
+                </g>
+              );
+            })}
+            <polyline points={accLine} fill="none" stroke="#f97316" strokeWidth="1.6" />
+            {days.map((d, i) => (
+              <text key={d} x={18 + i * 36} y={88} textAnchor="middle" fontSize="6" fill="var(--lp-ink-soft)">
+                {d}
+              </text>
+            ))}
+          </svg>
+          <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+            {[
+              { c: "#38bdf8", l: "Words reviewed" },
+              { c: "#6366f1", l: "Words added" },
+              { c: "#f97316", l: "Accuracy" },
+            ].map((x) => (
+              <span key={x.l} className="inline-flex items-center gap-0.5 text-[7.5px] text-[var(--lp-ink-soft)]">
+                <span className="h-1.5 w-1.5 rounded-sm" style={{ background: x.c }} />
+                {x.l}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Mastery distribution + review modes */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-lg border p-2">
+            <p className="mb-1 text-[9.5px] font-semibold text-muted-foreground">
+              Mastery levels (current word bank)
+            </p>
+            <svg viewBox="0 0 200 100" className="w-full">
+              {[24, 46, 68].map((y) => (
+                <line key={y} x1="8" y1={y} x2="192" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.5" opacity="0.6" />
+              ))}
+              <line x1="8" y1="84" x2="192" y2="84" stroke="var(--lp-rule)" strokeWidth="0.7" />
+              {levels.map((lv, i) => {
+                const barH = (lv.count / 118) * 66;
+                return (
+                  <g key={lv.label}>
+                    <rect x={16 + i * 30} y={84 - barH} width="18" height={barH} fill={lv.fill} rx="1.5" />
+                    <text x={25 + i * 30} y={94} textAnchor="middle" fontSize="7" fill="var(--lp-ink-soft)">
+                      {lv.label}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+          <div className="rounded-lg border p-2">
+            <p className="mb-1 text-[9.5px] font-semibold text-muted-foreground">Review modes</p>
+            <table className="w-full text-[8.5px]">
+              <thead>
+                <tr className="border-b text-left uppercase tracking-wide text-muted-foreground">
+                  <th className="py-1 pr-2 font-medium">Mode</th>
+                  <th className="py-1 pr-2 font-medium">Sessions</th>
+                  <th className="py-1 pr-2 font-medium">Reviewed</th>
+                  <th className="py-1 font-medium">Accuracy</th>
+                </tr>
+              </thead>
+              <tbody>
+                {modes.map((m) => {
+                  const Icon = m.icon;
+                  return (
+                    <tr key={m.mode} className="border-b last:border-0">
+                      <td className="py-1 pr-2">
+                        <span className="flex items-center gap-1 font-medium text-[var(--lp-ink)]">
+                          <Icon className="h-2.5 w-2.5 text-muted-foreground" />
+                          {m.mode}
+                        </span>
+                      </td>
+                      <td className="py-1 pr-2 tabular-nums">{m.sessions}</td>
+                      <td className="py-1 pr-2 tabular-nums">{m.reviewed}</td>
+                      <td className="py-1">
+                        <span className={pctBadge(m.acc)}>{m.acc}%</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Review accuracy over time */}
+        <div className="rounded-lg border p-2">
+          <p className="mb-1 text-[9.5px] font-semibold text-muted-foreground">
+            Review accuracy over time
+          </p>
+          <svg viewBox="0 0 264 80" className="w-full">
+            {[16, 34, 52].map((y) => (
+              <line key={y} x1="6" y1={y} x2="258" y2={y} stroke="var(--lp-rule)" strokeDasharray="2 2" strokeWidth="0.5" opacity="0.6" />
+            ))}
+            <line x1="6" y1="68" x2="258" y2="68" stroke="var(--lp-rule)" strokeWidth="0.7" />
+            <polyline
+              points={historyPts
+                .map((v, i) => `${10 + i * 35},${68 - ((v - 60) / 40) * 52}`)
+                .join(" ")}
+              fill="none"
+              stroke="#6366f1"
+              strokeWidth="1.6"
+            />
+            {historyPts.map((v, i) => (
+              <circle
+                key={i}
+                cx={10 + i * 35}
+                cy={68 - ((v - 60) / 40) * 52}
+                r="2"
+                fill="#6366f1"
+              />
+            ))}
+          </svg>
+        </div>
+
+        {/* Most missed words */}
+        <div className="overflow-hidden rounded-lg border">
+          <div className="flex items-center gap-2 px-2 pt-1.5">
+            <p className="text-[9.5px] font-semibold text-muted-foreground">Most missed words</p>
+            <span className="flex-1" />
+            <span className="inline-flex items-center gap-1 rounded-md border border-[var(--lp-rule)] px-1.5 py-0.5 text-[8.5px] font-medium text-[var(--lp-ink)]">
+              <ListPlus className="h-2.5 w-2.5" />
+              Add to review list
+            </span>
+          </div>
+          <table className="w-full text-[8.5px]">
+            <thead>
+              <tr className="border-b bg-muted/40 text-left uppercase tracking-wide text-muted-foreground">
+                <th className="w-6 px-2 py-1" />
+                <th className="px-2 py-1 font-medium">Word</th>
+                <th className="px-2 py-1 font-medium">Missed</th>
+                <th className="px-2 py-1 font-medium">Students who missed it</th>
+                <th className="px-2 py-1 font-medium">Accuracy</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hardWords.map((w) => (
+                <tr key={w.word} className="border-b last:border-0">
+                  <td className="px-2 py-1">
+                    <span className="inline-block h-2.5 w-2.5 rounded-sm border border-muted-foreground/50" />
+                  </td>
+                  <td className="px-2 py-1 font-medium text-[var(--lp-ink)]">{w.word}</td>
+                  <td className="px-2 py-1 tabular-nums">{w.wrong}/{w.attempts}</td>
+                  <td className="px-2 py-1 tabular-nums">{w.learners}</td>
+                  <td className="px-2 py-1">
+                    <span className={pctBadge(Math.round(((w.attempts - w.wrong) / w.attempts) * 100))}>
+                      {Math.round(((w.attempts - w.wrong) / w.attempts) * 100)}%
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Per-student table */}
+        <div className="space-y-1">
+          <p className="text-[9.5px] font-semibold text-muted-foreground">Students</p>
+          <div className="overflow-hidden rounded-lg border">
+            <table className="w-full text-[8.5px]">
+              <thead>
+                <tr className="border-b bg-muted/40 text-left uppercase tracking-wide text-muted-foreground">
+                  <th className="px-2 py-1 font-medium">Student</th>
+                  <th className="px-2 py-1 font-medium">Word bank</th>
+                  <th className="px-2 py-1 font-medium">Mastered</th>
+                  <th className="px-2 py-1 font-medium">Due</th>
+                  <th className="px-2 py-1 font-medium">Sessions</th>
+                  <th className="px-2 py-1 font-medium">Accuracy</th>
+                  <th className="px-2 py-1 font-medium">Trend</th>
+                  <th className="px-2 py-1 font-medium">Last active</th>
+                  <th className="px-2 py-1" />
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((s) => (
+                  <tr key={s.name} className="border-b last:border-0">
+                    <td className="max-w-[7rem] px-2 py-1">
+                      <span className="block truncate font-medium text-[var(--lp-ink)]">{s.name}</span>
+                      <span className="block truncate text-[7.5px] text-muted-foreground">{s.email}</span>
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-1 tabular-nums">
+                      {s.bank}
+                      {s.phrases && <span className="ml-1 text-[7.5px] text-muted-foreground">({s.phrases})</span>}
+                    </td>
+                    <td className="px-2 py-1 tabular-nums">{s.mastered}</td>
+                    <td className="px-2 py-1 font-medium tabular-nums text-orange-600 dark:text-orange-400">
+                      {s.due}
+                    </td>
+                    <td className="px-2 py-1 tabular-nums">{s.sessions}</td>
+                    <td className="px-2 py-1">
+                      <span className={pctBadge(s.acc)}>{s.acc}%</span>
+                    </td>
+                    <td className="px-2 py-1 font-medium tabular-nums text-green-600 dark:text-green-400">
+                      {s.trend}
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-1 text-[8px] text-muted-foreground">{s.last}</td>
+                    <td className="whitespace-nowrap px-2 py-1 text-right">
+                      <span className="inline-flex items-center gap-0.5 text-[8.5px] text-[var(--lp-ink-soft)]">
+                        <Eye className="h-2.5 w-2.5" />
+                        Vocabulary
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Footnote — mirrors vocabulary.analytics.note */}
+        <p className="text-[7.5px] leading-snug text-[var(--lp-ink-soft)]">
+          Word bank figures show the current state of each student&apos;s vocabulary; sessions,
+          accuracy and activity cover the selected time range. Accuracy is the share of correct
+          answers across review sessions.
+        </p>
       </div>
     </MockupFrame>
   );

@@ -489,6 +489,7 @@
           "leaderboard": "排行榜",
           "words": "我的詞彙：單字",
           "spelling": "拼字遊戲設定",
+          "analytics": "學生分析總覽",
           "prev": "上一張",
           "next": "下一張",
           "goTo": "跳至第 {{n}} / {{count}} 張：{{label}}",

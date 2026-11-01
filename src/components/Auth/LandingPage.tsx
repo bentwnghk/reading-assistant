@@ -43,6 +43,7 @@ import {
   LeaderboardMockup,
   WordsTableMockup,
   SpellingSetupMockup,
+  VocabularyAnalyticsMockup,
   DashboardMockup,
   AssignmentDetailMockup,
   AssignmentsListMockup,
@@ -167,6 +168,7 @@ function MasterCarousel() {
     { key: "leaderboard", label: t("landing.chapters.master.carousel.leaderboard"), node: <LeaderboardMockup /> },
     { key: "words", label: t("landing.chapters.master.carousel.words"), node: <WordsTableMockup /> },
     { key: "spelling", label: t("landing.chapters.master.carousel.spelling"), node: <SpellingSetupMockup /> },
+    { key: "analytics", label: t("landing.chapters.master.carousel.analytics"), node: <VocabularyAnalyticsMockup /> },
   ];
   const count = slides.length;
   const carouselRef = useRef<HTMLDivElement>(null);
