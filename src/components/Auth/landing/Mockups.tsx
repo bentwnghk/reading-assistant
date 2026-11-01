@@ -95,6 +95,10 @@ import {
   MoreHorizontal,
   CircleAlert,
   Activity,
+  Archive,
+  ArchiveRestore,
+  Trash2,
+  Bookmark,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -1520,166 +1524,524 @@ export function DashboardMockup() {
   );
 }
 
-/* ── 7. ASSIGNMENTS — faithful mockup of the teacher assignment detail page ── */
-export function AssignmentsMockup() {
-  // Mirrors the AssignmentStats overview strip (4 StatCards).
-  const stats = [
-    { label: "Assessed", value: "24/28", icon: Users, color: "text-[var(--lp-accent)]" },
-    { label: "Participation", value: "86%", icon: TrendingUp, color: "text-emerald-500" },
-    { label: "Class avg", value: "74", icon: Award, color: "text-indigo-500" },
-    { label: "At-risk", value: "3", icon: TriangleAlert, color: "text-amber-500" },
-  ];
+/* ── 7. ASSIGNMENTS — two faithful, static mockups of the real /assignments pages ── */
+// Both mirror the live components with static <span>s standing in for buttons:
+//  - AssignmentDetailMockup → /assignments/[id] teacher view (AssignmentStats + roster table)
+//  - AssignmentsListMockup  → /assignments with the "My Assignments" tab active
+//    (header tabs, saved-roster bar, status filter, assignment cards with teacher actions)
 
-  // Mirrors the 8-column sortable roster table. Score columns match the real
-  // activity meta: testScore / vocab / spelling / grammarQuiz / grammarGame.
-  type Row = {
-    name: string;
-    init: string;
-    email: string;
-    progress: number;
-    test: number | null;
-    vocab: number | null;
-    spell: number | null;
-    gq: number | null;
-    gg: number | null;
-    viewed: string;
+// Tier colors mirror TIER_COLORS in utils/assignmentStats.ts, and the 70/50
+// thresholds mirror PASS_THRESHOLD / STRUGGLE_THRESHOLD there.
+const TIER = { below: "#ef4444", mid: "#f59e0b", pass: "#22c55e" } as const;
+const tierColor = (score: number) => (score < 50 ? TIER.below : score < 70 ? TIER.mid : TIER.pass);
+
+/** Per-activity accents mirror ACTIVITY_META in components/Assignments/AssignmentStats.tsx. */
+const ROSTER_ACTIVITIES = [
+  { key: "test", label: "Reading test", icon: BookOpenCheck, accent: "#14b8a6" },
+  { key: "vocab", label: "Vocab quiz", icon: ClipboardList, accent: "#3b82f6" },
+  { key: "spell", label: "Spelling", icon: SpellCheck, accent: "#ec4899" },
+  { key: "gq", label: "Grammar quiz", icon: GraduationCap, accent: "#d946ef" },
+  { key: "gg", label: "Grammar game", icon: Gamepad2, accent: "#f59e0b" },
+] as const;
+
+export function AssignmentDetailMockup() {
+  // Performance-by-activity chart data — hardest (lowest mean) at the top,
+  // exactly like the real AssignmentStats bar chart.
+  const performance = [
+    { key: "gg", mean: 48 },
+    { key: "gq", mean: 64 },
+    { key: "spell", mean: 72 },
+    { key: "vocab", mean: 78 },
+    { key: "test", mean: 81 },
+  ] as const;
+
+  // Participation & mastery cards — attempted/pass/avg kept consistent with
+  // the chart means above and the 28-student roster.
+  const participation: Record<
+    string,
+    { attempted: number; pass: number; mid: number; below: number; passRate: number; avg: number }
+  > = {
+    test: { attempted: 24, pass: 18, mid: 4, below: 2, passRate: 75, avg: 81 },
+    vocab: { attempted: 22, pass: 16, mid: 4, below: 2, passRate: 73, avg: 78 },
+    spell: { attempted: 20, pass: 13, mid: 5, below: 2, passRate: 65, avg: 72 },
+    gq: { attempted: 18, pass: 9, mid: 6, below: 3, passRate: 50, avg: 64 },
+    gg: { attempted: 15, pass: 5, mid: 6, below: 4, passRate: 33, avg: 48 },
   };
-  const rows: Row[] = [
-    { name: "Chloe L.", init: "C", email: "chloe.l@school.edu", progress: 100, test: 92, vocab: 88, spell: 90, gq: 85, gg: 80, viewed: "Jun 9, 14:22" },
-    { name: "Marcus T.", init: "M", email: "marcus.t@school.edu", progress: 80, test: 74, vocab: 70, spell: 78, gq: 72, gg: 68, viewed: "Jun 8, 09:10" },
-    { name: "Priya K.", init: "P", email: "priya.k@school.edu", progress: 52, test: 61, vocab: 55, spell: 60, gq: 58, gg: 50, viewed: "Jun 7, 16:40" },
-    { name: "Ethan W.", init: "E", email: "ethan.w@school.edu", progress: 24, test: null, vocab: null, spell: null, gq: null, gg: null, viewed: "—" },
-  ];
+  const total = 28;
 
-  const scoreCols = [
-    { key: "test" as const, icon: BookOpenCheck, color: "text-teal-500", title: "Test" },
-    { key: "vocab" as const, icon: ClipboardList, color: "text-blue-500", title: "Vocab" },
-    { key: "spell" as const, icon: SpellCheck, color: "text-pink-500", title: "Spelling" },
-    { key: "gq" as const, icon: GraduationCap, color: "text-fuchsia-500", title: "Grammar Quiz" },
-    { key: "gg" as const, icon: Gamepad2, color: "text-amber-500", title: "Grammar Game" },
-  ];
+  // Students needing attention — every chip score is below the 50 threshold.
+  const atRisk = [
+    { name: "Priya K.", email: "priya.k@school.edu.hk", weak: [{ key: "gg", score: 45 }] },
+    { name: "Wong Ka-ho", email: "khwong@school.edu.hk", weak: [{ key: "gq", score: 42 }, { key: "gg", score: 38 }] },
+    { name: "Johnson A.", email: "a.johnson@school.edu.hk", weak: [{ key: "spell", score: 48 }] },
+  ] as const;
 
-  const cell = (v: number | null) => (v == null ? "—" : String(v));
+  // Roster rows — score columns match the real activity meta; the table loads
+  // sorted by student name asc (the real default sort). Scores render as blue
+  // drill-down links, missing scores as "-", empty view dates as "Never".
+  const roster = [
+    { name: "Chloe L.", email: "chloe.l@school.edu.hk", progress: 100, scores: { test: 92, vocab: 88, spell: 90, gq: 85, gg: 80 }, viewed: "Jun 9, 2026, 02:22 PM" },
+    { name: "Ethan W.", email: "ethan.w@school.edu.hk", progress: 24, scores: { test: null, vocab: null, spell: null, gq: null, gg: null }, viewed: "Never" },
+    { name: "Johnson A.", email: "a.johnson@school.edu.hk", progress: 60, scores: { test: 66, vocab: 60, spell: 48, gq: 52, gg: 55 }, viewed: "Jun 6, 2026, 11:05 AM" },
+    { name: "Marcus T.", email: "marcus.t@school.edu.hk", progress: 80, scores: { test: 74, vocab: 70, spell: 78, gq: 72, gg: 68 }, viewed: "Jun 8, 2026, 09:10 AM" },
+  ] as const;
+
+  const labelFor = (key: string) => ROSTER_ACTIVITIES.find((a) => a.key === key)!.label;
 
   return (
-    <MockupFrame label="ASSIGNMENTS · Mr.🆖 ProReader">
-      {/* ── header card: title / subject / status + meta row ── */}
-      <div className="rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3.5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="truncate font-display text-base font-bold text-[var(--lp-ink)]">
-              DSE 2023 Paper 1 — Reading
-            </p>
-            <p className="mt-0.5 text-[11px] text-[var(--lp-ink-soft)]">English · Paper 1</p>
-          </div>
-          <span className="shrink-0 rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-            Active
-          </span>
-        </div>
-        <p className="mt-2 text-[11px] leading-snug text-[var(--lp-ink-soft)]">
-          Read the passage and complete all sections before the deadline.
-        </p>
-        <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 border-t border-[var(--lp-rule)] pt-2.5 text-[11px] text-[var(--lp-ink-soft)]">
-          <span className="inline-flex items-center gap-1">
-            <Calendar className="h-3 w-3" /> Due Jun 12
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <BadgeCheck className="h-3 w-3" /> Completed 18/28 students
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <TrendingUp className="h-3 w-3" /> Avg 64%
-          </span>
-        </div>
-      </div>
-
-      {/* ── export button (right-aligned, like the real page) ── */}
-      <div className="mt-3 flex justify-end">
-        <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--lp-ink)]">
-          <Download className="h-3.5 w-3.5" /> Export to Excel
+    <MockupFrame label="ASSIGNMENT DETAIL · Mr.🆖 ProReader">
+      {/* ── back row (real page: ghost Button + ArrowLeft) ── */}
+      <div className="flex">
+        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--lp-ink-soft)]">
+          <ArrowLeft className="h-3 w-3" /> Back
         </span>
       </div>
 
-      {/* ── AssignmentStats overview strip (4 StatCards) ── */}
-      <div className="mt-3 grid grid-cols-4 gap-2">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 p-2"
-          >
-            <s.icon className={`h-3 w-3 ${s.color}`} />
-            <div className="mt-1 font-display text-base font-bold text-[var(--lp-ink)]">
-              {s.value}
-            </div>
-            <div className="text-[8px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
-              {s.label}
-            </div>
+      {/* ── header card: title / subject / badges + meta row ── */}
+      <div className="mt-2 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="truncate font-display text-sm font-bold text-[var(--lp-ink)]">
+              DSE 2023 Paper 1 — Reading
+            </p>
+            <p className="mt-0.5 text-[9px] text-[var(--lp-ink-soft)]">English · Paper 1</p>
           </div>
-        ))}
+          <div className="flex shrink-0 items-center gap-1">
+            {/* Badge variant="default" */}
+            <span className="rounded-md bg-[var(--lp-accent)] px-1.5 py-0.5 text-[8px] font-semibold text-white">
+              Active
+            </span>
+            {/* Badge variant="destructive" — past due with progress < 100% */}
+            <span className="rounded-md bg-red-600 px-1.5 py-0.5 text-[8px] font-semibold text-white">
+              Overdue
+            </span>
+          </div>
+        </div>
+        <p className="mt-1.5 text-[9px] leading-snug text-[var(--lp-ink-soft)]">
+          Read the passage and complete all sections before the deadline.
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[var(--lp-rule)] pt-2 text-[9px] text-[var(--lp-ink-soft)]">
+          <span className="inline-flex items-center gap-1 text-red-500">
+            <Calendar className="h-2.5 w-2.5" /> Due Jun 12, 2026
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <BadgeCheck className="h-2.5 w-2.5" /> Completed: 18/28 students
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <TrendingUp className="h-2.5 w-2.5" /> Avg progress: 64%
+          </span>
+        </div>
       </div>
 
-      {/* ── roster table (8 sortable columns) ── */}
-      <div className="mt-3 overflow-hidden rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)]">
+      {/* ── export button (right-aligned outline Button, like the real page) ── */}
+      <div className="mt-2 flex justify-end">
+        <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] px-2 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+          <Download className="h-2.5 w-2.5" /> Export to Excel
+        </span>
+      </div>
+
+      {/* ── "Class insights" section heading (AssignmentStats SectionHeading) ── */}
+      <div className="mt-2.5 flex items-center gap-1.5">
+        <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[var(--lp-accent)]/10 text-[var(--lp-accent)]">
+          <Sparkles className="h-3 w-3" />
+        </span>
+        <div>
+          <p className="text-[9px] font-semibold leading-tight text-[var(--lp-ink)]">Class insights</p>
+          <p className="text-[7px] text-[var(--lp-ink-soft)]">Aggregated performance across all assigned students.</p>
+        </div>
+      </div>
+
+      {/* ── overview strip — mirrors the real StatCard layout (icon+label → value → sub) ── */}
+      <div className="mt-1.5 grid grid-cols-4 gap-1.5">
+        <div className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2">
+          <div className="flex items-center gap-1 text-[7px] text-[var(--lp-ink-soft)]">
+            <Users className="h-2 w-2 text-[var(--lp-accent)]" /> Students assessed
+          </div>
+          <div className="mt-0.5 font-display text-sm font-bold tabular-nums text-[var(--lp-ink)]">
+            24<span className="text-[9px] font-normal text-[var(--lp-ink-soft)]"> / 28</span>
+          </div>
+          <div className="text-[6.5px] text-[var(--lp-ink-soft)]">have at least one score</div>
+        </div>
+        <div className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2">
+          <div className="flex items-center gap-1 text-[7px] text-[var(--lp-ink-soft)]">
+            <TrendingUp className="h-2 w-2 text-emerald-500" /> Avg participation
+          </div>
+          <div className="mt-0.5 font-display text-sm font-bold tabular-nums text-[var(--lp-ink)]">71%</div>
+          <div className="text-[6.5px] text-[var(--lp-ink-soft)]">across all activities</div>
+        </div>
+        <div className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2">
+          <div className="flex items-center gap-1 text-[7px] text-[var(--lp-ink-soft)]">
+            <Award className="h-2 w-2 text-indigo-500" /> Class average
+          </div>
+          <div className="mt-0.5 font-display text-sm font-bold tabular-nums text-[var(--lp-ink)]">69</div>
+          <div className="text-[6.5px] text-[var(--lp-ink-soft)]">all attempts</div>
+        </div>
+        <div className="rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2">
+          <div className="flex items-center gap-1 text-[7px] text-[var(--lp-ink-soft)]">
+            <TriangleAlert className="h-2 w-2 text-amber-500" /> Needing attention
+          </div>
+          <div className="mt-0.5 font-display text-sm font-bold tabular-nums text-amber-500">3</div>
+          <div className="text-[6.5px] text-[var(--lp-ink-soft)]">below 50</div>
+        </div>
+      </div>
+
+      {/* ── performance by activity (static bar chart, hardest at the top) ── */}
+      <div className="mt-1.5 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2.5">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="text-[8px] font-semibold text-[var(--lp-ink-soft)]">Performance by activity</p>
+            <p className="text-[6.5px] text-[var(--lp-ink-soft)] opacity-70">Mean score (0–100), hardest at the top</p>
+          </div>
+          <div className="flex flex-wrap items-center justify-end gap-x-1.5 gap-y-0.5">
+            <span className="inline-flex items-center gap-0.5 text-[6.5px] text-[var(--lp-ink-soft)]">
+              <span className="h-1.5 w-1.5 rounded-sm" style={{ background: TIER.below }} /> Struggling
+            </span>
+            <span className="inline-flex items-center gap-0.5 text-[6.5px] text-[var(--lp-ink-soft)]">
+              <span className="h-1.5 w-1.5 rounded-sm" style={{ background: TIER.mid }} /> Developing
+            </span>
+            <span className="inline-flex items-center gap-0.5 text-[6.5px] text-[var(--lp-ink-soft)]">
+              <span className="h-1.5 w-1.5 rounded-sm" style={{ background: TIER.pass }} /> Mastery
+            </span>
+            <span className="inline-flex items-center gap-0.5 text-[6.5px] text-[var(--lp-ink-soft)]">
+              <span className="h-0 w-2 border-t border-dashed border-[var(--lp-ink-soft)]" /> Pass (70)
+            </span>
+          </div>
+        </div>
+        <div className="relative mt-1.5 space-y-1.5">
+          {/* dashed pass line across the bar area (labels are w-14 + gap-1.5) */}
+          <span
+            aria-hidden="true"
+            className="absolute top-0 h-full border-l border-dashed border-[var(--lp-ink-soft)]"
+            style={{ left: "calc(62px + (100% - 62px) * 0.7)" }}
+          />
+          {performance.map((d) => (
+            <div key={d.key} className="flex items-center gap-1.5">
+              <span className="w-14 shrink-0 truncate text-right text-[7.5px] text-[var(--lp-ink-soft)]">
+                {labelFor(d.key)}
+              </span>
+              <div className="relative h-2.5 flex-1">
+                <div
+                  className="h-full rounded-r-sm"
+                  style={{ width: `${d.mean}%`, background: tierColor(d.mean) }}
+                />
+                <span
+                  className="absolute top-1/2 -translate-y-1/2 text-[7px] font-medium tabular-nums text-[var(--lp-ink)]"
+                  style={{ left: `calc(${d.mean}% + 3px)` }}
+                >
+                  {d.mean}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── participation & mastery grid (5 ParticipationCards) ── */}
+      <div className="mt-1.5 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2.5">
+        <p className="text-[8px] font-semibold text-[var(--lp-ink-soft)]">Participation &amp; mastery</p>
+        <div className="mt-1.5 grid grid-cols-5 gap-1.5">
+          {ROSTER_ACTIVITIES.map((a) => {
+            const p = participation[a.key];
+            const notStarted = total - p.attempted;
+            const Icon = a.icon;
+            return (
+              <div key={a.key} className="rounded-md border border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/50 px-1.5 py-1.5">
+                <div className="flex items-center gap-0.5">
+                  <span style={{ color: a.accent }}>
+                    <Icon className="h-2 w-2" />
+                  </span>
+                  <span className="truncate text-[6.5px] font-medium text-[var(--lp-ink)]/80">{a.label}</span>
+                </div>
+                <div className="mt-1 flex items-end justify-between gap-1">
+                  <div>
+                    <div className="text-[10px] font-bold leading-none tabular-nums text-[var(--lp-ink)]">
+                      {Math.round((p.attempted / total) * 100)}%
+                    </div>
+                    <div className="mt-0.5 text-[6px] text-[var(--lp-ink-soft)]">attempted {p.attempted}/{total}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] font-bold leading-none tabular-nums text-[var(--lp-ink)]">{p.passRate}%</div>
+                    <div className="mt-0.5 text-[6px] text-[var(--lp-ink-soft)]">passed</div>
+                  </div>
+                </div>
+                {/* tier distribution strip: below / mid / pass / not started */}
+                <div className="mt-1.5 flex h-1 w-full overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                  <div style={{ width: `${(p.below / total) * 100}%`, background: TIER.below }} />
+                  <div style={{ width: `${(p.mid / total) * 100}%`, background: TIER.mid }} />
+                  <div style={{ width: `${(p.pass / total) * 100}%`, background: TIER.pass }} />
+                  {notStarted > 0 && (
+                    <div className="bg-[var(--lp-ink-soft)]/20" style={{ width: `${(notStarted / total) * 100}%` }} />
+                  )}
+                </div>
+                <div className="mt-1 flex items-center justify-between text-[6px] tabular-nums text-[var(--lp-ink-soft)]">
+                  <span>Avg: {p.avg}</span>
+                  <span>{p.pass}/{p.attempted}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── students needing attention (at-risk list with weak-area chips) ── */}
+      <div className="mt-1.5 rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-[8px] font-semibold text-[var(--lp-ink-soft)]">Students needing attention</p>
+            <p className="text-[6.5px] text-[var(--lp-ink-soft)] opacity-70">Scored below 50 in at least one activity</p>
+          </div>
+          <span className="rounded-md bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[7px] font-semibold tabular-nums text-[var(--lp-ink-soft)]">
+            3
+          </span>
+        </div>
+        <ul className="mt-1 divide-y divide-[var(--lp-rule)]">
+          {atRisk.map((s) => (
+            <li key={s.name} className="flex flex-wrap items-center gap-x-2 gap-y-0.5 py-1.5">
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--lp-paper-2)] text-[7px] font-bold text-[var(--lp-ink)]">
+                {s.name[0]}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[8px] font-medium leading-tight text-[var(--lp-ink)]">{s.name}</p>
+                <p className="truncate text-[6.5px] leading-tight text-[var(--lp-ink-soft)]">{s.email}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-[6.5px] text-[var(--lp-ink-soft)]">Needs support in</span>
+                {s.weak.map((w) => (
+                  <span
+                    key={w.key}
+                    className="inline-flex items-center gap-0.5 rounded-md bg-red-100 px-1 py-0.5 text-[6.5px] font-medium tabular-nums text-red-700 dark:bg-red-900/40 dark:text-red-300"
+                  >
+                    {labelFor(w.key)}
+                    <span className="text-red-500 dark:text-red-400">{w.score}</span>
+                  </span>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* ── roster table (8 sortable columns, faithful header labels) ── */}
+      <div className="mt-1.5 overflow-hidden rounded-lg border border-[var(--lp-rule)] bg-[var(--lp-surface)]">
         <table className="w-full border-collapse text-[var(--lp-ink)]">
           <thead>
-            <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[9px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
-              <th className="px-2 py-1.5 text-left font-semibold">Student</th>
-              <th className="px-1.5 py-1.5 text-left font-semibold">Progress</th>
-              {scoreCols.map((c) => (
-                <th key={c.key} className="px-1 py-1.5 text-center font-semibold" title={c.title}>
-                  <c.icon className={`mx-auto h-3 w-3 ${c.color}`} />
+            <tr className="border-b border-[var(--lp-rule)] bg-[var(--lp-paper-2)]/40 text-[7px] uppercase tracking-wide text-[var(--lp-ink-soft)]">
+              <th className="px-1.5 py-1.5 text-left font-semibold">
+                <span className="inline-flex items-center gap-0.5">Student <ChevronsUpDown className="h-1.5 w-1.5 opacity-50" /></span>
+              </th>
+              <th className="px-1 py-1.5 text-left font-semibold">
+                <span className="inline-flex items-center gap-0.5">Progress <ChevronsUpDown className="h-1.5 w-1.5 opacity-50" /></span>
+              </th>
+              {ROSTER_ACTIVITIES.map((a) => (
+                <th key={a.key} className="px-1 py-1.5 text-center font-semibold">
+                  <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
+                    {a.label} <ChevronsUpDown className="h-1.5 w-1.5 opacity-50" />
+                  </span>
                 </th>
               ))}
-              <th className="px-2 py-1.5 text-right font-semibold">Viewed</th>
+              <th className="px-1.5 py-1.5 text-right font-semibold">
+                <span className="inline-flex items-center gap-0.5">Last viewed <ChevronsUpDown className="h-1.5 w-1.5 opacity-50" /></span>
+              </th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r, i) => (
-              <tr
-                key={r.name}
-                className={`text-[11px] ${i !== rows.length - 1 ? "border-b border-[var(--lp-rule)]" : ""}`}
-              >
-                <td className="px-2 py-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--lp-accent)] text-[8px] font-bold text-white">
-                      {r.init}
-                    </span>
-                    <span className="truncate font-medium">{r.name}</span>
-                  </div>
-                </td>
+            {roster.map((r, i) => (
+              <tr key={r.name} className={`text-[8px] ${i !== roster.length - 1 ? "border-b border-[var(--lp-rule)]" : ""}`}>
                 <td className="px-1.5 py-1.5">
-                  <div className="flex items-center gap-1">
-                    <div className="h-1.5 w-8 overflow-hidden rounded-full bg-[var(--lp-rule)]">
-                      <div
-                        className="h-full rounded-full bg-[var(--lp-accent)]"
-                        style={{ width: `${r.progress}%` }}
-                      />
-                    </div>
-                    <span className="font-mono text-[9px] tabular-nums text-[var(--lp-ink-soft)]">
-                      {r.progress}%
+                  <div className="flex items-center gap-1.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--lp-paper-2)] text-[8px] font-bold text-[var(--lp-ink)]">
+                      {r.name[0]}
                     </span>
+                    <div className="min-w-0">
+                      <div className="truncate text-[8px] font-medium leading-tight">{r.name}</div>
+                      <div className="truncate text-[6.5px] leading-tight text-[var(--lp-ink-soft)]">{r.email}</div>
+                    </div>
                   </div>
                 </td>
-                {scoreCols.map((c) => (
-                  <td
-                    key={c.key}
-                    className={`px-1 py-1.5 text-center font-mono tabular-nums ${
-                      r[c.key] == null
-                        ? "text-[var(--lp-ink-soft)]"
-                        : (r[c.key] ?? 0) >= 70
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-[var(--lp-ink)]"
-                    }`}
-                  >
-                    {cell(r[c.key])}
+                <td className="px-1 py-1.5">
+                  <div className="flex items-center gap-1">
+                    <div className="h-1 w-8 overflow-hidden rounded-full bg-[var(--lp-rule)]">
+                      <div className="h-full bg-[var(--lp-accent)]" style={{ width: `${r.progress}%` }} />
+                    </div>
+                    <span className="text-[7px] tabular-nums text-[var(--lp-ink-soft)]">{r.progress}%</span>
+                  </div>
+                </td>
+                {ROSTER_ACTIVITIES.map((a) => (
+                  <td key={a.key} className="px-0.5 py-1.5 text-center tabular-nums">
+                    {/* real page: blue drill-down link; "-" when not attempted */}
+                    {r.scores[a.key] == null ? (
+                      <span className="text-[var(--lp-ink-soft)]">-</span>
+                    ) : (
+                      <span className="text-blue-600 dark:text-blue-400">{r.scores[a.key]}</span>
+                    )}
                   </td>
                 ))}
-                <td className="px-2 py-1.5 text-right font-mono text-[9px] tabular-nums text-[var(--lp-ink-soft)]">
+                <td className="px-1.5 py-1.5 text-right text-[6.5px] tabular-nums text-[var(--lp-ink-soft)]">
                   {r.viewed}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 7b. ASSIGNMENTS LIST — /assignments with the "My Assignments" tab active ── */
+// Mirrors AssignmentsList: header + SegmentedTabs (admin view), the collapsed
+// saved-roster bar (PresetsSection), the status filter + create button row and
+// assignment cards with teacher actions. Pagination is omitted — it only
+// renders past 10 assignments.
+export function AssignmentsListMockup() {
+  const cards = [
+    {
+      title: "DSE 2023 Paper 1 — Reading",
+      subject: "English · Paper 1",
+      status: "active" as const,
+      overdue: true,
+      description: "Read the passage and complete all sections before the deadline.",
+      due: "Overdue",
+      dueRed: true,
+      completed: "18/28",
+      avg: 64,
+      archiveLabel: "Archive",
+    },
+    {
+      title: "The Water Cycle — Comprehension",
+      subject: "Geography",
+      status: "active" as const,
+      overdue: false,
+      description: "Read about how water moves through its cycle, then answer the questions.",
+      due: "Due Jun 26, 2026",
+      dueRed: false,
+      completed: "9/24",
+      avg: 38,
+      archiveLabel: "Archive",
+    },
+    {
+      title: "News Clip — Plastic-free Week",
+      subject: "English · Reading",
+      status: "archived" as const,
+      overdue: false,
+      description: "Summarise the article and list three plastic-free swaps from the text.",
+      due: "Due May 2, 2026",
+      dueRed: false,
+      completed: "22/26",
+      avg: 91,
+      archiveLabel: "Unarchive",
+    },
+  ];
+
+  return (
+    <MockupFrame label="MY ASSIGNMENTS · Mr.🆖 ProReader">
+      {/* ── header row: title + help + view switch (SegmentedTabs) ── */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <ClipboardCheck className="h-4 w-4 text-[var(--lp-accent)]" />
+          <span className="font-display text-sm font-bold text-[var(--lp-ink)]">My Assignments</span>
+          <HelpCircle className="h-3 w-3 text-[var(--lp-ink-soft)]" />
+        </div>
+        {/* SegmentedTabs — "My Assignments" active */}
+        <div className="flex gap-0.5 rounded-lg bg-[var(--lp-paper-2)] p-0.5">
+          <span className="rounded-md bg-[var(--lp-surface)] px-2 py-0.5 text-[9px] font-medium text-[var(--lp-ink)] shadow-sm">
+            My Assignments
+          </span>
+          <span className="rounded-md px-2 py-0.5 text-[9px] font-medium text-[var(--lp-ink-soft)]">
+            All Teachers
+          </span>
+        </div>
+      </div>
+
+      {/* ── saved rosters bar (PresetsSection, collapsed) ── */}
+      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1 text-[9px] text-[var(--lp-ink-soft)]">
+          <Bookmark className="h-2.5 w-2.5" />
+          Saved rosters
+          <span className="rounded-md bg-[var(--lp-paper-2)] px-1 py-px text-[7px] font-semibold text-[var(--lp-ink-soft)]">3</span>
+          <ChevronDown className="h-2.5 w-2.5" />
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] px-2 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+          <Plus className="h-2.5 w-2.5" /> Create roster
+        </span>
+      </div>
+
+      {/* ── status filter + create assignment row ── */}
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center gap-3 rounded-lg border border-[var(--lp-rule)] px-2 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+          All <ChevronDown className="h-2.5 w-2.5 text-[var(--lp-ink-soft)]" />
+        </span>
+        <span className="flex-1" />
+        <span className="inline-flex items-center gap-1 rounded-lg border border-[var(--lp-rule)] px-2 py-1 text-[9px] font-medium text-[var(--lp-ink)]">
+          <Plus className="h-2.5 w-2.5" /> Create assignment
+        </span>
+      </div>
+
+      {/* ── assignment cards ── */}
+      <div className="mt-2 space-y-2">
+        {cards.map((c) => (
+          <div
+            key={c.title}
+            className={`overflow-hidden rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] ${
+              c.status === "archived" ? "opacity-60" : ""
+            }`}
+          >
+            <div className="px-3 pb-1 pt-2.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] font-semibold text-[var(--lp-ink)]">{c.title}</p>
+                  <p className="mt-0.5 text-[8px] text-[var(--lp-ink-soft)]">{c.subject}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  {c.status === "active" ? (
+                    <span className="rounded-md bg-[var(--lp-accent)] px-1.5 py-0.5 text-[8px] font-semibold text-white">
+                      Active
+                    </span>
+                  ) : (
+                    <span className="rounded-md bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[8px] font-semibold text-[var(--lp-ink-soft)]">
+                      Archived
+                    </span>
+                  )}
+                  {c.overdue && (
+                    <span className="rounded-md bg-red-600 px-1.5 py-0.5 text-[8px] font-semibold text-white">
+                      Overdue
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="px-3 pb-2">
+              <p className="mt-0.5 line-clamp-2 text-[9px] text-[var(--lp-ink-soft)]">{c.description}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[8.5px] text-[var(--lp-ink-soft)]">
+                <span className={`inline-flex items-center gap-1 ${c.dueRed ? "text-red-500" : ""}`}>
+                  <Calendar className="h-2.5 w-2.5" /> {c.due}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <BadgeCheck className="h-2.5 w-2.5" /> Completed: {c.completed} students
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <TrendingUp className="h-2.5 w-2.5" /> Avg progress: {c.avg}%
+                </span>
+              </div>
+              {/* teacher action row */}
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5 border-t border-[var(--lp-rule)] pt-1.5">
+                <span className="inline-flex items-center gap-0.5 text-[8.5px] text-[var(--lp-ink-soft)]">
+                  <BookOpen className="h-2.5 w-2.5" /> View session
+                </span>
+                <span className="inline-flex items-center gap-0.5 text-[8.5px] text-[var(--lp-ink-soft)]">
+                  <Pencil className="h-2.5 w-2.5" /> Edit
+                </span>
+                <span className="inline-flex items-center gap-0.5 text-[8.5px] text-[var(--lp-ink-soft)]">
+                  {c.status === "active" ? <Archive className="h-2.5 w-2.5" /> : <ArchiveRestore className="h-2.5 w-2.5" />}
+                  {c.archiveLabel}
+                </span>
+                <span className="inline-flex items-center gap-0.5 text-[8.5px] text-red-500">
+                  <Trash2 className="h-2.5 w-2.5" /> Delete
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </MockupFrame>
   );
