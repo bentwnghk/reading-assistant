@@ -34,7 +34,7 @@ interface LanguageCheckState {
   explanationLanguage: ExplanationLanguage;
   /** Persisted preference: run a second OCR pass that reverts silent corrections. */
   verifyTranscription: boolean;
-  /** Persisted learner age (8–18) that levels the "Learn from your mistakes" materials. */
+  /** Persisted learner age (8–18) that levels the "Learn from your mistakes" materials. The setup dialog re-defaults it from the Settings "Your Age" value (reading store `studentAge`) every time it opens. */
   learnAge: number;
   /** AI generation flags — store-level so spinners survive SPA navigation. */
   activeGenerations: Record<string, boolean>;

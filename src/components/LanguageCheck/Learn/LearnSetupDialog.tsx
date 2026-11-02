@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { GraduationCap, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useReadingStore } from "@/store/reading";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -49,6 +50,19 @@ export default function LearnSetupDialog({ essay, open, onOpenChange }: LearnSet
   const { begin } = useLanguageCheckLearn();
   const learnAge = useLanguageCheckStore((s) => s.learnAge);
   const setLearnAge = useLanguageCheckStore((s) => s.setLearnAge);
+
+  // Default the "Your level" slider to the "Your Age" value from the Settings
+  // dialog's User Info tab (the reading store's `studentAge`) each time the
+  // dialog opens; the learner can still fine-tune it here for this session.
+  // Read once via getState (non-reactive) so this dialog otherwise stays
+  // independent of the reading store.
+  useEffect(() => {
+    if (!open) return;
+    const age = useReadingStore.getState().studentAge;
+    setLearnAge(
+      Math.min(LANGUAGE_CHECK_LEARN_MAX_AGE, Math.max(LANGUAGE_CHECK_LEARN_MIN_AGE, age)),
+    );
+  }, [open, setLearnAge]);
 
   const counts = countByCategory(essay.corrections);
   const errors = counts.filter((c) => !isExpressionCategory(c.category));
