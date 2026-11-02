@@ -19,7 +19,6 @@ import { Footer } from "@/components/Internal/Footer";
 const loadLandingPage = () => import("@/components/Auth/LandingPage").then((m) => m.LandingPage);
 const loadHeader = () => import("@/components/Internal/Header");
 const loadSettingsBanner = () => import("@/components/Internal/SettingsBanner");
-const loadStudentInfo = () => import("@/components/ReadingAssistant/StudentInfo");
 const loadImageUpload = () => import("@/components/ReadingAssistant/ImageUpload");
 const loadPreReading = () => import("@/components/ReadingAssistant/PreReading");
 const loadWorkflowProgress = () => import("@/components/ReadingAssistant/WorkflowProgress");
@@ -39,7 +38,6 @@ const loadOnboardingDialog = () => import("@/components/Onboarding/OnboardingDia
 const LandingPage = dynamic(loadLandingPage);
 const Header = dynamic(loadHeader);
 const SettingsBanner = dynamic(loadSettingsBanner);
-const StudentInfo = dynamic(loadStudentInfo);
 const ImageUpload = dynamic(loadImageUpload);
 const PreReading = dynamic(loadPreReading);
 const WorkflowProgress = dynamic(loadWorkflowProgress);
@@ -65,7 +63,6 @@ const OnboardingDialog = dynamic(loadOnboardingDialog);
 const SECTION_LOADERS = [
   loadHeader,
   loadSettingsBanner,
-  loadStudentInfo,
   loadImageUpload,
   loadPreReading,
   loadWorkflowProgress,
@@ -315,9 +312,6 @@ function HomeContent() {
       <div className="max-lg:max-w-screen-md max-w-screen-lg mx-auto px-4">
         <SettingsBanner />
       <main className="scroll-mt-20">
-        <section id="section-student-info" className="scroll-mt-20">
-          <StudentInfo />
-        </section>
         <section id="section-upload" className="scroll-mt-20">
           <ImageUpload />
         </section>

@@ -3227,10 +3227,11 @@
   },
   "setting": {
     "title": "設定",
-    "description": "設定一般、AI 模型、語音和通知選項。",
+    "description": "設定用戶資料、一般、AI 模型、語音和通知選項。",
     "tabGeneral": "一般",
     "tabModels": "模型",
     "tabTTS": "語音",
+    "tabUserInfo": "用戶資料",
     "model": "模型",
     "visionModel": "視覺模型",
     "ocrModel": "OCR 模型（語法檢查）",

@@ -2,6 +2,7 @@
 import {
   useEffect,
   useRef,
+  useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
@@ -15,6 +16,7 @@ import {
   BookOpen,
   BookOpenCheck,
   Check,
+  ChevronDown,
   ClipboardCheck,
   ClipboardList,
   FileText,
@@ -34,6 +36,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import AgeSlider from "@/components/Internal/AgeSlider";
 import { useReadingStore } from "@/store/reading";
 import { useVocabularyStore } from "@/store/vocabulary";
 import { useAssignmentsStore } from "@/store/assignments";
@@ -79,13 +82,6 @@ function HalfCheck() {
 }
 
 const sections: SectionItem[] = [
-  {
-    id: "section-student-info",
-    icon: User,
-    labelKey: "toc.studentInfo",
-    checkCompleted: () => true,
-    isAccessible: () => true,
-  },
   {
     id: "section-upload",
     icon: Upload,
@@ -353,6 +349,9 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { data: session } = useSession();
   const role = session?.user?.role;
   const store = useReadingStore();
+  // Whether the User Info item's inline age panel is expanded. Ephemeral UI —
+  // component-local state is fine (the menu remounts on SPA navigation).
+  const [userInfoOpen, setUserInfoOpen] = useState(false);
   const dueForReviewCount = useVocabularyStore((s) => s.dueForReviewCount);
   const pendingAssignmentCount = useAssignmentsStore((s) => s.pendingAssignmentCount);
   const setOpenDashboard = useGlobalStore((s) => s.setOpenDashboard);
@@ -413,6 +412,39 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <nav className="space-y-0.5 p-2" aria-label={t("toc.title")}>
+      {/* User Info: expands in place instead of scrolling to a home-page
+          section — the User Information section was removed from the main
+          page. Shared by the desktop sidebar and the mobile drawer (both
+          render NavMenu). The inline slider edits the reading store's
+          `studentAge` directly, so it stays in sync with the Settings
+          dialog's User Info tab. */}
+      <div>
+        <button
+          onClick={() => setUserInfoOpen((v) => !v)}
+          aria-expanded={userInfoOpen}
+          className={cn(
+            "w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-left transition-colors",
+            "hover:bg-accent hover:text-accent-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          )}
+        >
+          <User className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="flex-1">{t("toc.studentInfo")}</span>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+              userInfoOpen && "rotate-180"
+            )}
+          />
+        </button>
+        {userInfoOpen && (
+          <div className="px-3 pb-2 pt-1">
+            <div className="rounded-md border bg-muted/30 p-3">
+              <AgeSlider />
+            </div>
+          </div>
+        )}
+      </div>
       {sections.map((section) => {
         const Icon = section.icon;
         const isCompleted = section.checkCompleted(store);

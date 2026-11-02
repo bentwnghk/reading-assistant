@@ -1,4 +1,3 @@
-export { default as StudentInfo } from "./StudentInfo";
 export { default as ImageUpload } from "./ImageUpload";
 export { default as PreReading } from "./PreReading";
 export { default as AiTextGenerator } from "./AiTextGenerator";

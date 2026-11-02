@@ -3230,10 +3230,11 @@
   },
   "setting": {
     "title": "Settings",
-    "description": "Configure general, AI models, text-to-speech, and notifications settings.",
+    "description": "Configure user info, general, AI models, text-to-speech, and notifications settings.",
     "tabGeneral": "General",
     "tabModels": "Models",
     "tabTTS": "TTS",
+    "tabUserInfo": "User Info",
     "model": "Model",
     "visionModel": "Vision Model",
     "ocrModel": "OCR Model (Grammar Check)",

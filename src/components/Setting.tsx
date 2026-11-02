@@ -43,9 +43,10 @@ import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, OCR_MODELS, IMAGE_MOD
 import { formatModelLabel } from "@/utils/model";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
-import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2 } from "lucide-react";
+import { CircleHelp, Settings, Sparkles, Volume2, Bell, Trash2, User } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { toast } from "sonner";
+import AgeSlider from "@/components/Internal/AgeSlider";
 import ReminderPreferences from "@/components/ReminderPreferences";
 import SubscriptionPanel from "@/components/Subscription/SubscriptionPanel";
 import SchoolSubscriptionPanel from "@/components/Subscription/SchoolSubscriptionPanel";
@@ -338,6 +339,10 @@ function Setting({ open, onClose }: SettingProps) {
                 <TabsTrigger value="tts" className="flex-1 gap-1 whitespace-normal">
                   <Volume2 className="h-3.5 w-3.5 shrink-0" />
                   <span>{t("setting.tabTTS")}</span>
+                </TabsTrigger>
+                <TabsTrigger value="userInfo" className="flex-1 gap-1 whitespace-normal">
+                  <User className="h-3.5 w-3.5 shrink-0" />
+                  <span>{t("setting.tabUserInfo")}</span>
                 </TabsTrigger>
                 {isAuthenticated && (
                   <TabsTrigger value="notifications" className="flex-1 gap-1 whitespace-normal">
@@ -1460,6 +1465,13 @@ function Setting({ open, onClose }: SettingProps) {
                     </FormItem>
                   )}
                 />
+              </TabsContent>
+
+              <TabsContent value="userInfo" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
+                <p className="text-sm text-muted-foreground">
+                  {t("reading.studentInfo.help.intro")}
+                </p>
+                <AgeSlider />
               </TabsContent>
 
               {isAuthenticated && (
