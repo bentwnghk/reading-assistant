@@ -331,24 +331,24 @@ function Setting({ open, onClose }: SettingProps) {
                   max-w-md dialog ("Notifications" wraps to a second row);
                   short CJK labels still fit on a single line. */}
               <TabsList className="w-full h-auto flex-wrap gap-1">
-                <TabsTrigger value="general" className="flex-1 gap-1 whitespace-normal">
+                <TabsTrigger value="general" className="flex-1 gap-1 whitespace-nowrap">
                   <Settings className="h-3.5 w-3.5 shrink-0" />
                   <span>{t("setting.tabGeneral")}</span>
                 </TabsTrigger>
-                <TabsTrigger value="models" className="flex-1 gap-1 whitespace-normal">
+                <TabsTrigger value="models" className="flex-1 gap-1 whitespace-nowrap">
                   <Sparkles className="h-3.5 w-3.5 shrink-0" />
                   <span>{t("setting.tabModels")}</span>
                 </TabsTrigger>
-                <TabsTrigger value="tts" className="flex-1 gap-1 whitespace-normal">
+                <TabsTrigger value="tts" className="flex-1 gap-1 whitespace-nowrap">
                   <Volume2 className="h-3.5 w-3.5 shrink-0" />
                   <span>{t("setting.tabTTS")}</span>
                 </TabsTrigger>
-                <TabsTrigger value="userInfo" className="flex-1 gap-1 whitespace-normal">
+                <TabsTrigger value="userInfo" className="flex-1 gap-1 whitespace-nowrap">
                   <User className="h-3.5 w-3.5 shrink-0" />
                   <span>{t("setting.tabUserInfo")}</span>
                 </TabsTrigger>
                 {isAuthenticated && (
-                  <TabsTrigger value="notifications" className="flex-1 gap-1 whitespace-normal">
+                  <TabsTrigger value="notifications" className="flex-1 gap-1 whitespace-nowrap">
                     <Bell className="h-3.5 w-3.5 shrink-0" />
                     <span>{t("reminder.tabNotifications")}</span>
                   </TabsTrigger>
