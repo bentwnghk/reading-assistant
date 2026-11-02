@@ -327,7 +327,10 @@ function Setting({ open, onClose }: SettingProps) {
         <Form {...form}>
           <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="w-full h-auto">
+              {/* flex-wrap: five tabs don't fit one row in English inside the
+                  max-w-md dialog ("Notifications" wraps to a second row);
+                  short CJK labels still fit on a single line. */}
+              <TabsList className="w-full h-auto flex-wrap gap-1">
                 <TabsTrigger value="general" className="flex-1 gap-1 whitespace-normal">
                   <Settings className="h-3.5 w-3.5 shrink-0" />
                   <span>{t("setting.tabGeneral")}</span>

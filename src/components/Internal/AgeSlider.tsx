@@ -48,11 +48,11 @@ function AgeSlider() {
   return (
     <div className="space-y-3">
       <div className="space-y-2">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-x-2">
           <Label htmlFor={sliderId}>
             {t("reading.studentInfo.ageLabel")}
           </Label>
-          <span className="text-lg font-bold text-primary">
+          <span className="text-lg font-bold text-primary whitespace-nowrap">
             {studentAge} {t("reading.studentInfo.yearsOld")}
           </span>
         </div>
@@ -71,13 +71,16 @@ function AgeSlider() {
           <span>18</span>
         </div>
       </div>
-      <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
+      {/* flex-wrap: in English the label + level badge don't fit narrow
+          surfaces (sidebar/drawer panel, narrow dialog viewports) on one
+          line — the badge drops to its own line instead of overflowing. */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 p-2 bg-muted/50 rounded-md">
         <GraduationCap className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="text-sm text-muted-foreground">
           {t("reading.studentInfo.estimatedLevel")}:
         </span>
         <span className={cn(
-          "px-2 py-0.5 rounded text-sm font-medium",
+          "px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap",
           getLevelColor(studentAge)
         )}>
           {getFormLevel(studentAge)}

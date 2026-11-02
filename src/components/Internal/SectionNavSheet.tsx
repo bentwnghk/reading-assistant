@@ -439,7 +439,7 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
         </button>
         {userInfoOpen && (
           <div className="px-3 pb-2 pt-1">
-            <div className="rounded-md border bg-muted/30 p-3">
+            <div className="rounded-md border bg-muted/30 p-2">
               <AgeSlider />
             </div>
           </div>
