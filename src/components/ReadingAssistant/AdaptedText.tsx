@@ -1103,7 +1103,8 @@ function AdaptedText() {
   }, [readAlongPlaying, startReadAlong, setReadAlong]);
 
   // Click-to-jump: restart read-along from the clicked sentence index.
-  // Works whether or not read-along is currently playing. The click event
+  // Only invoked while read-along is already playing (see handleSentenceClick) —
+  // starting playback is reserved for the Play button. The click event
   // serves as the user gesture for AudioContext unlock.
   const handleJumpReadAlong = useCallback(
     (index: number) => {
@@ -1246,10 +1247,13 @@ function AdaptedText() {
       return;
     }
 
-    // Read-along jump: clicking a sentence starts/jumps read-along to it.
+    // Read-along jump: while playback is running, clicking a sentence jumps
+    // read-along to it. When playback is NOT running, a sentence click must
+    // not start read-along — the Play button is the only way to start it.
     // Skip when the user is actively selecting text (drag-selection).
     const raSpan = target.closest(".ra-sentence") as HTMLElement | null;
     if (raSpan) {
+      if (!readAlongPlaying) return;
       const selection = window.getSelection();
       if (selection && selection.toString().trim().length > 0) return;
       const idxAttr = raSpan.getAttribute("data-ra-idx");
