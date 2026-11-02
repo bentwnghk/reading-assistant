@@ -613,9 +613,6 @@
       "dse": "DSE Level"
     },
     "studentInfo": {
-      "title": "User Information",
-      "nameLabel": "Your Name",
-      "roleLabel": "Role",
       "roles": {
         "admin": "Admin",
         "teacher": "Teacher",
@@ -624,33 +621,7 @@
       },
       "ageLabel": "Your Age",
       "yearsOld": "years old",
-      "estimatedLevel": "Estimated Level",
-      "help": {
-        "title": "User Information Guide",
-        "intro": "Tell us your age so every part of the app can match your level — from the language used to the questions you receive.",
-        "items": {
-          "age": {
-            "name": "Age Slider",
-            "desc": "Drag the slider to set your age (8–18). Each age maps to a Hong Kong school level."
-          },
-          "level": {
-            "name": "Estimated Level",
-            "desc": "See the school level for your age, e.g. age 10 → Primary 5, age 14 → Form 3, age 17 → Form 6/DSE."
-          },
-          "personalised": {
-            "name": "Personalised Learning",
-            "desc": "Your level shapes the summary, adapted text, reading test, vocabulary, grammar and the AI Tutor — all adjusted to your year group."
-          }
-        },
-        "stepsTitle": "How to set it up",
-        "steps": {
-          "s1": "Drag the Age slider to your age.",
-          "s2": "Check the Estimated Level badge that appears.",
-          "s3": "Everything you generate from now on is tailored to your level."
-        },
-        "tipTitle": "Good to know",
-        "tipContent": "Your age is saved with each reading session, so your history keeps the level you used. You can change it any time."
-      }
+      "estimatedLevel": "Estimated Level"
     },
     "imageUpload": {
       "title": "Select Text",
@@ -3235,6 +3206,7 @@
     "tabModels": "Models",
     "tabTTS": "TTS",
     "tabUserInfo": "User Info",
+    "userInfoDescription": "Tell us your age so every part of the app can match your level — from the language used to the questions you receive.",
     "model": "Model",
     "visionModel": "Vision Model",
     "ocrModel": "OCR Model (Grammar Check)",

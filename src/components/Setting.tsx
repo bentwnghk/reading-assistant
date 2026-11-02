@@ -1472,7 +1472,7 @@ function Setting({ open, onClose }: SettingProps) {
 
               <TabsContent value="userInfo" className="space-y-4 mt-4 max-h-[50vh] overflow-y-auto">
                 <p className="text-sm text-muted-foreground">
-                  {t("reading.studentInfo.help.intro")}
+                  {t("setting.userInfoDescription")}
                 </p>
                 <AgeSlider />
               </TabsContent>

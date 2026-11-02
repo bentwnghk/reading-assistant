@@ -668,7 +668,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><th>Card</th><th>Color</th><th>What it does</th></tr>
         <tr><td><b>Continue your session</b> <span class="small">(if you have one)</span></td><td><span class="badge" style="background:#e0e7ff;color:#4f46e5">activity</span></td><td>Scrolls to the next incomplete activity in your last session — summary, mind map, glossary, reading test, grammar, etc. The "+N more" hint counts the remaining activities.</td></tr>
         <tr><td><b>Read a new text</b></td><td><span class="badge b-amber">amber</span></td><td>Opens the Text Repository picker (below).</td></tr>
-        <tr><td><b>Upload image / PDF</b></td><td><span class="badge b-teal">teal</span></td><td>Jumps to the upload step (§4.2) and opens the file picker.</td></tr>
+        <tr><td><b>Upload image / PDF</b></td><td><span class="badge b-teal">teal</span></td><td>Jumps to the upload step (§4.3) and opens the file picker.</td></tr>
         <tr><td><b>Generate with AI</b></td><td><span class="badge b-violet">violet</span></td><td>Opens the AI text generator so Mr.🆖 ProReader writes a fresh passage on any topic.</td></tr>
       </table>
       <p>Choose <b>Read a new text</b> and the dialog briefly shows a loading spinner, then a randomly-picked text from your school's repository for a one-tap start:</p>
@@ -837,10 +837,10 @@ body.toc-noscroll{overflow:hidden}
       <div class="chapter-head">
         <span class="chapter-num">CHAPTER 3</span>
         <h2 class="section-title">3. Settings Reference</h2>
-        <p class="small">Open Settings from the top-right user menu. Four tabs: General, Models, TTS, Notifications.</p>
+        <p class="small">Open Settings from the top-right user menu. Five tabs: General, Models, TTS, User Info, Notifications.</p>
       </div>
 
-      <p>The Settings dialog is where you configure AI access (Chapter 2), choose which AI model powers each feature, set text-to-speech voices, and manage email reminders. Open it from the <b>user menu</b> (your avatar, top-right) → <b>Settings</b>. Your choices are saved to your account and restored on every sign-in, on any device.</p>
+      <p>The Settings dialog is where you set your age, configure AI access (Chapter 2), choose which AI model powers each feature, set text-to-speech voices, and manage email reminders. Open it from the <b>user menu</b> (your avatar, top-right) → <b>Settings</b>. Your choices are saved to your account and restored on every sign-in, on any device.</p>
 
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
         <div style="flex:1;min-width:240px">
@@ -872,11 +872,12 @@ body.toc-noscroll{overflow:hidden}
             <div class="mock-bar"><span class="pill">⚙ Settings dialog (centered modal)</span></div>
             <div class="mock-body">
               <div style="font-weight:700;font-size:15px">Settings</div>
-              <div class="small" style="margin:2px 0 10px">Configure general, AI models, text-to-speech, and notifications settings.</div>
+              <div class="small" style="margin:2px 0 10px">Configure user info, general, AI models, text-to-speech, and notifications settings.</div>
               <div class="faketab">
                 <span class="active"><svg class="ic sm"><use href="#i-settings"/></svg> General</span>
                 <span><svg class="ic sm"><use href="#i-sparkles"/></svg> Models</span>
                 <span><svg class="ic sm"><use href="#i-volume-2"/></svg> TTS</span>
+                <span><svg class="ic sm"><use href="#i-user"/></svg> User Info</span>
                 <span><svg class="ic sm"><use href="#i-bell"/></svg> Notifications</span>
               </div>
               <div style="border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;background:var(--subtle)">
@@ -891,7 +892,7 @@ body.toc-noscroll{overflow:hidden}
               </div>
             </div>
           </div>
-          <div class="mock-cap">Settings is a separate centered modal: 4 horizontal icon tabs + stacked full-width Save / Reset all settings.</div>
+          <div class="mock-cap">Settings is a separate centered modal: 5 horizontal icon tabs + stacked full-width Save / Reset all settings.</div>
         </div>
       </div>
       <div class="mock-cap" style="margin-top:8px">Notifications tab is hidden until signed in.</div>
@@ -945,7 +946,15 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><strong>Auto-speak Flashcard</strong></td><td>on / off</td><td>Reads each word aloud automatically when a flashcard loads. On by default.</td></tr>
       </table>
 
-      <h3>3.4 Notifications tab <span style="font-weight:400;font-size:.8em">(signed-in only)</span></h3>
+      <h3>3.4 User Info tab</h3>
+      <p>Your age personalises every AI output the app produces. The same control also lives outside this dialog: click <b>User Info</b> at the top of the navigation menu — the docked sidebar on desktop or the ☰ drawer on mobile — and the item expands in place, revealing the slider together with its estimated level. Both places edit the same value and stay in sync automatically.</p>
+      <table class="ref">
+        <tr><th>Control</th><th>Options</th><th>Notes</th></tr>
+        <tr><td><strong>Your Age</strong></td><td>slider, 8–18</td><td>Calibrates the summary, adapted/simplified text, reading test, vocabulary, grammar and the AI Tutor (age → grade table in §4.2). Applies and saves immediately — no Save needed.</td></tr>
+        <tr><td><strong>Estimated Level</strong></td><td>read-only badge</td><td>The HK school level for the chosen age, e.g. age 10 → Primary 5, age 14 → Secondary 3, age 17 → Secondary 6/DSE.</td></tr>
+      </table>
+
+      <h3>3.5 Notifications tab <span style="font-weight:400;font-size:.8em">(signed-in only)</span></h3>
       <p>Controls reading-reminder emails sent on a schedule by the server.</p>
       <table class="ref">
         <tr><th>Setting</th><th>Options</th></tr>
@@ -953,7 +962,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><strong>Remind me every</strong></td><td>3 · 5 · 7 · 14 · 21 · 30 days (default 7)</td></tr>
       </table>
 
-      <h3>3.5 Footer buttons</h3>
+      <h3>3.6 Footer buttons</h3>
       <ul>
         <li><b>Save</b> — applies your changes and syncs to the server.</li>
         <li><b>Reset all settings</b> — restores every option to its factory default.</li>
@@ -1001,7 +1010,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="mock-cap">Sticky header (phone layout: two rows). On phones ☰ opens the navigation drawer (on desktop the docked sidebar takes its place); badges show pending shares / overdue assignments / words due for review. The gradient AI Tutor FAB floats at the bottom-right corner.</div>
 
-      <p>On desktop screens (1024&nbsp;px and wider) the menu docks as a <b>sidebar pinned to the left edge</b>, shown by default beside the page content. Unlike the drawer it stays open while you move between pages — tap an entry and the page changes right beside it. The wordmark at the top of the sidebar is a link back to the main page.</p>
+      <p>On desktop screens (1024&nbsp;px and wider) the menu docks as a <b>sidebar pinned to the left edge</b>, shown by default beside the page content. Unlike the drawer it stays open while you move between pages — tap an entry and the page changes right beside it. The wordmark at the top of the sidebar is a link back to the main page. The <b>User Info</b> entry at the top behaves differently: clicking it expands the item in place — revealing the age slider with its estimated level — instead of scrolling to a page section (§4.2).</p>
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span><span class="pill">desktop · sidebar docked</span></div>
         <div class="mock-body" style="padding:0">
@@ -1012,7 +1021,13 @@ body.toc-noscroll{overflow:hidden}
                 <span style="color:var(--muted);display:inline-flex" title="Hide sidebar"><svg class="ic sm"><use href="#i-panel-close"/></svg></span>
               </div>
               <div style="border-top:1px solid var(--border);padding:6px;overflow:auto">
-                <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-user"/></svg><span style="flex:1">User Info</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
+                <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-user"/></svg><span style="flex:1">User Info</span><svg class="ic sm" style="color:var(--muted)"><use href="#i-chevron-down"/></svg></div>
+                <div style="margin:2px 8px 6px;border:1px solid var(--border);border-radius:8px;background:var(--subtle);padding:8px">
+                  <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Your Age</span><span style="font-weight:700;color:var(--primary);font-size:11.5px">13 years old</span></div>
+                  <div class="slider-track" style="margin:8px 0"><span class="slider-fill" style="width:50%"></span><i style="left:50%"></i></div>
+                  <div style="display:flex;justify-content:space-between"><span class="small" style="font-size:10px">8</span><span class="small" style="font-size:10px">13</span><span class="small" style="font-size:10px">18</span></div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:7px;padding:5px 7px;background:var(--card);border-radius:6px"><span class="small" style="font-size:10.5px">Estimated Level:</span><span class="badge" style="background:#dcfce7;color:#15803d;font-size:10px">Secondary 2</span></div>
+                </div>
                 <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-upload"/></svg><span style="flex:1">Select Text</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
                 <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-sparkles"/></svg><span style="flex:1">Before You Read</span><span style="color:var(--primary);font-weight:800">乄</span></div>
                 <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-file-text"/></svg><span style="flex:1">Summary</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
@@ -1046,7 +1061,7 @@ body.toc-noscroll{overflow:hidden}
       <div class="mock-cap">Desktop: the sidebar is pinned to the left edge and stays open as you navigate, with the page content beside it.</div>
       <p>Need the full width back? Press <b>Hide sidebar</b> <svg class="ic sm"><use href="#i-panel-close"/></svg> — the panel button at the sidebar's top right — or the matching button in the header's top-left corner. While it is hidden, that header button becomes <b>Show sidebar</b> <svg class="ic sm"><use href="#i-panel-open"/></svg> and brings the sidebar back, with the logo returning to the header. Whether the sidebar is shown, and how wide it is, are remembered on your device — after a reload it comes back exactly as you left it. To adjust the width, drag the highlighted right edge; double-click it to restore the default width, or select it and nudge with the ← / → keys.</p>
 
-      <p>On phones and tablets (under 1024&nbsp;px) there is no docked sidebar: tapping <b>☰</b> slides the navigation drawer in from the left instead. It lists the same workflow sections in reading order, then quick links to other pages. Tapping a section scrolls straight to it — from <code>/vocabulary</code>, <code>/assignments</code> or <code>/leaderboard</code> it jumps back to the main page and lands on that section — and the drawer closes itself after each tap.</p>
+      <p>On phones and tablets (under 1024&nbsp;px) there is no docked sidebar: tapping <b>☰</b> slides the navigation drawer in from the left instead. It lists the same workflow sections in reading order, then quick links to other pages. Tapping a section scrolls straight to it — from <code>/vocabulary</code>, <code>/assignments</code> or <code>/leaderboard</code> it jumps back to the main page and lands on that section — and the drawer closes itself after each tap. The <b>User Info</b> entry at the top expands in place here too — tap it to reveal the age slider with its estimated level (§4.2).</p>
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span><span class="pill">☰ drawer open (phone)</span></div>
         <div class="mock-body" style="padding:0">
@@ -1058,7 +1073,7 @@ body.toc-noscroll{overflow:hidden}
               <div style="height:9px;background:var(--border);border-radius:5px;width:84%"></div>
             </div>
             <div style="position:absolute;inset:0;background:rgba(0,0,0,.8)"></div>
-            <div style="position:absolute;top:0;left:0;bottom:0;width:262px;max-width:85%;background:var(--card);border-right:1px solid var(--border);box-shadow:8px 0 30px rgba(0,0,0,.18)">
+            <div style="position:absolute;top:0;left:0;bottom:0;width:262px;max-width:85%;background:var(--card);border-right:1px solid var(--border);box-shadow:8px 0 30px rgba(0,0,0,.18);display:flex;flex-direction:column">
               <div style="padding:13px 14px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
                 <div>
                   <div style="font-size:17px;font-weight:600;display:inline-flex;align-items:center;gap:3px"><span style="color:#2563eb">Mr.</span><span style="font-size:19px;line-height:1">🆖</span><span style="font-weight:800;background:linear-gradient(90deg,#9333ea,#ec4899,#6366f1);-webkit-background-clip:text;background-clip:text;color:transparent">ProReader</span></div>
@@ -1066,8 +1081,14 @@ body.toc-noscroll{overflow:hidden}
                 </div>
                 <span style="color:var(--muted);margin-top:2px;display:inline-flex"><svg class="ic sm"><use href="#i-x"/></svg></span>
               </div>
-              <div style="border-top:1px solid var(--border);padding:8px">
-                <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-user"/></svg><span style="flex:1">User Info</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
+              <div style="border-top:1px solid var(--border);padding:8px;flex:1;min-height:0;overflow:auto">
+                <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-user"/></svg><span style="flex:1">User Info</span><svg class="ic sm" style="color:var(--muted)"><use href="#i-chevron-down"/></svg></div>
+                <div style="margin:2px 8px 8px;border:1px solid var(--border);border-radius:8px;background:var(--subtle);padding:9px">
+                  <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Your Age</span><span style="font-weight:700;color:var(--primary);font-size:12.5px">13 years old</span></div>
+                  <div class="slider-track" style="margin:10px 0"><span class="slider-fill" style="width:50%"></span><i style="left:50%"></i></div>
+                  <div style="display:flex;justify-content:space-between"><span class="small" style="font-size:10.5px">8</span><span class="small" style="font-size:10.5px">13</span><span class="small" style="font-size:10.5px">18</span></div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:8px;padding:6px 8px;background:var(--card);border-radius:6px"><span class="small" style="font-size:11px">Estimated Level:</span><span class="badge" style="background:#dcfce7;color:#15803d;font-size:10.5px">Secondary 2</span></div>
+                </div>
                 <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-upload"/></svg><span style="flex:1">Select Text</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
                 <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-sparkles"/></svg><span style="flex:1">Before You Read</span><span style="color:var(--primary);font-weight:800">乄</span></div>
                 <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-file-text"/></svg><span style="flex:1">Summary</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
@@ -1090,7 +1111,7 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
-      <div class="mock-cap">Phones/tablets: the drawer slides in from the left over an 80% black overlay and closes after each tap. ✓ = section complete · 乄 = started but not finished. My Vocabulary / My Assignments carry due &amp; overdue badges; Teacher Dashboard appears for teachers/admins/super-admins only.</div>
+      <div class="mock-cap">Phones/tablets: the drawer slides in from the left over an 80% black overlay and closes after each tap. ✓ = section complete · 乄 = started but not finished. My Vocabulary / My Assignments carry due &amp; overdue badges; Teacher Dashboard appears for teachers/admins/super-admins only. User Info expands in place to show the age slider.</div>
       <table class="ref">
         <tr><th>Mark</th><th>Meaning</th></tr>
         <tr><td><b style="color:var(--primary)">✓</b></td><td>Section finished — matches the Workflow Progress tracker (4.1).</td></tr>
@@ -1124,12 +1145,16 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>4.2 Step 1 — Student Info</h3>
-      <p>First, drag the slider to set your <strong>age (8–18)</strong>. The app shows an estimated HK grade level, and this age is used to <em>calibrate every AI output</em> that follows — a 9-year-old gets simpler summaries and adapted text than a 16-year-old.</p>
+      <h3>4.2 Step 1 — Set your age (User Info)</h3>
+      <p>First, tell the app your <strong>age (8–18)</strong>. The app shows an estimated HK grade level, and this age is used to <em>calibrate every AI output</em> that follows — a 9-year-old gets simpler summaries and adapted text than a 16-year-old. The User Information card no longer sits on the main page; the slider lives in two handy places that always show the same value:</p>
+      <ul>
+        <li><b>Navigation menu</b> — click <b>User Info</b> at the top of the sidebar (desktop) or the ☰ drawer (mobile): the item expands in place, revealing the slider together with the estimated level.</li>
+        <li><b>Settings → User Info tab</b> (§3.4) — open Settings from the user menu (your avatar, top-right).</li>
+      </ul>
       <table class="ref"><tr><th>Age</th><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
       <tr><th>Grade</th><td>P3</td><td>P4</td><td>P5</td><td>P6</td><td>F1</td><td>F2</td><td>F3</td><td>F4</td><td>F5</td><td>F6</td><td>DSE</td></tr></table>
       <div class="mock">
-        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-user"/></svg> User Information</div><span class="btn sm"><svg class="ic sm"><use href="#i-bar-chart-3"/></svg> Dashboard</span><span class="btn sm"><svg class="ic sm"><use href="#i-trophy"/></svg> Leaderboard</span></div>
+        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span><span class="pill">User Info expanded (menu / Settings)</span></div>
         <div class="mock-body">
           <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">Your Age</span><span style="font-weight:700;color:var(--primary)">13 years old</span></div>
           <div class="slider-track"><span class="slider-fill" style="width:50%"></span><i style="left:50%"></i></div>
@@ -2623,7 +2648,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>11.1 Leaderboard <span style="font-weight:400;font-size:.8em">(<code>/leaderboard</code>)</span></h3>
-      <p>Open from the header trophy icon or the Student Info "Leaderboard" button. Three tabs: <b>Achievements</b>, <b>My Stats</b>, <b>Leaderboard</b>. On the Leaderboard tab a <b>Weekly / All-Time</b> toggle switches between the current week's rankings and lifetime rankings. In <b>Weekly</b> mode (Monday–Sunday) the week picker browses past weeks; in <b>All-Time</b> mode the picker is hidden since totals span all time. Scope: <b>Class / School / Global</b> (global lists students only).</p>
+      <p>Open from the header trophy icon. Three tabs: <b>Achievements</b>, <b>My Stats</b>, <b>Leaderboard</b>. On the Leaderboard tab a <b>Weekly / All-Time</b> toggle switches between the current week's rankings and lifetime rankings. In <b>Weekly</b> mode (Monday–Sunday) the week picker browses past weeks; in <b>All-Time</b> mode the picker is hidden since totals span all time. Scope: <b>Class / School / Global</b> (global lists students only).</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-trophy"/></svg> Achievements &amp; Leaderboard</div><span class="small">This Week</span></div>
         <div class="mock-body">

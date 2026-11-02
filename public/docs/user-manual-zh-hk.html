@@ -668,7 +668,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><th>卡片</th><th>顏色</th><th>作用</th></tr>
         <tr><td><b>繼續目前的學習</b><span class="small">（有環節時）</span></td><td><span class="badge" style="background:#e0e7ff;color:#4f46e5">活動色</span></td><td>捲動到上次環節的下一個未完成活動——摘要、思維導圖、詞彙表、閱讀測驗、語法等。「+ 還有 N 個」提示剩餘活動數量。</td></tr>
         <tr><td><b>閱讀新文本</b></td><td><span class="badge b-amber">琥珀</span></td><td>開啟文本庫挑選器（見下）。</td></tr>
-        <tr><td><b>上傳圖片 / PDF</b></td><td><span class="badge b-teal">青綠</span></td><td>跳到上傳步驟（§4.2）並開啟檔案選擇器。</td></tr>
+        <tr><td><b>上傳圖片 / PDF</b></td><td><span class="badge b-teal">青綠</span></td><td>跳到上傳步驟（§4.3）並開啟檔案選擇器。</td></tr>
         <tr><td><b>用 AI 生成</b></td><td><span class="badge b-violet">紫色</span></td><td>開啟 AI 文本產生器，讓 Mr.🆖 ProReader 撰寫任何主題的新文章。</td></tr>
       </table>
       <p>選擇<b>閱讀新文本</b>，對話框會短暫顯示載入轉圈，接著從你學校的文本庫隨機挑選一篇文本，一鍵開始：</p>
@@ -837,10 +837,10 @@ body.toc-noscroll{overflow:hidden}
       <div class="chapter-head">
         <span class="chapter-num">第 3 章</span>
         <h2 class="section-title">3. 設定參考</h2>
-        <p class="small">從右上角用戶選單開啟「設定」。四個分頁：一般、模型、語音、通知。</p>
+        <p class="small">從右上角用戶選單開啟「設定」。五個分頁：一般、模型、語音、用戶資料、通知。</p>
       </div>
 
-      <p>「設定」對話框讓你配置 AI 存取（第 2 章）、為每項功能選擇 AI 模型、設定語音朗讀聲線，以及管理電郵提醒。從右上角<b>用戶選單</b>（你的頭像）→ <b>設定</b> 開啟。你的選擇會儲存至帳戶，並在每次以任何裝置登入時還原。</p>
+      <p>「設定」對話框讓你設定年齡、配置 AI 存取（第 2 章）、為每項功能選擇 AI 模型、設定語音朗讀聲線，以及管理電郵提醒。從右上角<b>用戶選單</b>（你的頭像）→ <b>設定</b> 開啟。你的選擇會儲存至帳戶，並在每次以任何裝置登入時還原。</p>
 
       <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
         <div style="flex:1;min-width:240px">
@@ -872,11 +872,12 @@ body.toc-noscroll{overflow:hidden}
             <div class="mock-bar"><span class="pill">⚙ 設定對話框（置中模態）</span></div>
             <div class="mock-body">
               <div style="font-weight:700;font-size:15px">設定</div>
-              <div class="small" style="margin:2px 0 10px">設定一般、AI 模型、語音和通知選項。</div>
+              <div class="small" style="margin:2px 0 10px">設定用戶資料、一般、AI 模型、語音和通知選項。</div>
               <div class="faketab">
                 <span class="active"><svg class="ic sm"><use href="#i-settings"/></svg> 一般</span>
                 <span><svg class="ic sm"><use href="#i-sparkles"/></svg> 模型</span>
                 <span><svg class="ic sm"><use href="#i-volume-2"/></svg> 語音</span>
+                <span><svg class="ic sm"><use href="#i-user"/></svg> 用戶資料</span>
                 <span><svg class="ic sm"><use href="#i-bell"/></svg> 通知</span>
               </div>
               <div style="border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;background:var(--subtle)">
@@ -891,7 +892,7 @@ body.toc-noscroll{overflow:hidden}
               </div>
             </div>
           </div>
-          <div class="mock-cap">設定是獨立的置中模態：4 個橫向圖示分頁 ＋ 堆疊全寬「儲存」／「重設所有設定」。</div>
+          <div class="mock-cap">設定是獨立的置中模態：5 個橫向圖示分頁 ＋ 堆疊全寬「儲存」／「重設所有設定」。</div>
         </div>
       </div>
       <div class="mock-cap" style="margin-top:8px">通知分頁在登入後才顯示。</div>
@@ -945,7 +946,15 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><strong>自動朗讀字卡</strong></td><td>開／關</td><td>生字卡載入時自動朗讀每個生字。預設開啟。</td></tr>
       </table>
 
-      <h3>3.4 通知分頁</h3>
+      <h3>3.4 用戶資料分頁</h3>
+      <p>你的年齡會個人化應用程式產生的所有 AI 輸出。同一個控制項亦存在於對話框以外：點擊導航選單頂部的<b>用戶資料</b>——桌面版的停駐側邊欄或手機版的 ☰ 抽屜——項目便會原地展開，顯示年齡滑桿及預計程度。兩處編輯同一數值，自動保持同步。</p>
+      <table class="ref">
+        <tr><th>控制項</th><th>選項</th><th>備註</th></tr>
+        <tr><td><strong>你的年齡</strong></td><td>滑桿，8–18</td><td>校準摘要、改寫／簡化文本、閱讀測驗、詞彙、語法及 AI 導師（年齡 → 年級對照表見 §4.2）。即時套用並儲存——無需按「儲存」。</td></tr>
+        <tr><td><strong>預計程度</strong></td><td>唯讀徽章</td><td>所選年齡對應的香港學校級別，例如 10 歲 → 小五、14 歲 → 中三、17 歲 → 中六/DSE。</td></tr>
+      </table>
+
+      <h3>3.5 通知分頁</h3>
       <p>控制伺服器按計劃發送的閱讀提醒電郵。</p>
       <table class="ref">
         <tr><th>設定</th><th>選項</th></tr>
@@ -953,7 +962,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><strong>每隔</strong></td><td>每 3 · 5 · 7 · 14 · 21 · 30 天（預設 7）</td></tr>
       </table>
 
-      <h3>3.5 底部按鈕</h3>
+      <h3>3.6 底部按鈕</h3>
       <ul>
         <li><b>儲存</b>——套用變更並同步至伺服器。</li>
         <li><b>重設所有設定</b>——還原所有選項至出廠預設值。</li>
@@ -1001,7 +1010,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
       <div class="mock-cap">固定頂部欄（手機兩行版面）。手機上按 ☰ 開啟導航抽屜（桌面版則使用停駐側邊欄）；徽章顯示待處理分享／逾期功課／待複習字詞。漸層 AI 導師浮動按鈕位於右下角。</div>
 
-      <p>在桌面版螢幕（1024&nbsp;px 或更寬），選單會變成<b>停駐在左側的側邊欄</b>，預設展開，與頁面內容並排顯示。與抽屜不同，側邊欄在你切換頁面時保持開啟——按任何項目，內容就在旁邊切換。側邊欄頂部的商標可點擊返回主頁面。</p>
+      <p>在桌面版螢幕（1024&nbsp;px 或更寬），選單會變成<b>停駐在左側的側邊欄</b>，預設展開，與頁面內容並排顯示。與抽屜不同，側邊欄在你切換頁面時保持開啟——按任何項目，內容就在旁邊切換。側邊欄頂部的商標可點擊返回主頁面。頂部的「用戶資料」則不同：點擊它會原地展開項目——顯示年齡滑桿及預計程度——而非捲動至頁面區段（§4.2）。</p>
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span><span class="pill">桌面版 · 側邊欄停駐</span></div>
         <div class="mock-body" style="padding:0">
@@ -1012,7 +1021,13 @@ body.toc-noscroll{overflow:hidden}
                 <span style="color:var(--muted);display:inline-flex" title="隱藏側邊欄"><svg class="ic sm"><use href="#i-panel-close"/></svg></span>
               </div>
               <div style="border-top:1px solid var(--border);padding:6px;overflow:auto">
-                <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-user"/></svg><span style="flex:1">用戶資料</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
+                <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-user"/></svg><span style="flex:1">用戶資料</span><svg class="ic sm" style="color:var(--muted)"><use href="#i-chevron-down"/></svg></div>
+                <div style="margin:2px 8px 6px;border:1px solid var(--border);border-radius:8px;background:var(--subtle);padding:8px">
+                  <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">你的年齡</span><span style="font-weight:700;color:var(--primary);font-size:11.5px">13 歲</span></div>
+                  <div class="slider-track" style="margin:8px 0"><span class="slider-fill" style="width:50%"></span><i style="left:50%"></i></div>
+                  <div style="display:flex;justify-content:space-between"><span class="small" style="font-size:10px">8</span><span class="small" style="font-size:10px">13</span><span class="small" style="font-size:10px">18</span></div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:7px;padding:5px 7px;background:var(--card);border-radius:6px"><span class="small" style="font-size:10.5px">預計程度：</span><span class="badge" style="background:#dcfce7;color:#15803d;font-size:10px">中二</span></div>
+                </div>
                 <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-upload"/></svg><span style="flex:1">選擇文本</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
                 <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-sparkles"/></svg><span style="flex:1">閱讀前準備</span><span style="color:var(--primary);font-weight:800">乄</span></div>
                 <div style="display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:6px;font-size:12.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-file-text"/></svg><span style="flex:1">摘要</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
@@ -1046,7 +1061,7 @@ body.toc-noscroll{overflow:hidden}
       <div class="mock-cap">桌面版：側邊欄停駐於左側，切換頁面時保持開啟，頁面內容在其右側並排顯示。</div>
       <p>需要完整版面時，按<b>隱藏側邊欄</b> <svg class="ic sm"><use href="#i-panel-close"/></svg>——側邊欄右上角的麵板按鈕——或頂部欄左上角的同一按鈕收起側邊欄。收起後，頂部欄的該按鈕會變成<b>顯示側邊欄</b> <svg class="ic sm"><use href="#i-panel-open"/></svg>，按它即可重新展開，商標亦同時回到頂部欄。側邊欄的顯示狀態與寬度都會記在你的裝置上，重新載入後保持原狀。調整寬度：拖曳高亮的右緣即可；雙擊邊緣還原預設寬度；選取邊緣後可用 ← / → 方向鍵微調。</p>
 
-      <p>手機和平板（1024&nbsp;px 以下）沒有停駐側邊欄：按 <b>☰</b> 會改為從左側滑入導航抽屜，依閱讀順序列出相同的區段，之後是其他頁面的快捷連結。按區段會直接捲動至該處——在 <code>/vocabulary</code>、<code>/assignments</code> 或 <code>/leaderboard</code> 頁按下的話，會先返回主頁面再定位到該區段——而且每次點按後抽屜都會自動關閉。</p>
+      <p>手機和平板（1024&nbsp;px 以下）沒有停駐側邊欄：按 <b>☰</b> 會改為從左側滑入導航抽屜，依閱讀順序列出相同的區段，之後是其他頁面的快捷連結。按區段會直接捲動至該處——在 <code>/vocabulary</code>、<code>/assignments</code> 或 <code>/leaderboard</code> 頁按下的話，會先返回主頁面再定位到該區段——而且每次點按後抽屜都會自動關閉。頂部的「用戶資料」同樣可原地展開——輕按即可顯示年齡滑桿及預計程度（§4.2）。</p>
       <div class="mock">
         <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span><span class="pill">☰ 抽屜開啟（手機）</span></div>
         <div class="mock-body" style="padding:0">
@@ -1058,7 +1073,7 @@ body.toc-noscroll{overflow:hidden}
               <div style="height:9px;background:var(--border);border-radius:5px;width:84%"></div>
             </div>
             <div style="position:absolute;inset:0;background:rgba(0,0,0,.8)"></div>
-            <div style="position:absolute;top:0;left:0;bottom:0;width:262px;max-width:85%;background:var(--card);border-right:1px solid var(--border);box-shadow:8px 0 30px rgba(0,0,0,.18)">
+            <div style="position:absolute;top:0;left:0;bottom:0;width:262px;max-width:85%;background:var(--card);border-right:1px solid var(--border);box-shadow:8px 0 30px rgba(0,0,0,.18);display:flex;flex-direction:column">
               <div style="padding:13px 14px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
                 <div>
                   <div style="font-size:17px;font-weight:600;display:inline-flex;align-items:center;gap:3px"><span style="color:#2563eb">Mr.</span><span style="font-size:19px;line-height:1">🆖</span><span style="font-weight:800;background:linear-gradient(90deg,#9333ea,#ec4899,#6366f1);-webkit-background-clip:text;background-clip:text;color:transparent">ProReader</span></div>
@@ -1066,8 +1081,14 @@ body.toc-noscroll{overflow:hidden}
                 </div>
                 <span style="color:var(--muted);margin-top:2px;display:inline-flex"><svg class="ic sm"><use href="#i-x"/></svg></span>
               </div>
-              <div style="border-top:1px solid var(--border);padding:8px">
-                <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-user"/></svg><span style="flex:1">用戶資料</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
+              <div style="border-top:1px solid var(--border);padding:8px;flex:1;min-height:0;overflow:auto">
+                <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-user"/></svg><span style="flex:1">用戶資料</span><svg class="ic sm" style="color:var(--muted)"><use href="#i-chevron-down"/></svg></div>
+                <div style="margin:2px 8px 8px;border:1px solid var(--border);border-radius:8px;background:var(--subtle);padding:9px">
+                  <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">你的年齡</span><span style="font-weight:700;color:var(--primary);font-size:12.5px">13 歲</span></div>
+                  <div class="slider-track" style="margin:10px 0"><span class="slider-fill" style="width:50%"></span><i style="left:50%"></i></div>
+                  <div style="display:flex;justify-content:space-between"><span class="small" style="font-size:10.5px">8</span><span class="small" style="font-size:10.5px">13</span><span class="small" style="font-size:10.5px">18</span></div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:8px;padding:6px 8px;background:var(--card);border-radius:6px"><span class="small" style="font-size:11px">預計程度：</span><span class="badge" style="background:#dcfce7;color:#15803d;font-size:10.5px">中二</span></div>
+                </div>
                 <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-upload"/></svg><span style="flex:1">選擇文本</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
                 <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-sparkles"/></svg><span style="flex:1">閱讀前準備</span><span style="color:var(--primary);font-weight:800">乄</span></div>
                 <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:6px;font-size:13.5px"><svg class="ic sm" style="color:var(--muted)"><use href="#i-file-text"/></svg><span style="flex:1">摘要</span><svg class="ic sm" style="color:var(--primary)"><use href="#i-check"/></svg></div>
@@ -1090,7 +1111,7 @@ body.toc-noscroll{overflow:hidden}
           </div>
         </div>
       </div>
-      <div class="mock-cap">手機／平板：抽屜從左側滑入，底下為 80% 黑色遮罩，每次點按後自動關閉。✓＝區段完成 · 乄＝已開始但未完成。「我的詞彙／我的功課」帶待複習及逾期徽章；「教師儀表板」僅限教師／管理員／超級管理員。</div>
+      <div class="mock-cap">手機／平板：抽屜從左側滑入，底下為 80% 黑色遮罩，每次點按後自動關閉。✓＝區段完成 · 乄＝已開始但未完成。「我的詞彙／我的功課」帶待複習及逾期徽章；「教師儀表板」僅限教師／管理員／超級管理員。用戶資料會原地展開顯示年齡滑桿。</div>
       <table class="ref">
         <tr><th>標記</th><th>意思</th></tr>
         <tr><td><b style="color:var(--primary)">✓</b></td><td>區段完成——與工作流程進度追蹤器（4.1）一致。</td></tr>
@@ -1124,12 +1145,16 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <h3>4.2 第 1 步 — 學生資訊</h3>
-      <p>首先，拖動滑桿設定你的<strong>年齡（8–18）</strong>。應用程式會顯示對應的香港年級，此年齡用於<em>校準隨後所有 AI 輸出</em>——9 歲者所得的摘要與改寫版本會比 16 歲者簡單。</p>
+      <h3>4.2 第 1 步 — 設定年齡（用戶資料）</h3>
+      <p>首先，告訴應用程式你的<strong>年齡（8–18）</strong>。應用程式會顯示對應的香港年級，此年齡用於<em>校準隨後所有 AI 輸出</em>——9 歲者所得的摘要與改寫版本會比 16 歲者簡單。主頁面已不再顯示用戶資料卡；滑桿改為放在兩個方便的位置，兩者永遠顯示相同數值：</p>
+      <ul>
+        <li><b>導航選單</b>——點擊側邊欄（桌面版）或 ☰ 抽屜（手機版）頂部的<b>用戶資料</b>：項目會原地展開，顯示年齡滑桿及預計程度。</li>
+        <li><b>設定 → 用戶資料分頁</b>（§3.4）——從用戶選單（右上角頭像）開啟設定。</li>
+      </ul>
       <table class="ref"><tr><th>年齡</th><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
       <tr><th>年級</th><td>P3</td><td>P4</td><td>P5</td><td>P6</td><td>F1</td><td>F2</td><td>F3</td><td>F4</td><td>F5</td><td>F6</td><td>DSE</td></tr></table>
       <div class="mock">
-        <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-user"/></svg> 用戶資料</div><span class="btn sm"><svg class="ic sm"><use href="#i-bar-chart-3"/></svg> 學習歷程</span><span class="btn sm"><svg class="ic sm"><use href="#i-trophy"/></svg> 成就與排行榜</span></div>
+        <div class="mock-bar"><div class="dots"><i></i><i></i><i></i></div><span class="url">read.mr5ai.com</span><span class="pill">用戶資料已展開（選單／設定）</span></div>
         <div class="mock-body">
           <div style="display:flex;justify-content:space-between;align-items:center"><span class="small">你的年齡</span><span style="font-weight:700;color:var(--primary)">13 歲</span></div>
           <div class="slider-track"><span class="slider-fill" style="width:50%"></span><i style="left:50%"></i></div>
@@ -2623,7 +2648,7 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>11.1 排行榜 <span style="font-weight:400;font-size:.8em">（<code>/leaderboard</code>）</span></h3>
-      <p>從頂欄獎盃圖示或學生資訊的「排行榜」按鈕開啟。三個分頁：<b>成就</b>、<b>我的統計</b>、<b>排行榜</b>。排行榜分頁上有 <b>本週／歷史總計</b> 切換，可在當週排名與終身累計排名之間切換。<b>本週</b>模式（週一至週日）可用週選擇器瀏覽往週；<b>歷史總計</b>模式因涵蓋所有時間，會隱藏週選擇器。範圍：<b>班別／學校／全球</b>（全球僅列學生）。</p>
+      <p>從頂欄獎盃圖示開啟。三個分頁：<b>成就</b>、<b>我的統計</b>、<b>排行榜</b>。排行榜分頁上有 <b>本週／歷史總計</b> 切換，可在當週排名與終身累計排名之間切換。<b>本週</b>模式（週一至週日）可用週選擇器瀏覽往週；<b>歷史總計</b>模式因涵蓋所有時間，會隱藏週選擇器。範圍：<b>班別／學校／全球</b>（全球僅列學生）。</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-trophy"/></svg> 成就與排行榜</div><span class="small">本週</span></div>
         <div class="mock-body">
