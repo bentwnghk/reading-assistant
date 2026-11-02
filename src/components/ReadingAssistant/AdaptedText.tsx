@@ -1661,9 +1661,11 @@ function AdaptedText() {
                 </div>
               )}
 
-              {/* Interactive text body */}
+              {/* Interactive text body. While read-along is playing, the
+                  .ra-playing class enables the sentence click-to-jump
+                  affordance (pointer cursor + hover tint, see globals.css). */}
               <div
-                className="prose prose-slate dark:prose-invert max-w-full"
+                className={`prose prose-slate dark:prose-invert max-w-full${readAlongPlaying ? " ra-playing" : ""}`}
                 ref={setContainerRef}
               >
                 <ParagraphWithNav
