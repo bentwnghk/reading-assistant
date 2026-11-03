@@ -20,7 +20,13 @@ import {
   verifyTranscriptionPrompt,
   languageCheckPrompt,
   languageCheckSystemPrompt,
+  languageAssessmentPrompt,
+  languageAssessmentSystemPrompt,
 } from "@/constants/readingPrompts";
+import {
+  languageAssessmentSchema,
+  type StoredLanguageAssessment,
+} from "@/utils/languageCheckAssessment";
 import { fetchAppConfig } from "@/utils/app-config";
 import { parseError } from "@/utils/error";
 import {
@@ -224,6 +230,7 @@ export default function useLanguageCheck() {
         checkedText: "",
         corrections: [],
         droppedCount: 0,
+        assessment: null,
       });
       toast.success(
         verify && restored > 0
@@ -345,6 +352,7 @@ export default function useLanguageCheck() {
         corrections: errors,
         checkModel: languageCheckModel,
         droppedCount: dropped + invalid,
+        assessment: null,
       });
 
       if (errors.length === 0) {
@@ -379,5 +387,41 @@ export default function useLanguageCheck() {
     }
   }
 
-  return { transcribe, runCheck, generate: generateWithFallback };
+  /** Stateless Language (L) assessment of a checked essay (1-7 scale). */
+  async function assessLanguage(
+    essay: Pick<LanguageCheckEssay, "checkedText" | "transcript" | "corrections">,
+    signal?: AbortSignal,
+  ): Promise<StoredLanguageAssessment> {
+    const text = (essay.checkedText || essay.transcript).trim();
+    const counts = new Map<string, number>();
+    for (const e of essay.corrections) {
+      counts.set(e.category, (counts.get(e.category) ?? 0) + 1);
+    }
+    const summary = counts.size
+      ? [...counts].map(([c, n]) => `- ${c}: ${n}`).join("\n")
+      : "- none detected";
+    const { languageCheckModel } = useSettingStore.getState();
+    const ac = new AbortController();
+    signal?.addEventListener("abort", () => ac.abort());
+    try {
+      const output = await generateWithFallback(
+        languageCheckModel,
+        languageAssessmentSystemPrompt(),
+        languageAssessmentPrompt(text, summary),
+        ac.signal,
+      );
+      const parsed = languageAssessmentSchema.parse(
+        JSON.parse(stripJsonFences(output)),
+      );
+      return { ...parsed, assessedAt: Date.now(), model: languageCheckModel };
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      if (error instanceof SyntaxError || (error as Error)?.name === "ZodError") {
+        throw new Error(i18next.t("languageCheck.check.parseError"));
+      }
+      throw new Error(describeGenerationError(error));
+    }
+  }
+
+  return { transcribe, runCheck, assessLanguage, generate: generateWithFallback };
 }

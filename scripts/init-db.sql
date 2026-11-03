@@ -879,6 +879,7 @@ CREATE TABLE language_check_essays (
   ocr_model     TEXT NOT NULL DEFAULT '',
   check_model   TEXT NOT NULL DEFAULT '',
   dropped_count INTEGER NOT NULL DEFAULT 0,
+  assessment    JSONB,
   created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

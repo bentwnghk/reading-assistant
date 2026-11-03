@@ -38,6 +38,7 @@ import LearnSetupDialog from "@/components/LanguageCheck/Learn/LearnSetupDialog"
 import PageStaging, { type StagedPage } from "@/components/LanguageCheck/PageStaging";
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
+import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
 import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
 import { ClassCombobox } from "@/components/Internal/ClassCombobox";
@@ -606,6 +607,13 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
             </p>
           )}
           <ResultsSummary essay={essay} checking={checkRunning} />
+          <AssessmentPanel
+            essay={essay}
+            language={language}
+            onSave={(assessment) =>
+              useLanguageCheckStore.getState().save(essay.id, { assessment })
+            }
+          />
           {essay.corrections.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-xl border bg-card p-10 text-center">
               <SpellCheck className="h-8 w-8 text-green-600" />

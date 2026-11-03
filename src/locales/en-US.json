@@ -4974,6 +4974,28 @@
       "dropped_one": "{{count}} suggestion could not be placed in the text and was skipped.",
       "dropped_other": "{{count}} suggestions could not be placed in the text and were skipped."
     },
+    "assessment": {
+      "title": "AI Language assessment",
+      "subtitle": "Scored 0–7 against the HKDSE Writing \"Language (L)\" rubric",
+      "saveError": "The assessment could not be saved.",
+      "assessedOn": "Assessed {{date}}",
+      "button": "Get AI assessment",
+      "again": "Re-assess",
+      "working": "Assessing…",
+      "error": "Assessment failed. Please try again.",
+      "overall": "Overall",
+      "scale": "/ 7",
+      "subScores": "Sub-scores",
+      "strengths": "Strengths",
+      "weaknesses": "Areas to improve",
+      "dim": {
+        "grammar": "Grammar",
+        "sentenceStructure": "Sentence Structure",
+        "vocabulary": "Vocabulary",
+        "spellingPunctuation": "Spelling & Punctuation",
+        "registerToneStyle": "Register, Tone & Style"
+      }
+    },
     "results": {
       "tierErrors": "Errors",
       "tierSuggestions": "Suggestions",

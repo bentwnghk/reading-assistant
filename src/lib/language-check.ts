@@ -52,6 +52,7 @@ function mapEssay(row: Record<string, unknown>): LanguageCheckEssay {
     ocrModel: (row.ocr_model as string) || "",
     checkModel: (row.check_model as string) || "",
     droppedCount: Number(row.dropped_count) || 0,
+    assessment: (row.assessment as LanguageCheckAssessment | null) ?? null,
     ownerId: (row.owner_id as string) || (row.user_id as string) || "",
     ownerName: (row.owner_name as string) || "",
     createdAt: toMs(row.created_at),
@@ -214,6 +215,7 @@ export interface EssayPatch {
   ocrModel?: string
   checkModel?: string
   droppedCount?: number
+  assessment?: LanguageCheckAssessment | null
 }
 
 /** Partial update; only the provided fields are written. */
@@ -238,6 +240,12 @@ export async function updateEssay(
   if (patch.ocrModel !== undefined) add("ocr_model", patch.ocrModel)
   if (patch.checkModel !== undefined) add("check_model", patch.checkModel)
   if (patch.droppedCount !== undefined) add("dropped_count", patch.droppedCount)
+  if (patch.assessment !== undefined)
+    add(
+      "assessment",
+      patch.assessment === null ? null : JSON.stringify(patch.assessment),
+      "::jsonb",
+    )
 
   if (sets.length === 0) return true
 
@@ -537,7 +545,7 @@ export async function getStaffEssay(
     `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
             e.user_id, u.name AS user_name, u.email AS user_email,
             e.transcript, e.checked_text, e.corrections,
-            e.ocr_model, e.check_model, e.dropped_count,
+            e.ocr_model, e.check_model, e.dropped_count, e.assessment,
             jsonb_array_length(e.images) AS page_count
      ${STAFF_FROM}
      WHERE ${clauses.join(" AND ")}`,
@@ -563,5 +571,21 @@ export async function getStaffEssay(
     ocrModel: (row.ocr_model as string) || "",
     checkModel: (row.check_model as string) || "",
     droppedCount: Number(row.dropped_count) || 0,
+    assessment: (row.assessment as LanguageCheckAssessment | null) ?? null,
   }
+}
+
+/** Saves an assessment for an essay the staff member can see (scope-checked). */
+export async function setStaffAssessment(
+  scope: LanguageCheckStaffScope,
+  id: string,
+  assessment: LanguageCheckAssessment,
+): Promise<boolean> {
+  const essay = await getStaffEssay(scope, id)
+  if (!essay) return false
+  await getPool().query(
+    `UPDATE language_check_essays SET assessment = $1::jsonb WHERE id = $2`,
+    [JSON.stringify(assessment), id],
+  )
+  return true
 }

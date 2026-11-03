@@ -1155,6 +1155,21 @@ interface LanguageCheckEssaySummary {
   updatedAt: number;
 }
 
+interface LanguageCheckAssessment {
+  overall: number;
+  scores: {
+    grammar: number;
+    sentenceStructure: number;
+    vocabulary: number;
+    spellingPunctuation: number;
+    registerToneStyle: number;
+  };
+  strengths: { en: string; zh: string }[];
+  weaknesses: { en: string; zh: string }[];
+  assessedAt: number;
+  model: string;
+}
+
 interface LanguageCheckEssay {
   id: string;
   title: string;
@@ -1169,6 +1184,8 @@ interface LanguageCheckEssay {
   checkModel: string;
   /** Errors the model reported that could not be anchored in the text. */
   droppedCount: number;
+  /** Saved AI Language (L) assessment; null = never assessed. */
+  assessment: LanguageCheckAssessment | null;
   /** Owner (learner) of the essay — equals the caller for self-uploads. */
   ownerId: string;
   /** Owner display name ("" if the user row is gone). */
@@ -1221,4 +1238,5 @@ interface LanguageCheckStaffDetail extends LanguageCheckStaffRow {
   ocrModel: string;
   checkModel: string;
   droppedCount: number;
+  assessment: LanguageCheckAssessment | null;
 }

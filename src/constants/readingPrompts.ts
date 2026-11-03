@@ -1829,3 +1829,56 @@ Rules:
 Respond with ONLY this JSON object:
 { "verdict": "correct" | "partial" | "incorrect", "feedback": "English feedback", "feedbackZh": "繁體中文 feedback" }`;
 }
+
+export const LANGUAGE_ASSESSMENT_DIMENSIONS = [
+  "grammar",
+  "sentenceStructure",
+  "vocabulary",
+  "spellingPunctuation",
+  "registerToneStyle",
+] as const;
+
+export function languageAssessmentSystemPrompt(): string {
+  return `You are a senior HKDSE English Language Paper 2 (Writing) marker. You assess ONLY the "Language (L)" criterion on the official 0-7 scale.
+
+## Official Language (L) descriptors
+7: Unlimited range of accurate sentence structures, excellent grasp of more complex structures. Grammar extremely accurate. Vocabulary well-chosen and used appropriately to express subtleties of meaning. Spelling and punctuation entirely correct. Register, tone and style used to deliberate effect and entirely appropriate to genre and text-type.
+6: Very wide range of accurate sentence structures, good grasp of more complex structures. Grammar accurate with only very minor slips. Vocabulary well-chosen and often used appropriately to express subtleties. Spelling and punctuation almost entirely correct. Register, tone and style entirely appropriate.
+5: Wide range of accurate sentence structures with good grasp of simple and complex sentences. Grammar mainly accurate with occasional common errors that do not affect overall clarity. Vocabulary wide, with many examples of more sophisticated lexis. Spelling and punctuation mostly correct. Register, tone and style appropriate.
+4: A range of accurate sentence structures with some attempts to use more complex sentences. Grammatical errors occur in more complex structures but overall clarity not affected. Vocabulary moderately wide and used appropriately. Spelling and punctuation sufficiently accurate to convey meaning. Register, tone and style mostly appropriate.
+3: Simple sentences generally accurately constructed; occasional attempts at more complex sentences; structures tend to be repetitive. Grammatical errors sometimes affect meaning. Common vocabulary generally appropriate. Most common words spelt correctly, basic punctuation accurate. Some evidence of appropriate register, tone and style.
+2: Short simple sentences generally accurate; only scattered attempts at longer, more complex sentences. Grammatical errors often affect meaning. Simple vocabulary appropriate. Spelling of simple words correct, more complex ones not; basic punctuation mostly accurate.
+1: Some short simple sentences accurately structured. Grammatical errors frequently obscure meaning. Very simple vocabulary of limited range, often based on the prompt. A few words spelt correctly, basic punctuation occasionally accurate.
+0: Multiple errors in sentence structures, spelling and/or word usage, which make understanding impossible.
+
+## Sub-scores (each an integer 0-7, judged against the descriptors above)
+1. grammar - grammatical accuracy, and whether errors affect meaning.
+2. sentenceStructure - control and range of simple and complex sentence structures.
+3. vocabulary - precision and range of words, collocations and idiomatic phrasing.
+4. spellingPunctuation - spelling and punctuation accuracy.
+5. registerToneStyle - appropriateness of register, tone and style to the apparent genre and text-type.
+The overall score is an integer 0-7 reflecting the best-fit descriptor overall (a holistic judgement, not a mechanical average, but it must be consistent with the sub-scores).
+
+## Rules
+- Be accurate and calibrated; do not inflate. Typical S4-S6 scripts score 3-5. Use the full scale only when the descriptors truly fit.
+- Judge ONLY language. Ignore content, ideas and organisation. Do not penalise length itself.
+- The text is a transcript of handwriting; "[?]" marks illegible words - ignore them.
+- You are given the essay and a list of errors already detected by a prior check (counts per category). Use them as evidence, but read the essay yourself.
+- Feedback: 2-4 bullets each for strengths and weaknesses. Each bullet must be specific, cite short quotes from the essay where useful, and be written for a student. Every bullet has an English version ("en") and a Traditional Chinese (Hong Kong) version ("zh"); keep quotes from the essay in English in both.
+
+Return ONLY JSON (no markdown fences):
+{"overall":5,"scores":{"grammar":5,"sentenceStructure":4,"vocabulary":5,"spellingPunctuation":5,"registerToneStyle":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]}`;
+}
+
+export function languageAssessmentPrompt(
+  text: string,
+  errorSummary: string,
+): string {
+  return `Assess the Language (L) of this essay.
+
+## Previously detected issues
+${errorSummary}
+
+## Essay
+${text}`;
+}

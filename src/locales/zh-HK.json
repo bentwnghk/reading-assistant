@@ -4965,6 +4965,28 @@
       "done": "共發現 {{errors}} 項錯誤及 {{suggestions}} 項表達建議。",
       "dropped_other": "有 {{count}} 項建議無法對應到文中位置，已略過。"
     },
+    "assessment": {
+      "title": "AI 語言評估",
+      "subtitle": "按 HKDSE 寫作「語言 (L)」評分準則評為 0–7 分",
+      "saveError": "無法儲存評估結果。",
+      "assessedOn": "評估於 {{date}}",
+      "button": "獲取 AI 評估",
+      "again": "重新評估",
+      "working": "評估中…",
+      "error": "評估失敗，請重試。",
+      "overall": "總分",
+      "scale": "/ 7",
+      "subScores": "分項分數",
+      "strengths": "優點",
+      "weaknesses": "待改善之處",
+      "dim": {
+        "grammar": "文法",
+        "sentenceStructure": "句子結構",
+        "vocabulary": "詞彙",
+        "spellingPunctuation": "拼寫及標點",
+        "registerToneStyle": "語域、語氣及風格"
+      }
+    },
     "results": {
       "tierErrors": "錯誤",
       "tierSuggestions": "表達建議",

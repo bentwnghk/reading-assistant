@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
+import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
 import {
   ExplanationLanguageToggle,
   STATUS_TONE,
@@ -415,7 +416,25 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
               </div>
 
               {detail.status === "checked" && detail.checkedText ? (
-                <div className="min-h-0 overflow-y-auto">
+                <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
+                  <AssessmentPanel
+                    essay={detail}
+                    language={language}
+                    onSave={async (assessment) => {
+                      const res = await fetch(
+                        `/api/grammar-check/staff/${detail.id}/assessment`,
+                        {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify(assessment),
+                        },
+                      );
+                      if (!res.ok) throw new Error("save failed");
+                      setDetail((d) =>
+                        d && d.id === detail.id ? { ...d, assessment } : d,
+                      );
+                    }}
+                  />
                   {/* Same view students see: inline highlights, popovers,
                       category filter and the cross-linked correction cards.
                       ResultsView never reads `images`. */}

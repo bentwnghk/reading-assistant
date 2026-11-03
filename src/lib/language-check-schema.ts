@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { storedAssessmentSchema } from "@/utils/languageCheckAssessment"
 import {
   LANGUAGE_CHECK_CATEGORIES,
   LANGUAGE_CHECK_STATUSES,
@@ -48,4 +49,5 @@ export const patchSchema = z.object({
   ocrModel: z.string().max(100).optional(),
   checkModel: z.string().max(100).optional(),
   droppedCount: z.number().int().min(0).max(1000).optional(),
+  assessment: storedAssessmentSchema.nullable().optional(),
 })
