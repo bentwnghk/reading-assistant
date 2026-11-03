@@ -503,10 +503,11 @@
       "writing": {
         "eyebrow": "Grammar Check",
         "title": "From reading to writing.",
-        "lede": "Photograph a handwritten essay and Grammar Check transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, then turn every mistake into a lesson, practice and quiz built from your own essay. Teachers watch the whole class learn from their mistakes in one dashboard.",
+        "lede": "Photograph a handwritten essay and Grammar Check transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE \"Language (L)\" rubric in one press, then turn every mistake into a lesson, practice and quiz built from your own essay. Teachers watch the whole class learn from their mistakes in one dashboard.",
         "bullets": [
           "Verbatim transcription you review beside the original scan",
           "Inline corrections with explanations — errors vs. suggestions",
+          "AI Language assessment — HKDSE \"Language (L)\" 0–7 band with five sub-scores",
           "Learn from your mistakes: lesson → practice → quiz",
           "Saved sessions resume on any device, exportable to Word",
           "Student learning dashboards for every class"
