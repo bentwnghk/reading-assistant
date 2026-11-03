@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -14,6 +14,8 @@ import {
   Play,
   Plus,
   Search,
+  ChevronDown,
+  ChevronUp,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -71,9 +73,11 @@ function EntryTypeBadge({ entryType }: { entryType: "word" | "phrase" }) {
 
 interface ReviewListsTabProps {
   onReviewList?: (listId: string) => void;
+  /** When set, view another (permitted) user's lists read-only — hides all actions. */
+  userId?: string | null;
 }
 
-function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
+function ReviewListsTab({ onReviewList, userId }: ReviewListsTabProps) {
   const { t } = useTranslation();
   const [lists, setLists] = useState<ReviewListSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,9 +106,17 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Read-only expansion (student view): lazily fetch a list's words
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedWords, setExpandedWords] = useState<ReviewListWord[] | null>(
+    null
+  );
+  const [expandedLoading, setExpandedLoading] = useState(false);
+
   const fetchLists = useCallback(async () => {
     try {
-      const res = await fetch("/api/review-lists");
+      const qs = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+      const res = await fetch(`/api/review-lists${qs}`);
       if (!res.ok) return;
       const data = await res.json();
       setLists(data);
@@ -112,11 +124,39 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     fetchLists();
   }, [fetchLists]);
+
+  const toggleExpand = useCallback(
+    async (list: ReviewListSummary) => {
+      if (expandedId === list.id) {
+        setExpandedId(null);
+        setExpandedWords(null);
+        return;
+      }
+      setExpandedId(list.id);
+      setExpandedWords(null);
+      setExpandedLoading(true);
+      try {
+        const qs = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+        const res = await fetch(`/api/review-lists/${list.id}${qs}`);
+        if (res.ok) {
+          const data = await res.json();
+          setExpandedWords(data.words || []);
+        } else {
+          setExpandedWords([]);
+        }
+      } catch {
+        setExpandedWords([]);
+      } finally {
+        setExpandedLoading(false);
+      }
+    },
+    [expandedId, userId]
+  );
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -296,6 +336,7 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
         <Table>
           <TableHeader>
             <TableRow>
+              {userId && <TableHead className="w-[36px]" />}
               <TableHead>
                 <Button
                   variant="ghost"
@@ -321,60 +362,117 @@ function ReviewListsTab({ onReviewList }: ReviewListsTabProps) {
                   <ArrowUpDown className="ml-1 h-3 w-3" />
                 </Button>
               </TableHead>
-              <TableHead className="w-[140px]" />
+              {!userId && <TableHead className="w-[140px]" />}
             </TableRow>
           </TableHeader>
           <TableBody>
             {pagedLists.map((list) => (
-              <TableRow key={list.id}>
-                <TableCell className="font-medium">{list.name}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {list.wordCount}
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {new Date(list.createdAt).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      title={t("vocabulary.reviewLists.review")}
-                      onClick={() => onReviewList?.(list.id)}
-                    >
-                      <Play className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      title={t("vocabulary.reviewLists.edit")}
-                      onClick={() => openEdit(list)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      title={t("vocabulary.reviewLists.share")}
-                      onClick={() => openShare(list)}
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive"
-                      title={t("vocabulary.reviewLists.delete")}
-                      onClick={() => setDeleteId(list.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+              <Fragment key={list.id}>
+                <TableRow>
+                  {userId && (
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        aria-expanded={expandedId === list.id}
+                        title={t("vocabulary.reviewLists.colWords")}
+                        onClick={() => toggleExpand(list)}
+                      >
+                        {expandedId === list.id ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                  )}
+                  <TableCell className="font-medium">{list.name}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {list.wordCount}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {new Date(list.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  {!userId && (
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title={t("vocabulary.reviewLists.review")}
+                          onClick={() => onReviewList?.(list.id)}
+                        >
+                          <Play className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title={t("vocabulary.reviewLists.edit")}
+                          onClick={() => openEdit(list)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title={t("vocabulary.reviewLists.share")}
+                          onClick={() => openShare(list)}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          title={t("vocabulary.reviewLists.delete")}
+                          onClick={() => setDeleteId(list.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+                {userId && expandedId === list.id && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="bg-muted/30 p-0">
+                      {expandedLoading ? (
+                        <div className="flex items-center justify-center py-6">
+                          <LoaderCircle className="h-5 w-5 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : (expandedWords ?? []).length === 0 ? (
+                        <div className="text-center py-4 text-sm text-muted-foreground">
+                          {t("vocabulary.reviewLists.noWords")}
+                        </div>
+                      ) : (
+                        <div className="divide-y">
+                          {(expandedWords ?? []).map((w, i) => (
+                            <div
+                              key={`${w.word}-${i}`}
+                              className="flex items-center gap-2 text-sm py-2 px-3 min-w-0"
+                            >
+                              <span className="font-medium shrink-0">
+                                {w.word}
+                              </span>
+                              <EntryTypeBadge entryType={entryTypeOf(w)} />
+                              <span className="text-muted-foreground truncate min-w-0 flex-1">
+                                {w.chineseDefinition}
+                              </span>
+                              <span className="text-muted-foreground truncate min-w-0 flex-1 hidden sm:block">
+                                {w.englishDefinition}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </Fragment>
             ))}
           </TableBody>
         </Table>

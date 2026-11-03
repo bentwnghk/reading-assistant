@@ -379,7 +379,10 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
   const visibleTabs = isStudentView
     ? tabs.filter(
         (tab) =>
-          tab.key === "table" || tab.key === "phrases" || tab.key === "history"
+          tab.key === "table" ||
+          tab.key === "phrases" ||
+          tab.key === "lists" ||
+          tab.key === "history"
       )
     : tabs;
 
@@ -757,7 +760,13 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
           {activeTab === "history" && (
             <ReviewHistory key={viewKey} userId={viewingUserId} />
           )}
-          {activeTab === "lists" && <ReviewListsTab onReviewList={handleReviewList} />}
+          {activeTab === "lists" && (
+            <ReviewListsTab
+              key={viewKey}
+              userId={viewingUserId}
+              onReviewList={handleReviewList}
+            />
+          )}
           <ShareVocabularyDialog
             open={shareOpen}
             onOpenChange={setShareOpen}

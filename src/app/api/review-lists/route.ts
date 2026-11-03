@@ -5,6 +5,7 @@ import {
   deleteReviewList,
   updateReviewList,
 } from "@/lib/review-lists";
+import { canViewStudentVocabulary } from "@/lib/users";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -25,13 +26,31 @@ const createSchema = z.object({
     .min(1),
 });
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const lists = await getReviewLists(session.user.id);
+
+    // Teacher/admin/super-admin may read another (permitted) user's lists
+    // (read-only: POST/PATCH/DELETE below stay self-scoped)
+    const { searchParams } = new URL(request.url);
+    const userIdParam = searchParams.get("userId");
+    let targetUserId = session.user.id;
+    if (userIdParam && userIdParam !== session.user.id) {
+      const role = session.user.role;
+      if (role !== "super-admin" && role !== "admin" && role !== "teacher") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      const allowed = await canViewStudentVocabulary(session.user.id, role, userIdParam);
+      if (!allowed) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      targetUserId = userIdParam;
+    }
+
+    const lists = await getReviewLists(targetUserId);
     return NextResponse.json(lists);
   } catch (error) {
     console.error("Error fetching review lists:", error);
