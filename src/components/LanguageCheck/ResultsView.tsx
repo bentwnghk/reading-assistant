@@ -21,11 +21,14 @@ interface ResultsViewProps {
   essay: LanguageCheckEssay;
   language: ExplanationLanguage;
   /**
-   * Embedded in a scrolling dialog (staff essay details): render the columns
-   * as normal flow so the DIALOG is the single scroll container. Nested
-   * per-column scrollers trap touch scrolling on iOS once the outer scroll
-   * reaches them. Default false keeps the full-page workspace behaviour,
-   * where each column gets its own viewport at `lg`.
+   * Embedded in the staff essay-details dialog. At `lg`+ the pane grid fills
+   * the dialog's remaining height and each column scrolls INSIDE itself, so
+   * cross-linking a mistake scrolls only its pane — never the whole dialog.
+   * Below `lg` (phones / iPad portrait) both modes are plain flow inside the
+   * nearest scroll container: per-pane scrollers would be tiny and would trap
+   * iOS touch chaining, so there the dialog scrolls as one (expected when the
+   * panes are stacked). Default false keeps the full-page workspace
+   * behaviour, where each column gets its own `lg` viewport.
    */
   embedded?: boolean;
 }
@@ -113,7 +116,16 @@ export default function ResultsView({ essay, language, embedded = false }: Resul
       : null;
 
   return (
-    <div className="flex min-h-0 shrink-0 flex-col gap-3">
+    <div
+      className={cn(
+        "flex min-h-0 shrink-0 flex-col gap-3",
+        // Embedded at `lg`: become the flex-filling region of the dialog
+        // body (which then has no overflow of its own), so the panes can own
+        // the scrolling. `shrink-0` still guards the stacked (<lg) flow mode
+        // against the flex-squeeze collapse.
+        embedded && "lg:shrink lg:flex-1",
+      )}
+    >
       {counts.length > 0 && (
         <div className="flex flex-col gap-2" aria-label={t("languageCheck.results.legend")}>
           {[
@@ -191,13 +203,24 @@ export default function ResultsView({ essay, language, embedded = false }: Resul
         </div>
       )}
 
-      <div className="grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_26rem]">
+      {/* Embedded at `lg`: the grid fills the remaining dialog height
+          (min height guards short viewports, where the dialog scrolls again)
+          and the row is constrained so the columns stretch to it. */}
+      <div
+        className={cn(
+          "grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_26rem]",
+          embedded && "lg:min-h-[16rem] lg:flex-1 lg:grid-rows-[minmax(0,1fr)]",
+        )}
+      >
         <div
           className={cn(
             "min-w-0 rounded-xl border bg-card p-5 sm:p-8",
-            // Own viewport only in the full-page workspace; embedded mode
-            // flows inside the dialog's single scroll container.
-            !embedded && "lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto",
+            // Full page: own fixed viewport. Embedded: stretch to the grid
+            // row (bounded by the dialog) and scroll internally, so
+            // cross-link clicks scroll this pane only.
+            embedded
+              ? "lg:min-h-0 lg:overflow-y-auto"
+              : "lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto",
           )}
         >
           <p
@@ -224,8 +247,10 @@ export default function ResultsView({ essay, language, embedded = false }: Resul
 
         <div
           className={cn(
-            "flex min-w-0 flex-col gap-3",
-            !embedded && "lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto lg:pr-1",
+            "flex min-w-0 flex-col gap-3 lg:pr-1",
+            embedded
+              ? "lg:min-h-0 lg:overflow-y-auto"
+              : "lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto",
           )}
         >
           {essay.corrections.map((error, i) =>
