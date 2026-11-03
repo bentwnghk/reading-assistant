@@ -8,6 +8,7 @@ import {
   PenLine,
   ArrowLeftRight,
   LoaderCircle,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -111,6 +112,7 @@ function ExportPanel({ entryType = "word" }: { entryType?: "word" | "phrase" }) 
         <Button variant="outline" size="sm" className="h-9">
           <Download className="h-4 w-4 mr-1" />
           {t("vocabulary.export.title")}
+          <ChevronDown className="h-3 w-3 ml-1 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="start">
