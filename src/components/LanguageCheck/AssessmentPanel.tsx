@@ -58,17 +58,20 @@ export default function AssessmentPanel({ essay, language, onSave }: AssessmentP
     }
   }
 
+  // Bullets quote long runs of learner text (English in ASCII quotes joined
+  // by CJK punctuation, e.g. "xxx"、"yyy"); without a soft-wrap rule their
+  // min-content width blows the grid past the card/dialog edge.
   const bullets = (items: { en: string; zh: string }[]) =>
     items.map((b, i) => <li key={i}>{language === "zh" ? b.zh : b.en}</li>);
 
   return (
-    <div className="rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-4 dark:from-violet-950/30 dark:to-sky-950/30">
+    <div className="overflow-hidden rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-4 dark:from-violet-950/30 dark:to-sky-950/30">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Award className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-          <div>
+        <div className="flex min-w-0 items-center gap-2">
+          <Award className="h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400" />
+          <div className="min-w-0">
             <p className="text-sm font-semibold">{t("languageCheck.assessment.title")}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="break-words text-xs text-muted-foreground">
               {t("languageCheck.assessment.subtitle")}
               {result &&
                 ` · ${t("languageCheck.assessment.assessedOn", {
@@ -99,7 +102,7 @@ export default function AssessmentPanel({ essay, language, onSave }: AssessmentP
 
       {result && (
         <div className="mt-4 flex flex-col gap-4">
-          <div className="grid gap-4 sm:grid-cols-[9rem_1fr]">
+          <div className="grid gap-4 sm:grid-cols-[9rem_minmax(0,1fr)]">
             <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-3">
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t("languageCheck.assessment.overall")}
@@ -112,20 +115,22 @@ export default function AssessmentPanel({ essay, language, onSave }: AssessmentP
                 </span>
               </span>
             </div>
-            <div className="flex flex-col gap-2 rounded-lg border bg-card p-3">
+            <div className="flex min-w-0 flex-col gap-2 rounded-lg border bg-card p-3">
               <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t("languageCheck.assessment.subScores")}
               </span>
               {LANGUAGE_ASSESSMENT_DIMENSIONS.map((d) => (
-                <div key={d} className="flex items-center gap-2 text-sm">
-                  <span className="w-44 shrink-0">{t(`languageCheck.assessment.dim.${d}`)}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                <div key={d} className="flex min-w-0 items-center gap-2 text-sm">
+                  <span className="w-32 shrink-0 sm:w-44">
+                    {t(`languageCheck.assessment.dim.${d}`)}
+                  </span>
+                  <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
                       className={cn("h-full rounded-full", tone(result.scores[d]))}
                       style={{ width: `${(result.scores[d] / 7) * 100}%` }}
                     />
                   </div>
-                  <span className="w-8 text-right font-semibold tabular-nums">
+                  <span className="w-8 shrink-0 text-right font-semibold tabular-nums">
                     {result.scores[d]}
                   </span>
                 </div>
@@ -133,19 +138,23 @@ export default function AssessmentPanel({ essay, language, onSave }: AssessmentP
             </div>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-lg border bg-card p-3">
+            <div className="min-w-0 rounded-lg border bg-card p-3">
               <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                <CheckCircle2 className="h-4 w-4" />
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
                 {t("languageCheck.assessment.strengths")}
               </p>
-              <ul className="list-disc space-y-1.5 pl-5 text-sm">{bullets(result.strengths)}</ul>
+              <ul className="list-disc space-y-1.5 pl-5 text-sm [overflow-wrap:anywhere]">
+                {bullets(result.strengths)}
+              </ul>
             </div>
-            <div className="rounded-lg border bg-card p-3">
+            <div className="min-w-0 rounded-lg border bg-card p-3">
               <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-amber-700 dark:text-amber-400">
-                <TriangleAlert className="h-4 w-4" />
+                <TriangleAlert className="h-4 w-4 shrink-0" />
                 {t("languageCheck.assessment.weaknesses")}
               </p>
-              <ul className="list-disc space-y-1.5 pl-5 text-sm">{bullets(result.weaknesses)}</ul>
+              <ul className="list-disc space-y-1.5 pl-5 text-sm [overflow-wrap:anywhere]">
+                {bullets(result.weaknesses)}
+              </ul>
             </div>
           </div>
         </div>

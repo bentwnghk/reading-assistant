@@ -20,13 +20,21 @@ import type { ExplanationLanguage } from "@/store/languageCheck";
 interface ResultsViewProps {
   essay: LanguageCheckEssay;
   language: ExplanationLanguage;
+  /**
+   * Embedded in a scrolling dialog (staff essay details): render the columns
+   * as normal flow so the DIALOG is the single scroll container. Nested
+   * per-column scrollers trap touch scrolling on iOS once the outer scroll
+   * reaches them. Default false keeps the full-page workspace behaviour,
+   * where each column gets its own viewport at `lg`.
+   */
+  embedded?: boolean;
 }
 
 /**
  * Essay with inline highlights (left) and a scrollable column of correction
  * cards (right). Highlights ↔ cards are cross-linked.
  */
-export default function ResultsView({ essay, language }: ResultsViewProps) {
+export default function ResultsView({ essay, language, embedded = false }: ResultsViewProps) {
   const { t } = useTranslation();
   const categoryLabel = useCategoryLabel();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -184,7 +192,14 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
       )}
 
       <div className="grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_26rem]">
-        <div className="min-w-0 rounded-xl border bg-card p-5 sm:p-8 lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto">
+        <div
+          className={cn(
+            "min-w-0 rounded-xl border bg-card p-5 sm:p-8",
+            // Own viewport only in the full-page workspace; embedded mode
+            // flows inside the dialog's single scroll container.
+            !embedded && "lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto",
+          )}
+        >
           <p
             className="whitespace-pre-wrap break-words text-lg leading-[2.4rem]"
             lang="en"
@@ -207,7 +222,12 @@ export default function ResultsView({ essay, language }: ResultsViewProps) {
           </p>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-3 lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto lg:pr-1">
+        <div
+          className={cn(
+            "flex min-w-0 flex-col gap-3",
+            !embedded && "lg:max-h-[calc(100vh-15rem)] lg:overflow-y-auto lg:pr-1",
+          )}
+        >
           {essay.corrections.map((error, i) =>
             hidden.has(error.category) ? null : (
               <CorrectionCard

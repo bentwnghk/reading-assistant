@@ -446,6 +446,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                       images: [],
                     }}
                     language={language}
+                    embedded
                   />
                 </div>
               ) : (
