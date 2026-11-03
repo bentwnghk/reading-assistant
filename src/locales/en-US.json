@@ -285,7 +285,7 @@
         },
         "languageCheck": {
           "title": "Grammar Check",
-          "desc": "AI digitises handwritten essays (image/PDF) and marks them up with colour-coded, HKDSE-aligned corrections and phrasing suggestions. Learn from your mistakes then turns those same errors into lessons, practice and quizzes."
+          "desc": "AI digitises handwritten essays (image/PDF) and marks them up with colour-coded, HKDSE-aligned corrections and phrasing suggestions — and the new AI Language Assessment scores the writing on the HKDSE \"Language (L)\" rubric: an overall 0–7 band, five sub-scores and bilingual strengths & weaknesses. Learn from your mistakes then turns those same errors into lessons, practice and quizzes."
         },
         "assignments": {
           "title": "Assignments",
