@@ -60,6 +60,8 @@ function VocabularyTable() {
     activeReviewListWordIds,
     exitReviewList,
     viewingUserId,
+    showWordsSelectedOnly,
+    setShowWordsSelectedOnly,
   } = useVocabularyStore();
   const readOnly = !!viewingUserId;
   const {
@@ -97,15 +99,14 @@ function VocabularyTable() {
 
   const [sortField, setSortField] = useState<SortField>("word");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [pageSize, setPageSize] = useState<number>(50);
   const [currentPage, setCurrentPage] = useState(1);
   const hasEverSelected = selectedWordIds.size > 0;
-  const effectiveShowSelectedOnly = showSelectedOnly && hasEverSelected;
+  const effectiveShowSelectedOnly = showWordsSelectedOnly && hasEverSelected;
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterMastery, filterSource]);
+  }, [filterMastery, filterSource, showWordsSelectedOnly]);
 
   const filteredWords = useMemo(() => {
     let result = activeReviewListWordIds
@@ -347,7 +348,7 @@ function VocabularyTable() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowSelectedOnly(true)}
+              onClick={() => setShowWordsSelectedOnly(true)}
               className="h-9 animate-pulse ring-2 ring-sky-400 dark:ring-sky-300 ring-offset-1 ring-offset-background shadow-[0_0_8px_1px_rgba(56,189,248,0.5)] dark:shadow-[0_0_8px_1px_rgba(125,211,252,0.6)]"
             >
               <Eye className="h-3.5 w-3.5 mr-1" />
@@ -358,7 +359,7 @@ function VocabularyTable() {
             <Button
               variant="default"
               size="sm"
-              onClick={() => setShowSelectedOnly(false)}
+              onClick={() => setShowWordsSelectedOnly(false)}
               className="h-9"
             >
               <EyeOff className="h-3.5 w-3.5 mr-1" />

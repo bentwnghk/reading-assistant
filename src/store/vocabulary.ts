@@ -47,6 +47,14 @@ interface VocabularyStoreState {
   words: VocabularyWord[];
   stats: VocabularyStats;
   selectedWordIds: Set<string>;
+  /**
+   * Whether the Words/Phrases table's "Selected Only" filter is armed.
+   * Set (type-scoped) by autoSelectForReview so the table shows the
+   * auto-selected items without a manual click; disarmed wherever the
+   * selection is cleared or replaced. Never persisted.
+   */
+  showWordsSelectedOnly: boolean;
+  showPhrasesSelectedOnly: boolean;
   reviewQueue: VocabularyWord[];
   searchQuery: string;
   sortBy: SortField;
@@ -69,6 +77,8 @@ interface VocabularyStoreState {
 interface VocabularyStoreActions {
   fetchVocabulary: (userId?: string | null, userName?: string | null) => Promise<void>;
   setSelectedWordIds: (ids: Set<string>) => void;
+  setShowWordsSelectedOnly: (value: boolean) => void;
+  setShowPhrasesSelectedOnly: (value: boolean) => void;
   toggleWordSelection: (wordId: string) => void;
   selectAll: () => void;
   clearSelection: () => void;
@@ -132,6 +142,8 @@ export const useVocabularyStore = create<
     unrated: 0,
   },
   selectedWordIds: new Set<string>(),
+  showWordsSelectedOnly: false,
+  showPhrasesSelectedOnly: false,
   reviewQueue: [],
   searchQuery: "",
   sortBy: "word",
@@ -188,6 +200,8 @@ export const useVocabularyStore = create<
           unrated: 0,
         },
         selectedWordIds: new Set(),
+        showWordsSelectedOnly: false,
+        showPhrasesSelectedOnly: false,
         reviewQueue: [],
         activeReviewListWordIds: null,
         isLoading: false,
@@ -209,7 +223,18 @@ export const useVocabularyStore = create<
     }
   },
 
-  setSelectedWordIds: (ids) => set({ selectedWordIds: ids }),
+  setSelectedWordIds: (ids) =>
+    set({
+      selectedWordIds: ids,
+      // An explicit selection write is not an auto-select — never leave the
+      // tables' selected-only filter armed across it.
+      showWordsSelectedOnly: false,
+      showPhrasesSelectedOnly: false,
+    }),
+
+  setShowWordsSelectedOnly: (value) => set({ showWordsSelectedOnly: value }),
+
+  setShowPhrasesSelectedOnly: (value) => set({ showPhrasesSelectedOnly: value }),
 
   toggleWordSelection: (wordId) =>
     set((state) => {
@@ -233,7 +258,13 @@ export const useVocabularyStore = create<
       };
     }),
 
-  clearSelection: () => set({ selectedWordIds: new Set(), reviewQueue: [] }),
+  clearSelection: () =>
+    set({
+      selectedWordIds: new Set(),
+      showWordsSelectedOnly: false,
+      showPhrasesSelectedOnly: false,
+      reviewQueue: [],
+    }),
 
   autoSelectForReview: (count, strategy, entryType = "word") => {
     const { words, filterRating, filterMastery, filterSource } = get();
@@ -301,7 +332,15 @@ export const useVocabularyStore = create<
       [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
     }
     const selected = candidates.slice(0, count);
-    set({ selectedWordIds: new Set(selected.map((w) => w.id)) });
+    set({
+      selectedWordIds: new Set(selected.map((w) => w.id)),
+      // Default the matching table to the selected-only view (as if its
+      // "Selected Only" button was clicked) so the auto-selected items are
+      // immediately visible.
+      ...(entryType === "phrase"
+        ? { showPhrasesSelectedOnly: true }
+        : { showWordsSelectedOnly: true }),
+    });
   },
 
   startReview: () =>
@@ -312,7 +351,13 @@ export const useVocabularyStore = create<
       return { reviewQueue: queue };
     }),
 
-  setReviewQueue: (queue) => set({ reviewQueue: queue, selectedWordIds: new Set() }),
+  setReviewQueue: (queue) =>
+    set({
+      reviewQueue: queue,
+      selectedWordIds: new Set(),
+      showWordsSelectedOnly: false,
+      showPhrasesSelectedOnly: false,
+    }),
 
   clearReviewQueue: () => set({ reviewQueue: [] }),
 
@@ -532,6 +577,8 @@ export const useVocabularyStore = create<
       activeReviewListWordIds: null,
       reviewQueue: [],
       selectedWordIds: new Set(),
+      showWordsSelectedOnly: false,
+      showPhrasesSelectedOnly: false,
     }),
 }));
 

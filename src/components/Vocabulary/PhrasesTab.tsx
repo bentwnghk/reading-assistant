@@ -57,6 +57,8 @@ export default function PhrasesTab() {
     activeReviewListWordIds,
     exitReviewList,
     viewingUserId,
+    showPhrasesSelectedOnly,
+    setShowPhrasesSelectedOnly,
   } = useVocabularyStore();
   const readOnly = !!viewingUserId;
   const {
@@ -95,13 +97,12 @@ export default function PhrasesTab() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [pageSize, setPageSize] = useState<number>(50);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const hasEverSelected = selectedWordIds.size > 0;
-  const effectiveShowSelectedOnly = showSelectedOnly && hasEverSelected;
+  const effectiveShowSelectedOnly = showPhrasesSelectedOnly && hasEverSelected;
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterMastery, filterSource, filterRating, searchQuery]);
+  }, [filterMastery, filterSource, filterRating, searchQuery, showPhrasesSelectedOnly]);
 
   const allPhrases = useMemo(
     () => words.filter((w) => w.entryType === "phrase"),
@@ -389,7 +390,7 @@ export default function PhrasesTab() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    setShowSelectedOnly(true);
+                    setShowPhrasesSelectedOnly(true);
                     resetPage();
                   }}
                   className="h-9 animate-pulse ring-2 ring-sky-400 dark:ring-sky-300 ring-offset-1 ring-offset-background shadow-[0_0_8px_1px_rgba(56,189,248,0.5)] dark:shadow-[0_0_8px_1px_rgba(125,211,252,0.6)]"
@@ -403,7 +404,7 @@ export default function PhrasesTab() {
                   variant="default"
                   size="sm"
                   onClick={() => {
-                    setShowSelectedOnly(false);
+                    setShowPhrasesSelectedOnly(false);
                     resetPage();
                   }}
                   className="h-9"

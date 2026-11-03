@@ -108,6 +108,8 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
     setFilterRating,
     setFilterMastery,
     setFilterSource,
+    setShowWordsSelectedOnly,
+    setShowPhrasesSelectedOnly,
   } = useVocabularyStore();
   const [activeTab, setActiveTab] = useState<TabType>("table");
   const [shareOpen, setShareOpen] = useState(false);
@@ -249,6 +251,11 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
       setFilterSource("all");
       setSearchQuery("");
       autoSelectForReview(count, strategy);
+      // This flow jumps straight into the review modes and never lands on the
+      // Words/Phrases tables — undo the selected-only arming the auto-select
+      // just did (it also resets the filters above for the same reason).
+      setShowWordsSelectedOnly(false);
+      setShowPhrasesSelectedOnly(false);
       startReview();
       currentReviewMode.current = mode;
       currentEntryType.current = "word";
@@ -261,6 +268,8 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
       setFilterMastery,
       setFilterSource,
       setSearchQuery,
+      setShowWordsSelectedOnly,
+      setShowPhrasesSelectedOnly,
     ]
   );
 
