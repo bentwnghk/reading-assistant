@@ -113,7 +113,7 @@ export default function ResultsView({ essay, language, embedded = false }: Resul
       : null;
 
   return (
-    <div className="flex min-h-0 flex-col gap-3">
+    <div className="flex min-h-0 shrink-0 flex-col gap-3">
       {counts.length > 0 && (
         <div className="flex flex-col gap-2" aria-label={t("languageCheck.results.legend")}>
           {[

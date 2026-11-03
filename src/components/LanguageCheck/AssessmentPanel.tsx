@@ -65,7 +65,7 @@ export default function AssessmentPanel({ essay, language, onSave }: AssessmentP
     items.map((b, i) => <li key={i}>{language === "zh" ? b.zh : b.en}</li>);
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-4 dark:from-violet-950/30 dark:to-sky-950/30">
+    <div className="shrink-0 overflow-hidden rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-4 dark:from-violet-950/30 dark:to-sky-950/30">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <Award className="h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400" />
