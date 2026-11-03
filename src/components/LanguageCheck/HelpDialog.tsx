@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Award,
   BookOpen,
   ClipboardList,
   Cloud,
@@ -139,6 +140,12 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
               name={t("languageCheck.help.overview.statuses.name")}
               desc={t("languageCheck.help.overview.statuses.desc")}
             />
+            <HelpRow
+              icon={Award}
+              tone="bg-violet-500/10 text-violet-500"
+              name={t("languageCheck.help.overview.assessment.name")}
+              desc={t("languageCheck.help.overview.assessment.desc")}
+            />
             {isStaff && (
               <HelpRow
                 icon={UserCog}
@@ -210,6 +217,12 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
               tone="bg-rose-500/10 text-rose-500"
               name={t("languageCheck.help.results.tiers.name")}
               desc={t("languageCheck.help.results.tiers.desc")}
+            />
+            <HelpRow
+              icon={Award}
+              tone="bg-violet-500/10 text-violet-500"
+              name={t("languageCheck.help.results.assessment.name")}
+              desc={t("languageCheck.help.results.assessment.desc")}
             />
             <HelpRow
               icon={Filter}

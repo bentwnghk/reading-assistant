@@ -5177,10 +5177,11 @@ export function UnderstandDifficultyMockup() {
    your mistakes" session, mirroring:
      1. ReviewStage.tsx + ScanViewer.tsx   — scan ↔ transcript review
      2. ResultsView.tsx + ErrorSpan.tsx + CorrectionCard.tsx
-     3. LessonView.tsx (+ LearnPath sidebar)
-     4. PracticePlayer.tsx + ExerciseCard.tsx (practice mode)
-     5. QuizPlayer.tsx + ExerciseCard.tsx (quiz mode)
-     6. LanguageCheckHome.tsx + StaffLearning.tsx + LearnDashboardView.tsx
+     3. AssessmentPanel.tsx                — AI Language assessment
+     4. LessonView.tsx (+ LearnPath sidebar)
+     5. PracticePlayer.tsx + ExerciseCard.tsx (practice mode)
+     6. QuizPlayer.tsx + ExerciseCard.tsx (quiz mode)
+     7. LanguageCheckHome.tsx + StaffLearning.tsx + LearnDashboardView.tsx
    ════════════════════════════════════════════════════════════════ */
 
 /* Category styles for the corrections shown — faithful subset of
@@ -5390,8 +5391,9 @@ export function LanguageCheckTranscribeMockup() {
 }
 
 /* ── 06 · 2. GRAMMAR CHECK — checked results + correction popover (faithful) ──
-   Mirrors the results workspace: toolbar, ResultsSummary line, two-tier legend,
-   the highlighted essay with an open ErrorSpan popover, and CorrectionCards. */
+   Mirrors the results workspace: toolbar, ResultsSummary line, the collapsed
+   AssessmentPanel, two-tier legend, the highlighted essay with an open
+   ErrorSpan popover, and CorrectionCards. */
 export function LanguageCheckResultsMockup() {
   return (
     <MockupFrame label="GRAMMAR CHECK · Mr.🆖 ProReader">
@@ -5424,6 +5426,34 @@ export function LanguageCheckResultsMockup() {
           <span className="mx-1.5">·</span>
           Model: claude-sonnet-5-5
         </p>
+
+        {/* AssessmentPanel — collapsed: headline band stays in the header
+            (collapsed chevron is un-rotated, outline "Re-assess" button) */}
+        <div className="rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-3 dark:from-violet-950/30 dark:to-sky-950/30">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center">
+                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+              </span>
+              <Award className="h-3.5 w-3.5 shrink-0 text-violet-600 dark:text-violet-400" />
+              <div className="min-w-0">
+                <p className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-[var(--lp-ink)]">
+                  AI Language assessment
+                  <span className="rounded-full bg-violet-600/10 px-1.5 py-0.5 text-[9px] font-semibold tabular-nums text-violet-700 dark:bg-violet-400/10 dark:text-violet-300">
+                    4 / 7
+                  </span>
+                </p>
+                <p className="text-[9px] text-muted-foreground">
+                  Scored 0–7 against the HKDSE Writing “Language (L)” rubric · Assessed 31/10/2026, 14:32
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+              <Sparkles className="mr-1 h-3 w-3" />
+              Re-assess
+            </span>
+          </div>
+        </div>
 
         {/* Two-tier legend — errors, then optional-expression suggestions */}
         <div className="space-y-1">
@@ -5591,7 +5621,177 @@ export function LanguageCheckResultsMockup() {
   );
 }
 
-/* ── Learn-session chrome shared by slides 3-5 — LearnWorkspace header
+/* ── 06 · 3. GRAMMAR CHECK — AI Language assessment expanded (faithful) ──
+   Mirrors AssessmentPanel.tsx expanded in the results workspace: the violet
+   gradient panel with the overall 0–7 band, the five sub-score bars (tone
+   colours per score), bilingual-style strengths & areas cards, and the
+   corrections that follow below the panel. */
+export function LanguageCheckAssessmentMockup() {
+  /* Faithful subset of the real rubric dimensions + tone() from
+     AssessmentPanel.tsx (≥6 emerald · ≥4 sky · ≥3 amber · else rose). */
+  const subScores = [
+    { label: "Grammar", score: 4 },
+    { label: "Sentence Structure", score: 4 },
+    { label: "Vocabulary", score: 5 },
+    { label: "Spelling & Punctuation", score: 5 },
+    { label: "Register, Tone & Style", score: 4 },
+  ];
+  const tone = (score: number) =>
+    score >= 6
+      ? "bg-emerald-500"
+      : score >= 4
+        ? "bg-sky-500"
+        : score >= 3
+          ? "bg-amber-500"
+          : "bg-rose-500";
+  const strengths = [
+    "Good range of topic vocabulary — “introduce a levy on plastic bags” is used naturally.",
+    "Simple sentences are generally accurate and easy to follow.",
+    "Most common words are spelt correctly and basic punctuation is accurate.",
+  ];
+  const weaknesses = [
+    "Subject-verb agreement slips — “Everyone know that plastic takes…” needs “knows”.",
+    "Countability and comparatives — “million of plastic bottles”, “more and more worse”.",
+    "Some phrasing reads as direct translation — try “harm the environment” instead of “cause serious pollution to the environment”.",
+  ];
+
+  return (
+    <MockupFrame label="GRAMMAR CHECK · Mr.🆖 ProReader">
+      <div className="space-y-2.5">
+        {/* Toolbar — same workspace chrome as slide 2 */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+            <span className="font-semibold">English</span>
+            <span className="inline-flex h-3.5 w-6 items-center rounded-full bg-muted-foreground/30 px-0.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-white" />
+            </span>
+            <span className="text-muted-foreground">繁體中文</span>
+          </span>
+          <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground">
+            <GraduationCap className="mr-1 h-3 w-3" />
+            Learn from mistakes
+          </span>
+          <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+            <Download className="mr-1 h-3 w-3" />
+            Export to Word
+          </span>
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border text-muted-foreground">
+            <MoreHorizontal className="h-3.5 w-3.5" />
+          </span>
+        </div>
+
+        {/* ResultsSummary line */}
+        <p className="text-[10px] text-muted-foreground">
+          <span className="font-medium text-[var(--lp-ink)]">5 corrections · 1 suggestion</span>
+          <span className="mx-1.5">·</span>
+          Model: claude-sonnet-5-5
+        </p>
+
+        {/* AssessmentPanel — expanded (chevron rotated, outline button) */}
+        <div className="rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-3 dark:from-violet-950/30 dark:to-sky-950/30">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center">
+                <ChevronDown className="h-3 w-3 rotate-180 text-muted-foreground" />
+              </span>
+              <Award className="h-3.5 w-3.5 shrink-0 text-violet-600 dark:text-violet-400" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-[var(--lp-ink)]">AI Language assessment</p>
+                <p className="text-[9px] text-muted-foreground">
+                  Scored 0–7 against the HKDSE Writing “Language (L)” rubric · Assessed 31/10/2026, 14:32
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+              <Sparkles className="mr-1 h-3 w-3" />
+              Re-assess
+            </span>
+          </div>
+
+          <div className="mt-2.5 grid gap-2 sm:grid-cols-[7rem_minmax(0,1fr)]">
+            {/* Overall band card */}
+            <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-2">
+              <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground">
+                Overall
+              </span>
+              <span className="text-xl font-bold tabular-nums text-[var(--lp-ink)]">
+                4
+                <span className="text-[10px] font-normal text-muted-foreground"> / 7</span>
+              </span>
+            </div>
+            {/* Sub-scores — label · tone bar · score, mirroring the real rows */}
+            <div className="flex min-w-0 flex-col gap-1.5 rounded-lg border bg-card p-2">
+              <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground">
+                Sub-scores
+              </span>
+              {subScores.map((d) => (
+                <div key={d.label} className="flex min-w-0 items-center gap-1.5 text-[10px]">
+                  <span className="w-24 shrink-0 text-[var(--lp-ink)] sm:w-32">{d.label}</span>
+                  <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={`h-full rounded-full ${tone(d.score)}`}
+                      style={{ width: `${(d.score / 7) * 100}%` }}
+                    />
+                  </div>
+                  <span className="w-5 shrink-0 text-right font-semibold tabular-nums text-[var(--lp-ink)]">
+                    {d.score}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-2.5 grid gap-2 md:grid-cols-2">
+            <div className="min-w-0 rounded-lg border bg-card p-2">
+              <p className="mb-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                <CheckCircle2 className="h-3 w-3 shrink-0" />
+                Strengths
+              </p>
+              <ul className="list-disc space-y-1 pl-4 text-[9.5px] leading-snug text-[var(--lp-ink)] [overflow-wrap:anywhere]">
+                {strengths.map((b, i) => (
+                  <li key={i}>{b}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="min-w-0 rounded-lg border bg-card p-2">
+              <p className="mb-1 flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                <TriangleAlert className="h-3 w-3 shrink-0" />
+                Areas to improve
+              </p>
+              <ul className="list-disc space-y-1 pl-4 text-[9.5px] leading-snug text-[var(--lp-ink)] [overflow-wrap:anywhere]">
+                {weaknesses.map((b, i) => (
+                  <li key={i}>{b}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* The corrections follow below the panel — cropped at the frame edge */}
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="mr-0.5 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
+              Errors
+            </span>
+            <LcLegendChip cat="svo" count={1} />
+            <LcLegendChip cat="plural" count={1} />
+            <LcLegendChip cat="choice" count={1} />
+            <LcLegendChip cat="wform" count={1} />
+          </div>
+          <div className="overflow-hidden rounded-xl border bg-card p-2.5" style={{ maxHeight: "2.75rem" }}>
+            <p className="whitespace-pre-wrap break-words text-[11.5px] leading-[1.7rem]" lang="en">
+              Everyone <LcSpan cat="svo" n={1}>know</LcSpan> that plastic takes hundreds of years
+              to break down. Every year, <LcSpan cat="plural" n={2}>million of</LcSpan> plastic
+              bottles are thrown away…
+            </p>
+          </div>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── Learn-session chrome shared by slides 4-6 — LearnWorkspace header
    (LearnContainer.tsx) + LearnPath sidebar. ────────────────────────────── */
 const LEARN_STAGE_ICONS = { lesson: BookOpen, practice: PenLine, quiz: Trophy } as const;
 
@@ -5729,7 +5929,7 @@ function LearnChrome({
   );
 }
 
-/* ── 06 · 3. LEARN — the lesson stage (faithful, static) ──
+/* ── 06 · 4. LEARN — the lesson stage (faithful, static) ──
    Mirrors LessonView.tsx: header card, the learner's own mistakes with marked
    sentences + diff chips, the rule with pattern + examples, a wrong/right
    contrast, and the "Start practice" button. */
@@ -5895,7 +6095,7 @@ export function LearnLessonMockup() {
   );
 }
 
-/* ── 06 · 4. LEARN — practice stage (faithful, static) ──
+/* ── 06 · 5. LEARN — practice stage (faithful, static) ──
    Mirrors PracticePlayer + ExerciseCard in practice mode: progress row, type
    pills, fill-blank input graded wrong, hint, "Not quite" feedback with model
    answer, Try again / Show answer. */
@@ -5988,7 +6188,7 @@ export function LearnPracticeMockup() {
   );
 }
 
-/* ── 06 · 5. LEARN — quiz stage (faithful, static) ──
+/* ── 06 · 6. LEARN — quiz stage (faithful, static) ──
    Mirrors QuizPlayer + ExerciseCard in quiz mode: progress row, choice
    question with a picked option, and a single "Submit answer" — no hints,
    no feedback until the review at the end. */
@@ -6074,7 +6274,7 @@ export function LearnQuizMockup() {
   );
 }
 
-/* ── 06 · 6. GRAMMAR CHECK — Student learning overview (faithful, static) ──
+/* ── 06 · 7. GRAMMAR CHECK — Student learning overview (faithful, static) ──
    Mirrors /grammar-check?view=students&tab=learning: scope switch, section
    tabs, staff filter bar, Overview/Sessions/Activity tabs + range, the stat
    grid, the activity chart and the per-topic + per-student tables. */

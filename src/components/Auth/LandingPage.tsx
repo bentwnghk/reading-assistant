@@ -56,6 +56,7 @@ import {
   AssignmentsListMockup,
   LanguageCheckTranscribeMockup,
   LanguageCheckResultsMockup,
+  LanguageCheckAssessmentMockup,
   LearnLessonMockup,
   LearnPracticeMockup,
   LearnQuizMockup,
@@ -448,13 +449,15 @@ function PracticeCarousel() {
 }
 
 /* Grammar Check carousel (Chapter 06) — mirrors MasterCarousel, cycling the
-   6 Grammar Check views: transcription review, checked results, the three
-   "Learn from your mistakes" stages and the staff student-learning overview. */
+   7 Grammar Check views: transcription review, checked results, the AI
+   Language assessment, the three "Learn from your mistakes" stages and the
+   staff student-learning overview. */
 function LanguageCheckCarousel() {
   const { t } = useTranslation();
   const slides = [
     { key: "transcribe", label: t("landing.chapters.writing.carousel.transcribe"), node: <LanguageCheckTranscribeMockup /> },
     { key: "results", label: t("landing.chapters.writing.carousel.results"), node: <LanguageCheckResultsMockup /> },
+    { key: "assessment", label: t("landing.chapters.writing.carousel.assessment"), node: <LanguageCheckAssessmentMockup /> },
     { key: "lesson", label: t("landing.chapters.writing.carousel.lesson"), node: <LearnLessonMockup /> },
     { key: "practice", label: t("landing.chapters.writing.carousel.practice"), node: <LearnPracticeMockup /> },
     { key: "quiz", label: t("landing.chapters.writing.carousel.quiz"), node: <LearnQuizMockup /> },

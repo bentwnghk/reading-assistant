@@ -516,6 +516,7 @@
           "slideCount": "{{count}} slides",
           "transcribe": "Transcription review",
           "results": "Corrections & popover",
+          "assessment": "AI Language assessment",
           "lesson": "Learn · lesson",
           "practice": "Learn · practice",
           "quiz": "Learn · quiz",
@@ -4734,6 +4735,10 @@
           "name": "Essay Statuses",
           "desc": "Each essay moves through Draft (uploaded) → Transcribed (digitised) → Checked (marked). The list shows pages, comments and the last update."
         },
+        "assessment": {
+          "name": "AI Language Assessment",
+          "desc": "After checking, score the writing against the HKDSE \"Language (L)\" rubric — an overall 0–7 band, five sub-scores and bilingual feedback. The overall also shows in the essay list. Details in the Results tab."
+        },
         "retention": {
           "name": "Storage & Privacy",
           "desc": "Original scans are removed {{days}} days after upload. Checked essays keep their transcript and corrections so you can review them anytime."
@@ -4771,10 +4776,14 @@
         }
       },
       "results": {
-        "intro": "Corrections appear as inline highlights in the essay, each numbered and paired with an explanation card.",
+        "intro": "Corrections appear as inline highlights in the essay, each numbered and paired with an explanation card. Below them, the AI Language assessment scores the writing against the HKDSE \"Language (L)\" rubric.",
         "tiers": {
           "name": "Errors vs. Suggestions",
           "desc": "Errors (grammar and mechanics) get a solid underline; expression suggestions (phrasing, concision, stronger words) are optional polish with alternative ways to say it."
+        },
+        "assessment": {
+          "name": "AI Language Assessment",
+          "desc": "Press \"Get AI assessment\" to score the writing on the HKDSE \"Language (L)\" rubric: an overall 0–7 band, five sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve. It is saved with the essay — the overall also shows in the essay list — and can be re-run anytime."
         },
         "filter": {
           "name": "Category Filter",
