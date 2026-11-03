@@ -515,6 +515,22 @@ export async function exportFillInBlankDocx(
   saveAs(blob, `fill-in-the-blank-${Date.now()}.docx`);
 }
 
+/**
+ * Spreadsheet-style column label for a 0-based index:
+ * 0 → "A", 25 → "Z", 26 → "AA", 27 → "AB", 702 → "AAA", ...
+ * Used for Column B letter labels so matching exercises work
+ * with more than 26 selected words/phrases.
+ */
+function columnLabel(index: number): string {
+  let label = "";
+  let n = index;
+  do {
+    label = String.fromCharCode(65 + (n % 26)) + label;
+    n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return label;
+}
+
 export async function exportMatchingDocx(
   words: ExportWord[],
   title?: string
@@ -551,8 +567,13 @@ export async function exportMatchingDocx(
     })
   );
 
-  const shuffledDefs = [...words].sort(() => Math.random() - 0.5);
-  const letterLabels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  // Fisher–Yates shuffle: uniform over all orderings, unlike sort(() => Math.random() - 0.5),
+  // which is comparator-inconsistent and biases toward (near-)original order.
+  const shuffledDefs = [...words];
+  for (let i = shuffledDefs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledDefs[i], shuffledDefs[j]] = [shuffledDefs[j], shuffledDefs[i]];
+  }
 
   const numCol = new TableCell({
     children: [new Paragraph({ children: [new TextRun({ text: "", bold: true })] })],
@@ -611,7 +632,7 @@ export async function exportMatchingDocx(
         }),
         new TableCell({
           children: [
-            new Paragraph({ children: [new TextRun({ text: `${letterLabels[i]}.` })] }),
+            new Paragraph({ children: [new TextRun({ text: `${columnLabel(i)}.` })] }),
           ],
           verticalAlign: VerticalAlign.CENTER,
         }),
@@ -648,7 +669,7 @@ export async function exportMatchingDocx(
   for (let i = 0; i < words.length; i++) {
     const w = words[i];
     const defIndex = shuffledDefs.indexOf(w);
-    const letter = letterLabels[defIndex] || "?";
+    const letter = columnLabel(defIndex);
     children.push(
       new Paragraph({
         children: [
