@@ -239,7 +239,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       ) : (
         <>
           <div className={cn("overflow-x-auto rounded-xl border bg-card px-3", loading && "opacity-60")}>
-            <table className="w-full min-w-[56rem] text-sm">
+            <table className="w-full min-w-[62rem] text-sm">
               <thead>
                 <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <th className="py-2 pr-3 font-medium">
@@ -259,6 +259,9 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                   </th>
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colErrors")}
+                  </th>
+                  <th className="py-2 pr-3 font-medium">
+                    {t("languageCheck.assessment.overall")}
                   </th>
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colUpdated")}
@@ -294,6 +297,9 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                     <td className="py-2 pr-3 tabular-nums">{row.wordCount}</td>
                     <td className="py-2 pr-3 tabular-nums">
                       {row.status === "checked" ? row.errorCount : "—"}
+                    </td>
+                    <td className="py-2 pr-3 tabular-nums">
+                      {row.overall ?? "—"}
                     </td>
                     <td className="whitespace-nowrap py-2 pr-3 text-muted-foreground">
                       {formatDateTime(row.updatedAt)}

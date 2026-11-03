@@ -4889,6 +4889,7 @@
       "words_other": "{{count}} words",
       "errors_one": "{{count}} comment",
       "errors_other": "{{count}} comments",
+      "overall": "Overall {{score}}/7",
       "status": {
         "draft": "Draft",
         "transcribed": "Transcribed",

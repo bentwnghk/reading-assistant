@@ -1141,6 +1141,8 @@ interface LanguageCheckEssaySummary {
   status: "draft" | "transcribed" | "checked";
   pageCount: number;
   errorCount: number;
+  /** Saved AI Language (L) assessment overall (0-7); null = not assessed. */
+  overall: number | null;
   /** Words in the transcript (0 while there is no text yet). */
   wordCount: number;
   /**
@@ -1224,6 +1226,8 @@ interface LanguageCheckStaffRow {
   status: "draft" | "transcribed" | "checked";
   pageCount: number;
   errorCount: number;
+  /** Saved AI Language (L) assessment overall (0-7); null = not assessed. */
+  overall: number | null;
   /** Words in the transcript (0 while there is no text yet). */
   wordCount: number;
   createdAt: number;

@@ -222,6 +222,8 @@ export default function EssayList({
                         ` · ${t("languageCheck.list.words", { count: essay.wordCount })}`}
                       {essay.status === "checked" &&
                         ` · ${t("languageCheck.list.errors", { count: essay.errorCount })}`}
+                      {essay.overall !== null &&
+                        ` · ${t("languageCheck.list.overall", { score: essay.overall })}`}
                     </span>
                   </span>
                   {essay.ownerId && essay.ownerId !== session?.user?.id && (

@@ -88,6 +88,7 @@ function toSummary(e: LanguageCheckEssay): LanguageCheckEssaySummary {
     status: e.status,
     pageCount: e.images.length,
     errorCount: e.corrections.length,
+    overall: e.assessment?.overall ?? null,
     wordCount: countWords(e.transcript),
     ownerId: e.ownerId,
     ownerName: e.ownerName,
@@ -255,6 +256,10 @@ export const useLanguageCheckStore = create(
                       errorCount: patch.corrections
                         ? patch.corrections.length
                         : e.errorCount,
+                      overall:
+                        patch.assessment !== undefined
+                          ? (patch.assessment?.overall ?? null)
+                          : e.overall,
                       wordCount:
                         patch.transcript !== undefined
                           ? countWords(patch.transcript)

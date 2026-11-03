@@ -22,6 +22,10 @@ function arrayOf<T>(value: unknown): T[] {
  * The lightweight lists never select the transcript payload, so the figure is
  * derived in SQL exactly like page_count / error_count.
  */
+/** Saved Language (L) assessment overall (NULL when not assessed / malformed). */
+const OVERALL_SQL = `CASE WHEN jsonb_typeof(e.assessment) = 'object'
+     THEN (e.assessment->>'overall')::int END`
+
 const WORD_COUNT_SQL = `CASE WHEN btrim(e.transcript) = '' THEN 0
      ELSE array_length(regexp_split_to_array(btrim(e.transcript), '\\s+'), 1) END`
 
@@ -32,6 +36,7 @@ function mapSummary(row: Record<string, unknown>): LanguageCheckEssaySummary {
     status: row.status as LanguageCheckEssaySummary["status"],
     pageCount: Number(row.page_count) || 0,
     errorCount: Number(row.error_count) || 0,
+    overall: row.overall === null || row.overall === undefined ? null : Number(row.overall),
     wordCount: Number(row.word_count) || 0,
     ownerId: (row.owner_id as string) || (row.user_id as string) || "",
     ownerName: (row.owner_name as string) || "",
@@ -114,6 +119,7 @@ export async function listEssays(
             e.user_id AS owner_id, u.name AS owner_name,
             jsonb_array_length(e.images) AS page_count,
             jsonb_array_length(e.corrections) AS error_count,
+            ${OVERALL_SQL} AS overall,
             ${WORD_COUNT_SQL} AS word_count
      FROM language_check_essays e
      LEFT JOIN users u ON u.id = e.user_id
@@ -450,6 +456,7 @@ export async function listStaffEssays(
               e.user_id, u.name AS user_name, u.email AS user_email,
               jsonb_array_length(e.images) AS page_count,
               jsonb_array_length(e.corrections) AS error_count,
+              ${OVERALL_SQL} AS overall,
               ${WORD_COUNT_SQL} AS word_count
        ${STAFF_FROM}
        ${where}
@@ -498,6 +505,10 @@ export async function listStaffEssays(
         status: row.status as LanguageCheckStaffRow["status"],
         pageCount: Number(row.page_count) || 0,
         errorCount: Number(row.error_count) || 0,
+        overall:
+          row.overall === null || row.overall === undefined
+            ? null
+            : Number(row.overall),
         wordCount: Number(row.word_count) || 0,
         createdAt: toMs(row.created_at),
         updatedAt: toMs(row.updated_at),
@@ -572,6 +583,8 @@ export async function getStaffEssay(
     checkModel: (row.check_model as string) || "",
     droppedCount: Number(row.dropped_count) || 0,
     assessment: (row.assessment as LanguageCheckAssessment | null) ?? null,
+    overall:
+      (row.assessment as LanguageCheckAssessment | null)?.overall ?? null,
   }
 }
 

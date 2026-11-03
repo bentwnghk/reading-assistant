@@ -4883,6 +4883,7 @@
       "pages_other": "{{count}} 掃描頁",
       "words_other": "{{count}} 字",
       "errors_other": "{{count}} 項批註",
+      "overall": "總分 {{score}}/7",
       "status": {
         "draft": "草稿",
         "transcribed": "已轉錄",

@@ -66,6 +66,7 @@ beforeAll(async () => {
       title TEXT NOT NULL DEFAULT '', images JSONB NOT NULL DEFAULT '[]', transcript TEXT NOT NULL DEFAULT '',
       status TEXT NOT NULL DEFAULT 'draft', checked_text TEXT NOT NULL DEFAULT '', corrections JSONB NOT NULL DEFAULT '[]',
       ocr_model TEXT NOT NULL DEFAULT '', check_model TEXT NOT NULL DEFAULT '', dropped_count INTEGER NOT NULL DEFAULT 0,
+      assessment JSONB,
       created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW());
   `);
   await db.exec(fs.readFileSync("scripts/add-language-check-learn.sql", "utf8"));
