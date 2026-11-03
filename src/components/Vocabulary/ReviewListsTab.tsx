@@ -368,23 +368,31 @@ function ReviewListsTab({ onReviewList, userId }: ReviewListsTabProps) {
           <TableBody>
             {pagedLists.map((list) => (
               <Fragment key={list.id}>
-                <TableRow>
+                <TableRow
+                  {...(userId
+                    ? {
+                        onClick: () => toggleExpand(list),
+                        onKeyDown: (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            toggleExpand(list);
+                          }
+                        },
+                        tabIndex: 0,
+                        "aria-expanded": expandedId === list.id,
+                      }
+                    : {})}
+                  className={cn(userId && "cursor-pointer")}
+                >
                   {userId && (
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        aria-expanded={expandedId === list.id}
-                        title={t("vocabulary.reviewLists.colWords")}
-                        onClick={() => toggleExpand(list)}
-                      >
+                      <span className="flex h-7 w-7 items-center justify-center text-muted-foreground">
                         {expandedId === list.id ? (
                           <ChevronUp className="h-4 w-4" />
                         ) : (
                           <ChevronDown className="h-4 w-4" />
                         )}
-                      </Button>
+                      </span>
                     </TableCell>
                   )}
                   <TableCell className="font-medium">{list.name}</TableCell>
@@ -453,18 +461,19 @@ function ReviewListsTab({ onReviewList, userId }: ReviewListsTabProps) {
                           {(expandedWords ?? []).map((w, i) => (
                             <div
                               key={`${w.word}-${i}`}
-                              className="flex items-center gap-2 text-sm py-2 px-3 min-w-0"
+                              className="py-2 px-3 min-w-0"
                             >
-                              <span className="font-medium shrink-0">
-                                {w.word}
-                              </span>
-                              <EntryTypeBadge entryType={entryTypeOf(w)} />
-                              <span className="text-muted-foreground truncate min-w-0 flex-1">
-                                {w.chineseDefinition}
-                              </span>
-                              <span className="text-muted-foreground truncate min-w-0 flex-1 hidden sm:block">
-                                {w.englishDefinition}
-                              </span>
+                              <div className="flex items-start gap-2 flex-wrap min-w-0">
+                                <span className="font-medium break-words min-w-0">
+                                  {w.word}
+                                </span>
+                                <EntryTypeBadge entryType={entryTypeOf(w)} />
+                              </div>
+                              {w.chineseDefinition && (
+                                <div className="text-sm text-muted-foreground mt-0.5 break-words">
+                                  {w.chineseDefinition}
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
