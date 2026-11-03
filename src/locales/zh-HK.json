@@ -4974,6 +4974,8 @@
       "again": "重新評估",
       "working": "評估中…",
       "error": "評估失敗，請重試。",
+      "collapse": "收起評估",
+      "expand": "展開評估",
       "overall": "總分",
       "scale": "/ 7",
       "subScores": "分項分數",

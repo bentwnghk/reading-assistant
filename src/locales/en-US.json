@@ -4983,6 +4983,8 @@
       "again": "Re-assess",
       "working": "Assessing…",
       "error": "Assessment failed. Please try again.",
+      "collapse": "Collapse assessment",
+      "expand": "Expand assessment",
       "overall": "Overall",
       "scale": "/ 7",
       "subScores": "Sub-scores",
