@@ -60,6 +60,8 @@ function mapEssay(row: Record<string, unknown>): LanguageCheckEssay {
     assessment: (row.assessment as LanguageCheckAssessment | null) ?? null,
     ownerId: (row.owner_id as string) || (row.user_id as string) || "",
     ownerName: (row.owner_name as string) || "",
+    ownerEmail: (row.owner_email as string) || "",
+    ownerClassName: (row.owner_class_name as string) || "",
     createdAt: toMs(row.created_at),
     updatedAt: toMs(row.updated_at),
   }
@@ -164,7 +166,10 @@ export async function getEssay(
     [id, userId, LANGUAGE_CHECK_DRAFT_RETENTION_DAYS],
   )
   const { rows } = await getPool().query(
-    `SELECT e.*, e.user_id AS owner_id, u.name AS owner_name
+    `SELECT e.*, e.user_id AS owner_id, u.name AS owner_name, u.email AS owner_email,
+            (SELECT string_agg(c.name, ', ' ORDER BY c.name)
+             FROM class_members cm JOIN classes c ON c.id = cm.class_id
+             WHERE cm.student_id = e.user_id) AS owner_class_name
      FROM language_check_essays e
      LEFT JOIN users u ON u.id = e.user_id
      WHERE e.id = $1 AND (e.user_id = $2 OR e.uploaded_by = $2)`,
@@ -199,7 +204,10 @@ export async function createEssay(
        VALUES ($1, $2, $3, $4::jsonb, $5)
        RETURNING *
      )
-     SELECT ins.*, ins.user_id AS owner_id, u.name AS owner_name
+     SELECT ins.*, ins.user_id AS owner_id, u.name AS owner_name, u.email AS owner_email,
+            (SELECT string_agg(c.name, ', ' ORDER BY c.name)
+             FROM class_members cm JOIN classes c ON c.id = cm.class_id
+             WHERE cm.student_id = ins.user_id) AS owner_class_name
      FROM ins LEFT JOIN users u ON u.id = ins.user_id`,
     [
       data.userId,

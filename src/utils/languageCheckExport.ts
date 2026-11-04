@@ -15,6 +15,7 @@ import {
   isExpressionCategory,
   type LanguageCheckCategory,
 } from "@/constants/languageCheck";
+import { LANGUAGE_ASSESSMENT_DIMENSIONS } from "@/constants/readingPrompts";
 import { applyCorrections, buildSegments } from "@/utils/languageCheck";
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
@@ -29,6 +30,27 @@ export interface LanguageCheckExportOptions {
 
 const RED = "C00000";
 const GREEN = "00803C";
+const AMBER = "B45309";
+
+function formatDate(ms: number): string {
+  return new Date(ms).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+/** Bulleted line for the assessment strengths / weaknesses lists. */
+function bullet(text: string, color: string): Paragraph {
+  return new Paragraph({
+    spacing: { after: 60 },
+    indent: { left: 360, hanging: 240 },
+    children: [
+      new TextRun({ text: "• ", bold: true, color }),
+      new TextRun({ text, color: "404040" }),
+    ],
+  });
+}
 
 /** Splits styled runs on newlines into paragraphs (blank lines are dropped). */
 function toParagraphs(
@@ -182,12 +204,143 @@ export async function exportLanguageCheckDocx({
     });
   });
 
-  const date = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const date = formatDate(Date.now());
   const title = essay.title || t("languageCheck.list.untitled");
+
+  // Student header: name, class and email as labelled centred lines (each
+  // only when known — the owner row may be gone and a learner may be in no
+  // class).
+  const studentRows: [string, string][] = (
+    [
+      [t("languageCheck.export.studentName"), essay.ownerName.trim()],
+      [t("languageCheck.export.studentClass"), (essay.ownerClassName ?? "").trim()],
+      [t("languageCheck.export.studentEmail"), (essay.ownerEmail ?? "").trim()],
+    ] as [string, string][]
+  ).filter(([, value]) => value !== "");
+  const studentBlock: Paragraph[] = studentRows.map(([label, value], i) =>
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: i === studentRows.length - 1 ? 200 : 40 },
+      children: [
+        new TextRun({ text: `${label}: `, bold: true, size: 20, color: "595959" }),
+        new TextRun({ text: value, size: 20, color: "404040" }),
+      ],
+    }),
+  );
+
+  // AI Language assessment — the document's first content section. Bullets
+  // follow the explanation-language switch like the on-screen panel, with a
+  // fallback to the other language when one is empty.
+  const assessment = essay.assessment;
+  const pickText = (b: { en: string; zh: string }): string =>
+    (language === "zh" ? b.zh : b.en).trim() || (b.en || b.zh).trim();
+  const assessmentBlocks: Paragraph[] = [
+    new Paragraph({
+      text: t("languageCheck.assessment.title"),
+      heading: HeadingLevel.HEADING_1,
+      spacing: { before: 400 },
+    }),
+  ];
+  if (!assessment) {
+    assessmentBlocks.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: t("languageCheck.export.notAssessed"),
+            italics: true,
+            color: "7F7F7F",
+          }),
+        ],
+      }),
+    );
+  } else {
+    assessmentBlocks.push(
+      new Paragraph({
+        spacing: { after: 200 },
+        children: [
+          new TextRun({
+            text: `${t("languageCheck.assessment.overall")}: `,
+            bold: true,
+          }),
+          new TextRun({
+            text: `${assessment.overall} ${t("languageCheck.assessment.scale")}`,
+            bold: true,
+            size: 32,
+          }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { after: 80 },
+        children: [
+          new TextRun({
+            text: t("languageCheck.assessment.subScores"),
+            bold: true,
+            color: "595959",
+          }),
+        ],
+      }),
+      ...LANGUAGE_ASSESSMENT_DIMENSIONS.map(
+        (d) =>
+          new Paragraph({
+            spacing: { after: 60 },
+            children: [
+              new TextRun({
+                text: `${t(`languageCheck.assessment.dim.${d}`)}: `,
+                color: "404040",
+              }),
+              new TextRun({
+                text: `${assessment.scores[d]} ${t("languageCheck.assessment.scale")}`,
+                bold: true,
+              }),
+            ],
+          }),
+      ),
+      new Paragraph({
+        spacing: { before: 200, after: 80 },
+        children: [
+          new TextRun({
+            text: t("languageCheck.assessment.strengths"),
+            bold: true,
+            color: GREEN,
+          }),
+        ],
+      }),
+      ...assessment.strengths.map((b) => bullet(pickText(b), GREEN)),
+      new Paragraph({
+        spacing: { before: 200, after: 80 },
+        children: [
+          new TextRun({
+            text: t("languageCheck.assessment.weaknesses"),
+            bold: true,
+            color: AMBER,
+          }),
+        ],
+      }),
+      ...assessment.weaknesses.map((b) => bullet(pickText(b), AMBER)),
+      new Paragraph({
+        spacing: { before: 200 },
+        children: [
+          new TextRun({
+            text: [
+              t("languageCheck.assessment.assessedOn", {
+                date: formatDate(assessment.assessedAt),
+              }),
+              assessment.model
+                ? t("languageCheck.results.checkedWith", {
+                    model: assessment.model,
+                  })
+                : "",
+            ]
+              .filter(Boolean)
+              .join(" · "),
+            italics: true,
+            size: 18,
+            color: "7F7F7F",
+          }),
+        ],
+      }),
+    );
+  }
 
   const doc = new Document({
     styles: {
@@ -222,9 +375,12 @@ export async function exportLanguageCheckDocx({
               }),
             ],
           }),
+          ...studentBlock,
+          ...assessmentBlocks,
           new Paragraph({
             text: t("languageCheck.export.marked"),
             heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400 },
           }),
           ...toParagraphs(markedParts),
           new Paragraph({

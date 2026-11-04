@@ -5039,6 +5039,10 @@
       "noErrorsHint": "沒有需要更正的地方。如果你預期有更正，請檢查轉錄文字是否與手寫內容完全一致。"
     },
     "export": {
+      "studentName": "姓名",
+      "studentClass": "班別",
+      "studentEmail": "電郵",
+      "notAssessed": "尚未評估——請先在結果頁面按「獲取 AI 評估」。",
       "polished": "潤飾版作文（包含表達建議）",
       "subtitle": "{{count}} 項更正及建議 · {{date}}",
       "marked": "批改後的作文",

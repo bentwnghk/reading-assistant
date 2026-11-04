@@ -5050,6 +5050,10 @@
       "noErrorsHint": "Nothing needed correcting. If you expected corrections, check that the transcript matches the handwriting exactly."
     },
     "export": {
+      "studentName": "Name",
+      "studentClass": "Class",
+      "studentEmail": "Email",
+      "notAssessed": "Not assessed yet — click \"Get AI assessment\" on the results page first.",
       "polished": "Polished essay (with expression suggestions)",
       "subtitle": "{{count}} corrections and suggestions · {{date}}",
       "marked": "Marked essay",

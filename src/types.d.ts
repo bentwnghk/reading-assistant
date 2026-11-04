@@ -1192,6 +1192,16 @@ interface LanguageCheckEssay {
   ownerId: string;
   /** Owner display name ("" if the user row is gone). */
   ownerName: string;
+  /**
+   * Owner email ("" if the user row is gone). Optional: essays read before
+   * this field existed don't carry it — treat as "".
+   */
+  ownerEmail?: string;
+  /**
+   * Owner class name(s), comma-joined ("" when the learner is in no class).
+   * Optional for the same reason as `ownerEmail`.
+   */
+  ownerClassName?: string;
   createdAt: number;
   updatedAt: number;
 }
