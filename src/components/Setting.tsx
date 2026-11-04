@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, OCR_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels, getSavedTtsVoiceFor } from "@/store/setting";
+import { useSettingStore, AVAILABLE_MODELS, VISION_MODELS, OCR_MODELS, IMAGE_MODELS, RESTRICTED_IMAGE_MODELS, RESTRICTED_VISION_MODELS, TUTOR_MODELS, READING_TEXT_MODELS, TTS_VOICES, TTS_MODELS, TTS_MODEL_VOICES, ALL_TTS_VOICES, TTS_VOICE_LABELS, TTS_PLAYBACK_RATES, RESTRICTED_MODELS, RESTRICTED_TUTOR_MODELS, RESTRICTED_MODEL_FIELD_NAMES, enforceRestrictedModels, getSavedTtsVoiceFor } from "@/store/setting";
 import { formatModelLabel } from "@/utils/model";
 import locales from "@/constants/locales";
 import { cn } from "@/utils/style";
@@ -155,6 +155,15 @@ function Setting({ open, onClose }: SettingProps) {
   const tutorModelOptions = showRestrictedModels
     ? TUTOR_MODELS
     : TUTOR_MODELS.filter((m) => !RESTRICTED_TUTOR_MODELS.includes(m));
+  // claude-haiku-5-5 is only selectable by admins/super-admins and
+  // meter-billing (mode "local") users for the Vision (OCR) Model and the
+  // Grammar Check OCR Model; hidden from everyone else's dropdowns.
+  const visionModelOptions = showRestrictedModels
+    ? VISION_MODELS
+    : VISION_MODELS.filter((m) => !RESTRICTED_VISION_MODELS.includes(m));
+  const ocrModelOptions = showRestrictedModels
+    ? OCR_MODELS
+    : OCR_MODELS.filter((m) => !RESTRICTED_VISION_MODELS.includes(m));
   // The premium image model is only selectable by admins/super-admins and
   // meter-billing (mode "local") users.
   const imageModelOptions =
@@ -753,7 +762,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {VISION_MODELS.map((m) => (
+                            {visionModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {formatModelLabel(m)}
                               </SelectItem>
@@ -1280,7 +1289,7 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {OCR_MODELS.map((m) => (
+                            {ocrModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {formatModelLabel(m)}
                               </SelectItem>
@@ -1311,10 +1320,12 @@ function Setting({ open, onClose }: SettingProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {/* Not filtered by RESTRICTED_MODELS: every user
-                                may pick any Grammar Check model (same policy
-                                as ocrModel). */}
-                            {READING_TEXT_MODELS.map((m) => (
+                            {/* Filtered by RESTRICTED_MODELS like the other
+                                model dropdowns: claude-sonnet-5-5 is admin/
+                                super-admin/meter-billing only; gpt-6.1-sol
+                                (the default), gpt-6.1-terra, deepseek-flash
+                                and gemini-3.8-flash are open to everyone. */}
+                            {readingTextModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {formatModelLabel(m)}
                               </SelectItem>

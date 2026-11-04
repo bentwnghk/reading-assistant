@@ -706,9 +706,9 @@ A standalone page (`/grammar-check`, opened from the hamburger menu) that is ind
 | Step | What happens |
 |------|--------------|
 | 📷 **Upload** | Handwritten essay or scanned work as images or PDF (up to 10 pages), or photos taken with a phone camera one page at a time. Pages wait in a tray where each can be **cropped** to just the handwriting, reordered or removed before transcription |
-| 🔤 **OCR** | The Settings *OCR Model (Grammar Check)* (`claude-haiku-5-5` by default, or `gpt-6-luna`) transcribes it **verbatim** (mistakes kept; unreadable words become `[?]`) with paragraph breaks preserved. A transcriber-only system prompt with few-shot examples resists the model's habit of silently fixing errors, and an optional **Double-check transcription** switch adds a second pass that reverts any it still fixed |
+| 🔤 **OCR** | The Settings *OCR Model (Grammar Check)* (`gpt-6-luna` by default; `claude-haiku-5-5` is admin/super-admin/Meter only) transcribes it **verbatim** (mistakes kept; unreadable words become `[?]`) with paragraph breaks preserved. A transcriber-only system prompt with few-shot examples resists the model's habit of silently fixing errors, and an optional **Double-check transcription** switch adds a second pass that reverts any it still fixed |
 | 👀 **Review** | Edit the transcript side by side with the zoomable original scan |
-| ✍️ **Check** | The Settings *Grammar Check Model* (`deepseek-flash`, `gemini-3.8-flash`, `gpt-6.1-sol`, `claude-sonnet-5-5`) finds **errors** tuned to common ESL/EFL (HK) patterns and HKDSE Writing, plus optional **expression suggestions**: unclear/awkward phrasing, Chinglish (literal translation), wordiness and stronger word choice, each with alternatives and a "why" note |
+| ✍️ **Check** | The Settings *Grammar Check Model* (`gpt-6.1-sol` by default; `gpt-6.1-terra`, `deepseek-flash` and `gemini-3.8-flash` also open to all users; `claude-sonnet-5-5` is admin/super-admin/Meter only) finds **errors** tuned to common ESL/EFL (HK) patterns and HKDSE Writing, plus optional **expression suggestions**: unclear/awkward phrasing, Chinglish (literal translation), wordiness and stronger word choice, each with alternatives and a "why" note |
 | 🎨 **Results** | Colour-coded inline highlights, hover/tap popover (original vs. correction + grammar note), side cards with red→green changes, English / 繁體中文 notes, `.docx` export |
 
 ---
@@ -757,7 +757,7 @@ All models are served through the **Mr.🆖 AI Hub** (an OpenAI-compatible gatew
 | Provider | Models |
 |----------|--------|
 | 🟢 **Google Gemini** | gemini-3.8-flash |
-| 🔵 **OpenAI** | gpt-5.6-luna, gpt-6-luna, gpt-6.1-sol |
+| 🔵 **OpenAI** | gpt-5.6-luna, gpt-6-luna, gpt-6.1-sol, gpt-6.1-terra |
 | 🟣 **Anthropic** | claude-sonnet-5-5 |
 | 🔴 **DeepSeek** | deepseek-flash |
 | 🟠 **OpenRouter** | step-3.7-flash |

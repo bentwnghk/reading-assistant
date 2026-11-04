@@ -16,10 +16,10 @@ export type VisionModel = (typeof VISION_MODELS)[number];
 
 /**
  * OCR model for Grammar Check transcription, separate from visionModel
- * (which OCRs reading-assistant uploads). Deliberately NOT in
- * RESTRICTED_MODEL_FIELD_NAMES, so every user can pick any option. The list
- * happens to equal VISION_MODELS today but is kept explicit so the two can
- * diverge.
+ * (which OCRs reading-assistant uploads). The list happens to equal
+ * VISION_MODELS today but is kept explicit so the two can diverge.
+ * claude-haiku-5-5 is restricted (see RESTRICTED_VISION_MODELS) —
+ * gpt-6-luna stays selectable by everyone.
  */
 export const OCR_MODELS = ["claude-haiku-5-5", "gpt-6-luna"] as const;
 
@@ -40,9 +40,14 @@ export const RESTRICTED_IMAGE_MODELS: string[] = [
   "google/gemini-3.1-flash-image",
 ];
 
-// claude-haiku-5-5 is deliberately NOT in RESTRICTED_TUTOR_MODELS — every
-// user may pick it (same policy as ocrModel), not just
-// admins/super-admins/meter-billing users.
+// claude-haiku-5-5 is premium for the Vision (OCR) Model (visionModel) and
+// the Grammar Check OCR Model (ocrModel): admins/super-admins and
+// meter-billing (mode "local") users only; hidden from everyone else's
+// dropdowns. gpt-6-luna is the default for all users.
+export const RESTRICTED_VISION_MODELS: string[] = [
+  "claude-haiku-5-5",
+];
+
 export const TUTOR_MODELS = [
   "deepseek-flash",
   "step-3.7-flash",
@@ -57,22 +62,24 @@ export type TutorModel = (typeof TUTOR_MODELS)[number];
 export const READING_TEXT_MODELS = [
   "claude-sonnet-5-5",
   "gpt-6.1-sol",
+  "gpt-6.1-terra",
   "deepseek-flash",
   "gemini-3.8-flash",
 ] as const;
 
 export type ReadingTextModel = (typeof READING_TEXT_MODELS)[number];
 
-// Preview models hidden from the Settings dropdowns for regular users.
-// Admins, super-admins and meter-billing (mode "local") users always see them.
+// Preview model hidden from the Settings dropdowns for regular users.
+// Admins, super-admins and meter-billing (mode "local") users always see it.
+// gemini-3.8-flash used to be restricted here too but is now open to all
+// users in every list it appears in.
 export const RESTRICTED_MODELS: string[] = [
   "claude-sonnet-5-5",
-  "gemini-3.8-flash",
 ];
 
 export const RESTRICTED_TUTOR_MODELS: string[] = [
   "claude-sonnet-5-5",
-  "gemini-3.8-flash",
+  "claude-haiku-5-5",
 ];
 
 // Pure model-id renames for the general/reading-text/tutor model fields —
@@ -106,11 +113,15 @@ const TTS_MODEL_REPLACEMENTS: Record<string, TtsModel> = {
 };
 
 // Fields whose selections are limited by RESTRICTED_MODELS /
-// RESTRICTED_TUTOR_MODELS for non-privileged users. languageCheckModel and
-// ocrModel are deliberately NOT here: every user may pick any option in
-// their lists (claude-sonnet-5-5 is the languageCheckModel default and must
-// stay selectable by everyone).
+// RESTRICTED_TUTOR_MODELS / RESTRICTED_VISION_MODELS for non-privileged
+// users (everyone except admins/super-admins/meter-billing).
+// languageCheckModel follows the standard policy: claude-sonnet-5-5 (in
+// RESTRICTED_MODELS) is premium there too, while gpt-6.1-sol (its default),
+// gpt-6.1-terra, deepseek-flash and gemini-3.8-flash stay selectable by
+// everyone.
 export const RESTRICTED_MODEL_FIELD_NAMES = [
+  "visionModel",
+  "ocrModel",
   "prereadingModel",
   "summaryModel",
   "mindMapModel",
@@ -123,6 +134,7 @@ export const RESTRICTED_MODEL_FIELD_NAMES = [
   "collocationModel",
   "grammarModel",
   "readingTextModel",
+  "languageCheckModel",
   "tutorModel",
 ] as const;
 
@@ -416,7 +428,7 @@ export const defaultValues: SettingStore = {
   provider: "openaicompatible",
   mode: "subscription" as ApiMode | "",
   visionModel: "gpt-6-luna",
-  ocrModel: "claude-haiku-5-5",
+  ocrModel: "gpt-6-luna",
   imageModel: "google/gemini-3.1-flash-lite-image",
   prereadingModel: "gpt-6-luna",
   summaryModel: "deepseek-flash",
@@ -430,7 +442,7 @@ export const defaultValues: SettingStore = {
   collocationModel: "gpt-6-luna",
   grammarModel: "gpt-6-luna",
   readingTextModel: "deepseek-flash",
-  languageCheckModel: "claude-sonnet-5-5",
+  languageCheckModel: "gpt-6.1-sol",
   tutorModel: "gpt-6-luna",
   ttsModel: "x-ai/grok-voice-tts-1.0",
   ttsVoice: "ara",
@@ -665,7 +677,11 @@ export function getRestrictedModelResets(
   const updates: Partial<Record<RestrictedModelField, string>> = {};
   for (const field of RESTRICTED_MODEL_FIELD_NAMES) {
     const restricted =
-      field === "tutorModel" ? RESTRICTED_TUTOR_MODELS : RESTRICTED_MODELS;
+      field === "tutorModel"
+        ? RESTRICTED_TUTOR_MODELS
+        : field === "visionModel" || field === "ocrModel"
+          ? RESTRICTED_VISION_MODELS
+          : RESTRICTED_MODELS;
     if (restricted.includes(state[field])) {
       updates[field] = defaultValues[field];
     }
