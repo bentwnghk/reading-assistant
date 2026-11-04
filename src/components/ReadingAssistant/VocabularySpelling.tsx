@@ -358,6 +358,13 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
 
   const hasRatings = wordStats.hard > 0 || wordStats.medium > 0 || wordStats.easy > 0;
 
+  // Words the solo game will actually play per the Number-of-Words selection:
+  // "all" → every glossary word, otherwise the selected cap (startGame only
+  // slices when the glossary is longer than the cap). Drives the solo
+  // practice card's description so it tracks the selection live.
+  const selectedWordCount =
+    wordCountLimit === "all" ? glossary.length : Math.min(wordCountLimit, glossary.length);
+
   const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -965,11 +972,11 @@ function VocabularySpelling({ glossary, mergedRatings, onWordResult, onComplete,
                 </div>
                 <div className="hidden sm:block text-xs text-muted-foreground mt-0.5">
                   {t("reading.glossary.spelling.playMode.soloDesc")}
-          </div>
-          <p className="text-muted-foreground text-sm">
-            {t("reading.glossary.spelling.subtitle", { count: glossary.length })}
-          </p>
-        </div>
+                </div>
+                <p className="text-muted-foreground text-sm" aria-live="polite">
+                  {t("reading.glossary.spelling.subtitle", { count: selectedWordCount })}
+                </p>
+              </div>
 
               {/* Multiplayer Battle — bold & gamified entry */}
               <button
