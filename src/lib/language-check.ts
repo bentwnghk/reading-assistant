@@ -610,3 +610,44 @@ export async function setStaffAssessment(
   )
   return true
 }
+
+/**
+ * Persists a staff-initiated re-check for an essay inside the caller's staff
+ * scope. Mirrors what an owner re-check writes (runCheck): new corrections
+ * anchored to `checkedText`, the model that produced them, and any dropped
+ * reports — status moves to 'checked' and a stale assessment is reset, since
+ * it was scored against the previous corrections.
+ */
+export async function staffRecheckEssay(
+  scope: LanguageCheckStaffScope,
+  id: string,
+  patch: {
+    checkedText: string
+    corrections: LanguageCheckError[]
+    checkModel: string
+    droppedCount: number
+  },
+): Promise<boolean> {
+  // Scope check first (same pattern as setStaffAssessment): out-of-scope
+  // essays look identical to missing ones, and nothing is written.
+  const essay = await getStaffEssay(scope, id)
+  if (!essay) return false
+  await getPool().query(
+    `UPDATE language_check_essays
+     SET status = 'checked',
+         checked_text = $1,
+         corrections = $2::jsonb,
+         check_model = $3,
+         dropped_count = $4,
+         assessment = NULL
+     WHERE id = $5`,
+    [
+      patch.checkedText,
+      JSON.stringify(patch.corrections),
+      patch.checkModel,
+      patch.droppedCount,
+      id,
+    ],
+  )
+  return true
+}

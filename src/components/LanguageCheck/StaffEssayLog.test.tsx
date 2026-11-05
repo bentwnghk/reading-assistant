@@ -23,6 +23,20 @@ vi.mock("sonner", () => ({
   toast: { error: vi.fn(), success: vi.fn() },
 }));
 
+// The check pipeline (AI calls, toasts, abort) is exercised elsewhere; here
+// we only verify the dialog wiring: the button must fire runStaffCheck with
+// the open essay and refresh everything afterwards.
+const { runStaffCheckSpy } = vi.hoisted(() => ({
+  runStaffCheckSpy: vi.fn(),
+}));
+
+vi.mock("@/hooks/useLanguageCheck", () => ({
+  default: () => ({
+    runStaffCheck: runStaffCheckSpy,
+    assessLanguage: vi.fn(),
+  }),
+}));
+
 interface FixtureRow {
   id: string;
   userId: string;
@@ -37,6 +51,45 @@ const ALL_ROWS: FixtureRow[] = [
 ];
 
 const staffRequests: string[] = [];
+const detailRequests: string[] = [];
+
+/** Mutable staff detail fixture (view dialog), re-set in beforeEach. */
+let detailFixture: Record<string, unknown>;
+
+function makeDetail(): Record<string, unknown> {
+  return {
+    id: "e1",
+    userId: "alice",
+    userName: "Alice",
+    userEmail: "alice@example.com",
+    title: "Alice essay",
+    status: "checked",
+    pageCount: 1,
+    errorCount: 1,
+    overall: null,
+    wordCount: 4,
+    createdAt: Date.now() - 1000,
+    updatedAt: Date.now() - 1000,
+    transcript: "He go to school.",
+    checkedText: "He go to school.",
+    corrections: [
+      {
+        id: "c1",
+        start: 0,
+        end: 2,
+        original: "He",
+        correction: "He goes",
+        category: "subject-verb-agreement",
+        explanation: "Third person singular takes -s.",
+        explanationZh: "第三人稱單數動詞要加 s。",
+      },
+    ],
+    ocrModel: "gpt-6-luna",
+    checkModel: "gpt-6.1-sol",
+    droppedCount: 0,
+    assessment: null,
+  };
+}
 
 function staffResponse(url: URL) {
   const userId = url.searchParams.get("userId");
@@ -78,6 +131,10 @@ function staffResponse(url: URL) {
 
 beforeEach(() => {
   staffRequests.length = 0;
+  detailRequests.length = 0;
+  detailFixture = makeDetail();
+  runStaffCheckSpy.mockReset();
+  runStaffCheckSpy.mockResolvedValue(true);
   // cmdk needs ResizeObserver, absent in jsdom
   if (!("ResizeObserver" in globalThis)) {
     (globalThis as Record<string, unknown>).ResizeObserver = class {
@@ -123,6 +180,21 @@ beforeEach(() => {
         ok: true,
         json: async () => staffResponse(url),
       } as Response;
+    }
+    // Staff detail (view dialog) — exact match wins over the [id] prefix.
+    const detailMatch = url.pathname.match(
+      /^\/api\/grammar-check\/staff\/([^/]+)$/,
+    );
+    if (detailMatch) {
+      detailRequests.push(detailMatch[1]);
+      return {
+        ok: true,
+        json: async () => detailFixture,
+      } as Response;
+    }
+    // The caller's own essay list (languageCheck store loadList refresh).
+    if (url.pathname === "/api/grammar-check") {
+      return { ok: true, json: async () => [] } as Response;
     }
     throw new Error(`unexpected fetch: ${url.pathname}`);
   });
@@ -231,5 +303,80 @@ describe("StaffEssayLog filters", () => {
     await waitFor(() => {
       expect(staffRequests[staffRequests.length - 1]).toContain("page=1");
     });
+  });
+});
+
+describe("StaffEssayLog view dialog re-check", () => {
+  /** The View button of the table row whose title cell is `title`. */
+  function viewButtonForRow(title: string): HTMLButtonElement {
+    const row = screen.getByText(title).closest("tr");
+    if (!row) throw new Error(`row ${title} not found`);
+    const button = row.querySelector("button");
+    if (!button) throw new Error(`view button for ${title} not found`);
+    return button as HTMLButtonElement;
+  }
+
+  function buttonByText(label: string): HTMLButtonElement {
+    const el = screen.getByText(label).closest("button");
+    if (!el) throw new Error(`button ${label} not found`);
+    return el as HTMLButtonElement;
+  }
+
+  /** Opens the dialog and waits for the check button to appear. */
+  async function openDialog(label: string) {
+    fireEvent.click(viewButtonForRow("Alice essay"));
+    await screen.findByText(label);
+  }
+
+  it("Check again runs the staff check on the open essay, then refreshes", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    await openDialog("languageCheck.results.recheck");
+
+    const listBefore = staffRequests.length;
+    const detailBefore = detailRequests.length;
+    fireEvent.click(buttonByText("languageCheck.results.recheck"));
+
+    await waitFor(() => expect(runStaffCheckSpy).toHaveBeenCalledTimes(1));
+    expect(runStaffCheckSpy).toHaveBeenCalledWith({
+      id: "e1",
+      transcript: "He go to school.",
+    });
+    // A finished re-check re-fetches the dialog AND the table.
+    await waitFor(() => {
+      expect(detailRequests.length).toBeGreaterThan(detailBefore);
+      expect(staffRequests.length).toBeGreaterThan(listBefore);
+    });
+  });
+
+  it("disables Check again for essays past the retention window", async () => {
+    detailFixture = { ...makeDetail(), createdAt: 0 };
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    await openDialog("languageCheck.results.recheck");
+
+    const button = buttonByText("languageCheck.results.recheck");
+    expect(button.disabled).toBe(true);
+    expect(button.title).toBe("languageCheck.results.expiredDisabled");
+    expect(runStaffCheckSpy).not.toHaveBeenCalled();
+  });
+
+  it("disables the check when there is no transcript to check", async () => {
+    detailFixture = {
+      ...makeDetail(),
+      status: "draft",
+      transcript: "",
+      checkedText: "",
+      corrections: [],
+    };
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    // Unchecked essay: the button offers a first check instead.
+    await openDialog("languageCheck.review.runCheck");
+
+    const button = buttonByText("languageCheck.review.runCheck");
+    expect(button.disabled).toBe(true);
+    expect(button.title).toBe("languageCheck.check.noText");
+    expect(runStaffCheckSpy).not.toHaveBeenCalled();
   });
 });

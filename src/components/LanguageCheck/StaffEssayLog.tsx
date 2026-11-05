@@ -9,6 +9,7 @@ import {
   LoaderCircle,
   RefreshCw,
   Search,
+  Square,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -33,11 +34,18 @@ import {
   ExplanationLanguageToggle,
   STATUS_TONE,
 } from "@/components/LanguageCheck/shared";
-import { useLanguageCheckStore } from "@/store/languageCheck";
+import useLanguageCheck from "@/hooks/useLanguageCheck";
+import {
+  abortLanguageCheck,
+  useLanguageCheckStore,
+} from "@/store/languageCheck";
 import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
 import { parseError } from "@/utils/error";
-import { LANGUAGE_CHECK_STATUSES } from "@/constants/languageCheck";
+import {
+  LANGUAGE_CHECK_RETENTION_DAYS,
+  LANGUAGE_CHECK_STATUSES,
+} from "@/constants/languageCheck";
 
 interface StaffListResponse {
   rows: LanguageCheckStaffRow[];
@@ -62,8 +70,11 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50];
 export default function StaffEssayLog({ classId: classProp, userId: userProp }: StaffEssayLogProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
+  const { runStaffCheck } = useLanguageCheck();
   const language = useLanguageCheckStore((s) => s.explanationLanguage);
   const setLanguage = useLanguageCheckStore((s) => s.setExplanationLanguage);
+  const generating = useLanguageCheckStore((s) => s.activeGenerations);
+  const generatingId = useLanguageCheckStore((s) => s.generatingEssayId);
   const role = session?.user?.role;
 
   const [data, setData] = useState<StaffListResponse | null>(null);
@@ -147,6 +158,26 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     }
   }
 
+  // Re-check the open student's essay. The generation pipeline (toasts,
+  // progress, abort, the one-at-a-time guard) is shared with the owner
+  // workspace; only the persist step goes through the staff endpoint.
+  const checkRunning =
+    !!detail && generatingId === detail.id && !!generating["language-check"];
+
+  async function handleStaffRecheck() {
+    if (!detail) return;
+    const ok = await runStaffCheck({
+      id: detail.id,
+      transcript: detail.transcript,
+    });
+    if (!ok) return;
+    // Refresh the dialog, this table — and the caller's own essay list in
+    // the languageCheck store (they may be the uploader of this essay, in
+    // which case its summary is cached there too).
+    void useLanguageCheckStore.getState().loadList(true);
+    await Promise.all([openDetail(detail.id), load()]);
+  }
+
   if (!isStaff) {
     return null;
   }
@@ -165,6 +196,25 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     { label: t("languageCheck.staff.statStudents"), value: stats?.students },
     { label: t("languageCheck.staff.statPages"), value: stats?.pages },
   ];
+
+  // Re-check availability — same archive semantics as the owner workspace:
+  // past the retention window the essay stays viewable but stops mutating,
+  // and without a transcript there is nothing to check.
+  const detailExpired =
+    !!detail &&
+    Date.now() - detail.createdAt >=
+      LANGUAGE_CHECK_RETENTION_DAYS * 86_400_000;
+  const hasTranscript = !!detail?.transcript.trim();
+  const recheckDisabled =
+    checkRunning ||
+    !!generating["language-check"] ||
+    !hasTranscript ||
+    detailExpired;
+  const recheckTitle = !hasTranscript
+    ? t("languageCheck.check.noText")
+    : detailExpired
+      ? t("languageCheck.results.expiredDisabled")
+      : undefined;
 
   return (
     <section className="flex flex-col gap-3">
@@ -418,7 +468,38 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                   {detail.checkModel &&
                     ` · ${t("languageCheck.results.checkedWith", { model: detail.checkModel })}`}
                 </p>
-                <ExplanationLanguageToggle language={language} onChange={setLanguage} />
+                <div className="flex flex-wrap items-center gap-2">
+                  {checkRunning && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => abortLanguageCheck("language-check")}
+                    >
+                      <Square className="mr-1.5 h-3.5 w-3.5" />
+                      {t("languageCheck.stop")}
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={recheckDisabled}
+                    title={recheckTitle}
+                    onClick={() => void handleStaffRecheck()}
+                  >
+                    {checkRunning ? (
+                      <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="mr-1.5 h-4 w-4" />
+                    )}
+                    {detail.status === "checked"
+                      ? t("languageCheck.results.recheck")
+                      : t("languageCheck.review.runCheck")}
+                  </Button>
+                  <ExplanationLanguageToggle
+                    language={language}
+                    onChange={setLanguage}
+                  />
+                </div>
               </div>
 
               {detail.status === "checked" && detail.checkedText ? (

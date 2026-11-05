@@ -51,3 +51,17 @@ export const patchSchema = z.object({
   droppedCount: z.number().int().min(0).max(1000).optional(),
   assessment: storedAssessmentSchema.nullable().optional(),
 })
+
+/**
+ * Staff-initiated re-check results (POST /api/grammar-check/staff/[id]/recheck).
+ * Only the fields a finished check produces are accepted — status is forced
+ * to 'checked' and the assessment is reset server-side — so a staff caller
+ * can never touch the transcript, title or anything else on a learner's
+ * essay through this route.
+ */
+export const staffRecheckSchema = z.object({
+  checkedText: z.string().max(LANGUAGE_CHECK_MAX_TRANSCRIPT_CHARS),
+  corrections: z.array(errorSchema).max(500),
+  checkModel: z.string().max(100),
+  droppedCount: z.number().int().min(0).max(1000),
+})

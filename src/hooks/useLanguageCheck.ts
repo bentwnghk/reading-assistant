@@ -293,14 +293,29 @@ export default function useLanguageCheck() {
     }
   }
 
-  /** Runs the grammar check on the essay's current transcript. */
-  async function runCheck(essayId: string): Promise<boolean> {
-    const store = useLanguageCheckStore.getState();
-    if (store.activeGenerations["language-check"]) return false;
-    const essay = store.active;
-    if (!essay || essay.id !== essayId) return false;
+  /** Result of a finished check run, handed to the caller's persist step. */
+  interface CheckRunResult {
+    checkedText: string;
+    corrections: LanguageCheckError[];
+    checkModel: string;
+    droppedCount: number;
+  }
 
-    const text = essay.transcript;
+  /**
+   * Shared check pipeline: chunk the transcript → one AI call per chunk →
+   * anchor the reports → persist. Used by the owner workspace (`runCheck`,
+   * persists through the owner essay PATCH) and the staff essay log
+   * (`runStaffCheck`, persists through the scope-checked staff endpoint).
+   * Generation state lives in the languageCheck store, so only one check can
+   * run at a time app-wide and spinners survive SPA navigation.
+   */
+  async function runCheckPipeline(
+    essayId: string,
+    text: string,
+    persist: (result: CheckRunResult) => Promise<void>,
+  ): Promise<boolean> {
+    if (useLanguageCheckStore.getState().activeGenerations["language-check"])
+      return false;
     const paragraphs = splitParagraphs(text);
     if (paragraphs.length === 0) {
       toast.error(i18next.t("languageCheck.check.noText"));
@@ -315,8 +330,8 @@ export default function useLanguageCheck() {
       duration: Infinity,
       description: i18next.t("languageCheck.check.waitHint"),
     });
-    store.setGenerating("language-check", true);
-    store.setGeneratingEssayId(essayId);
+    useLanguageCheckStore.getState().setGenerating("language-check", true);
+    useLanguageCheckStore.getState().setGeneratingEssayId(essayId);
 
     try {
       const chunks = chunkParagraphs(paragraphs);
@@ -345,14 +360,11 @@ export default function useLanguageCheck() {
       }
 
       const { errors, dropped } = resolveErrors(text, rawAll);
-      await useLanguageCheckStore.getState().save(essayId, {
-        transcript: text,
-        status: "checked",
+      await persist({
         checkedText: text,
         corrections: errors,
         checkModel: languageCheckModel,
         droppedCount: dropped + invalid,
-        assessment: null,
       });
 
       if (errors.length === 0) {
@@ -385,6 +397,49 @@ export default function useLanguageCheck() {
       s.setGenerating("language-check", false);
       s.setGeneratingEssayId(null);
     }
+  }
+
+  /** Runs the grammar check on the essay's current transcript. */
+  async function runCheck(essayId: string): Promise<boolean> {
+    const essay = useLanguageCheckStore.getState().active;
+    if (!essay || essay.id !== essayId) return false;
+    return runCheckPipeline(essayId, essay.transcript, async (result) => {
+      await useLanguageCheckStore.getState().save(essayId, {
+        transcript: essay.transcript,
+        status: "checked",
+        ...result,
+        assessment: null,
+      });
+    });
+  }
+
+  /**
+   * Staff re-check of a learner's essay from the staff essay log dialog. The
+   * essay belongs to a student inside the caller's staff scope (not
+   * necessarily the caller), so results persist through the scope-checked
+   * staff endpoint rather than the owner PATCH. A fresh check resets any
+   * saved assessment server-side, exactly like an owner re-check.
+   */
+  async function runStaffCheck(
+    essay: Pick<LanguageCheckStaffDetail, "id" | "transcript">,
+  ): Promise<boolean> {
+    return runCheckPipeline(essay.id, essay.transcript, async (result) => {
+      const res = await fetch(`/api/grammar-check/staff/${essay.id}/recheck`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result),
+      });
+      if (!res.ok) {
+        let message = `Request failed (${res.status})`;
+        try {
+          const body = (await res.json()) as { error?: string };
+          if (body.error) message = body.error;
+        } catch {
+          // Non-JSON body — keep the generic message.
+        }
+        throw new Error(message);
+      }
+    });
   }
 
   /** Stateless Language (L) assessment of a checked essay (1-7 scale). */
@@ -423,5 +478,5 @@ export default function useLanguageCheck() {
     }
   }
 
-  return { transcribe, runCheck, assessLanguage, generate: generateWithFallback };
+  return { transcribe, runCheck, runStaffCheck, assessLanguage, generate: generateWithFallback };
 }
