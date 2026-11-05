@@ -131,6 +131,37 @@ export async function getVocabularyStats(
   };
 }
 
+/**
+ * Battle-eligible vocabulary count for the spelling-battle lobby's word-count
+ * buttons: words AND phrases (the battle resolver is not type-scoped), hidden
+ * rows excluded, with the same strategy filters the realtime resolver applies
+ * when resolving a room's word source (fetchVocabulary in
+ * realtime/src/game/words.ts). Keep the WHERE clauses in sync with it.
+ */
+export async function countVocabularyForBattle(
+  userId: string,
+  filter: VocabularyFilter = "random"
+): Promise<number> {
+  const pool = getPool();
+  let query = `SELECT COUNT(*)::int AS count
+     FROM user_vocabulary uv
+     WHERE uv.user_id = $1 AND uv.hidden_at = 0`;
+  const params: unknown[] = [userId];
+  if (filter === "due") {
+    query += ` AND (uv.next_review_at = 0 OR uv.next_review_at <= $2)`;
+    params.push(Date.now());
+  } else if (filter === "hardest") {
+    query += ` AND uv.rating = 'hard'`;
+  } else if (filter === "newest") {
+    query += ` AND uv.mastery_level = 0 AND uv.review_count = 0`;
+  } else if (filter === "weakest") {
+    query += ` AND uv.review_count > 0`;
+  }
+  // "all" and "random" → no extra filter (mirrors fetchVocabulary).
+  const { rows } = await pool.query<{ count: number }>(query, params);
+  return Number(rows[0]?.count ?? 0);
+}
+
 function isMultiWordEntry(word: string): boolean {
   return word.trim().split(/\s+/).length > 1;
 }

@@ -1,8 +1,24 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
-import { getUserVocabulary, getVocabularyStats, getVocabularyDueForReview, deleteVocabularyWords } from "@/lib/vocabulary";
+import { getUserVocabulary, getVocabularyStats, getVocabularyDueForReview, deleteVocabularyWords, countVocabularyForBattle } from "@/lib/vocabulary";
 import { canViewStudentVocabulary } from "@/lib/users";
+
+// Derived from the global VocabularyFilter union (types.d.ts) so a new filter
+// value fails the type check here until it is added (and mirrored in
+// realtime/src/game/words.ts fetchVocabulary).
+const VOCABULARY_FILTERS = [
+  "all",
+  "due",
+  "hardest",
+  "newest",
+  "random",
+  "weakest",
+] as const satisfies readonly VocabularyFilter[];
+
+const countSchema = z.object({
+  filter: z.enum(VOCABULARY_FILTERS).default("random"),
+});
 
 const deleteSchema = z.object({
   ids: z
@@ -71,6 +87,21 @@ export async function GET(request: Request) {
     if (type === "stats") {
       const stats = await getVocabularyStats(targetUserId);
       return NextResponse.json(stats);
+    }
+
+    // Spelling-battle lobby: how many entries (words + phrases) the caller's
+    // bank can supply for a battle word source, with the resolver's strategy
+    // filter. Read-only; the lobby never passes userId, so this is always the
+    // caller's own bank.
+    if (type === "count") {
+      const parsed = countSchema.safeParse({
+        filter: searchParams.get("filter") ?? undefined,
+      });
+      if (!parsed.success) {
+        return NextResponse.json({ error: "Invalid filter" }, { status: 400 });
+      }
+      const count = await countVocabularyForBattle(targetUserId, parsed.data.filter);
+      return NextResponse.json({ count });
     }
 
     if (type === "due") {

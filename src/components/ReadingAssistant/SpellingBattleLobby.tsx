@@ -33,6 +33,7 @@ import copy from "copy-to-clipboard";
 
 import { useSpellingBattle } from "@/hooks/useSpellingBattle";
 import { useBattleStore } from "@/store/battle";
+import { useReadingStore } from "@/store/reading";
 import { cn } from "@/utils/style";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -88,8 +88,19 @@ const BASE_MODES: SpellingGameMode[] = ["listen-type", "scramble", "fill-blanks"
 // Minimum words a battle's word source must supply. Mirror of
 // MIN_BATTLE_WORDS in `realtime/src/game/words.ts` (the server enforces it on
 // every resolved source; this copy gates the "selected words" pre-check and
-// the word-count slider). Keep both sides in sync.
+// the word-count buttons). Keep both sides in sync.
 const MIN_BATTLE_WORDS = 10;
+
+/** Word-count buttons (mirrors the solo spelling setup's count options). */
+const WORD_COUNT_OPTIONS = [10, 20, 30];
+
+/**
+ * Fallback "All" request when the source's available count is unknown (the
+ * vocabulary count fetch failed). The server caps the request to whatever the
+ * source actually resolves to (`resolveWordList`), so an oversized number is
+ * always safe.
+ */
+const ALL_WORDS_FALLBACK = 9999;
 
 export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, onExit }: SpellingBattleLobbyProps) {
   const { t } = useTranslation();
@@ -110,7 +121,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
   // whole word from memory (all underscores shown).
   const [fullBlank, setFullBlank] = useState(false);
   const [difficulty, setDifficulty] = useState<SpellingDifficulty>("medium");
-  const [wordCount, setWordCount] = useState(10);
+  const [wordCountLimit, setWordCountLimit] = useState<number | "all">(MIN_BATTLE_WORDS);
   const [timed, setTimed] = useState(true);
   const [classBattle, setClassBattle] = useState(false);
   const [targetClassId, setTargetClassId] = useState<string>("");
@@ -122,6 +133,10 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
   const [reviewLists, setReviewLists] = useState<{ id: string; name: string; wordCount: number }[]>([]);
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [rosters, setRosters] = useState<AssignmentPreset[]>([]);
+  // Battle-eligible count (words + phrases) of the host's vocabulary bank for
+  // the current strategy filter. null = unknown (fetch pending or failed) —
+  // the word-count buttons then impose no restriction.
+  const [vocabAvailable, setVocabAvailable] = useState<number | null>(null);
 
   // ── Join form ────────────────────────────────────────────────────────────
   const [joinCode, setJoinCode] = useState("");
@@ -159,6 +174,28 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
       .catch(() => {});
   }, [canHostClassBattle]);
 
+  // Vocabulary-bank availability for the word-count buttons. The vocabulary
+  // store is only loaded on the /vocabulary page, so the lobby fetches a
+  // lightweight count instead — matching exactly what the realtime resolver
+  // will pull (words + phrases, hidden excluded, strategy filter applied).
+  // Failure leaves it null (unknown → no button restriction).
+  useEffect(() => {
+    if (sourceType !== "vocabulary") return;
+    let cancelled = false;
+    fetch(`/api/vocabulary?type=count&filter=${encodeURIComponent(vocabFilter)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { count?: number } | null) => {
+        if (cancelled) return;
+        setVocabAvailable(data && typeof data.count === "number" ? data.count : null);
+      })
+      .catch(() => {
+        if (!cancelled) setVocabAvailable(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sourceType, vocabFilter]);
+
   const buildSource = useCallback((): WordSource => {
     switch (sourceType) {
       case "glossary":
@@ -171,6 +208,51 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
         return { type: "selected", words: selectedWords ?? [] };
     }
   }, [sourceType, defaultGlossarySessionId, vocabFilter, reviewListId, selectedWords]);
+
+  // ── Word-count availability (drives the word-count buttons) ─────────────
+  // Total words the selected source can supply; null = unknown (review lists
+  // still loading, or the vocabulary count fetch failed) → no restriction.
+  const readingGlossary = useReadingStore((s) => s.glossary);
+  let availableWords: number | null = null;
+  switch (sourceType) {
+    case "glossary":
+      // Only offered when a reading-session id was passed, so the reading
+      // store's glossary is the same session the server will read.
+      if (defaultGlossarySessionId) availableWords = readingGlossary.length;
+      break;
+    case "selected":
+      availableWords = selectedWords?.length ?? 0;
+      break;
+    case "review-list":
+      availableWords = reviewLists.find((rl) => rl.id === reviewListId)?.wordCount ?? null;
+      break;
+    case "vocabulary":
+      availableWords = vocabAvailable;
+      break;
+  }
+
+  // Buttons 10 / 20 / 30; the first option larger than the source's available
+  // words is replaced by an "All" button (every remaining option is larger
+  // still, so it is dropped too) — same shape as the solo spelling setup.
+  // "All" is itself disabled when the source cannot supply a battle at all
+  // (fewer than MIN_BATTLE_WORDS — the server would reject the room).
+  const allDisabled = availableWords !== null && availableWords < MIN_BATTLE_WORDS;
+  const wordCountButtons: (number | "all")[] = [];
+  for (const n of WORD_COUNT_OPTIONS) {
+    if (availableWords !== null && n > availableWords) {
+      wordCountButtons.push("all");
+      break;
+    }
+    wordCountButtons.push(n);
+  }
+
+  // A count picked on a roomier source becomes invalid after switching to a
+  // smaller one — collapse to "All" (the button that replaced it).
+  useEffect(() => {
+    if (availableWords !== null && wordCountLimit !== "all" && wordCountLimit > availableWords) {
+      setWordCountLimit("all");
+    }
+  }, [availableWords, wordCountLimit]);
 
   const handleCreate = useCallback(() => {
     const source = buildSource();
@@ -190,6 +272,13 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
       toast.error(t(`${M}.errors.needClass`));
       return;
     }
+    // "All" sends the source's exact available count (the server caps to what
+    // actually resolves); when that count is unknown, an oversized request is
+    // equally capped — so both land on "everything the source has".
+    const wordCount =
+      wordCountLimit === "all"
+        ? availableWords ?? ALL_WORDS_FALLBACK
+        : wordCountLimit;
     battle.clearError();
     battle.createRoom({
       config: { source, difficulty, gameMode, wordCount, timed, classBattle, fullBlank },
@@ -197,7 +286,7 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
       targetPresetId: classBattle && targetPresetId ? targetPresetId : undefined,
       hostAsSpectator: canHostClassBattle && hostAsSpectator ? true : undefined,
     });
-  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, targetPresetId, hostAsSpectator, canHostClassBattle, difficulty, gameMode, fullBlank, wordCount, timed, battle, t]);
+  }, [buildSource, defaultGlossarySessionId, reviewListId, classBattle, targetClassId, targetPresetId, hostAsSpectator, canHostClassBattle, difficulty, gameMode, fullBlank, wordCountLimit, availableWords, timed, battle, t]);
 
   const handleJoin = useCallback(() => {
     if (joinCode.trim().length < 4) {
@@ -546,17 +635,26 @@ export function SpellingBattleLobby({ defaultGlossarySessionId, selectedWords, o
 
           {/* Word count */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs uppercase text-muted-foreground">{t(`reading.glossary.spelling.selectWordCount`)}</Label>
-              <Badge variant="secondary">{wordCount}</Badge>
+            <Label className="text-xs uppercase text-muted-foreground">{t(`reading.glossary.spelling.selectWordCount`)}</Label>
+            <div className="flex flex-wrap gap-2">
+              {wordCountButtons.map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setWordCountLimit(opt)}
+                  disabled={opt === "all" && allDisabled}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg border-2 transition-all text-sm font-medium",
+                    wordCountLimit === opt
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:border-primary/50",
+                    opt === "all" && allDisabled && "cursor-not-allowed opacity-50"
+                  )}
+                >
+                  {opt === "all" ? t("reading.glossary.allWords") : opt}
+                </button>
+              ))}
             </div>
-            <Slider
-              value={[wordCount]}
-              min={MIN_BATTLE_WORDS}
-              max={30}
-              step={1}
-              onValueChange={(v) => setWordCount(v[0] ?? MIN_BATTLE_WORDS)}
-            />
           </div>
 
           {/* Speed bonus toggle (per-word timer always applies; this only enables the speed-point bonus) */}
