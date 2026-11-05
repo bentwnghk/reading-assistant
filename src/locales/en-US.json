@@ -4738,7 +4738,7 @@
         },
         "assessment": {
           "name": "AI Language Assessment",
-          "desc": "After checking, score the writing against the HKDSE \"Language (L)\" rubric — an overall 0–7 band, five sub-scores and bilingual feedback. The overall also shows in the essay list. Details in the Results tab."
+          "desc": "After checking, score the writing against the HKDSE \"Language (L)\" rubric — an overall 0–7 band, five sub-scores and bilingual feedback. The overall also shows in the essay list. Students get one assessment per essay — staff can re-assess. Details in the Results tab."
         },
         "retention": {
           "name": "Storage & Privacy",
@@ -4784,7 +4784,7 @@
         },
         "assessment": {
           "name": "AI Language Assessment",
-          "desc": "Press \"Get AI assessment\" to score the writing on the HKDSE \"Language (L)\" rubric: an overall 0–7 band, five sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve. It is saved with the essay — the overall also shows in the essay list — and can be re-run anytime."
+          "desc": "Press \"Get AI assessment\" to score the writing on the HKDSE \"Language (L)\" rubric: an overall 0–7 band, five sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve. It is saved with the essay and the overall also shows in the essay list. Students get one assessment per essay — the saved result stays on the essay and cannot be re-run; teachers, admins and super-admins can re-assess it."
         },
         "filter": {
           "name": "Category Filter",
