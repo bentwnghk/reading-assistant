@@ -273,6 +273,26 @@ export async function updateEssay(
   return (result.rowCount ?? 0) > 0
 }
 
+/**
+ * Does this essay already carry a saved assessment (scoped to the owner /
+ * staff uploader)? Students may save the FIRST assessment of an essay but
+ * never replace an existing one — an assessed essay is final for them, and
+ * only staff (staff-log route, or the owner PATCH as uploader) may
+ * re-assess it.
+ */
+export async function essayHasAssessment(
+  userId: string,
+  id: string,
+): Promise<boolean> {
+  const { rowCount } = await getPool().query(
+    `SELECT 1 FROM language_check_essays
+     WHERE id = $1 AND assessment IS NOT NULL
+       AND (user_id = $2 OR uploaded_by = $2)`,
+    [id, userId],
+  )
+  return (rowCount ?? 0) > 0
+}
+
 export async function deleteEssay(
   userId: string,
   id: string,

@@ -364,6 +364,11 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   // they are built from and recorded against the owner (the student).
   const ownedByViewer = !essay.ownerId || essay.ownerId === session?.user?.id;
 
+  // Students cannot re-assess an assessed essay (server-enforced too);
+  // staff keep the re-assess action for their own and uploaded essays.
+  const role = session?.user?.role;
+  const isStaff = role === "teacher" || role === "admin" || role === "super-admin";
+
   // Past the retention window the essay becomes a read-only archive: the
   // scans are purged server-side, so scan/edit/recheck are disabled while
   // the transcript and corrections stay viewable.
@@ -610,10 +615,12 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
           <AssessmentPanel
             essay={essay}
             language={language}
+            allowReassess={isStaff}
             onSave={(assessment) =>
               useLanguageCheckStore.getState().save(essay.id, { assessment })
             }
           />
+
           {essay.corrections.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-xl border bg-card p-10 text-center">
               <SpellCheck className="h-8 w-8 text-green-600" />

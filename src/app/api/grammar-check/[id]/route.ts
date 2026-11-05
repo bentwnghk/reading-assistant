@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { parseError } from "@/utils/error"
-import { getEssay, updateEssay, deleteEssay } from "@/lib/language-check"
+import {
+  getEssay,
+  updateEssay,
+  deleteEssay,
+  essayHasAssessment,
+  isStaffRole,
+} from "@/lib/language-check"
 import { patchSchema } from "@/lib/language-check-schema"
 
 type Ctx = { params: Promise<{ id: string }> }
@@ -37,6 +43,20 @@ export async function PATCH(request: NextRequest, context: Ctx) {
         { error: "Invalid request body", details: parsed.error.flatten() },
         { status: 400 },
       )
+    }
+    // Students cannot re-assess an assessed essay: the first saved
+    // assessment is final for them. Only staff may replace one (staff log
+    // route, or here when the staff caller is the essay's uploader). A null
+    // assessment (the reset a fresh check writes) is still allowed — it
+    // makes the essay assessable again against the new corrections.
+    if (parsed.data.assessment && !isStaffRole(session.user.role)) {
+      const assessed = await essayHasAssessment(session.user.id, id)
+      if (assessed) {
+        return NextResponse.json(
+          { error: "Essay already assessed" },
+          { status: 403 },
+        )
+      }
     }
     const ok = await updateEssay(session.user.id, id, parsed.data)
     if (!ok) {

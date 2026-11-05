@@ -15,6 +15,13 @@ interface AssessmentPanelProps {
     "id" | "checkedText" | "transcript" | "corrections" | "assessment"
   >;
   language: ExplanationLanguage;
+  /**
+   * Whether an essay that already carries an assessment may be assessed
+   * again. False for students in the owner workspace — their saved result
+   * stays visible but becomes read-only (only staff may re-assess). Saving
+   * the FIRST assessment is always allowed. Defaults to true (staff log).
+   */
+  allowReassess?: boolean;
   /** Persists a fresh assessment; throwing shows a toast (result is still shown). */
   onSave: (assessment: LanguageCheckAssessment) => Promise<void>;
 }
@@ -26,7 +33,12 @@ function tone(score: number): string {
   return "bg-rose-500";
 }
 
-export default function AssessmentPanel({ essay, language, onSave }: AssessmentPanelProps) {
+export default function AssessmentPanel({
+  essay,
+  language,
+  allowReassess = true,
+  onSave,
+}: AssessmentPanelProps) {
   const { t } = useTranslation();
   const { assessLanguage } = useLanguageCheck();
   const [fresh, setFresh] = useState<{
@@ -39,9 +51,11 @@ export default function AssessmentPanel({ essay, language, onSave }: AssessmentP
   // Ephemeral view state (like ResultsView's category filter): whether the
   // result body is expanded. A fresh assessment always expands it again.
   const [open, setOpen] = useState(true);
+  // Once an assessment exists, running again is a staff-only action.
+  const canRun = !result || allowReassess;
 
   async function run() {
-    if (loading) return;
+    if (loading || !canRun) return;
     setLoading(true);
     const id = essay.id;
     try {
@@ -119,24 +133,26 @@ export default function AssessmentPanel({ essay, language, onSave }: AssessmentP
             </p>
           </div>
         </div>
-        <Button
-          size="lg"
-          onClick={run}
-          disabled={loading}
-          variant={result ? "outline" : "default"}
-          className={cn(!result && "bg-violet-600 text-white hover:bg-violet-700")}
-        >
-          {loading ? (
-            <LoaderCircle className="h-4 w-4 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4" />
-          )}
-          {loading
-            ? t("languageCheck.assessment.working")
-            : result
-              ? t("languageCheck.assessment.again")
-              : t("languageCheck.assessment.button")}
-        </Button>
+        {canRun && (
+          <Button
+            size="lg"
+            onClick={run}
+            disabled={loading}
+            variant={result ? "outline" : "default"}
+            className={cn(!result && "bg-violet-600 text-white hover:bg-violet-700")}
+          >
+            {loading ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {loading
+              ? t("languageCheck.assessment.working")
+              : result
+                ? t("languageCheck.assessment.again")
+                : t("languageCheck.assessment.button")}
+          </Button>
+        )}
       </div>
 
       {result && open && (

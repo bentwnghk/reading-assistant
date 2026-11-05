@@ -10,6 +10,8 @@ const queries: Array<{ sql: string; values: unknown[] }> = [];
 let role: string | null = "teacher";
 /** canUploadForStudent result: how many rows the scope check finds. */
 let scopeRows = 1;
+/** essayHasAssessment result: 1 = the essay already carries an assessment. */
+let assessedRows = 0;
 
 vi.mock("@/auth", () => ({
   auth: async () => (role ? { user: { id: "teacher-1", role } } : null),
@@ -25,6 +27,8 @@ vi.mock("@/lib/db", () => ({
       const flat = sql.replace(/\s+/g, " ").trim();
       queries.push({ sql: flat, values: values ?? [] });
       if (flat.includes("SELECT 1 FROM users u")) return { rows: [], rowCount: scopeRows };
+      if (flat.startsWith("SELECT 1 FROM language_check_essays"))
+        return { rows: [], rowCount: assessedRows };
       if (flat.startsWith("WITH ins")) {
         return {
           rows: [
@@ -51,6 +55,8 @@ vi.mock("@/lib/db", () => ({
       }
       if (flat.includes("COUNT(*)::int AS n")) return { rows: [{ n: 0 }] };
       if (flat.startsWith("UPDATE language_check_essays SET title"))
+        return { rows: [], rowCount: 1 };
+      if (flat.startsWith("UPDATE language_check_essays SET assessment"))
         return { rows: [], rowCount: 1 };
       return { rows: [], rowCount: 0 };
     },
@@ -84,6 +90,7 @@ beforeEach(() => {
   queries.length = 0;
   role = "teacher";
   scopeRows = 1;
+  assessedRows = 0;
 });
 
 describe("POST /api/grammar-check (teacher upload)", () => {
@@ -147,5 +154,83 @@ describe("PATCH /api/grammar-check/[id] (uploader access)", () => {
       q.sql.startsWith("UPDATE language_check_essays SET title"),
     )!;
     expect(update.sql).toContain("OR uploaded_by = $");
+  });
+});
+
+// Students cannot re-assess an assessed essay: the first saved assessment is
+// final for them, while staff may always replace one. A null assessment (the
+// reset a fresh check writes) must keep flowing for everyone.
+describe("PATCH /api/grammar-check/[id] (student re-assessment lock)", () => {
+  const ASSESSMENT: LanguageCheckAssessment = {
+    overall: 5,
+    scores: {
+      grammar: 5,
+      sentenceStructure: 4,
+      vocabulary: 5,
+      spellingPunctuation: 6,
+      registerToneStyle: 4,
+    },
+    strengths: [{ en: "Clear topic sentence", zh: "主題句清晰" }],
+    weaknesses: [{ en: "Tense errors", zh: "時態錯誤" }],
+    assessedAt: 1700000000000,
+    model: "gpt-6.1-sol",
+  };
+
+  const assessmentPatch = () =>
+    queries.find((q) =>
+      q.sql.startsWith("UPDATE language_check_essays SET assessment"),
+    );
+
+  it("rejects a student saving a new assessment over the saved one", async () => {
+    role = "student";
+    assessedRows = 1;
+    const res = await PATCH(patch({ assessment: ASSESSMENT }), {
+      params: Promise.resolve({ id: "essay-1" }),
+    });
+    expect(res.status).toBe(403);
+    expect(assessmentPatch()).toBeUndefined();
+    // The lock is checked against the essay the caller owns/uploaded.
+    const guard = queries.find((q) =>
+      q.sql.startsWith("SELECT 1 FROM language_check_essays"),
+    )!;
+    expect(guard.sql).toContain("assessment IS NOT NULL");
+    expect(guard.sql).toContain("OR uploaded_by = $");
+    expect(guard.values[0]).toBe("essay-1");
+  });
+
+  it("lets a student save the FIRST assessment", async () => {
+    role = "student";
+    assessedRows = 0;
+    const res = await PATCH(patch({ assessment: ASSESSMENT }), {
+      params: Promise.resolve({ id: "essay-1" }),
+    });
+    expect(res.status).toBe(200);
+    expect(assessmentPatch()).toBeDefined();
+  });
+
+  it("lets staff replace a saved assessment", async () => {
+    role = "teacher";
+    assessedRows = 1;
+    const res = await PATCH(patch({ assessment: ASSESSMENT }), {
+      params: Promise.resolve({ id: "essay-1" }),
+    });
+    expect(res.status).toBe(200);
+    expect(assessmentPatch()).toBeDefined();
+    // No lock lookup for staff callers at all.
+    expect(
+      queries.find((q) =>
+        q.sql.startsWith("SELECT 1 FROM language_check_essays"),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("still lets a student PATCH the null reset a fresh check writes", async () => {
+    role = "student";
+    assessedRows = 1;
+    const res = await PATCH(patch({ assessment: null }), {
+      params: Promise.resolve({ id: "essay-1" }),
+    });
+    expect(res.status).toBe(200);
+    expect(assessmentPatch()).toBeDefined();
   });
 });
