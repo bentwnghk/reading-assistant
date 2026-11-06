@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
-// Teacher-uploaded essays: POST /api/grammar-check with a studentId must
+// Teacher-uploaded essays: POST /api/writing-assessment with a studentId must
 // create the row owned by the STUDENT (so it lists/opens/feeds Learn for
 // them exactly as a self-upload) with uploaded_by = the staff caller, and
 // refuse non-staff or out-of-scope callers without inserting anything.
@@ -92,7 +92,7 @@ function patch(body: unknown) {
   return {
     method: "PATCH",
     json: async () => body,
-    nextUrl: new URL("http://localhost/api/grammar-check/essay-1"),
+    nextUrl: new URL("http://localhost/api/writing-assessment/essay-1"),
   } as unknown as NextRequest;
 }
 
@@ -106,7 +106,7 @@ beforeEach(() => {
   assessedRows = 0;
 });
 
-describe("POST /api/grammar-check (teacher upload)", () => {
+describe("POST /api/writing-assessment (teacher upload)", () => {
   it("rejects anonymous callers", async () => {
     role = null;
     expect(
@@ -175,7 +175,7 @@ describe("POST /api/grammar-check (teacher upload)", () => {
   });
 });
 
-describe("PATCH /api/grammar-check/[id] (uploader access)", () => {
+describe("PATCH /api/writing-assessment/[id] (uploader access)", () => {
   it("lets the uploader patch via the user_id OR uploaded_by predicate", async () => {
     const res = await PATCH(patch({ title: "Renamed" }), {
       params: Promise.resolve({ id: "essay-1" }),
@@ -191,7 +191,7 @@ describe("PATCH /api/grammar-check/[id] (uploader access)", () => {
 // Students cannot re-assess an assessed essay: the first saved assessment is
 // final for them, while staff may always replace one. A null assessment (the
 // reset a fresh check writes) must keep flowing for everyone.
-describe("PATCH /api/grammar-check/[id] (student re-assessment lock)", () => {
+describe("PATCH /api/writing-assessment/[id] (student re-assessment lock)", () => {
   const ASSESSMENT: LanguageCheckAssessment = {
     overall: 5,
     scores: {

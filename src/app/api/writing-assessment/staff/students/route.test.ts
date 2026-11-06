@@ -28,7 +28,7 @@ import { GET } from "./route";
 
 function req(query = "") {
   return {
-    nextUrl: new URL(`http://localhost/api/grammar-check/staff/students?${query}`),
+    nextUrl: new URL(`http://localhost/api/writing-assessment/staff/students?${query}`),
   } as unknown as NextRequest;
 }
 

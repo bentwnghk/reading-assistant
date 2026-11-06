@@ -40,7 +40,7 @@ export default function LearnContainer() {
   useEffect(() => {
     if (!wanted) {
       if (session) router.replace(learnUrl(session.key));
-      else router.replace("/grammar-check?tab=learning");
+      else router.replace("/writing-assessment?tab=learning");
       return;
     }
     if (requested.current === wanted) return;
@@ -56,7 +56,7 @@ export default function LearnContainer() {
   }, [wanted]);
 
   useEffect(() => {
-    if (failed) router.replace("/grammar-check?tab=learning");
+    if (failed) router.replace("/writing-assessment?tab=learning");
   }, [failed, router]);
 
   if (!session || (wanted && session.key !== wanted)) {
@@ -161,7 +161,7 @@ function LearnWorkspace({ session }: { session: LearnSession }) {
 
   function leave() {
     void flush();
-    router.push("/grammar-check");
+    router.push("/writing-assessment");
   }
 
   const level = t(`reading.levels.${levelKeyForAge(session.age)}`);

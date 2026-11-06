@@ -159,7 +159,7 @@ export default function LanguageCheckContainer() {
         if (forClassId === "__mine__") qs.set("mine", "1");
         else if (forClassId) qs.set("classId", forClassId);
         const res = await fetch(
-          `/api/grammar-check/staff/students?${qs.toString()}`,
+          `/api/writing-assessment/staff/students?${qs.toString()}`,
           { signal: ac.signal },
         );
         if (!res.ok) return;

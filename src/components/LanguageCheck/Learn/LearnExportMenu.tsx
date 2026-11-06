@@ -60,7 +60,7 @@ export default function LearnExportMenu({
     setBusy(true);
     try {
       if (flushFirst) await useLanguageCheckLearnStore.getState().flush();
-      const res = await fetch(endpoint ?? `/api/grammar-check/learn/${sessionId}/export`);
+      const res = await fetch(endpoint ?? `/api/writing-assessment/learn/${sessionId}/export`);
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
       await exportLearnDocx({

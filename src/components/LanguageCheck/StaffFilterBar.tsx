@@ -43,7 +43,7 @@ export default function StaffFilterBar({
   role,
   value,
   onChange,
-  studentsEndpoint = "/api/grammar-check/staff/students",
+  studentsEndpoint = "/api/writing-assessment/staff/students",
   allowMine = false,
 }: StaffFilterBarProps) {
   const { t } = useTranslation();

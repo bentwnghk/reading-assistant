@@ -69,7 +69,7 @@ export const patchSchema = z.object({
 })
 
 /**
- * Staff-initiated re-check results (POST /api/grammar-check/staff/[id]/recheck).
+ * Staff-initiated re-check results (POST /api/writing-assessment/staff/[id]/recheck).
  * Only the fields a finished check produces are accepted — status is forced
  * to 'checked' and the assessment is reset server-side — so a staff caller
  * can never touch the transcript, title or anything else on a learner's

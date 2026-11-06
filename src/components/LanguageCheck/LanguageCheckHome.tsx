@@ -27,7 +27,7 @@ const SECTIONS: Section[] = ["essays", "learning"];
 const MINE_SECTIONS: Section[] = ["essays", "topics", "learning"];
 
 /**
- * Landing view of /grammar-check.
+ * Landing view of /writing-assessment.
  *
  *   Student   →  [ Essays | Learning ]
  *   Staff     →  [ My work | My students ]  +  [ Essays | Learning ]

@@ -66,7 +66,7 @@ function promptLabel(category: string): string {
   return category.replace(/-/g, " ");
 }
 
-const BASE = "/api/grammar-check/learn";
+const BASE = "/api/writing-assessment/learn";
 
 async function readError(res: Response): Promise<string> {
   try {

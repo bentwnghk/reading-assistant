@@ -52,7 +52,7 @@ interface StaffLearningProps {
 }
 
 /**
- * Staff "Student learning" tab on /grammar-check: class-level dashboard,
+ * Staff "Student learning" tab on /writing-assessment: class-level dashboard,
  * per-student progress over time, every learner's sessions (read only) and the
  * activity feed. Scope matches the essay log — teacher → students in their
  * classes, admin → their school, super-admin → everyone. Class and student come
@@ -99,7 +99,7 @@ export default function StaffLearning({ classId, userId, onPickStudent }: StaffL
       {tab === "activity" && (
         <LearnActivityLog
           key={`${range}|${classId}|${userId}`}
-          endpoint="/api/grammar-check/learn/staff/activity"
+          endpoint="/api/writing-assessment/learn/staff/activity"
           query={{ range: String(range), ...filters }}
           showUser
         />
@@ -130,7 +130,7 @@ function Overview({
   });
   for (const [k, v] of Object.entries(filters)) if (v) params.set(k, v);
   const { data, loading, error, reload } = useLanguageCheckLearnData<LearnStaffDashboardData>(
-    `/api/grammar-check/learn/staff/dashboard?${params.toString()}`,
+    `/api/writing-assessment/learn/staff/dashboard?${params.toString()}`,
   );
 
   // Any filter change goes back to the first page of students.
@@ -263,12 +263,12 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
   const { data, loading, error } = useLanguageCheckLearnData<{
     rows: LearnStaffSessionSummary[];
     total: number;
-  }>(`/api/grammar-check/learn/staff/sessions?${params.toString()}`);
+  }>(`/api/writing-assessment/learn/staff/sessions?${params.toString()}`);
 
   async function openDetail(id: string) {
     setDetailId(id);
     try {
-      const res = await fetch(`/api/grammar-check/learn/staff/sessions/${id}`);
+      const res = await fetch(`/api/writing-assessment/learn/staff/sessions/${id}`);
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
       setDetail(body as LearnStaffSessionDetailWire);
@@ -366,7 +366,7 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
                   <LearnExportMenu
                     sessionId={s.id}
                     status={s.status}
-                    endpoint={`/api/grammar-check/learn/staff/sessions/${s.id}`}
+                    endpoint={`/api/writing-assessment/learn/staff/sessions/${s.id}`}
                     variant="ghost"
                     iconOnly
                     includeStudentWork

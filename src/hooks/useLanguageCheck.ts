@@ -434,7 +434,7 @@ export default function useLanguageCheck() {
     }
   }
 
-  /** Runs the grammar check on the essay's current transcript. */
+  /** Runs the writing check on the essay's current transcript. */
   async function runCheck(essayId: string): Promise<boolean> {
     const essay = useLanguageCheckStore.getState().active;
     if (!essay || essay.id !== essayId) return false;
@@ -470,7 +470,7 @@ export default function useLanguageCheck() {
       >,
   ): Promise<boolean> {
     return runCheckPipeline(essay.id, essay.transcript, async (result) => {
-      const res = await fetch(`/api/grammar-check/staff/${essay.id}/recheck`, {
+      const res = await fetch(`/api/writing-assessment/staff/${essay.id}/recheck`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(result),

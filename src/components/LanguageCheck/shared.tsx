@@ -52,7 +52,7 @@ export interface SegmentedOption<T extends string> {
   title?: string;
 }
 
-/** Compact pill tab-switcher shared by every sub-view on /grammar-check. */
+/** Compact pill tab-switcher shared by every sub-view on /writing-assessment. */
 export function SegmentedTabs<T extends string>({
   value,
   onChange,

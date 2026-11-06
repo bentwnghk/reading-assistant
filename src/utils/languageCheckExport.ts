@@ -460,5 +460,5 @@ export async function exportLanguageCheckDocx({
 
   const blob = await Packer.toBlob(doc);
   const safeName = title.replace(/[\\/:*?"<>|]+/g, "").trim().slice(0, 60) || "essay";
-  saveAs(blob, `${safeName} - grammar check.docx`);
+  saveAs(blob, `${safeName} - writing assessment.docx`);
 }

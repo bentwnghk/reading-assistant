@@ -545,7 +545,7 @@ export function planLearnUnits(
 
 /** Where a learning session lives; the id is the database id, so it opens on any device. */
 export function learnUrl(id: string): string {
-  return `/grammar-check/learn?session=${encodeURIComponent(id)}`;
+  return `/writing-assessment/learn?session=${encodeURIComponent(id)}`;
 }
 
 // ─── Display ─────────────────────────────────────────────────────────────────

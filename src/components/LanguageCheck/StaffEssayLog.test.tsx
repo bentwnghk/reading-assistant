@@ -174,7 +174,7 @@ beforeEach(() => {
         ],
       } as Response;
     }
-    if (url.pathname === "/api/grammar-check/staff") {
+    if (url.pathname === "/api/writing-assessment/staff") {
       staffRequests.push(url.searchParams.toString());
       return {
         ok: true,
@@ -183,7 +183,7 @@ beforeEach(() => {
     }
     // Staff detail (view dialog) — exact match wins over the [id] prefix.
     const detailMatch = url.pathname.match(
-      /^\/api\/grammar-check\/staff\/([^/]+)$/,
+      /^\/api\/writing-assessment\/staff\/([^/]+)$/,
     );
     if (detailMatch) {
       detailRequests.push(detailMatch[1]);
@@ -193,7 +193,7 @@ beforeEach(() => {
       } as Response;
     }
     // The caller's own essay list (languageCheck store loadList refresh).
-    if (url.pathname === "/api/grammar-check") {
+    if (url.pathname === "/api/writing-assessment") {
       return { ok: true, json: async () => [] } as Response;
     }
     throw new Error(`unexpected fetch: ${url.pathname}`);

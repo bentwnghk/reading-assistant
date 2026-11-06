@@ -24,7 +24,7 @@ import { countWords } from "@/utils/languageCheck";
 
 interface ReviewStageProps {
   essay: LanguageCheckEssay;
-  /** Called after a successful grammar check (switches to the results view). */
+  /** Called after a successful writing check (switches to the results view). */
   onChecked: () => void;
 }
 

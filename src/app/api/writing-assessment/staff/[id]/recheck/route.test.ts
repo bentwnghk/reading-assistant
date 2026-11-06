@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
-// Staff re-check: POST /api/grammar-check/staff/[id]/recheck must re-validate
+// Staff re-check: POST /api/writing-assessment/staff/[id]/recheck must re-validate
 // the caller's staff scope against the essay's owner BEFORE writing, force
 // status = 'checked' + reset the assessment (a new check invalidates the old
 // one), and accept only the fields a finished check produces — the schema has
@@ -86,7 +86,7 @@ const scopeQuery = () =>
 const updateQuery = () =>
   queries.find((q) => q.sql.startsWith("UPDATE language_check_essays"));
 
-describe("POST /api/grammar-check/staff/[id]/recheck", () => {
+describe("POST /api/writing-assessment/staff/[id]/recheck", () => {
   it("rejects anonymous callers", async () => {
     role = null;
     expect((await POST(call(BODY), ctx())).status).toBe(401);

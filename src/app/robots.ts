@@ -13,7 +13,7 @@ export default function robots(): MetadataRoute.Robots {
           "/vocabulary",
           "/leaderboard",
           "/assignments",
-          "/grammar-check",
+          "/writing-assessment",
           "/image-viewer",
           "/unsubscribe",
           "/sw.js",

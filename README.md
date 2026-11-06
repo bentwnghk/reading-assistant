@@ -701,7 +701,7 @@ Full subscription lifecycle powered by Stripe for both individual users and scho
 
 ### 🔍 Writing Assessment (essay error correction)
 
-A standalone page (`/grammar-check`, opened from the hamburger menu) that is independent of reading sessions and has its own store and database table.
+A standalone page (`/writing-assessment`, opened from the hamburger menu) that is independent of reading sessions and has its own store and database table.
 
 | Step | What happens |
 |------|--------------|
@@ -809,7 +809,7 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes (AI, auth, admin, subscriptions, etc.)
 │   ├── assignments/       # Assignments page (list, detail, roster)
-│   ├── grammar-check/    # Writing Assessment page (essay OCR + error correction)
+│   ├── writing-assessment/    # Writing Assessment page (essay OCR + error correction)
 │   ├── leaderboard/       # Leaderboard page
 │   ├── vocabulary/        # My Vocabulary page
 │   ├── image-viewer/      # Standalone image viewer

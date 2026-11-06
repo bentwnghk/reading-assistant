@@ -5172,8 +5172,8 @@ export function UnderstandDifficultyMockup() {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   CHAPTER 06 — GRAMMAR CHECK (from reading to writing)
-   Faithful, static mockups of /grammar-check and its "Learn from
+   CHAPTER 06 — WRITING ASSESSMENT (from reading to writing)
+   Faithful, static mockups of /writing-assessment and its "Learn from
    your mistakes" session, mirroring:
      1. ReviewStage.tsx + ScanViewer.tsx   — scan ↔ transcript review
      2. ResultsView.tsx + ErrorSpan.tsx + CorrectionCard.tsx
@@ -5277,14 +5277,14 @@ const LC_TRANSCRIPT_P1 =
 const LC_TRANSCRIPT_P2 =
   "However, many citizens think recycling is troublesome. They rather throw everything into one bin than wash and separate their rubbish. If we do not act now, the situation will become more and more worse.";
 
-/* ── 06 · 1. GRAMMAR CHECK — transcription review stage (faithful, static) ──
+/* ── 06 · 1. WRITING ASSESSMENT — transcription review stage (faithful, static) ──
    Mirrors ReviewStage.tsx: step indicator, hint + verify switch + action row,
    and the scan ↔ transcript split panes. */
 export function LanguageCheckTranscribeMockup() {
   return (
-    <MockupFrame label="GRAMMAR CHECK · Mr.🆖 ProReader">
+    <MockupFrame label="WRITING ASSESSMENT · Mr.🆖 ProReader">
       <div className="space-y-2.5">
-        {/* Step indicator — Scan ✓ · Review transcript (current) · Corrections */}
+        {/* Step indicator — Scan ✓ · Review transcript (current) · Assessment */}
         <ol className="flex flex-wrap items-center gap-1.5 text-[11px]">
           <li className="flex items-center gap-1.5 text-muted-foreground">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-white">
@@ -5307,7 +5307,7 @@ export function LanguageCheckTranscribeMockup() {
               <span className="flex h-5 w-5 items-center justify-center rounded-full border text-xs tabular-nums">
                 3
               </span>
-              Corrections
+              Assessment
             </span>
           </li>
         </ol>
@@ -5330,7 +5330,7 @@ export function LanguageCheckTranscribeMockup() {
             </span>
             <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground">
               <SpellCheck className="mr-1 h-3 w-3" />
-              Run grammar check
+              Run writing check
             </span>
           </div>
         </div>
@@ -5390,13 +5390,13 @@ export function LanguageCheckTranscribeMockup() {
   );
 }
 
-/* ── 06 · 2. GRAMMAR CHECK — checked results + correction popover (faithful) ──
-   Mirrors the results workspace: toolbar, ResultsSummary line, the collapsed
-   AssessmentPanel, two-tier legend, the highlighted essay with an open
-   ErrorSpan popover, and CorrectionCards. */
+/* ── 06 · 2. WRITING ASSESSMENT — checked results + correction popover (faithful) ──
+   Mirrors the results workspace: toolbar, the results tabs (Corrections &
+   explanations active), ResultsSummary line, two-tier legend, the highlighted
+   essay with an open ErrorSpan popover, and CorrectionCards. */
 export function LanguageCheckResultsMockup() {
   return (
-    <MockupFrame label="GRAMMAR CHECK · Mr.🆖 ProReader">
+    <MockupFrame label="WRITING ASSESSMENT · Mr.🆖 ProReader">
       <div className="space-y-2.5">
         {/* Toolbar — ExplanationLanguageToggle · Learn · Export · More */}
         <div className="flex flex-wrap items-center gap-1.5">
@@ -5420,40 +5420,23 @@ export function LanguageCheckResultsMockup() {
           </span>
         </div>
 
+        {/* Results tabs — SegmentedTabs (shared.tsx): the essay workspace splits
+            into "AI Writing Assessment" and "Corrections & explanations" */}
+        <div className="flex w-fit gap-1 rounded-lg bg-muted p-1">
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            AI Writing Assessment
+          </span>
+          <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-semibold text-[var(--lp-ink)] shadow-sm">
+            Corrections & explanations
+          </span>
+        </div>
+
         {/* ResultsSummary line */}
         <p className="text-[10px] text-muted-foreground">
           <span className="font-medium text-[var(--lp-ink)]">5 corrections · 1 suggestion</span>
           <span className="mx-1.5">·</span>
           Model: claude-sonnet-5-5
         </p>
-
-        {/* AssessmentPanel — collapsed: headline band stays in the header
-            (collapsed chevron is un-rotated, outline "Re-assess" button) */}
-        <div className="rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-3 dark:from-violet-950/30 dark:to-sky-950/30">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-1.5">
-              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center">
-                <ChevronDown className="h-3 w-3 text-muted-foreground" />
-              </span>
-              <Award className="h-3.5 w-3.5 shrink-0 text-violet-600 dark:text-violet-400" />
-              <div className="min-w-0">
-                <p className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-[var(--lp-ink)]">
-                  AI Writing Assessment
-                  <span className="rounded-full bg-violet-600/10 px-1.5 py-0.5 text-[9px] font-semibold tabular-nums text-violet-700 dark:bg-violet-400/10 dark:text-violet-300">
-                    4 / 7
-                  </span>
-                </p>
-                <p className="text-[9px] text-muted-foreground">
-                  Scored 0–7 against the HKDSE Writing “Language (L)” rubric · Assessed 31/10/2026, 14:32
-                </p>
-              </div>
-            </div>
-            <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
-              <Sparkles className="mr-1 h-3 w-3" />
-              Re-assess
-            </span>
-          </div>
-        </div>
 
         {/* Two-tier legend — errors, then optional-expression suggestions */}
         <div className="space-y-1">
@@ -5621,14 +5604,20 @@ export function LanguageCheckResultsMockup() {
   );
 }
 
-/* ── 06 · 3. GRAMMAR CHECK — AI Writing Assessment expanded (faithful) ──
-   Mirrors AssessmentPanel.tsx expanded in the results workspace: the violet
-   gradient panel with the overall 0–7 band, the five sub-score bars (tone
-   colours per score), bilingual-style strengths & areas cards, and the
-   corrections that follow below the panel. */
+/* ── 06 · 3. WRITING ASSESSMENT — AI Writing Assessment expanded (faithful) ──
+   Mirrors AssessmentPanel.tsx expanded on the results view's assessment tab:
+   the results tabs, the violet gradient panel with the overall 0–7 band and
+   the Content/Language/Organization criterion cards, then the Language (L)
+   section — sub-score bars (tone colours per score) and bilingual-style
+   strengths & areas cards. */
 export function LanguageCheckAssessmentMockup() {
   /* Faithful subset of the real rubric dimensions + tone() from
      AssessmentPanel.tsx (≥6 emerald · ≥4 sky · ≥3 amber · else rose). */
+  const criteria = [
+    { label: "Content (C)", score: 3 },
+    { label: "Language (L)", score: 4 },
+    { label: "Organization (O)", score: 4 },
+  ];
   const subScores = [
     { label: "Grammar", score: 4 },
     { label: "Sentence Structure", score: 4 },
@@ -5656,7 +5645,7 @@ export function LanguageCheckAssessmentMockup() {
   ];
 
   return (
-    <MockupFrame label="GRAMMAR CHECK · Mr.🆖 ProReader">
+    <MockupFrame label="WRITING ASSESSMENT · Mr.🆖 ProReader">
       <div className="space-y-2.5">
         {/* Toolbar — same workspace chrome as slide 2 */}
         <div className="flex flex-wrap items-center gap-1.5">
@@ -5680,12 +5669,15 @@ export function LanguageCheckAssessmentMockup() {
           </span>
         </div>
 
-        {/* ResultsSummary line */}
-        <p className="text-[10px] text-muted-foreground">
-          <span className="font-medium text-[var(--lp-ink)]">5 corrections · 1 suggestion</span>
-          <span className="mx-1.5">·</span>
-          Model: claude-sonnet-5-5
-        </p>
+        {/* Results tabs — SegmentedTabs (shared.tsx), assessment tab active */}
+        <div className="flex w-fit gap-1 rounded-lg bg-muted p-1">
+          <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-semibold text-[var(--lp-ink)] shadow-sm">
+            AI Writing Assessment
+          </span>
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            Corrections & explanations
+          </span>
+        </div>
 
         {/* AssessmentPanel — expanded (chevron rotated, outline button) */}
         <div className="rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-3 dark:from-violet-950/30 dark:to-sky-950/30">
@@ -5698,7 +5690,8 @@ export function LanguageCheckAssessmentMockup() {
               <div className="min-w-0">
                 <p className="text-[11px] font-semibold text-[var(--lp-ink)]">AI Writing Assessment</p>
                 <p className="text-[9px] text-muted-foreground">
-                  Scored 0–7 against the HKDSE Writing “Language (L)” rubric · Assessed 31/10/2026, 14:32
+                  Scored 0–7 on each HKDSE Writing criterion: Content, Language and Organization ·
+                  Assessed 31/10/2026, 14:32
                 </p>
               </div>
             </div>
@@ -5708,8 +5701,8 @@ export function LanguageCheckAssessmentMockup() {
             </span>
           </div>
 
+          {/* Overall band + the three HKDSE criterion cards */}
           <div className="mt-2.5 grid gap-2 sm:grid-cols-[7rem_minmax(0,1fr)]">
-            {/* Overall band card */}
             <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-2">
               <span className="text-[8px] font-medium uppercase tracking-wider text-muted-foreground">
                 Overall
@@ -5717,6 +5710,31 @@ export function LanguageCheckAssessmentMockup() {
               <span className="text-xl font-bold tabular-nums text-[var(--lp-ink)]">
                 4
                 <span className="text-[10px] font-normal text-muted-foreground"> / 7</span>
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {criteria.map((c) => (
+                <div
+                  key={c.label}
+                  className="flex min-w-0 flex-col items-center justify-center rounded-lg border bg-card p-2 text-center"
+                >
+                  <span className="text-[8px] font-medium text-muted-foreground">{c.label}</span>
+                  <span className="text-lg font-bold tabular-nums text-[var(--lp-ink)]">
+                    {c.score}
+                    <span className="text-[9px] font-normal text-muted-foreground"> / 7</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Language (L) section — sub-scores + strengths/weaknesses (a faithful
+              subset of the per-criterion sections) */}
+          <section className="mt-2.5 flex min-w-0 flex-col gap-2 rounded-lg border bg-card/60 p-2">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-[10px] font-semibold text-[var(--lp-ink)]">Language (L)</h3>
+              <span className="rounded-full bg-violet-600/10 px-1.5 py-0.5 text-[9px] font-semibold tabular-nums text-violet-700 dark:bg-violet-400/10 dark:text-violet-300">
+                4 / 7
               </span>
             </div>
             {/* Sub-scores — label · tone bar · score, mirroring the real rows */}
@@ -5739,52 +5757,32 @@ export function LanguageCheckAssessmentMockup() {
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="mt-2.5 grid gap-2 md:grid-cols-2">
-            <div className="min-w-0 rounded-lg border bg-card p-2">
-              <p className="mb-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
-                <CheckCircle2 className="h-3 w-3 shrink-0" />
-                Strengths
-              </p>
-              <ul className="list-disc space-y-1 pl-4 text-[9.5px] leading-snug text-[var(--lp-ink)] [overflow-wrap:anywhere]">
-                {strengths.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
+            <div className="grid gap-2 md:grid-cols-2">
+              <div className="min-w-0 rounded-lg border bg-card p-2">
+                <p className="mb-1 flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle2 className="h-3 w-3 shrink-0" />
+                  Strengths
+                </p>
+                <ul className="list-disc space-y-1 pl-4 text-[9.5px] leading-snug text-[var(--lp-ink)] [overflow-wrap:anywhere]">
+                  {strengths.map((b, i) => (
+                    <li key={i}>{b}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="min-w-0 rounded-lg border bg-card p-2">
+                <p className="mb-1 flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                  <TriangleAlert className="h-3 w-3 shrink-0" />
+                  Areas to improve
+                </p>
+                <ul className="list-disc space-y-1 pl-4 text-[9.5px] leading-snug text-[var(--lp-ink)] [overflow-wrap:anywhere]">
+                  {weaknesses.map((b, i) => (
+                    <li key={i}>{b}</li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <div className="min-w-0 rounded-lg border bg-card p-2">
-              <p className="mb-1 flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-400">
-                <TriangleAlert className="h-3 w-3 shrink-0" />
-                Areas to improve
-              </p>
-              <ul className="list-disc space-y-1 pl-4 text-[9.5px] leading-snug text-[var(--lp-ink)] [overflow-wrap:anywhere]">
-                {weaknesses.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* The corrections follow below the panel — cropped at the frame edge */}
-        <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-1">
-            <span className="mr-0.5 text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
-              Errors
-            </span>
-            <LcLegendChip cat="svo" count={1} />
-            <LcLegendChip cat="plural" count={1} />
-            <LcLegendChip cat="choice" count={1} />
-            <LcLegendChip cat="wform" count={1} />
-          </div>
-          <div className="overflow-hidden rounded-xl border bg-card p-2.5" style={{ maxHeight: "2.75rem" }}>
-            <p className="whitespace-pre-wrap break-words text-[11.5px] leading-[1.7rem]" lang="en">
-              Everyone <LcSpan cat="svo" n={1}>know</LcSpan> that plastic takes hundreds of years
-              to break down. Every year, <LcSpan cat="plural" n={2}>million of</LcSpan> plastic
-              bottles are thrown away…
-            </p>
-          </div>
+          </section>
         </div>
       </div>
     </MockupFrame>
@@ -6274,8 +6272,8 @@ export function LearnQuizMockup() {
   );
 }
 
-/* ── 06 · 7. GRAMMAR CHECK — Student learning overview (faithful, static) ──
-   Mirrors /grammar-check?view=students&tab=learning: scope switch, section
+/* ── 06 · 7. WRITING ASSESSMENT — Student learning overview (faithful, static) ──
+   Mirrors /writing-assessment?view=students&tab=learning: scope switch, section
    tabs, staff filter bar, Overview/Sessions/Activity tabs + range, the stat
    grid, the activity chart and the per-topic + per-student tables. */
 export function LanguageCheckStaffOverviewMockup() {

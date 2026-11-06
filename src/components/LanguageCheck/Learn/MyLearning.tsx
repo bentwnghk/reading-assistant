@@ -48,7 +48,7 @@ type Tab = "sessions" | "dashboard" | "activity";
 const PAGE_SIZE = 8;
 
 /**
- * The learner's own learning history on /grammar-check ("My learning" tab):
+ * The learner's own learning history on /writing-assessment ("My learning" tab):
  * every saved "Learn from your mistakes" session (resume on any device), a
  * dashboard of progress over time and the activity log.
  */
@@ -76,7 +76,7 @@ export default function MyLearning() {
       {tab === "activity" && (
         <LearnActivityLog
           key={range}
-          endpoint="/api/grammar-check/learn/activity"
+          endpoint="/api/writing-assessment/learn/activity"
           query={{ range: String(range) }}
         />
       )}
@@ -88,7 +88,7 @@ function OwnDashboard({ range }: { range: number }) {
   const { t } = useTranslation();
   const params = new URLSearchParams({ range: String(range), tz: browserTimeZone() });
   const { data, loading, error, reload } = useLanguageCheckLearnData<LearnDashboardData>(
-    `/api/grammar-check/learn/dashboard?${params.toString()}`,
+    `/api/writing-assessment/learn/dashboard?${params.toString()}`,
   );
   if (!data) {
     return loading ? (
@@ -118,7 +118,7 @@ function SessionsList() {
   const categoryLabel = useCategoryLabel();
   const active = useLanguageCheckLearnStore((s) => s.session);
   const { data, loading, error, reload } = useLanguageCheckLearnData<LearnSessionSummary[]>(
-    "/api/grammar-check/learn",
+    "/api/writing-assessment/learn",
   );
   const [page, setPage] = useState(1);
   const [detail, setDetail] = useState<LearnSessionDetailWire | null>(null);
@@ -135,7 +135,7 @@ function SessionsList() {
     setDetailId(id);
     try {
       // The history view: unfinished practice/quiz content is withheld server-side.
-      const res = await fetch(`/api/grammar-check/learn/${id}/review`);
+      const res = await fetch(`/api/writing-assessment/learn/${id}/review`);
       const body = await res.json().catch(() => null);
       if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
       setDetail(body as LearnSessionDetailWire);
@@ -152,7 +152,7 @@ function SessionsList() {
     try {
       // Anything still queued for this session must not resurrect it.
       await useLanguageCheckLearnStore.getState().flush();
-      const res = await fetch(`/api/grammar-check/learn/${toDelete.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/writing-assessment/learn/${toDelete.id}`, { method: "DELETE" });
       if (!res.ok && res.status !== 404) {
         const body = await res.json().catch(() => null);
         throw new Error(body?.error || `HTTP ${res.status}`);
