@@ -19,7 +19,7 @@ export function browserTimeZone(): string {
 }
 
 /**
- * GET JSON from a Grammar Check learning endpoint. `url = null` skips the
+ * GET JSON from a Writing Assessment learning endpoint. `url = null` skips the
  * request (e.g. a staff-only panel before the role is known). Re-fetches when
  * the url changes; the previous data stays visible while it loads. Stale
  * responses are ignored.

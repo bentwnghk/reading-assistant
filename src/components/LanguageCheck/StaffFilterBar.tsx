@@ -21,7 +21,7 @@ interface StaffFilterBarProps {
   role: string | undefined;
   value: StaffSelection;
   onChange: (next: StaffSelection) => void;
-  /** Student options endpoint (`?classId=`/`?mine=` is appended). Defaults to Grammar Check's. */
+  /** Student options endpoint (`?classId=`/`?mine=` is appended). Defaults to Writing Assessment's. */
   studentsEndpoint?: string;
   /**
    * Offer a "My Classes" option (classes the viewer teaches) and make it the

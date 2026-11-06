@@ -269,7 +269,7 @@
         },
         "wordExport": {
           "title": "Word Export",
-          "desc": "Take learning offline! Turn adapted texts, glossaries, quizzes, tests, and grammar practice — even Grammar Check corrections and Learn-from-your-mistakes worksheets — into polished Word documents."
+          "desc": "Take learning offline! Turn adapted texts, glossaries, quizzes, tests, and grammar practice — even Writing Assessment corrections and Learn-from-your-mistakes worksheets — into polished Word documents."
         },
         "grammar": {
           "title": "Grammar Analysis & Quiz",
@@ -284,8 +284,8 @@
           "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Share review lists with your classmates and teachers — teachers and admins can share school-wide!"
         },
         "languageCheck": {
-          "title": "Grammar Check",
-          "desc": "AI digitises handwritten essays (image/PDF) and marks them up with colour-coded, HKDSE-aligned corrections and phrasing suggestions — and the new AI Language Assessment scores the writing on the HKDSE \"Language (L)\" rubric: an overall 0–7 band, five sub-scores and bilingual strengths & weaknesses. Learn from your mistakes then turns those same errors into lessons, practice and quizzes."
+          "title": "Writing Assessment",
+          "desc": "AI digitises handwritten essays (image/PDF) and marks them up with colour-coded, HKDSE-aligned corrections and phrasing suggestions — and the new AI Writing Assessment scores the writing on the HKDSE Content, Language and Organization rubrics: a 0–7 band for each, with bilingual strengths & weaknesses. Learn from your mistakes then turns those same errors into lessons, practice and quizzes."
         },
         "assignments": {
           "title": "Assignments",
@@ -501,23 +501,23 @@
         }
       },
       "writing": {
-        "eyebrow": "Grammar Check",
+        "eyebrow": "Writing Assessment",
         "title": "From reading to writing.",
-        "lede": "Photograph a handwritten essay and Grammar Check transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE \"Language (L)\" rubric in one press, then turn every mistake into a lesson, practice and quiz built from your own essay. Teachers watch the whole class learn from their mistakes in one dashboard.",
+        "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, then turn every mistake into a lesson, practice and quiz built from your own essay. Teachers watch the whole class learn from their mistakes in one dashboard.",
         "bullets": [
           "Verbatim transcription you review beside the original scan",
           "Inline corrections with explanations — errors vs. suggestions",
-          "AI Language assessment — HKDSE \"Language (L)\" 0–7 band with five sub-scores",
+          "AI Writing Assessment — HKDSE Content, Language and Organization, each on a 0–7 band",
           "Learn from your mistakes: lesson → practice → quiz",
           "Saved sessions resume on any device, exportable to Word",
           "Student learning dashboards for every class"
         ],
         "carousel": {
-          "label": "Grammar Check features",
+          "label": "Writing Assessment features",
           "slideCount": "{{count}} slides",
           "transcribe": "Transcription review",
           "results": "Corrections & popover",
-          "assessment": "AI Language assessment",
+          "assessment": "AI Writing Assessment",
           "lesson": "Learn · lesson",
           "practice": "Learn · practice",
           "quiz": "Learn · quiz",
@@ -3211,7 +3211,7 @@
     "userInfoDescription": "Tell us your age so every part of the app can match your level — from the language used to the questions you receive.",
     "model": "Model",
     "visionModel": "Vision Model",
-    "ocrModel": "OCR Model (Grammar Check)",
+    "ocrModel": "OCR Model (Writing Assessment)",
     "imageModel": "Visualization Model",
     "prereadingModel": "Pre-reading Model",
     "summaryModel": "Summary Model",
@@ -3225,7 +3225,7 @@
     "sentenceAnalysisModel": "Sentence Analysis Model",
     "grammarModel": "Grammar Model",
     "readingTextModel": "Reading Text Generator Model",
-    "languageCheckModel": "Grammar Check Model",
+    "languageCheckModel": "Writing Assessment Model",
     "tutorModel": "AI Tutor Model",
     "ttsModel": "TTS Model",
     "ttsModelTip": "The TTS model used for all pronunciation and read-aloud playback.",
@@ -4700,8 +4700,8 @@
     "back": "Back"
   },
   "languageCheck": {
-    "navTitle": "Grammar Check",
-    "title": "Grammar Check",
+    "navTitle": "Writing Assessment",
+    "title": "Writing Assessment",
     "subtitle": "Upload a handwritten essay or scanned work. We digitise it, you review the transcript, then get inline corrections with grammar notes aligned with HKDSE writing — and with \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
     "back": "Back",
     "cancel": "Cancel",
@@ -4715,7 +4715,7 @@
       "serverKeyMissing": "The server has no AI provider API key configured. If you host this app yourself, set the provider key in your environment."
     },
     "help": {
-      "title": "Grammar Check Guide",
+      "title": "Writing Assessment Guide",
       "tabs": {
         "overview": "Overview",
         "transcript": "Transcript",
@@ -4723,7 +4723,7 @@
         "learning": "Learning"
       },
       "overview": {
-        "intro": "Grammar Check digitises handwritten or scanned essays, then marks them with inline corrections and grammar notes aligned with HKDSE writing.",
+        "intro": "Writing Assessment digitises handwritten or scanned essays, then marks them with inline corrections and grammar notes aligned with HKDSE writing.",
         "sections": {
           "name": "Two Sections",
           "desc": "\"My essays\" holds the upload area and your saved essays; \"My learning\" holds saved learning sessions, a progress dashboard and an activity log."
@@ -4737,8 +4737,8 @@
           "desc": "Each essay moves through Draft (uploaded) → Transcribed (digitised) → Checked (marked). The list shows pages, comments and the last update."
         },
         "assessment": {
-          "name": "AI Language Assessment",
-          "desc": "After checking, score the writing against the HKDSE \"Language (L)\" rubric — an overall 0–7 band, five sub-scores and bilingual feedback. The overall also shows in the essay list. Students get one assessment per essay — staff can re-assess. Details in the Results tab."
+          "name": "AI Writing Assessment",
+          "desc": "After checking, score the writing against the HKDSE Content, Language and Organization rubrics — a 0–7 band for each, five Language sub-scores and bilingual strengths and weaknesses for each criterion. The overall also shows in the essay list. Students get one assessment per essay — staff can re-assess. Details in the Results tab."
         },
         "retention": {
           "name": "Storage & Privacy",
@@ -4777,14 +4777,14 @@
         }
       },
       "results": {
-        "intro": "Corrections appear as inline highlights in the essay, each numbered and paired with an explanation card. Below them, the AI Language assessment scores the writing against the HKDSE \"Language (L)\" rubric.",
+        "intro": "Corrections appear as inline highlights in the essay, each numbered and paired with an explanation card. The AI Writing Assessment tab scores the writing on the HKDSE Content, Language and Organization rubrics; the corrections tab holds the highlights and explanation cards.",
         "tiers": {
           "name": "Errors vs. Suggestions",
           "desc": "Errors (grammar and mechanics) get a solid underline; expression suggestions (phrasing, concision, stronger words) are optional polish with alternative ways to say it."
         },
         "assessment": {
-          "name": "AI Language Assessment",
-          "desc": "Press \"Get AI assessment\" to score the writing on the HKDSE \"Language (L)\" rubric: an overall 0–7 band, five sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve. It is saved with the essay and the overall also shows in the essay list. Students get one assessment per essay — the saved result stays on the essay and cannot be re-run; teachers, admins and super-admins can re-assess it."
+          "name": "AI Writing Assessment",
+          "desc": "The first results tab. Press \"Get AI assessment\" to score the writing on the HKDSE Content (C), Language (L) and Organization (O) rubrics: a 0–7 band for each plus an overall, five Language sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve for each criterion. Corrections and explanations are on the second tab. It is saved with the essay and the overall also shows in the essay list. Students get one assessment per essay — the saved result stays on the essay and cannot be re-run; teachers, admins and super-admins can re-assess it."
         },
         "filter": {
           "name": "Category Filter",
@@ -5002,7 +5002,7 @@
       "wordCount_other": "{{count}} words",
       "placeholder": "The transcript will appear here. You can also type or paste the essay.",
       "paragraphHint": "Separate paragraphs with a blank line.",
-      "runCheck": "Run grammar check",
+      "runCheck": "Run writing check",
       "backToResults": "Back to results",
       "changedSince": "The transcript was edited after the last check. Run the check again to update the corrections.",
       "page": "Page {{current}} / {{total}}",
@@ -5024,8 +5024,14 @@
       "dropped_other": "{{count}} suggestions could not be placed in the text and were skipped."
     },
     "assessment": {
-      "title": "AI Language assessment",
-      "subtitle": "Scored 0–7 against the HKDSE Writing \"Language (L)\" rubric",
+      "title": "AI Writing Assessment",
+      "subtitle": "Scored 0–7 on each HKDSE Writing criterion: Content, Language and Organization",
+      "legacy": "This assessment was made before Content and Organization were added and covers Language only. Re-assess to get all three criteria.",
+      "criteria": {
+        "content": "Content (C)",
+        "language": "Language (L)",
+        "organization": "Organization (O)"
+      },
       "saveError": "The assessment could not be saved.",
       "assessedOn": "Assessed {{date}}",
       "button": "Get AI assessment",
@@ -5044,10 +5050,22 @@
         "sentenceStructure": "Sentence Structure",
         "vocabulary": "Vocabulary",
         "spellingPunctuation": "Spelling & Punctuation",
-        "registerToneStyle": "Register, Tone & Style"
+        "registerToneStyle": "Register, Tone & Style",
+        "requirements": "Content Requirements",
+        "relevancy": "Relevancy",
+        "development": "Development of Ideas",
+        "creativity": "Creativity and Originality",
+        "engagement": "Reader Engagement",
+        "effectiveOrganization": "Effective Organization",
+        "supportingDetails": "Relevant Supporting Details",
+        "cohesiveness": "Cohesiveness",
+        "coherence": "Coherence"
       }
     },
     "results": {
+      "tabsLabel": "Results sections",
+      "tabAssessment": "AI Writing Assessment",
+      "tabCorrections": "Corrections & explanations",
       "tierErrors": "Errors",
       "tierSuggestions": "Suggestions",
       "hideTier": "Hide group",
@@ -5233,7 +5251,7 @@
           "review": "Needs review"
         },
         "reviewTopic": "Review",
-        "nextStep": "Next step: rewrite your essay using what you learned, then run Grammar Check again to see how many of these mistakes disappear.",
+        "nextStep": "Next step: rewrite your essay using what you learned, then run Writing Assessment again to see how many of these mistakes disappear.",
         "backToEssay": "Back to my essay"
       },
       "errors": {

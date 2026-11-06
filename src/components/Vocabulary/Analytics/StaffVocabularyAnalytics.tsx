@@ -62,7 +62,7 @@ export default function StaffVocabularyAnalytics({ role, onOpenStudent }: Props)
   const [range, setRange] = useState(30);
 
   // "__mine__" (My Classes) travels as mine=1 — the same translation the
-  // Grammar Check staff tabs and the "Check an essay for" picker use.
+  // Writing Assessment staff tabs and the "Check an essay for" picker use.
   const filters: Filters = {
     classId: selection.classId && selection.classId !== "__mine__" ? selection.classId : undefined,
     mine: selection.classId === "__mine__" ? "1" : undefined,

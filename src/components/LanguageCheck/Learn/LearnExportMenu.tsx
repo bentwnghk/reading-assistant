@@ -24,7 +24,7 @@ interface LearnExportMenuProps {
   status: LearnSessionStatus;
   /** Endpoint returning `{ session }` with the full content (default: the learner's own). */
   endpoint?: string;
-  /** Language of the explanations; defaults to the Grammar Check preference. */
+  /** Language of the explanations; defaults to the Writing Assessment preference. */
   language?: ExplanationLanguage;
   /** Save pending work first (the session open in this browser). */
   flushFirst?: boolean;

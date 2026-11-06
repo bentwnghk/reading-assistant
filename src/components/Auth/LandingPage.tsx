@@ -448,8 +448,8 @@ function PracticeCarousel() {
   );
 }
 
-/* Grammar Check carousel (Chapter 06) — mirrors MasterCarousel, cycling the
-   7 Grammar Check views: transcription review, checked results, the AI
+/* Writing Assessment carousel (Chapter 06) — mirrors MasterCarousel, cycling the
+   7 Writing Assessment views: transcription review, checked results, the AI
    Language assessment, the three "Learn from your mistakes" stages and the
    staff student-learning overview. */
 function LanguageCheckCarousel() {

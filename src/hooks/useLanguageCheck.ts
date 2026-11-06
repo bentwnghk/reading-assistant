@@ -98,7 +98,7 @@ function taskOf(
 }
 
 /**
- * OCR + language-check actions for the Grammar Check feature. Independent of
+ * OCR + language-check actions for the Writing Assessment feature. Independent of
  * useReadingAssistant / the reading store: all state lives in the
  * languageCheck store so it survives SPA navigation.
  */

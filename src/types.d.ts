@@ -1113,7 +1113,7 @@ interface RepositoryTextListItem {
   updatedAt: number;
 }
 
-// ─── Grammar Check (essay error correction; independent of reading sessions) ──
+// ─── Writing Assessment (essay error correction; independent of reading sessions) ──
 
 /** A resolved error anchored to [start, end) in LanguageCheckEssay.checkedText. */
 interface LanguageCheckError {
@@ -1185,8 +1185,20 @@ interface LanguageCheckEssaySummary {
   updatedAt: number;
 }
 
+interface LanguageCheckCriterionFeedback {
+  score: number;
+  /** Sub-scores keyed by dimension; absent on older assessments. */
+  scores?: Record<string, number>;
+  strengths: { en: string; zh: string }[];
+  weaknesses: { en: string; zh: string }[];
+}
+
 interface LanguageCheckAssessment {
+  /** Mean of Content, Language and Organization (legacy: the Language score). */
   overall: number;
+  /** Language (L) score; absent on legacy assessments (use `overall`). */
+  languageScore?: number;
+  /** Language block (top level for backward compatibility). */
   scores: {
     grammar: number;
     sentenceStructure: number;
@@ -1196,6 +1208,9 @@ interface LanguageCheckAssessment {
   };
   strengths: { en: string; zh: string }[];
   weaknesses: { en: string; zh: string }[];
+  /** Absent on legacy (Language-only) assessments. */
+  content?: LanguageCheckCriterionFeedback;
+  organization?: LanguageCheckCriterionFeedback;
   assessedAt: number;
   model: string;
 }

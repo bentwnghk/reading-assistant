@@ -91,7 +91,7 @@ src/
 │   ├── assignments.ts          # Assignment CRUD + stripSessionForAssignment (teacher→student)
 │   ├── assignment-presets.ts   # Reusable school-wide student-group presets
 │   ├── skill-profile.ts        # Comprehension skill-profile snapshot + cross-session rollup
-│   ├── language-check.ts       # Grammar Check essay CRUD (list is lightweight; images only in getEssay)
+│   ├── language-check.ts       # Writing Assessment essay CRUD (list is lightweight; images only in getEssay)
 │   ├── language-check-schema.ts # Zod schemas for /api/grammar-check bodies (categories derive from constants)
 │   ├── subscription.ts         # Subscription data access
 │   └── subscription-email.ts   # Subscription email templates
@@ -660,7 +660,7 @@ Activity types added: `assignment_create`, `assignment_start`, `assignment_submi
 
 ## Vocabulary Analytics (staff, `/vocabulary?view=analytics`)
 
-Teachers/admins/super-admins get a **Student analytics** view next to their own vocabulary (`VocabularyHome.tsx` is the `/vocabulary` entry; students see `VocabularyContainer` unchanged). Modelled on the Grammar Check "Student learning" tab and reuses its pieces: `StaffFilterBar` (class + student, `studentsEndpoint` prop, `allowMine` — "My Classes" offered + default exactly like the Grammar Check staff tabs, `"__mine__"` travels as `mine=1`), `SegmentedTabs`, `LearnRangeTabs`, `Stat`/`Delta`/`PercentBadge`, `requireStaff` (scope: teacher → classes, admin → school, super-admin → all).
+Teachers/admins/super-admins get a **Student analytics** view next to their own vocabulary (`VocabularyHome.tsx` is the `/vocabulary` entry; students see `VocabularyContainer` unchanged). Modelled on the Writing Assessment "Student learning" tab and reuses its pieces: `StaffFilterBar` (class + student, `studentsEndpoint` prop, `allowMine` — "My Classes" offered + default exactly like the Writing Assessment staff tabs, `"__mine__"` travels as `mine=1`), `SegmentedTabs`, `LearnRangeTabs`, `Stat`/`Delta`/`PercentBadge`, `requireStaff` (scope: teacher → classes, admin → school, super-admin → all).
 
 - **Ledger**: `vocabulary_activity_events` (`scripts/add-vocabulary-activity.sql`, backfills existing sessions/words, + `init-db.sql`). Types in `VOCABULARY_ACTIVITY_EVENT_TYPES` (`constants/vocabularyActivity.ts`): `session_completed` (written by `createReviewSession`, key `rs:<id>`) and `words_added` (glossary sync / phrases, only genuinely NEW rows; teacher-shared words are not the student's activity). `logVocabularyActivity` is fire-and-forget and idempotent via `event_key`.
 - **Data**: `src/lib/vocabulary-activity.ts`. Every query starts from a scope CTE (`sc`: students only, not banned, role/class/student filtered), so a filter can never reach outside the staff member's scope. All four staff queries also accept `mineTeacherId` (`mine=1` → the caller's own classes, narrowed inside the same CTE — the dashboard's student table, filter-bar user list, sessions and activity feed all narrow). Word-bank figures (`snapshot`, per-student bank columns) are the CURRENT state (hidden words excluded); sessions/accuracy/activity respect the time range. Review sessions come from `vocabulary_review_sessions` (source of truth), the ledger only adds `words_added`.
@@ -670,7 +670,7 @@ Teachers/admins/super-admins get a **Student analytics** view next to their own 
 
 ---
 
-## Grammar Check (`/grammar-check`)
+## Writing Assessment (`/grammar-check`)
 
 Standalone essay error-correction tool, reachable from the hamburger menu (`SectionNavSheet` → `pageLinks[]`). **Independent of reading sessions**: own table, store, API, hook and components — it must never read/write `reading.ts`, `history.ts` or `reading_sessions`.
 
@@ -708,7 +708,7 @@ Standalone essay error-correction tool, reachable from the hamburger menu (`Sect
 | Progressive generation (`begin`, `ensureLesson/Practice/Quiz`, `evaluateOpen`) | `src/hooks/useLanguageCheckLearn.ts` |
 | UI | `src/components/LanguageCheck/Learn/*`, page `src/app/grammar-check/learn/` |
 
-- **Reuses the Grammar Check stack, not the reading store.** Generation uses `languageCheckModel` through `useLanguageCheck().generate` (fallback-model retry); the explanation-language switch is the same `explanationLanguage` pref. `useLanguageCheckStore.reset()` (sign-out / account switch) also resets the learn store.
+- **Reuses the Writing Assessment stack, not the reading store.** Generation uses `languageCheckModel` through `useLanguageCheck().generate` (fallback-model retry); the explanation-language switch is the same `explanationLanguage` pref. `useLanguageCheckStore.reset()` (sign-out / account switch) also resets the learn store.
 - **Persisted, resumable, teacher-visible** (`scripts/add-language-check-learn.sql` + `init-db.sql`). The DATABASE is the source of truth; the learn store is the in-memory working copy plus a sync engine. Tables: `language_check_learn_sessions` (units JSONB = lesson/practice/quiz content + answers; `summary` JSONB + `unit_count`/`units_completed`/`avg_quiz_percent` so lists never read `units`; `essay_id` is `ON DELETE SET NULL` so deleting the essay keeps the learning), `language_check_learn_rounds` (every FINISHED quiz round with its items and answers — a retake never overwrites it) and `language_check_learn_events` (append-only activity ledger behind both dashboards; survives deleting a session). A session lives at `/grammar-check/learn?session=<id>` and opens on any device; `POST /api/grammar-check/learn` builds units **server-side from the stored essay** (`planLearnUnits`, shared with the client) and resumes an unfinished session with the same selection (advisory-locked, so two devices cannot create two).
 
 | Piece | Location |
@@ -758,7 +758,7 @@ Next.js App Router pages in `src/app/`:
 | `/` (`page.tsx`) | Main reading assistant page (core workflow) |
 | `/vocabulary` | My Vocabulary page (auth-gated) |
 | `/leaderboard` | Leaderboard + achievements page (auth-gated) |
-| `/grammar-check` | Grammar Check: essay OCR + inline error correction (auth-gated, noindex) |
+| `/grammar-check` | Writing Assessment: essay OCR + inline error correction (auth-gated, noindex) |
 | `/image-viewer` | Standalone image viewer with zoom/pan |
 | `/privacy-policy` | Privacy policy page |
 | `/terms-of-service` | Terms of service page |

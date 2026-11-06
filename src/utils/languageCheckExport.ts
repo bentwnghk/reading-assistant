@@ -15,7 +15,11 @@ import {
   isExpressionCategory,
   type LanguageCheckCategory,
 } from "@/constants/languageCheck";
-import { LANGUAGE_ASSESSMENT_DIMENSIONS } from "@/constants/readingPrompts";
+import {
+  CONTENT_ASSESSMENT_DIMENSIONS,
+  LANGUAGE_ASSESSMENT_DIMENSIONS,
+  ORGANIZATION_ASSESSMENT_DIMENSIONS,
+} from "@/constants/readingPrompts";
 import { applyCorrections, buildSegments } from "@/utils/languageCheck";
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
@@ -228,7 +232,7 @@ export async function exportLanguageCheckDocx({
     }),
   );
 
-  // AI Language assessment — the document's first content section. Bullets
+  // AI Writing Assessment — the document's first content section. Bullets
   // follow the explanation-language switch like the on-screen panel, with a
   // fallback to the other language when one is empty.
   const assessment = essay.assessment;
@@ -269,54 +273,82 @@ export async function exportLanguageCheckDocx({
           }),
         ],
       }),
-      new Paragraph({
-        spacing: { after: 80 },
-        children: [
-          new TextRun({
-            text: t("languageCheck.assessment.subScores"),
-            bold: true,
-            color: "595959",
-          }),
-        ],
-      }),
-      ...LANGUAGE_ASSESSMENT_DIMENSIONS.map(
-        (d) =>
-          new Paragraph({
-            spacing: { after: 60 },
-            children: [
-              new TextRun({
-                text: `${t(`languageCheck.assessment.dim.${d}`)}: `,
-                color: "404040",
-              }),
-              new TextRun({
-                text: `${assessment.scores[d]} ${t("languageCheck.assessment.scale")}`,
-                bold: true,
-              }),
-            ],
-          }),
-      ),
-      new Paragraph({
-        spacing: { before: 200, after: 80 },
-        children: [
-          new TextRun({
-            text: t("languageCheck.assessment.strengths"),
-            bold: true,
-            color: GREEN,
-          }),
-        ],
-      }),
-      ...assessment.strengths.map((b) => bullet(pickText(b), GREEN)),
-      new Paragraph({
-        spacing: { before: 200, after: 80 },
-        children: [
-          new TextRun({
-            text: t("languageCheck.assessment.weaknesses"),
-            bold: true,
-            color: AMBER,
-          }),
-        ],
-      }),
-      ...assessment.weaknesses.map((b) => bullet(pickText(b), AMBER)),
+      ...[
+        ...(assessment.content
+          ? [{ key: "content", ...assessment.content, subScores: assessment.content.scores }]
+          : []),
+        {
+          key: "language",
+          score: assessment.languageScore ?? assessment.overall,
+          subScores: assessment.scores as Record<string, number>,
+          strengths: assessment.strengths,
+          weaknesses: assessment.weaknesses,
+        },
+        ...(assessment.organization
+          ? [{ key: "organization", ...assessment.organization, subScores: assessment.organization.scores }]
+          : []),
+      ].flatMap((c) => [
+        new Paragraph({
+          spacing: { before: 280, after: 80 },
+          children: [
+            new TextRun({
+              text: `${t(`languageCheck.assessment.criteria.${c.key}`)}: `,
+              bold: true,
+              size: 26,
+            }),
+            new TextRun({
+              text: `${c.score} ${t("languageCheck.assessment.scale")}`,
+              bold: true,
+              size: 26,
+            }),
+          ],
+        }),
+        ...(c.subScores
+          ? (c.key === "content"
+              ? CONTENT_ASSESSMENT_DIMENSIONS
+              : c.key === "organization"
+                ? ORGANIZATION_ASSESSMENT_DIMENSIONS
+                : LANGUAGE_ASSESSMENT_DIMENSIONS
+            ).map(
+              (d: string) =>
+                new Paragraph({
+                  spacing: { after: 60 },
+                  children: [
+                    new TextRun({
+                      text: `${t(`languageCheck.assessment.dim.${d}`)}: `,
+                      color: "404040",
+                    }),
+                    new TextRun({
+                      text: `${c.subScores?.[d] ?? "–"} ${t("languageCheck.assessment.scale")}`,
+                      bold: true,
+                    }),
+                  ],
+                }),
+            )
+          : []),
+        new Paragraph({
+          spacing: { before: 160, after: 80 },
+          children: [
+            new TextRun({
+              text: t("languageCheck.assessment.strengths"),
+              bold: true,
+              color: GREEN,
+            }),
+          ],
+        }),
+        ...c.strengths.map((b) => bullet(pickText(b), GREEN)),
+        new Paragraph({
+          spacing: { before: 160, after: 80 },
+          children: [
+            new TextRun({
+              text: t("languageCheck.assessment.weaknesses"),
+              bold: true,
+              color: AMBER,
+            }),
+          ],
+        }),
+        ...c.weaknesses.map((b) => bullet(pickText(b), AMBER)),
+      ]),
       new Paragraph({
         spacing: { before: 200 },
         children: [

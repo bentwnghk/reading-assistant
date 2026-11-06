@@ -46,6 +46,7 @@ import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
 import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import {
   ExplanationLanguageToggle,
+  SegmentedTabs,
   useCategoryLabel,
 } from "@/components/LanguageCheck/shared";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
@@ -369,6 +370,9 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   const generatingId = useLanguageCheckStore((s) => s.generatingEssayId);
   const [view, setView] = useState<View>("auto");
   const [scanOpen, setScanOpen] = useState(false);
+  const [resultsTab, setResultsTab] = useState<"assessment" | "corrections">(
+    "assessment",
+  );
   const [exporting, setExporting] = useState(false);
   const [learnOpen, setLearnOpen] = useState(false);
   const [title, setTitle] = useState(essay.title);
@@ -630,26 +634,40 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
             </p>
           )}
           <EssayTaskCard essay={essay} />
-          <ResultsSummary essay={essay} checking={checkRunning} />
-          <AssessmentPanel
-            essay={essay}
-            language={language}
-            allowReassess={isStaff}
-            onSave={(assessment) =>
-              useLanguageCheckStore.getState().save(essay.id, { assessment })
-            }
+          <SegmentedTabs
+            value={resultsTab}
+            onChange={setResultsTab}
+            ariaLabel={t("languageCheck.results.tabsLabel")}
+            className="w-fit"
+            options={[
+              { value: "assessment", label: t("languageCheck.results.tabAssessment") },
+              { value: "corrections", label: t("languageCheck.results.tabCorrections") },
+            ]}
           />
-
-          {essay.corrections.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-xl border bg-card p-10 text-center">
-              <SpellCheck className="h-8 w-8 text-green-600" />
-              <p className="font-medium">{t("languageCheck.results.noErrors")}</p>
-              <p className="max-w-md text-sm text-muted-foreground">
-                {t("languageCheck.results.noErrorsHint")}
-              </p>
-            </div>
+          {resultsTab === "assessment" ? (
+            <AssessmentPanel
+              essay={essay}
+              language={language}
+              allowReassess={isStaff}
+              onSave={(assessment) =>
+                useLanguageCheckStore.getState().save(essay.id, { assessment })
+              }
+            />
           ) : (
-            <ResultsView essay={essay} language={language} />
+            <>
+              <ResultsSummary essay={essay} checking={checkRunning} />
+              {essay.corrections.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 rounded-xl border bg-card p-10 text-center">
+                  <SpellCheck className="h-8 w-8 text-green-600" />
+                  <p className="font-medium">{t("languageCheck.results.noErrors")}</p>
+                  <p className="max-w-md text-sm text-muted-foreground">
+                    {t("languageCheck.results.noErrorsHint")}
+                  </p>
+                </div>
+              ) : (
+                <ResultsView essay={essay} language={language} />
+              )}
+            </>
           )}
         </>
       ) : (

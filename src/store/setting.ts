@@ -15,7 +15,7 @@ export const VISION_MODELS = ["claude-haiku-5-5", "gpt-6-luna"] as const;
 export type VisionModel = (typeof VISION_MODELS)[number];
 
 /**
- * OCR model for Grammar Check transcription, separate from visionModel
+ * OCR model for Writing Assessment transcription, separate from visionModel
  * (which OCRs reading-assistant uploads). The list happens to equal
  * VISION_MODELS today but is kept explicit so the two can diverge.
  * claude-haiku-5-5 is restricted (see RESTRICTED_VISION_MODELS) —
@@ -41,7 +41,7 @@ export const RESTRICTED_IMAGE_MODELS: string[] = [
 ];
 
 // claude-haiku-5-5 is premium for the Vision (OCR) Model (visionModel) and
-// the Grammar Check OCR Model (ocrModel): admins/super-admins and
+// the Writing Assessment OCR Model (ocrModel): admins/super-admins and
 // meter-billing (mode "local") users only; hidden from everyone else's
 // dropdowns. gpt-6-luna is the default for all users.
 export const RESTRICTED_VISION_MODELS: string[] = [

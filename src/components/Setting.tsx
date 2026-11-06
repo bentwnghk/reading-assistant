@@ -157,7 +157,7 @@ function Setting({ open, onClose }: SettingProps) {
     : TUTOR_MODELS.filter((m) => !RESTRICTED_TUTOR_MODELS.includes(m));
   // claude-haiku-5-5 is only selectable by admins/super-admins and
   // meter-billing (mode "local") users for the Vision (OCR) Model and the
-  // Grammar Check OCR Model; hidden from everyone else's dropdowns.
+  // Writing Assessment OCR Model; hidden from everyone else's dropdowns.
   const visionModelOptions = showRestrictedModels
     ? VISION_MODELS
     : VISION_MODELS.filter((m) => !RESTRICTED_VISION_MODELS.includes(m));

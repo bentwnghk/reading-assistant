@@ -32,6 +32,7 @@ import ResultsView from "@/components/LanguageCheck/ResultsView";
 import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
 import {
   ExplanationLanguageToggle,
+  SegmentedTabs,
   STATUS_TONE,
 } from "@/components/LanguageCheck/shared";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
@@ -79,6 +80,9 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
 
   const [data, setData] = useState<StaffListResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [detailTab, setDetailTab] = useState<"assessment" | "corrections">(
+    "assessment",
+  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const classId = classProp ?? "all";
@@ -508,37 +512,48 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
 
               {detail.status === "checked" && detail.checkedText ? (
                 <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
-                  <AssessmentPanel
-                    essay={detail}
-                    language={language}
-                    onSave={async (assessment) => {
-                      const res = await fetch(
-                        `/api/grammar-check/staff/${detail.id}/assessment`,
-                        {
-                          method: "PUT",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify(assessment),
-                        },
-                      );
-                      if (!res.ok) throw new Error("save failed");
-                      setDetail((d) =>
-                        d && d.id === detail.id ? { ...d, assessment } : d,
-                      );
-                    }}
+                  <SegmentedTabs
+                    value={detailTab}
+                    onChange={setDetailTab}
+                    ariaLabel={t("languageCheck.results.tabsLabel")}
+                    className="w-fit"
+                    options={[
+                      { value: "assessment", label: t("languageCheck.results.tabAssessment") },
+                      { value: "corrections", label: t("languageCheck.results.tabCorrections") },
+                    ]}
                   />
-                  {/* Same view students see: inline highlights, popovers,
-                      category filter and the cross-linked correction cards.
-                      ResultsView never reads `images`. */}
-                  <ResultsView
-                    essay={{
-                      ...detail,
-                      ownerId: detail.userId,
-                      ownerName: detail.userName,
-                      images: [],
-                    }}
-                    language={language}
-                    embedded
-                  />
+                  {detailTab === "assessment" ? (
+                    <AssessmentPanel
+                      essay={detail}
+                      language={language}
+                      onSave={async (assessment) => {
+                        const res = await fetch(
+                          `/api/grammar-check/staff/${detail.id}/assessment`,
+                          {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(assessment),
+                          },
+                        );
+                        if (!res.ok) throw new Error("save failed");
+                        setDetail((d) =>
+                          d && d.id === detail.id ? { ...d, assessment } : d,
+                        );
+                      }}
+                    />
+                  ) : (
+                    // Same view students see (ResultsView never reads `images`).
+                    <ResultsView
+                      essay={{
+                        ...detail,
+                        ownerId: detail.userId,
+                        ownerName: detail.userName,
+                        images: [],
+                      }}
+                      language={language}
+                      embedded
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="flex min-h-0 flex-col gap-4 overflow-y-auto">

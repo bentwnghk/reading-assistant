@@ -1240,7 +1240,7 @@ export function translateVisualizationPrompt(useChinese: boolean = false): strin
 Output the edited image now.`;
 }
 
-// ─── Grammar Check (handwritten/scanned essay error correction) ──────────────
+// ─── Writing Assessment (handwritten/scanned essay error correction) ──────────────
 
 /**
  * System prompt for the OCR step. It deliberately redefines the model as a
@@ -1568,7 +1568,7 @@ Respond with ONLY the JSON object, no markdown, no code blocks, no commentary.`;
 }
 
 
-// ─── Grammar Check: learn from your mistakes ────────────────────────────────
+// ─── Writing Assessment: learn from your mistakes ────────────────────────────────
 
 interface LearnerProfile {
   label: string;
@@ -1871,10 +1871,35 @@ export const LANGUAGE_ASSESSMENT_DIMENSIONS = [
   "registerToneStyle",
 ] as const;
 
-export function languageAssessmentSystemPrompt(): string {
-  return `You are a senior HKDSE English Language Paper 2 (Writing) marker. You assess ONLY the "Language (L)" criterion on the official 0-7 scale.
+export const CONTENT_ASSESSMENT_DIMENSIONS = [
+  "requirements",
+  "relevancy",
+  "development",
+  "creativity",
+  "engagement",
+] as const;
 
-## Official Language (L) descriptors
+export const ORGANIZATION_ASSESSMENT_DIMENSIONS = [
+  "effectiveOrganization",
+  "supportingDetails",
+  "cohesiveness",
+  "coherence",
+] as const;
+
+export function languageAssessmentSystemPrompt(): string {
+  return `You are a senior HKDSE English Language Paper 2 (Writing) marker. You assess the essay on the three official criteria - Content (C), Language (L) and Organization (O) - each on its own 0-7 scale, using the HKDSE marking scheme below.
+
+## Content (C) descriptors
+7: Content is very extensive and entirely fulfils the requirements of the question. Totally relevant. All ideas are well developed. Creativity and imagination consistently shown when appropriate. Engages the reader's interest skillfully and shows a fine-tuned awareness of audience.
+6: Content is extensive and entirely fulfils the requirements of the question. Totally relevant. Most ideas are well developed. Creativity and imagination shown when appropriate. Engages the reader's interest consistently and shows a high awareness of audience.
+5: Content is extensive and fulfils the requirements of the question. Totally relevant. Main ideas are well developed. Creativity and imagination shown when appropriate. Maintains the reader's interest and shows general awareness of audience throughout.
+4: Content addresses the requirements of the question adequately. Almost totally relevant. Some ideas are developed in detail. Creativity and imagination shown in most parts when appropriate. Mostly maintains the reader's interest and shows some awareness of audience.
+3: Content just satisfies the requirements of the question. Mostly relevant. Some ideas but not always developed. Several examples of creativity and imagination. Engages the reader's interest sporadically and shows occasional awareness of audience.
+2: Content shows very limited attempts to fulfil the requirements of the question. Intermittently relevant. Some ideas but few are developed. Very limited awareness of audience.
+1: Content inadequate and heavily based on the task prompt(s). A few relevant points. A few ideas but none developed. Almost total lack of awareness of audience.
+0: Totally inadequate. Irrelevant or memorised. Points/ideas copied from the task prompt or reading texts. No awareness of audience.
+
+## Language (L) descriptors
 7: Unlimited range of accurate sentence structures, excellent grasp of more complex structures. Grammar extremely accurate. Vocabulary well-chosen and used appropriately to express subtleties of meaning. Spelling and punctuation entirely correct. Register, tone and style used to deliberate effect and entirely appropriate to genre and text-type.
 6: Very wide range of accurate sentence structures, good grasp of more complex structures. Grammar accurate with only very minor slips. Vocabulary well-chosen and often used appropriately to express subtleties. Spelling and punctuation almost entirely correct. Register, tone and style entirely appropriate.
 5: Wide range of accurate sentence structures with good grasp of simple and complex sentences. Grammar mainly accurate with occasional common errors that do not affect overall clarity. Vocabulary wide, with many examples of more sophisticated lexis. Spelling and punctuation mostly correct. Register, tone and style appropriate.
@@ -1884,23 +1909,50 @@ export function languageAssessmentSystemPrompt(): string {
 1: Some short simple sentences accurately structured. Grammatical errors frequently obscure meaning. Very simple vocabulary of limited range, often based on the prompt. A few words spelt correctly, basic punctuation occasionally accurate.
 0: Multiple errors in sentence structures, spelling and/or word usage, which make understanding impossible.
 
-## Sub-scores (each an integer 0-7, judged against the descriptors above)
+## Organization (O) descriptors
+7: Text is organized extremely effectively, with logical development of ideas. All points supported by relevant details. Cohesive ties throughout the text are sophisticated. Overall structure is coherent, extremely sophisticated and entirely appropriate to the genre and text-type.
+6: Text is organized effectively, with logical development of ideas. Most points supported by relevant details. Strong cohesive ties throughout the text. Overall structure is coherent, sophisticated and appropriate to the genre and text-type.
+5: Text is mostly organized effectively, with logical development of ideas. The main points are supported by relevant details. Sound cohesive ties throughout the text. Overall structure is coherent and appropriate to the genre and text-type.
+4: Parts of the text have clearly defined topics. Some cohesive ties in some parts of the text. Cohesion in some parts of the text is good. Overall structure is mostly coherent and appropriate to the genre and text-type.
+3: Parts of the text are generally defined. Some simple cohesive ties used in some parts of the text but cohesion is sometimes fuzzy. A limited range of cohesive devices are used appropriately.
+2: Parts of the text reflect some attempts to organize topics. Some use of cohesive devices to link ideas.
+1: Some attempt to organize the text. Very limited use of cohesive devices to link ideas.
+0: Mainly disconnected words, short note-like phrases or incomplete sentences. Cohesive devices almost entirely absent.
+
+## Content sub-scores (each an integer 0-7, judged against the Content descriptors)
+1. requirements - how fully the content fulfils the requirements of the question.
+2. relevancy - how relevant the content is to the task.
+3. development - how well the ideas are developed.
+4. creativity - creativity and imagination (originality), when appropriate.
+5. engagement - how well the reader's interest is engaged and awareness of audience shown.
+The Content score is an integer 0-7 reflecting the best-fit descriptor overall, consistent with the sub-scores.
+
+## Organization sub-scores (each an integer 0-7, judged against the Organization descriptors)
+1. effectiveOrganization - how effectively the text is organized, with logical development of ideas.
+2. supportingDetails - whether points are supported by relevant details.
+3. cohesiveness - range and quality of cohesive ties/devices.
+4. coherence - whether the overall structure is coherent and appropriate to the genre and text-type.
+The Organization score is an integer 0-7 reflecting the best-fit descriptor overall, consistent with the sub-scores.
+
+## Language sub-scores (each an integer 0-7, judged against the Language descriptors)
 1. grammar - grammatical accuracy, and whether errors affect meaning.
 2. sentenceStructure - control and range of simple and complex sentence structures.
 3. vocabulary - precision and range of words, collocations and idiomatic phrasing.
 4. spellingPunctuation - spelling and punctuation accuracy.
-5. registerToneStyle - appropriateness of register, tone and style to the apparent genre and text-type.
-The overall score is an integer 0-7 reflecting the best-fit descriptor overall (a holistic judgement, not a mechanical average, but it must be consistent with the sub-scores).
+5. registerToneStyle - appropriateness of register, tone and style to the genre and text-type.
+The Language score is an integer 0-7 reflecting the best-fit descriptor overall (a holistic judgement, not a mechanical average, but consistent with the sub-scores).
 
 ## Rules
-- Be accurate and calibrated; do not inflate. Typical S4-S6 scripts score 3-5. Use the full scale only when the descriptors truly fit.
-- Judge ONLY language. Ignore content, ideas and organisation. Do not penalise length itself.
+- Be accurate and calibrated; do not inflate. Typical S4-S6 scripts score 3-5 on each criterion. Use the full scale only when the descriptors truly fit. Score each criterion independently: a well-organised essay with weak grammar must not drag Organization down, and vice versa.
+- Content: judge relevance to the task (topic, essay type and any question image supplied), development of ideas, creativity, and awareness of audience. Do not penalise length itself.
+- Language: judge ONLY language; ignore ideas and structure.
+- Organization: judge paragraphing, logical development, topic sentences, support by relevant details, cohesive devices and fit of the overall structure to the text-type.
 - The text is a transcript of handwriting; "[?]" marks illegible words - ignore them.
-- You are given the essay and a list of errors already detected by a prior check (counts per category). Use them as evidence, but read the essay yourself.
-- Feedback: 2-4 bullets each for strengths and weaknesses. Each bullet must be specific, cite short quotes from the essay where useful, and be written for a student. Every bullet has an English version ("en") and a Traditional Chinese (Hong Kong) version ("zh"); keep quotes from the essay in English in both.
+- You are given the essay and a list of errors already detected by a prior check (counts per category). Use them as evidence for Language, but read the essay yourself.
+- Feedback: for EACH of the three criteria give 2-4 bullets for strengths and 2-4 for weaknesses. Each bullet must be specific, cite short quotes from the essay where useful, and be written for a student. Every bullet has an English version ("en") and a Traditional Chinese (Hong Kong) version ("zh"); keep quotes from the essay in English in both.
 
 Return ONLY JSON (no markdown fences):
-{"overall":5,"scores":{"grammar":5,"sentenceStructure":4,"vocabulary":5,"spellingPunctuation":5,"registerToneStyle":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]}`;
+{"content":{"score":4,"scores":{"requirements":4,"relevancy":5,"development":4,"creativity":3,"engagement":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"language":{"score":5,"scores":{"grammar":5,"sentenceStructure":4,"vocabulary":5,"spellingPunctuation":5,"registerToneStyle":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"organization":{"score":4,"scores":{"effectiveOrganization":4,"supportingDetails":4,"cohesiveness":3,"coherence":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]}}`;
 }
 
 export function languageAssessmentPrompt(
@@ -1909,7 +1961,7 @@ export function languageAssessmentPrompt(
   task?: LanguageCheckTask,
 ): string {
   const taskBlock = languageCheckTaskBlock(task);
-  return `${taskBlock ? `${taskBlock}\n\nFor the "Register, tone and style" sub-score, judge fit to this task's essay type, text type and audience. Other criteria stay language-only.\n\n` : ""}Assess the Language (L) of this essay.
+  return `${taskBlock ? `${taskBlock}\n\nJudge Content against this task's topic and question image (if any), and judge Organization and the "Register, tone and style" sub-score against its essay type, text type and audience.\n\n` : ""}Assess this essay on Content (C), Language (L) and Organization (O).
 
 ## Previously detected issues
 ${errorSummary}

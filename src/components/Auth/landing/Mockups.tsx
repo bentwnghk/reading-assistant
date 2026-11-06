@@ -5177,7 +5177,7 @@ export function UnderstandDifficultyMockup() {
    your mistakes" session, mirroring:
      1. ReviewStage.tsx + ScanViewer.tsx   — scan ↔ transcript review
      2. ResultsView.tsx + ErrorSpan.tsx + CorrectionCard.tsx
-     3. AssessmentPanel.tsx                — AI Language assessment
+     3. AssessmentPanel.tsx                — AI Writing Assessment
      4. LessonView.tsx (+ LearnPath sidebar)
      5. PracticePlayer.tsx + ExerciseCard.tsx (practice mode)
      6. QuizPlayer.tsx + ExerciseCard.tsx (quiz mode)
@@ -5438,7 +5438,7 @@ export function LanguageCheckResultsMockup() {
               <Award className="h-3.5 w-3.5 shrink-0 text-violet-600 dark:text-violet-400" />
               <div className="min-w-0">
                 <p className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-[var(--lp-ink)]">
-                  AI Language assessment
+                  AI Writing Assessment
                   <span className="rounded-full bg-violet-600/10 px-1.5 py-0.5 text-[9px] font-semibold tabular-nums text-violet-700 dark:bg-violet-400/10 dark:text-violet-300">
                     4 / 7
                   </span>
@@ -5621,7 +5621,7 @@ export function LanguageCheckResultsMockup() {
   );
 }
 
-/* ── 06 · 3. GRAMMAR CHECK — AI Language assessment expanded (faithful) ──
+/* ── 06 · 3. GRAMMAR CHECK — AI Writing Assessment expanded (faithful) ──
    Mirrors AssessmentPanel.tsx expanded in the results workspace: the violet
    gradient panel with the overall 0–7 band, the five sub-score bars (tone
    colours per score), bilingual-style strengths & areas cards, and the
@@ -5696,7 +5696,7 @@ export function LanguageCheckAssessmentMockup() {
               </span>
               <Award className="h-3.5 w-3.5 shrink-0 text-violet-600 dark:text-violet-400" />
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold text-[var(--lp-ink)]">AI Language assessment</p>
+                <p className="text-[11px] font-semibold text-[var(--lp-ink)]">AI Writing Assessment</p>
                 <p className="text-[9px] text-muted-foreground">
                   Scored 0–7 against the HKDSE Writing “Language (L)” rubric · Assessed 31/10/2026, 14:32
                 </p>
@@ -6315,7 +6315,7 @@ export function LanguageCheckStaffOverviewMockup() {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--lp-ink)]">
             <SpellCheck className="h-4 w-4 text-primary" />
-            Grammar Check
+            Writing Assessment
           </h3>
           <div className="flex gap-1 rounded-lg bg-muted p-1">
             <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">

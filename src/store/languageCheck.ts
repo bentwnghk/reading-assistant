@@ -5,7 +5,7 @@ import { useLanguageCheckLearnStore } from "@/store/languageCheckLearn";
 import { countWords } from "@/utils/languageCheck";
 
 /**
- * Grammar Check store — fully independent of the reading/history stores.
+ * Writing Assessment store — fully independent of the reading/history stores.
  *
  * Essays live in PostgreSQL (see /api/grammar-check); this store is the
  * client cache + generation state. Only the explanation-language preference is
