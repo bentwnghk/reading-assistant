@@ -422,7 +422,10 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   }
 
   async function handleRecheck() {
-    if (await runCheck(essay.id)) setView("results");
+    if (await runCheck(essay.id)) {
+      setResultsTab("assessment");
+      setView("results");
+    }
   }
 
   async function handleExport() {
@@ -673,7 +676,10 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
       ) : (
         <ReviewStage
           essay={essay}
-          onChecked={() => setView("results")}
+          onChecked={() => {
+            setResultsTab("assessment");
+            setView("results");
+          }}
         />
       )}
 

@@ -179,6 +179,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       questionImage: detail.questionImage,
     });
     if (!ok) return;
+    setDetailTab("assessment");
     // Refresh the dialog, this table — and the caller's own essay list in
     // the languageCheck store (they may be the uploader of this essay, in
     // which case its summary is cached there too).

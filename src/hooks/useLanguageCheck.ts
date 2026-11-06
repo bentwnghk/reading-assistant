@@ -97,6 +97,17 @@ function taskOf(
   };
 }
 
+/** Per-category error counts handed to the assessment prompt as evidence. */
+function summarizeErrors(corrections: Pick<LanguageCheckError, "category">[]): string {
+  const counts = new Map<string, number>();
+  for (const e of corrections) {
+    counts.set(e.category, (counts.get(e.category) ?? 0) + 1);
+  }
+  return counts.size
+    ? [...counts].map(([c, n]) => `- ${c}: ${n}`).join("\n")
+    : "- none detected";
+}
+
 /**
  * OCR + language-check actions for the Writing Assessment feature. Independent of
  * useReadingAssistant / the reading store: all state lives in the
@@ -332,6 +343,8 @@ export default function useLanguageCheck() {
     corrections: LanguageCheckError[];
     checkModel: string;
     droppedCount: number;
+    /** Set when the follow-up assessment call finished successfully. */
+    assessment?: StoredLanguageAssessment;
   }
 
   /**
@@ -347,6 +360,8 @@ export default function useLanguageCheck() {
     text: string,
     persist: (result: CheckRunResult) => Promise<void>,
     task?: LanguageCheckTask,
+    /** Also run the AI writing assessment, as a second AI call after the error check. */
+    withAssessment = false,
   ): Promise<boolean> {
     if (useLanguageCheckStore.getState().activeGenerations["language-check"])
       return false;
@@ -395,11 +410,40 @@ export default function useLanguageCheck() {
       }
 
       const { errors, dropped } = resolveErrors(text, rawAll);
+
+      // Sequential on purpose: the assessment prompt uses the detected error
+      // counts as evidence, so it runs once the error check has resolved.
+      // An assessment failure keeps the check result (Assess can be retried).
+      let assessment: StoredLanguageAssessment | undefined;
+      if (withAssessment) {
+        useLanguageCheckStore.getState().setProgress(null);
+        try {
+          assessment = await assessText(
+            text,
+            summarizeErrors(errors),
+            task,
+            ac.signal,
+            task?.questionImage,
+          );
+        } catch (e) {
+          if (!isAbortError(e) && !ac.signal.aborted) {
+            console.error("Writing assessment failed:", e);
+            toast.error(
+              e instanceof Error
+                ? e.message
+                : i18next.t("languageCheck.assessment.error"),
+            );
+          }
+        }
+      }
+      if (ac.signal.aborted) throw new DOMException("Aborted", "AbortError");
+
       await persist({
         checkedText: text,
         corrections: errors,
         checkModel: languageCheckModel,
         droppedCount: dropped + invalid,
+        assessment,
       });
 
       if (errors.length === 0) {
@@ -441,15 +485,24 @@ export default function useLanguageCheck() {
     return runCheckPipeline(
       essayId,
       essay.transcript,
-      async (result) => {
+      async ({ assessment, ...result }) => {
+        // A fresh check resets any saved assessment first; the new assessment
+        // is then saved as a "first" assessment (students may not overwrite).
         await useLanguageCheckStore.getState().save(essayId, {
           transcript: essay.transcript,
           status: "checked",
           ...result,
           assessment: null,
         });
+        if (!assessment) return;
+        try {
+          await useLanguageCheckStore.getState().save(essayId, { assessment });
+        } catch {
+          toast.error(i18next.t("languageCheck.assessment.saveError"));
+        }
       },
       taskOf(essay),
+      true,
     );
   }
 
@@ -469,23 +522,64 @@ export default function useLanguageCheck() {
         >
       >,
   ): Promise<boolean> {
-    return runCheckPipeline(essay.id, essay.transcript, async (result) => {
-      const res = await fetch(`/api/writing-assessment/staff/${essay.id}/recheck`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result),
-      });
-      if (!res.ok) {
-        let message = `Request failed (${res.status})`;
-        try {
-          const body = (await res.json()) as { error?: string };
-          if (body.error) message = body.error;
-        } catch {
-          // Non-JSON body — keep the generic message.
+    return runCheckPipeline(essay.id, essay.transcript, async ({ assessment, ...result }) => {
+      const send = async (url: string, method: string, body: unknown) => {
+        const res = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          let message = `Request failed (${res.status})`;
+          try {
+            const data = (await res.json()) as { error?: string };
+            if (data.error) message = data.error;
+          } catch {
+            // Non-JSON body — keep the generic message.
+          }
+          throw new Error(message);
         }
-        throw new Error(message);
+      };
+      await send(`/api/writing-assessment/staff/${essay.id}/recheck`, "POST", result);
+      if (!assessment) return;
+      try {
+        await send(`/api/writing-assessment/staff/${essay.id}/assessment`, "PUT", assessment);
+      } catch {
+        toast.error(i18next.t("languageCheck.assessment.saveError"));
       }
-    }, taskOf(essay));
+    }, taskOf(essay), true);
+  }
+
+  /** One AI call: Content / Language / Organization assessment of `text`. */
+  async function assessText(
+    text: string,
+    errorSummary: string,
+    task: LanguageCheckTask | undefined,
+    signal: AbortSignal | undefined,
+    image: string | undefined,
+  ): Promise<StoredLanguageAssessment> {
+    const { languageCheckModel } = useSettingStore.getState();
+    const ac = new AbortController();
+    signal?.addEventListener("abort", () => ac.abort());
+    try {
+      const output = await generateWithFallback(
+        languageCheckModel,
+        languageAssessmentSystemPrompt(),
+        languageAssessmentPrompt(text, errorSummary, task),
+        ac.signal,
+        image,
+      );
+      const parsed = languageAssessmentSchema.parse(
+        JSON.parse(stripJsonFences(output)),
+      );
+      return { ...parsed, assessedAt: Date.now(), model: languageCheckModel };
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      if (error instanceof SyntaxError || (error as Error)?.name === "ZodError") {
+        throw new Error(i18next.t("languageCheck.check.parseError"));
+      }
+      throw new Error(describeGenerationError(error));
+    }
   }
 
   /** Stateless Language (L) assessment of a checked essay (1-7 scale). */
@@ -500,35 +594,8 @@ export default function useLanguageCheck() {
     signal?: AbortSignal,
   ): Promise<StoredLanguageAssessment> {
     const text = (essay.checkedText || essay.transcript).trim();
-    const counts = new Map<string, number>();
-    for (const e of essay.corrections) {
-      counts.set(e.category, (counts.get(e.category) ?? 0) + 1);
-    }
-    const summary = counts.size
-      ? [...counts].map(([c, n]) => `- ${c}: ${n}`).join("\n")
-      : "- none detected";
-    const { languageCheckModel } = useSettingStore.getState();
-    const ac = new AbortController();
-    signal?.addEventListener("abort", () => ac.abort());
-    try {
-      const output = await generateWithFallback(
-        languageCheckModel,
-        languageAssessmentSystemPrompt(),
-        languageAssessmentPrompt(text, summary, taskOf(essay)),
-        ac.signal,
-        essay.questionImage || undefined,
-      );
-      const parsed = languageAssessmentSchema.parse(
-        JSON.parse(stripJsonFences(output)),
-      );
-      return { ...parsed, assessedAt: Date.now(), model: languageCheckModel };
-    } catch (error) {
-      if (isAbortError(error)) throw error;
-      if (error instanceof SyntaxError || (error as Error)?.name === "ZodError") {
-        throw new Error(i18next.t("languageCheck.check.parseError"));
-      }
-      throw new Error(describeGenerationError(error));
-    }
+    const summary = summarizeErrors(essay.corrections);
+    return assessText(text, summary, taskOf(essay), signal, essay.questionImage || undefined);
   }
 
   return { transcribe, runCheck, runStaffCheck, assessLanguage, generate: generateWithFallback };
