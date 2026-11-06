@@ -4702,7 +4702,7 @@
   "languageCheck": {
     "navTitle": "Writing Assessment",
     "title": "Writing Assessment",
-    "subtitle": "Upload a handwritten essay or scanned work. We digitise it, you review the transcript, then get inline corrections with grammar notes aligned with HKDSE writing — and with \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
+    "subtitle": "Upload a handwritten essay or scanned work. We digitise it, you review the transcript, then one check returns inline corrections with explanations plus an automatic AI Writing Assessment scored 0–7 on the HKDSE Content, Language and Organization criteria — and with \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
     "back": "Back",
     "cancel": "Cancel",
     "stop": "Stop",
@@ -4723,10 +4723,14 @@
         "learning": "Learning"
       },
       "overview": {
-        "intro": "Writing Assessment digitises handwritten or scanned essays, then marks them with inline corrections and grammar notes aligned with HKDSE writing.",
+        "intro": "Pick a topic, upload a handwritten or scanned essay and review the verbatim transcript — then one check returns inline corrections with explanations and automatically scores the writing with the AI Writing Assessment on the HKDSE Content, Language and Organization rubrics.",
         "sections": {
           "name": "Two Sections",
           "desc": "\"My essays\" holds the upload area and your saved essays; \"My learning\" holds saved learning sessions, a progress dashboard and an activity log."
+        },
+        "topic": {
+          "name": "Pick a Topic First",
+          "desc": "Every essay answers a writing task. Choose a topic from your Topic Library above the upload area — a title, the full prompt, an optional question image and the DSE Part A/B essay type. Its title becomes the essay's default title, and the task guides both the check and the assessment."
         },
         "upload": {
           "name": "Uploading",
@@ -4734,11 +4738,11 @@
         },
         "statuses": {
           "name": "Essay Statuses",
-          "desc": "Each essay moves through Draft (uploaded) → Transcribed (digitised) → Checked (marked). The list shows pages, comments and the last update."
+          "desc": "Each essay moves through Draft (uploaded) → Transcribed (digitised) → Checked (marked). The list shows pages, word count, error count, the assessment overall and the last update."
         },
         "assessment": {
           "name": "AI Writing Assessment",
-          "desc": "After checking, score the writing against the HKDSE Content, Language and Organization rubrics — a 0–7 band for each, five Language sub-scores and bilingual strengths and weaknesses for each criterion. The overall also shows in the essay list. Students get one assessment per essay — staff can re-assess. Details in the Results tab."
+          "desc": "Every check now ends with an automatic AI Writing Assessment: a 0–7 band for each HKDSE criterion — Content, Language and Organization — plus sub-scores and bilingual strengths and weaknesses. The overall also shows in the essay list. If the assessment pass fails, \"Get AI assessment\" runs it again. Students get one assessment per essay — staff can re-assess. Details in the Results tab."
         },
         "retention": {
           "name": "Storage & Privacy",
@@ -4777,14 +4781,14 @@
         }
       },
       "results": {
-        "intro": "Corrections appear as inline highlights in the essay, each numbered and paired with an explanation card. The AI Writing Assessment tab scores the writing on the HKDSE Content, Language and Organization rubrics; the corrections tab holds the highlights and explanation cards.",
+        "intro": "Results open on the AI Writing Assessment tab — filled in automatically by the check, scoring the writing on the HKDSE Content, Language and Organization rubrics. The \"Corrections & Explanations\" tab holds the inline highlights, each numbered and paired with an explanation card.",
         "tiers": {
           "name": "Errors vs. Suggestions",
           "desc": "Errors (grammar and mechanics) get a solid underline; expression suggestions (phrasing, concision, stronger words) are optional polish with alternative ways to say it."
         },
         "assessment": {
           "name": "AI Writing Assessment",
-          "desc": "The first results tab. Press \"Get AI assessment\" to score the writing on the HKDSE Content (C), Language (L) and Organization (O) rubrics: a 0–7 band for each plus an overall, five Language sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve for each criterion. Corrections and explanations are on the second tab. It is saved with the essay and the overall also shows in the essay list. Students get one assessment per essay — the saved result stays on the essay and cannot be re-run; teachers, admins and super-admins can re-assess it."
+          "desc": "The first results tab, filled in automatically right after the check — the assessment reads the detected error counts as evidence. It scores HKDSE Content (C), Language (L) and Organization (O): a 0–7 band for each plus an overall, five Language sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve for each criterion. If it did not run — essays checked before this feature, or a failed pass — press \"Get AI assessment\" to run it manually. It is saved with the essay and the overall also shows in the essay list. Students get one assessment per essay — the saved result stays on the essay and cannot be re-run; teachers, admins and super-admins can re-assess it."
         },
         "filter": {
           "name": "Category Filter",
@@ -5065,7 +5069,7 @@
     "results": {
       "tabsLabel": "Results sections",
       "tabAssessment": "AI Writing Assessment",
-      "tabCorrections": "Corrections & explanations",
+      "tabCorrections": "Corrections & Explanations",
       "tierErrors": "Errors",
       "tierSuggestions": "Suggestions",
       "hideTier": "Hide group",

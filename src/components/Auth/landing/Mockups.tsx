@@ -5421,13 +5421,13 @@ export function LanguageCheckResultsMockup() {
         </div>
 
         {/* Results tabs — SegmentedTabs (shared.tsx): the essay workspace splits
-            into "AI Writing Assessment" and "Corrections & explanations" */}
+            into "AI Writing Assessment" and "Corrections & Explanations" */}
         <div className="flex w-fit gap-1 rounded-lg bg-muted p-1">
           <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
             AI Writing Assessment
           </span>
           <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-semibold text-[var(--lp-ink)] shadow-sm">
-            Corrections & explanations
+            Corrections & Explanations
           </span>
         </div>
 
@@ -5675,7 +5675,7 @@ export function LanguageCheckAssessmentMockup() {
             AI Writing Assessment
           </span>
           <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
-            Corrections & explanations
+            Corrections & Explanations
           </span>
         </div>
 

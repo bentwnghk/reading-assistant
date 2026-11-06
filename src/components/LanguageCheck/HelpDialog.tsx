@@ -9,6 +9,7 @@ import {
   Clock,
   Download,
   Eye,
+  FileQuestion,
   FileText,
   Filter,
   GraduationCap,
@@ -125,6 +126,12 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
               tone="bg-emerald-500/10 text-emerald-500"
               name={t("languageCheck.help.overview.sections.name")}
               desc={t("languageCheck.help.overview.sections.desc")}
+            />
+            <HelpRow
+              icon={FileQuestion}
+              tone="bg-sky-500/10 text-sky-500"
+              name={t("languageCheck.help.overview.topic.name")}
+              desc={t("languageCheck.help.overview.topic.desc")}
             />
             <HelpRow
               icon={ImagePlus}
