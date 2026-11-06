@@ -67,8 +67,8 @@ export default function LanguageCheckHome({
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
-      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-        <div className="min-w-0">
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <h1 className="flex items-center gap-2 text-2xl font-bold">
             <SpellCheck className="h-6 w-6 text-primary" />
             {t("languageCheck.title")}
@@ -83,21 +83,21 @@ export default function LanguageCheckHome({
               <HelpCircle className="h-4 w-4 text-muted-foreground" />
             </Button>
           </h1>
-          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-            {t("languageCheck.subtitle")}
-          </p>
+          {isStaff && (
+            <SegmentedTabs
+              value={scope}
+              onChange={(view) => navigate({ view })}
+              ariaLabel={t("languageCheck.page.scopeLabel")}
+              options={[
+                { value: "mine", label: t("languageCheck.page.scope.mine") },
+                { value: "students", label: t("languageCheck.page.scope.students") },
+              ]}
+            />
+          )}
         </div>
-        {isStaff && (
-          <SegmentedTabs
-            value={scope}
-            onChange={(view) => navigate({ view })}
-            ariaLabel={t("languageCheck.page.scopeLabel")}
-            options={[
-              { value: "mine", label: t("languageCheck.page.scope.mine") },
-              { value: "students", label: t("languageCheck.page.scope.students") },
-            ]}
-          />
-        )}
+        <p className="max-w-3xl text-sm text-muted-foreground">
+          {t("languageCheck.subtitle")}
+        </p>
       </div>
 
       <div className="flex flex-col gap-4">
