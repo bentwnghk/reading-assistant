@@ -327,7 +327,7 @@ export const LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE: Record<
   "dse-part-b": {
     label: "DSE Writing Part B",
     guidance:
-      "HKDSE English Language Paper 2 Writing Part B: the elective, longer creative/extended writing question (roughly 400 words) chosen from the Learning Elements (e.g. short stories, poems and songs, drama, debating, popular culture, workplace communication). Judge register, tone and style against the genre the chosen question calls for (e.g. narrative voice for a story, persuasive register for a speech or debate).",
+      "HKDSE English Language Paper 2 Writing Part B: the elective, longer creative/extended writing question (roughly 400 words). Judge register, tone and style against the genre the chosen question calls for (e.g. narrative voice for a story, persuasive register for a speech or debate).",
   },
 };
 
