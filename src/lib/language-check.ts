@@ -58,6 +58,9 @@ function mapEssay(row: Record<string, unknown>): LanguageCheckEssay {
     checkModel: (row.check_model as string) || "",
     droppedCount: Number(row.dropped_count) || 0,
     assessment: (row.assessment as LanguageCheckAssessment | null) ?? null,
+    topic: (row.topic as string) || "",
+    essayType: ((row.essay_type as string) || "") as LanguageCheckEssay["essayType"],
+    questionImage: (row.question_image as string) || "",
     ownerId: (row.owner_id as string) || (row.user_id as string) || "",
     ownerName: (row.owner_name as string) || "",
     ownerEmail: (row.owner_email as string) || "",
@@ -196,12 +199,19 @@ export async function createEssay(
     title: string
     images: string[]
     ocrModel?: string
+    /** Writing-task snapshot from the Topic Library. */
+    topicId?: string
+    topic?: string
+    essayType?: string
+    questionImage?: string
   },
 ): Promise<LanguageCheckEssay> {
   const { rows } = await getPool().query(
     `WITH ins AS (
-       INSERT INTO language_check_essays (user_id, uploaded_by, title, images, ocr_model)
-       VALUES ($1, $2, $3, $4::jsonb, $5)
+       INSERT INTO language_check_essays
+         (user_id, uploaded_by, title, images, ocr_model,
+          topic_id, topic, essay_type, question_image)
+       VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $8, $9)
        RETURNING *
      )
      SELECT ins.*, ins.user_id AS owner_id, u.name AS owner_name, u.email AS owner_email,
@@ -215,6 +225,10 @@ export async function createEssay(
       data.title,
       JSON.stringify(data.images),
       data.ocrModel ?? "",
+      data.topicId ?? null,
+      data.topic ?? "",
+      data.essayType ?? "",
+      data.questionImage ?? "",
     ],
   )
   return mapEssay(rows[0])
@@ -585,6 +599,7 @@ export async function getStaffEssay(
             e.user_id, u.name AS user_name, u.email AS user_email,
             e.transcript, e.checked_text, e.corrections,
             e.ocr_model, e.check_model, e.dropped_count, e.assessment,
+            e.topic, e.essay_type, e.question_image,
             jsonb_array_length(e.images) AS page_count
      ${STAFF_FROM}
      WHERE ${clauses.join(" AND ")}`,
@@ -611,6 +626,9 @@ export async function getStaffEssay(
     checkModel: (row.check_model as string) || "",
     droppedCount: Number(row.dropped_count) || 0,
     assessment: (row.assessment as LanguageCheckAssessment | null) ?? null,
+    topic: (row.topic as string) || "",
+    essayType: ((row.essay_type as string) || "") as LanguageCheckStaffDetail["essayType"],
+    questionImage: (row.question_image as string) || "",
     overall:
       (row.assessment as LanguageCheckAssessment | null)?.overall ?? null,
   }

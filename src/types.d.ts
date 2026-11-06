@@ -1135,6 +1135,34 @@ interface LanguageCheckError {
   alternatives?: string[];
 }
 
+type LanguageCheckEssayTypeId = "dse-part-a" | "dse-part-b";
+
+/** The writing task an essay answers (entered once, saved in the Topic Library). */
+interface LanguageCheckTopicSummary {
+  id: string;
+  title: string;
+  topic: string;
+  essayType: LanguageCheckEssayTypeId;
+  /** A question image is saved (the image itself is only on the full topic). */
+  hasQuestionImage: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface LanguageCheckTopic extends LanguageCheckTopicSummary {
+  /** Downscaled JPEG data URL of the question paper; "" = none. */
+  questionImage: string;
+}
+
+/** Writing-task context handed to the check / assessment prompts. */
+interface LanguageCheckTask {
+  title?: string;
+  topic?: string;
+  essayType?: LanguageCheckEssayTypeId | "";
+  /** Question image data URL, when one was uploaded. */
+  questionImage?: string;
+}
+
 interface LanguageCheckEssaySummary {
   id: string;
   title: string;
@@ -1188,6 +1216,10 @@ interface LanguageCheckEssay {
   droppedCount: number;
   /** Saved AI Language (L) assessment; null = never assessed. */
   assessment: LanguageCheckAssessment | null;
+  /** Writing-task snapshot taken from the Topic Library at upload ("" on older essays). */
+  topic: string;
+  essayType: LanguageCheckEssayTypeId | "";
+  questionImage: string;
   /** Owner (learner) of the essay — equals the caller for self-uploads. */
   ownerId: string;
   /** Owner display name ("" if the user row is gone). */
@@ -1246,6 +1278,9 @@ interface LanguageCheckStaffRow {
 
 /** Read-only staff view of one essay. Scans (images) are never included. */
 interface LanguageCheckStaffDetail extends LanguageCheckStaffRow {
+  topic: string;
+  essayType: LanguageCheckEssayTypeId | "";
+  questionImage: string;
   transcript: string;
   checkedText: string;
   corrections: LanguageCheckError[];

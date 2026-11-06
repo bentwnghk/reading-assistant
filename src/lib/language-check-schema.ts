@@ -2,6 +2,9 @@ import { z } from "zod"
 import { storedAssessmentSchema } from "@/utils/languageCheckAssessment"
 import {
   LANGUAGE_CHECK_CATEGORIES,
+  LANGUAGE_CHECK_ESSAY_TYPES,
+  LANGUAGE_CHECK_MAX_TOPIC_CHARS,
+  LANGUAGE_CHECK_MAX_TOPIC_TITLE_CHARS,
   LANGUAGE_CHECK_STATUSES,
   LANGUAGE_CHECK_MAX_ALTERNATIVES,
   LANGUAGE_CHECK_MAX_IMAGE_CHARS,
@@ -29,7 +32,20 @@ export const errorSchema = z.object({
     .optional(),
 })
 
+export const topicSchema = z.object({
+  title: z.string().trim().min(1).max(LANGUAGE_CHECK_MAX_TOPIC_TITLE_CHARS),
+  topic: z.string().trim().min(1).max(LANGUAGE_CHECK_MAX_TOPIC_CHARS),
+  essayType: z.enum(LANGUAGE_CHECK_ESSAY_TYPES),
+  questionImage: imageSchema.or(z.literal("")).optional().default(""),
+})
+
 export const createSchema = z.object({
+  /**
+   * Topic Library entry this essay answers (owned by the CALLER, who may be
+   * a teacher scanning on a student's behalf). Its title/topic/type/image
+   * are snapshotted onto the essay; the title becomes the essay title.
+   */
+  topicId: z.string().min(1).max(64),
   title: z.string().max(200).optional().default(""),
   images: z.array(imageSchema).min(1).max(LANGUAGE_CHECK_MAX_PAGES),
   ocrModel: z.string().max(100).optional().default(""),

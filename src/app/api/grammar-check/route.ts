@@ -10,6 +10,7 @@ import {
   resolveStaffScope,
   canUploadForStudent,
 } from "@/lib/language-check"
+import { getTopic } from "@/lib/language-check-topics"
 import { createSchema } from "@/lib/language-check-schema"
 
 export async function GET() {
@@ -69,6 +70,14 @@ export async function POST(request: Request) {
       uploadedBy = session.user.id
     }
 
+    // The writing task comes from the caller's own Topic Library (a teacher
+    // scanning for a student uses THEIR topic); it is snapshotted onto the
+    // essay so later library edits never change how it was assessed.
+    const topic = await getTopic(session.user.id, parsed.data.topicId)
+    if (!topic) {
+      return NextResponse.json({ error: "Topic not found" }, { status: 404 })
+    }
+
     // The cap counts against the owner (the student for teacher uploads).
     if ((await countEssays(ownerId)) >= LANGUAGE_CHECK_MAX_ESSAYS) {
       return NextResponse.json(
@@ -80,7 +89,11 @@ export async function POST(request: Request) {
     const essay = await createEssay({
       userId: ownerId,
       uploadedBy,
-      title: parsed.data.title,
+      title: topic.title,
+      topicId: topic.id,
+      topic: topic.topic,
+      essayType: topic.essayType,
+      questionImage: topic.questionImage,
       images: parsed.data.images,
       ocrModel: parsed.data.ocrModel,
     })

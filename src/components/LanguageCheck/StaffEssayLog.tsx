@@ -169,6 +169,10 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     const ok = await runStaffCheck({
       id: detail.id,
       transcript: detail.transcript,
+      title: detail.title,
+      topic: detail.topic,
+      essayType: detail.essayType,
+      questionImage: detail.questionImage,
     });
     if (!ok) return;
     // Refresh the dialog, this table — and the caller's own essay list in

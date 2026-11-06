@@ -13,7 +13,10 @@ interface AssessmentPanelProps {
   essay: Pick<
     LanguageCheckEssay,
     "id" | "checkedText" | "transcript" | "corrections" | "assessment"
-  >;
+  > &
+    Partial<
+      Pick<LanguageCheckEssay, "title" | "topic" | "essayType" | "questionImage">
+    >;
   language: ExplanationLanguage;
   /**
    * Whether an essay that already carries an assessment may be assessed

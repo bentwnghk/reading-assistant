@@ -82,6 +82,21 @@ function getFallbackModel(): Promise<string> {
   return fallbackModelPromise;
 }
 
+/** Writing-task context of an essay (snapshot saved at upload). */
+function taskOf(
+  essay: Partial<
+    Pick<LanguageCheckEssay, "title" | "topic" | "essayType" | "questionImage">
+  >,
+): LanguageCheckTask | undefined {
+  if (!essay.topic && !essay.essayType && !essay.questionImage) return undefined;
+  return {
+    title: essay.title,
+    topic: essay.topic,
+    essayType: essay.essayType,
+    questionImage: essay.questionImage || undefined,
+  };
+}
+
 /**
  * OCR + language-check actions for the Grammar Check feature. Independent of
  * useReadingAssistant / the reading store: all state lives in the
@@ -268,13 +283,31 @@ export default function useLanguageCheck() {
     system: string,
     prompt: string,
     signal: AbortSignal,
+    /** Optional question-paper image attached to the prompt (vision models). */
+    image?: string,
   ): Promise<string> {
     const run = async (name: string) => {
       const provider = await createModelProvider(name);
       const result = await generateText({
         model: provider,
         system,
-        prompt,
+        ...(image
+          ? {
+              messages: [
+                {
+                  role: "user" as const,
+                  content: [
+                    { type: "text" as const, text: prompt },
+                    {
+                      type: "image" as const,
+                      image,
+                      providerOptions: { openai: { imageDetail: "high" } },
+                    },
+                  ],
+                },
+              ],
+            }
+          : { prompt }),
         abortSignal: signal,
       });
       return result.text;
@@ -313,6 +346,7 @@ export default function useLanguageCheck() {
     essayId: string,
     text: string,
     persist: (result: CheckRunResult) => Promise<void>,
+    task?: LanguageCheckTask,
   ): Promise<boolean> {
     if (useLanguageCheckStore.getState().activeGenerations["language-check"])
       return false;
@@ -345,8 +379,9 @@ export default function useLanguageCheck() {
         const output = await generateWithFallback(
           languageCheckModel,
           languageCheckSystemPrompt(),
-          languageCheckPrompt(chunks[i]),
+          languageCheckPrompt(chunks[i], task),
           ac.signal,
+          task?.questionImage,
         );
         let json: unknown;
         try {
@@ -403,14 +438,19 @@ export default function useLanguageCheck() {
   async function runCheck(essayId: string): Promise<boolean> {
     const essay = useLanguageCheckStore.getState().active;
     if (!essay || essay.id !== essayId) return false;
-    return runCheckPipeline(essayId, essay.transcript, async (result) => {
-      await useLanguageCheckStore.getState().save(essayId, {
-        transcript: essay.transcript,
-        status: "checked",
-        ...result,
-        assessment: null,
-      });
-    });
+    return runCheckPipeline(
+      essayId,
+      essay.transcript,
+      async (result) => {
+        await useLanguageCheckStore.getState().save(essayId, {
+          transcript: essay.transcript,
+          status: "checked",
+          ...result,
+          assessment: null,
+        });
+      },
+      taskOf(essay),
+    );
   }
 
   /**
@@ -421,7 +461,13 @@ export default function useLanguageCheck() {
    * saved assessment server-side, exactly like an owner re-check.
    */
   async function runStaffCheck(
-    essay: Pick<LanguageCheckStaffDetail, "id" | "transcript">,
+    essay: Pick<LanguageCheckStaffDetail, "id" | "transcript"> &
+      Partial<
+        Pick<
+          LanguageCheckStaffDetail,
+          "title" | "topic" | "essayType" | "questionImage"
+        >
+      >,
   ): Promise<boolean> {
     return runCheckPipeline(essay.id, essay.transcript, async (result) => {
       const res = await fetch(`/api/grammar-check/staff/${essay.id}/recheck`, {
@@ -439,12 +485,18 @@ export default function useLanguageCheck() {
         }
         throw new Error(message);
       }
-    });
+    }, taskOf(essay));
   }
 
   /** Stateless Language (L) assessment of a checked essay (1-7 scale). */
   async function assessLanguage(
-    essay: Pick<LanguageCheckEssay, "checkedText" | "transcript" | "corrections">,
+    essay: Pick<
+      LanguageCheckEssay,
+      "checkedText" | "transcript" | "corrections"
+    > &
+      Partial<
+        Pick<LanguageCheckEssay, "title" | "topic" | "essayType" | "questionImage">
+      >,
     signal?: AbortSignal,
   ): Promise<StoredLanguageAssessment> {
     const text = (essay.checkedText || essay.transcript).trim();
@@ -462,8 +514,9 @@ export default function useLanguageCheck() {
       const output = await generateWithFallback(
         languageCheckModel,
         languageAssessmentSystemPrompt(),
-        languageAssessmentPrompt(text, summary),
+        languageAssessmentPrompt(text, summary, taskOf(essay)),
         ac.signal,
+        essay.questionImage || undefined,
       );
       const parsed = languageAssessmentSchema.parse(
         JSON.parse(stripJsonFences(output)),

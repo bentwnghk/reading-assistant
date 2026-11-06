@@ -40,6 +40,8 @@ import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
+import TopicPicker from "@/components/LanguageCheck/TopicPicker";
+import EssayTaskCard from "@/components/LanguageCheck/EssayTaskCard";
 import StudentCombobox from "@/components/LanguageCheck/StudentCombobox";
 import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import {
@@ -94,6 +96,7 @@ export default function LanguageCheckContainer() {
   const loadList = useLanguageCheckStore((s) => s.loadList);
   const open = useLanguageCheckStore((s) => s.open);
   const create = useLanguageCheckStore((s) => s.create);
+  const selectedTopicId = useLanguageCheckStore((s) => s.selectedTopicId);
   const [preparing, setPreparing] = useState(false);
   const [staged, setStaged] = useState<StagedPage[]>([]);
 
@@ -181,6 +184,10 @@ export default function LanguageCheckContainer() {
   // a multi-page essay can be built from several camera shots. Ephemeral UI
   // state: nothing is persisted or sent until the user starts the transcription.
   async function handleFiles(files: File[]) {
+    if (!selectedTopicId) {
+      toast.error(t("languageCheck.topics.picker.required"));
+      return;
+    }
     const room = LANGUAGE_CHECK_MAX_PAGES - staged.length;
     if (room <= 0) {
       toast.error(t("languageCheck.upload.tooManyPages", { max: LANGUAGE_CHECK_MAX_PAGES }));
@@ -229,12 +236,21 @@ export default function LanguageCheckContainer() {
 
   async function handleStart() {
     if (staged.length === 0) return;
+    if (!selectedTopicId) {
+      toast.error(t("languageCheck.topics.picker.required"));
+      return;
+    }
     setPreparing(true);
     try {
       const pages: string[] = [];
       for (const page of staged) pages.push(await preparePage(page.src));
       const studentId = forStudentId ?? undefined;
-      const essay = await create(pages, useSettingStore.getState().ocrModel, studentId);
+      const essay = await create(
+        pages,
+        useSettingStore.getState().ocrModel,
+        selectedTopicId,
+        studentId,
+      );
       setStaged([]);
       // Back to "Myself" so the teacher's next own upload can never be
       // silently attributed to the previous student.
@@ -317,6 +333,8 @@ export default function LanguageCheckContainer() {
           onFiles: handleFiles,
           onOpen: handleOpen,
           studentPicker,
+          topicPicker: <TopicPicker />,
+          uploadDisabled: !selectedTopicId,
           forStudentName: forStudent?.name ?? null,
           staging:
             staged.length > 0 ? (
@@ -611,6 +629,7 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
               })}
             </p>
           )}
+          <EssayTaskCard essay={essay} />
           <ResultsSummary essay={essay} checking={checkRunning} />
           <AssessmentPanel
             essay={essay}

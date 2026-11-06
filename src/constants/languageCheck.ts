@@ -308,6 +308,32 @@ export const LANGUAGE_CHECK_MAX_PAGES = 10;
  */
 export const LANGUAGE_CHECK_STAGING_MAX_SIDE = 3200;
 export const LANGUAGE_CHECK_MAX_ESSAYS = 100;
+
+// ─── Writing topics (Topic Library) ──────────────────────────────────────────
+
+export const LANGUAGE_CHECK_ESSAY_TYPES = ["dse-part-a", "dse-part-b"] as const;
+export type LanguageCheckEssayType = (typeof LANGUAGE_CHECK_ESSAY_TYPES)[number];
+
+/** What the marker should know about each essay type (injected into the AI prompts). */
+export const LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE: Record<
+  LanguageCheckEssayType,
+  { label: string; guidance: string }
+> = {
+  "dse-part-a": {
+    label: "DSE Writing Part A",
+    guidance:
+      "HKDSE English Language Paper 2 Writing Part A: the compulsory, task-based question (roughly 200 words) in which the text type, audience, purpose and content points are set by the task (e.g. letter, email, report, proposal, speech, article). Judge register, tone, format and style against the text type and audience the task asks for.",
+  },
+  "dse-part-b": {
+    label: "DSE Writing Part B",
+    guidance:
+      "HKDSE English Language Paper 2 Writing Part B: the elective, longer creative/extended writing question (roughly 400 words) chosen from the Learning Elements (e.g. short stories, poems and songs, drama, debating, popular culture, workplace communication). Judge register, tone and style against the genre the chosen question calls for (e.g. narrative voice for a story, persuasive register for a speech or debate).",
+  },
+};
+
+export const LANGUAGE_CHECK_MAX_TOPICS = 200;
+export const LANGUAGE_CHECK_MAX_TOPIC_TITLE_CHARS = 200;
+export const LANGUAGE_CHECK_MAX_TOPIC_CHARS = 5000;
 /** ~2.5 MB base64 per page after downscale is far above the expected ~300 KB. */
 export const LANGUAGE_CHECK_MAX_IMAGE_CHARS = 3_500_000;
 export const LANGUAGE_CHECK_MAX_TRANSCRIPT_CHARS = 60_000;

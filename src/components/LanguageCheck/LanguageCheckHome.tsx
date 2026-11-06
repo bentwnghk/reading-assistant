@@ -3,12 +3,13 @@ import { useState, type ComponentProps } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { FileText, GraduationCap, HelpCircle, SpellCheck } from "lucide-react";
+import { BookMarked, FileText, GraduationCap, HelpCircle, SpellCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EssayList from "@/components/LanguageCheck/EssayList";
 import HelpDialog from "@/components/LanguageCheck/HelpDialog";
 import MyLearning from "@/components/LanguageCheck/Learn/MyLearning";
 import StaffLearning from "@/components/LanguageCheck/Learn/StaffLearning";
+import TopicLibrary from "@/components/LanguageCheck/TopicLibrary";
 import StaffEssayLog from "@/components/LanguageCheck/StaffEssayLog";
 import StaffFilterBar, {
   EMPTY_STAFF_SELECTION,
@@ -18,9 +19,12 @@ import { SegmentedTabs } from "@/components/LanguageCheck/shared";
 import { cn } from "@/utils/style";
 
 type Scope = "mine" | "students";
-type Section = "essays" | "learning";
+type Section = "essays" | "learning" | "topics";
 
 const SECTIONS: Section[] = ["essays", "learning"];
+// The Topic Library is personal (not a student-scope view), so it only
+// exists next to "My essays" / "My learning".
+const MINE_SECTIONS: Section[] = ["essays", "topics", "learning"];
 
 /**
  * Landing view of /grammar-check.
@@ -51,15 +55,22 @@ export default function LanguageCheckHome({
   const isStaff = role === "teacher" || role === "admin" || role === "super-admin";
 
   const scope: Scope = isStaff && params.get("view") === "students" ? "students" : "mine";
-  const section: Section = params.get("tab") === "learning" ? "learning" : "essays";
+  const tab = params.get("tab");
+  const section: Section =
+    tab === "learning"
+      ? "learning"
+      : tab === "topics" && scope === "mine"
+        ? "topics"
+        : "essays";
 
   function navigate(next: { view?: Scope; tab?: Section }) {
     const q = new URLSearchParams(params.toString());
     const view = next.view ?? scope;
-    const tab = next.tab ?? section;
+    const nextTab = next.tab ?? section;
     if (view === "students") q.set("view", "students");
     else q.delete("view");
-    if (tab === "learning") q.set("tab", "learning");
+    if (nextTab === "learning" || (nextTab === "topics" && view === "mine"))
+      q.set("tab", nextTab);
     else q.delete("tab");
     const qs = q.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
@@ -102,7 +113,7 @@ export default function LanguageCheckHome({
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-1 border-b">
-          {SECTIONS.map((x) => (
+          {(scope === "mine" ? MINE_SECTIONS : SECTIONS).map((x) => (
             <button
               key={x}
               type="button"
@@ -119,7 +130,10 @@ export default function LanguageCheckHome({
             >
               {x === "essays" && <FileText className="h-4 w-4" />}
               {x === "learning" && <GraduationCap className="h-4 w-4" />}
-              {t(`languageCheck.page.sections.${scope}.${x}`)}
+              {x === "topics" && <BookMarked className="h-4 w-4" />}
+              {x === "topics"
+                ? t("languageCheck.topics.tab")
+                : t(`languageCheck.page.sections.${scope}.${x}`)}
             </button>
           ))}
         </div>
@@ -127,6 +141,8 @@ export default function LanguageCheckHome({
         {scope === "mine" ? (
           section === "essays" ? (
             <EssayList {...essayListProps} />
+          ) : section === "topics" ? (
+            <TopicLibrary onUseTopic={() => navigate({ tab: "essays" })} />
           ) : (
             <MyLearning />
           )

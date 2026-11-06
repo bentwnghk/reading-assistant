@@ -4844,6 +4844,44 @@
       "dropFor": "Drop {{name}}'s handwritten essay here, or paste a photo",
       "forStudentHint": "It will be saved to {{name}}'s essays, where they can review the corrections and learn from them."
     },
+    "topics": {
+      "tab": "Topic Library",
+      "task": "Writing task",
+      "new": "New topic",
+      "use": "Use for upload",
+      "edit": "Edit topic",
+      "delete": "Delete",
+      "hasImage": "Question image",
+      "intro": "Save each writing task once — title, full instructions, an optional question image and the essay type — then reuse it for every essay you scan on that topic. The AI refers to the topic, question image and essay type when checking and assessing.",
+      "empty": "No topics yet. Create one to get started.",
+      "deleteTitle": "Delete topic?",
+      "deleteDesc": "\"{{title}}\" will be removed from your library. Essays already checked with it keep their own copy of the task.",
+      "picker": {
+        "label": "Writing topic",
+        "placeholder": "Choose a saved topic",
+        "empty": "No saved topics — create one",
+        "required": "Choose or create a writing topic before uploading an essay."
+      },
+      "form": {
+        "newTitle": "New writing topic",
+        "editTitle": "Edit writing topic",
+        "desc": "The title becomes the default essay title. The topic, question image and essay type guide how the essay is checked and assessed.",
+        "title": "Title",
+        "titlePlaceholder": "e.g. S6 Writing 1",
+        "essayType": "Essay type",
+        "essayTypePlaceholder": "Select essay type",
+        "topic": "Topic (full prompt / instructions)",
+        "topicPlaceholder": "Paste the full question, including text type, audience and content points…",
+        "image": "Question image",
+        "optional": "optional",
+        "uploadImage": "Upload question image",
+        "removeImage": "Remove image",
+        "imageLoading": "Loading image…",
+        "imageUnsupported": "Please choose an image file.",
+        "imageTooLarge": "Image is too large.",
+        "save": "Save topic"
+      }
+    },
     "staging": {
       "title": "Pages to transcribe ({{count}}/{{max}})",
       "hint": "Crop each page to just the handwriting, then add more pages if your essay continues. Pages are read in this order.",

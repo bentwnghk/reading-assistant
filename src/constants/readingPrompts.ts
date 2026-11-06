@@ -1,5 +1,6 @@
 import i18next from "i18next";
 import {
+  LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE,
   LANGUAGE_CHECK_ILLEGIBLE_MARKER,
   LEARN_CATEGORY_FOCUS,
   LEARN_CATEGORY_TYPES,
@@ -1305,6 +1306,34 @@ ${draft}
 </draft>`;
 }
 
+/**
+ * Writing-task block shared by the check and assessment prompts. The topic,
+ * essay type and (optional) question image tell the marker what the student
+ * was asked to do, so register, format and relevance are judged against the
+ * task instead of guessed. Empty string when no task context exists (essays
+ * checked before the Topic Library existed).
+ */
+export function languageCheckTaskBlock(task?: LanguageCheckTask): string {
+  if (!task) return "";
+  const topic = task.topic?.trim();
+  const type = task.essayType
+    ? LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE[task.essayType]
+    : undefined;
+  if (!topic && !type && !task.questionImage) return "";
+  const lines: string[] = ["## Writing task the student was answering"];
+  if (task.title?.trim()) lines.push(`Title: ${task.title.trim()}`);
+  if (type) lines.push(`Essay type: ${type.label}\n${type.guidance}`);
+  if (topic) lines.push(`Topic / instructions given to the student:\n<topic>\n${topic}\n</topic>`);
+  if (task.questionImage)
+    lines.push(
+      "The question paper is attached as an image. Read it carefully; it is part of the task (text type, audience, purpose, content points, stimulus material).",
+    );
+  lines.push(
+    "Use the task to judge: whether the register, tone, format and text type fit what was asked (flag a mismatch under the register category, e.g. a casual voice in a formal letter, or missing letter/report conventions); and whether wording suits the stated audience and purpose. Still report ONLY language issues - do not mark content, relevance or organisation as errors, and never rewrite the student's ideas to fit the topic.",
+  );
+  return lines.join("\n\n");
+}
+
 export function languageCheckSystemPrompt(): string {
   return `You are an experienced English teacher and HKDSE English Language Paper 2 (Writing) marker for Hong Kong secondary students (S4-S6). Today is {now}.
 
@@ -1346,9 +1375,13 @@ Expression rules:
   );
 }
 
-export function languageCheckPrompt(paragraphs: { index: number; text: string }[]): string {
+export function languageCheckPrompt(
+  paragraphs: { index: number; text: string }[],
+  task?: LanguageCheckTask,
+): string {
   const numbered = paragraphs.map((p) => `[Paragraph ${p.index}]\n${p.text}`).join("\n\n");
-  return `Check the following student essay. Report Tier 1 errors AND Tier 2 expression suggestions as described in your instructions. The essay is split into numbered paragraphs.
+  const taskBlock = languageCheckTaskBlock(task);
+  return `${taskBlock ? `${taskBlock}\n\n` : ""}Check the following student essay. Report Tier 1 errors AND Tier 2 expression suggestions as described in your instructions. The essay is split into numbered paragraphs.
 
 <essay>
 ${numbered}
@@ -1873,8 +1906,10 @@ Return ONLY JSON (no markdown fences):
 export function languageAssessmentPrompt(
   text: string,
   errorSummary: string,
+  task?: LanguageCheckTask,
 ): string {
-  return `Assess the Language (L) of this essay.
+  const taskBlock = languageCheckTaskBlock(task);
+  return `${taskBlock ? `${taskBlock}\n\nFor the "Register, tone and style" sub-score, judge fit to this task's essay type, text type and audience. Other criteria stay language-only.\n\n` : ""}Assess the Language (L) of this essay.
 
 ## Previously detected issues
 ${errorSummary}

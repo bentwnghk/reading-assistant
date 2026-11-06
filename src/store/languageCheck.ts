@@ -27,6 +27,12 @@ interface LanguageCheckState {
   essays: LanguageCheckEssaySummary[];
   listLoaded: boolean;
   listLoading: boolean;
+  /** Topic Library (lightweight; question images are fetched on demand). */
+  topics: LanguageCheckTopicSummary[];
+  topicsLoaded: boolean;
+  topicsLoading: boolean;
+  /** Library topic the next upload will be filed under (not persisted). */
+  selectedTopicId: string | null;
   /** The essay currently open (full row incl. images), or null for the list view. */
   active: LanguageCheckEssay | null;
   activeLoading: boolean;
@@ -51,6 +57,20 @@ interface LanguageCheckActions {
   setGeneratingEssayId: (id: string | null) => void;
   setProgress: (progress: LanguageCheckProgress | null) => void;
   loadList: (force?: boolean) => Promise<void>;
+  loadTopics: (force?: boolean) => Promise<void>;
+  selectTopic: (id: string | null) => void;
+  /** Fetch one topic including its question image. */
+  fetchTopic: (id: string) => Promise<LanguageCheckTopic>;
+  saveTopic: (
+    data: {
+      title: string;
+      topic: string;
+      essayType: LanguageCheckEssayTypeId;
+      questionImage: string;
+    },
+    id?: string,
+  ) => Promise<LanguageCheckTopic>;
+  removeTopic: (id: string) => Promise<void>;
   /**
    * Create an essay from staged pages. `studentId` (staff only) uploads on
    * the student's behalf — the returned essay is owned by them.
@@ -58,6 +78,7 @@ interface LanguageCheckActions {
   create: (
     images: string[],
     ocrModel: string,
+    topicId: string,
     studentId?: string,
   ) => Promise<LanguageCheckEssay>;
   open: (id: string) => Promise<void>;
@@ -79,6 +100,11 @@ async function readError(res: Response): Promise<string> {
   } catch {
     return `Request failed (${res.status})`;
   }
+}
+
+function toTopicSummary(t: LanguageCheckTopic): LanguageCheckTopicSummary {
+  const { questionImage, ...rest } = t;
+  return { ...rest, hasQuestionImage: questionImage !== "" };
 }
 
 function toSummary(e: LanguageCheckEssay): LanguageCheckEssaySummary {
@@ -128,6 +154,10 @@ const initialData: Pick<
   | "essays"
   | "listLoaded"
   | "listLoading"
+  | "topics"
+  | "topicsLoaded"
+  | "topicsLoading"
+  | "selectedTopicId"
   | "active"
   | "activeLoading"
   | "activeGenerations"
@@ -137,6 +167,10 @@ const initialData: Pick<
   essays: [],
   listLoaded: false,
   listLoading: false,
+  topics: [],
+  topicsLoaded: false,
+  topicsLoading: false,
+  selectedTopicId: null,
   active: null,
   activeLoading: false,
   activeGenerations: {},
@@ -186,11 +220,57 @@ export const useLanguageCheckStore = create(
         }
       },
 
-      create: async (images, ocrModel, studentId) => {
+      loadTopics: async (force = false) => {
+        const { topicsLoaded, topicsLoading } = get();
+        if (topicsLoading || (topicsLoaded && !force)) return;
+        set({ topicsLoading: true });
+        try {
+          const res = await fetch(`${BASE}/topics`);
+          if (!res.ok) throw new Error(await readError(res));
+          const topics = (await res.json()) as LanguageCheckTopicSummary[];
+          set({ topics, topicsLoaded: true });
+        } finally {
+          set({ topicsLoading: false });
+        }
+      },
+
+      selectTopic: (selectedTopicId) => set({ selectedTopicId }),
+
+      fetchTopic: async (id) => {
+        const res = await fetch(`${BASE}/topics/${id}`);
+        if (!res.ok) throw new Error(await readError(res));
+        return (await res.json()) as LanguageCheckTopic;
+      },
+
+      saveTopic: async (data, id) => {
+        const res = await fetch(id ? `${BASE}/topics/${id}` : `${BASE}/topics`, {
+          method: id ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        const topic = (await res.json()) as LanguageCheckTopic;
+        const summary = toTopicSummary(topic);
+        set((s) => ({
+          topics: [summary, ...s.topics.filter((x) => x.id !== topic.id)],
+        }));
+        return topic;
+      },
+
+      removeTopic: async (id) => {
+        const res = await fetch(`${BASE}/topics/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error(await readError(res));
+        set((s) => ({
+          topics: s.topics.filter((x) => x.id !== id),
+          selectedTopicId: s.selectedTopicId === id ? null : s.selectedTopicId,
+        }));
+      },
+
+      create: async (images, ocrModel, topicId, studentId) => {
         const res = await fetch(BASE, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ images, ocrModel, studentId }),
+          body: JSON.stringify({ images, ocrModel, topicId, studentId }),
         });
         if (!res.ok) throw new Error(await readError(res));
         const essay = (await res.json()) as LanguageCheckEssay;

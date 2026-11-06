@@ -338,10 +338,12 @@ describe("StaffEssayLog view dialog re-check", () => {
     fireEvent.click(buttonByText("languageCheck.results.recheck"));
 
     await waitFor(() => expect(runStaffCheckSpy).toHaveBeenCalledTimes(1));
-    expect(runStaffCheckSpy).toHaveBeenCalledWith({
-      id: "e1",
-      transcript: "He go to school.",
-    });
+    expect(runStaffCheckSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "e1",
+        transcript: "He go to school.",
+      }),
+    );
     // A finished re-check re-fetches the dialog AND the table.
     await waitFor(() => {
       expect(detailRequests.length).toBeGreaterThan(detailBefore);

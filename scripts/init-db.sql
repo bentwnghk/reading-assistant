@@ -863,6 +863,25 @@ CREATE INDEX idx_user_trials_expires ON user_trials(expires_at);
 -- Independent of reading_sessions. images are downscaled JPEG data URLs and
 -- are excluded from the list query (lightweight/full split).
 
+CREATE TABLE language_check_topics (
+  id             TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id        TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title          TEXT NOT NULL,
+  topic          TEXT NOT NULL,
+  essay_type     TEXT NOT NULL CHECK (essay_type IN ('dse-part-a', 'dse-part-b')),
+  question_image TEXT NOT NULL DEFAULT '',
+  created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_language_check_topics_user
+  ON language_check_topics(user_id, updated_at DESC);
+
+CREATE TRIGGER update_language_check_topics_updated_at
+    BEFORE UPDATE ON language_check_topics
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TABLE language_check_essays (
   id            TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -880,6 +899,11 @@ CREATE TABLE language_check_essays (
   check_model   TEXT NOT NULL DEFAULT '',
   dropped_count INTEGER NOT NULL DEFAULT 0,
   assessment    JSONB,
+  -- Writing-task snapshot copied from the Topic Library at upload time.
+  topic_id      TEXT REFERENCES language_check_topics(id) ON DELETE SET NULL,
+  topic         TEXT NOT NULL DEFAULT '',
+  essay_type    TEXT NOT NULL DEFAULT '',
+  question_image TEXT NOT NULL DEFAULT '',
   created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

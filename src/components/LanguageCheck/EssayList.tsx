@@ -45,6 +45,10 @@ interface EssayListProps {
    * the upload card (above the drop prompt AND the staging tray).
    */
   studentPicker?: ReactNode;
+  /** Required writing-topic selector, rendered above the drop prompt. */
+  topicPicker?: ReactNode;
+  /** No topic chosen yet: uploading is blocked until one is. */
+  uploadDisabled?: boolean;
   /** Student display name when a staff upload is targeted; null = my own. */
   forStudentName?: string | null;
 }
@@ -56,6 +60,8 @@ export default function EssayList({
   onOpen,
   staging,
   studentPicker,
+  topicPicker,
+  uploadDisabled,
   forStudentName,
 }: EssayListProps) {
   const { t } = useTranslation();
@@ -81,6 +87,10 @@ export default function EssayList({
 
   function accept(list: FileList | File[] | null) {
     if (!list || preparing) return;
+    if (uploadDisabled) {
+      toast.error(t("languageCheck.topics.picker.required"));
+      return;
+    }
     const files = filterSupportedFiles(list);
     if (files.length === 0) {
       toast.error(t("languageCheck.upload.unsupported"));
@@ -100,7 +110,7 @@ export default function EssayList({
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preparing]);
+  }, [preparing, uploadDisabled]);
 
   async function confirmDelete() {
     if (!toDelete) return;
@@ -132,11 +142,15 @@ export default function EssayList({
         }}
         className={cn(
           "rounded-xl border-2 border-dashed transition-colors",
+          uploadDisabled && "opacity-95",
           // Slim bar once the learner has essays; roomy invitation for the first one.
           hasEssays || staging || preparing ? "p-4" : "p-8",
           dragging ? "border-primary bg-primary/5" : "border-border bg-card",
         )}
       >
+        {topicPicker && (
+          <div className="mb-4 border-b pb-3">{topicPicker}</div>
+        )}
         {studentPicker && (
           <div className="mb-4 border-b pb-3">{studentPicker}</div>
         )}
@@ -171,7 +185,7 @@ export default function EssayList({
                 {t("languageCheck.upload.hint", { max: LANGUAGE_CHECK_MAX_PAGES })}
               </p>
             </div>
-            <PageSourceButtons onFiles={onFiles} />
+            <PageSourceButtons onFiles={onFiles} disabled={uploadDisabled} />
           </div>
         )}
       </div>

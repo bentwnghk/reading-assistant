@@ -26,6 +26,19 @@ vi.mock("@/lib/db", () => ({
     query: async (sql: string, values?: unknown[]) => {
       const flat = sql.replace(/\s+/g, " ").trim();
       queries.push({ sql: flat, values: values ?? [] });
+      if (flat.includes("FROM language_check_topics"))
+        return {
+          rows: [
+            {
+              id: "topic-1",
+              title: "S6 Writing 1",
+              topic: "Write a letter",
+              essay_type: "dse-part-a",
+              question_image: "",
+              has_image: false,
+            },
+          ],
+        };
       if (flat.includes("SELECT 1 FROM users u")) return { rows: [], rowCount: scopeRows };
       if (flat.startsWith("SELECT 1 FROM language_check_essays"))
         return { rows: [], rowCount: assessedRows };
@@ -97,20 +110,20 @@ describe("POST /api/grammar-check (teacher upload)", () => {
   it("rejects anonymous callers", async () => {
     role = null;
     expect(
-      (await POST(post({ images: [IMAGE], studentId: "s1" }))).status,
+      (await POST(post({ images: [IMAGE], topicId: "topic-1", studentId: "s1" }))).status,
     ).toBe(401);
   });
 
   it("refuses studentId from a student without touching the database", async () => {
     role = "student";
-    const res = await POST(post({ images: [IMAGE], studentId: "s1" }));
+    const res = await POST(post({ images: [IMAGE], topicId: "topic-1", studentId: "s1" }));
     expect(res.status).toBe(403);
     expect(queries).toHaveLength(0);
   });
 
   it("refuses a student outside the staff scope", async () => {
     scopeRows = 0;
-    const res = await POST(post({ images: [IMAGE], studentId: "s1" }));
+    const res = await POST(post({ images: [IMAGE], topicId: "topic-1", studentId: "s1" }));
     expect(res.status).toBe(403);
     expect(insertQuery()).toBeUndefined();
     // Teacher scope: membership in the caller's classes, students only
@@ -122,7 +135,7 @@ describe("POST /api/grammar-check (teacher upload)", () => {
   });
 
   it("creates the essay owned by the student, uploaded_by the teacher", async () => {
-    const res = await POST(post({ images: [IMAGE], studentId: "s1" }));
+    const res = await POST(post({ images: [IMAGE], topicId: "topic-1", studentId: "s1" }));
     expect(res.status).toBe(201);
     const essay = (await res.json()) as LanguageCheckEssay;
     expect(essay.ownerId).toBe("s1");
@@ -135,8 +148,26 @@ describe("POST /api/grammar-check (teacher upload)", () => {
     expect(count.values[0]).toBe("s1");
   });
 
-  it("without studentId keeps the legacy self-owned insert", async () => {
+  it("snapshots the library topic onto the essay and uses its title", async () => {
+    await POST(post({ images: [IMAGE], topicId: "topic-1" }));
+    const insert = insertQuery();
+    expect(insert.values.slice(2, 3)).toEqual(["S6 Writing 1"]);
+    expect(insert.values.slice(5)).toEqual([
+      "topic-1",
+      "Write a letter",
+      "dse-part-a",
+      "",
+    ]);
+  });
+
+  it("rejects an upload without a topic", async () => {
     const res = await POST(post({ images: [IMAGE] }));
+    expect(res.status).toBe(400);
+    expect(insertQuery()).toBeUndefined();
+  });
+
+  it("without studentId keeps the legacy self-owned insert", async () => {
+    const res = await POST(post({ images: [IMAGE], topicId: "topic-1" }));
     expect(res.status).toBe(201);
     const insert = insertQuery();
     expect(insert.values[0]).toBe("teacher-1");

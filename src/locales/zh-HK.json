@@ -4841,6 +4841,44 @@
       "dropFor": "將 {{name}} 的手寫作文拖放至此，或貼上相片",
       "forStudentHint": "檢查結果會儲存至 {{name}} 的「我的作文」，他可自行查看批改並從中學習。"
     },
+    "topics": {
+      "tab": "題目庫",
+      "task": "寫作題目",
+      "new": "新增題目",
+      "use": "用於上載",
+      "edit": "編輯題目",
+      "delete": "刪除",
+      "hasImage": "題目圖片",
+      "intro": "每個寫作題目只需儲存一次——標題、完整題目要求、可選的題目圖片及作文類型——之後掃描同一題目的作文時即可重用。AI 在檢查及評估時會參考題目、題目圖片及作文類型。",
+      "empty": "尚未有題目，請先建立一個。",
+      "deleteTitle": "刪除題目？",
+      "deleteDesc": "「{{title}}」將從題目庫移除。已使用此題目檢查的作文會保留自己的題目副本。",
+      "picker": {
+        "label": "寫作題目",
+        "placeholder": "選擇已儲存的題目",
+        "empty": "沒有已儲存的題目——請建立",
+        "required": "上載作文前，請先選擇或建立寫作題目。"
+      },
+      "form": {
+        "newTitle": "新增寫作題目",
+        "editTitle": "編輯寫作題目",
+        "desc": "標題會成為作文的預設標題。題目、題目圖片及作文類型會引導 AI 如何檢查及評估作文。",
+        "title": "標題",
+        "titlePlaceholder": "例如：S6 Writing 1",
+        "essayType": "作文類型",
+        "essayTypePlaceholder": "選擇作文類型",
+        "topic": "題目（完整題目／指示）",
+        "topicPlaceholder": "貼上完整題目，包括文體、對象及內容要點…",
+        "image": "題目圖片",
+        "optional": "可選",
+        "uploadImage": "上載題目圖片",
+        "removeImage": "移除圖片",
+        "imageLoading": "正在載入圖片…",
+        "imageUnsupported": "請選擇圖片檔案。",
+        "imageTooLarge": "圖片過大。",
+        "save": "儲存題目"
+      }
+    },
     "staging": {
       "title": "待轉錄頁面（{{count}}/{{max}}）",
       "hint": "請將每頁裁剪至只剩手寫內容；如作文有多頁，可繼續新增。頁面將按此順序轉錄。",
