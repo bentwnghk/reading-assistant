@@ -5612,7 +5612,7 @@ export function LanguageCheckResultsMockup() {
 
 /* ── 06 · 3. WRITING ASSESSMENT — AI Writing Assessment expanded (faithful) ──
    Mirrors AssessmentPanel.tsx expanded on the results view's assessment tab:
-   the results tabs, the violet gradient panel with the overall 0–7 band and
+   the results tabs, the violet gradient panel with the overall 0–21 band and
    the Content/Language/Organization criterion cards, then the Language (L)
    section — sub-score bars (tone colours per score) and bilingual-style
    strengths & areas cards. */
@@ -5699,8 +5699,8 @@ export function LanguageCheckAssessmentMockup() {
               <div className="min-w-0">
                 <p className="text-[11px] font-semibold text-[var(--lp-ink)]">AI Writing Assessment</p>
                 <p className="text-[9px] text-muted-foreground">
-                  Scored 0–7 on each HKDSE Writing criterion: Content, Language and Organization ·
-                  Assessed 31/10/2026, 14:32
+                  Each HKDSE Writing criterion (Content, Language, Organization) is scored 0–7;
+                  the overall is their sum, out of 21 · Assessed 31/10/2026, 14:32
                 </p>
               </div>
             </div>
@@ -5717,8 +5717,8 @@ export function LanguageCheckAssessmentMockup() {
                 Overall
               </span>
               <span className="text-xl font-bold tabular-nums text-[var(--lp-ink)]">
-                4
-                <span className="text-[10px] font-normal text-muted-foreground"> / 7</span>
+                11
+                <span className="text-[10px] font-normal text-muted-foreground"> / 21</span>
               </span>
             </div>
             <div className="grid grid-cols-3 gap-2">

@@ -6,6 +6,11 @@ import {
 } from "@/constants/readingPrompts";
 
 const score = z.coerce.number().transform((n) => Math.min(7, Math.max(0, Math.round(n))));
+// The overall is the SUM of the three criterion scores (each 0-7), so it
+// spans 0-21. Kept separate from `score` (the per-criterion clamp) because
+// stored assessments are re-validated with this schema on every read/patch —
+// clamping to 7 would silently corrupt a saved 21 back down to 7.
+const overallScore = z.coerce.number().transform((n) => Math.min(21, Math.max(0, Math.round(n))));
 const bullet = z.object({ en: z.string().min(1), zh: z.string().min(1) });
 const bullets = z.array(bullet).min(1);
 
@@ -46,7 +51,7 @@ const criterionShape = z.object({
  * is the Language score itself.
  */
 const assessmentShape = z.object({
-  overall: score,
+  overall: overallScore,
   languageScore: score.optional(),
   scores: languageScores,
   strengths: bullets,
@@ -56,7 +61,7 @@ const assessmentShape = z.object({
 });
 
 export const languageAssessmentSchema = aiOutputSchema.transform((o) => ({
-  overall: Math.round((o.content.score + o.language.score + o.organization.score) / 3),
+  overall: o.content.score + o.language.score + o.organization.score,
   languageScore: o.language.score,
   scores: o.language.scores,
   strengths: o.language.strengths,

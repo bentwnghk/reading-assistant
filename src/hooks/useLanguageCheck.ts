@@ -590,7 +590,7 @@ export default function useLanguageCheck() {
     }
   }
 
-  /** Stateless Language (L) assessment of a checked essay (1-7 scale). */
+  /** Stateless assessment of a checked essay: each criterion 0-7, overall = sum (0-21). */
   async function assessLanguage(
     essay: Pick<
       LanguageCheckEssay,

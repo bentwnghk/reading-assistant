@@ -4947,7 +4947,7 @@
       "words_other": "{{count}} words",
       "errors_one": "{{count}} comment",
       "errors_other": "{{count}} comments",
-      "overall": "Overall {{score}}/7",
+      "overall": "Overall {{score}}/21",
       "status": {
         "draft": "Draft",
         "transcribed": "Transcribed",
@@ -5035,7 +5035,7 @@
     },
     "assessment": {
       "title": "AI Writing Assessment",
-      "subtitle": "Scored 0–7 on each HKDSE Writing criterion: Content, Language and Organization",
+      "subtitle": "Each HKDSE Writing criterion (Content, Language, Organization) is scored 0–7; the overall is their sum, out of 21",
       "legacy": "This assessment was made before Content and Organization were added and covers Language only. Re-assess to get all three criteria.",
       "criteria": {
         "content": "Content (C)",
@@ -5052,6 +5052,7 @@
       "expand": "Expand assessment",
       "overall": "Overall",
       "scale": "/ 7",
+      "overallScale": "/ 21",
       "subScores": "Sub-scores",
       "strengths": "Strengths",
       "weaknesses": "Areas to improve",

@@ -267,7 +267,7 @@ export async function exportLanguageCheckDocx({
             bold: true,
           }),
           new TextRun({
-            text: `${assessment.overall} ${t("languageCheck.assessment.scale")}`,
+            text: `${assessment.overall} ${t("languageCheck.assessment.overallScale")}`,
             bold: true,
             size: 32,
           }),

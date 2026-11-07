@@ -154,7 +154,7 @@ export default function AssessmentPanel({
               {/* Collapsed: keep the headline score visible in the header. */}
               {result && !open && (
                 <span className="rounded-full bg-violet-600/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-violet-700 dark:bg-violet-400/10 dark:text-violet-300">
-                  {result.overall} {t("languageCheck.assessment.scale")}
+                  {result.overall} {t("languageCheck.assessment.overallScale")}
                 </span>
               )}
             </p>
@@ -200,7 +200,7 @@ export default function AssessmentPanel({
                 {result.overall}
                 <span className="text-base font-normal text-muted-foreground">
                   {" "}
-                  {t("languageCheck.assessment.scale")}
+                  {t("languageCheck.assessment.overallScale")}
                 </span>
               </span>
             </div>

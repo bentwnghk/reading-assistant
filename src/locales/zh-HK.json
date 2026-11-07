@@ -4941,7 +4941,7 @@
       "pages_other": "{{count}} 掃描頁",
       "words_other": "{{count}} 字",
       "errors_other": "{{count}} 項批註",
-      "overall": "總分 {{score}}/7",
+      "overall": "總分 {{score}}/21",
       "status": {
         "draft": "草稿",
         "transcribed": "已轉錄",
@@ -5026,7 +5026,7 @@
     },
     "assessment": {
       "title": "AI 寫作評估",
-      "subtitle": "按 HKDSE 寫作「內容」、「語言」及「組織」三項準則各評為 0–7 分",
+      "subtitle": "按 HKDSE 寫作「內容」、「語言」及「組織」三項準則各評為 0–7 分，總分為三項之和（滿分 21 分）",
       "legacy": "此評估於加入「內容」及「組織」之前完成，只涵蓋語言。重新評估即可取得三項準則的評分。",
       "criteria": {
         "content": "內容 (C)",
@@ -5043,6 +5043,7 @@
       "expand": "展開評估",
       "overall": "總分",
       "scale": "/ 7",
+      "overallScale": "/ 21",
       "subScores": "分項分數",
       "strengths": "優點",
       "weaknesses": "待改善之處",

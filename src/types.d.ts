@@ -1169,7 +1169,7 @@ interface LanguageCheckEssaySummary {
   status: "draft" | "transcribed" | "checked";
   pageCount: number;
   errorCount: number;
-  /** Saved AI Language (L) assessment overall (0-7); null = not assessed. */
+  /** Saved AI Writing Assessment overall (0-21 = Content+Language+Organization sum); null = not assessed. */
   overall: number | null;
   /** Words in the transcript (0 while there is no text yet). */
   wordCount: number;
@@ -1194,7 +1194,7 @@ interface LanguageCheckCriterionFeedback {
 }
 
 interface LanguageCheckAssessment {
-  /** Mean of Content, Language and Organization (legacy: the Language score). */
+  /** Sum of the Content, Language and Organization scores (0-21); legacy: the Language score alone (0-7). */
   overall: number;
   /** Language (L) score; absent on legacy assessments (use `overall`). */
   languageScore?: number;
@@ -1293,7 +1293,7 @@ interface LanguageCheckStaffRow {
   status: "draft" | "transcribed" | "checked";
   pageCount: number;
   errorCount: number;
-  /** Saved AI Language (L) assessment overall (0-7); null = not assessed. */
+  /** Saved AI Writing Assessment overall (0-21 = Content+Language+Organization sum); null = not assessed. */
   overall: number | null;
   /** Words in the transcript (0 while there is no text yet). */
   wordCount: number;
