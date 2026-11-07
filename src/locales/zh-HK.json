@@ -5126,12 +5126,27 @@
       "studentClass": "班別",
       "studentEmail": "電郵",
       "notAssessed": "尚未評估——請先在結果頁面按「獲取 AI 評估」。",
-      "polished": "潤飾版作文（包含表達建議）",
+      "scores": "分數與評語",
+      "polished": "潤飾版作文",
       "subtitle": "{{count}} 項更正及建議 · {{date}}",
       "marked": "批改後的作文",
       "corrected": "更正後的作文",
       "notes": "更正說明",
+      "enhancedLight": "優化作文（輕度潤飾）",
+      "enhancedHeavy": "優化作文（5** 改寫）",
       "generatedBy": "由 Mr.🆖 ProReader 於 {{date}} 生成"
+    },
+    "exportDialog": {
+      "title": "匯出至 Word",
+      "description": "選擇要包含的章節，並排列它們在文件中的出現順序。文件標題及學生資料必定包含。",
+      "sectionsTitle": "章節",
+      "orderHint": "勾選以包含 · 使用箭頭調整順序",
+      "moveUp": "上移",
+      "moveDown": "下移",
+      "unavailablePolished": "當檢查找到表達建議後即可選用。",
+      "unavailableEnhanced": "請先在「優化文章」分頁生成。",
+      "noneSelected": "請至少選擇一個章節。",
+      "confirm": "匯出"
     },
     "learn": {
       "button": "從錯誤中學習",

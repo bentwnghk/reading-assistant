@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import LanguageCheckHome from "@/components/LanguageCheck/LanguageCheckHome";
 import LearnSetupDialog from "@/components/LanguageCheck/Learn/LearnSetupDialog";
+import ExportDialog from "@/components/LanguageCheck/ExportDialog";
 import PageStaging, { type StagedPage } from "@/components/LanguageCheck/PageStaging";
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
@@ -48,7 +49,6 @@ import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import {
   ExplanationLanguageToggle,
   SegmentedTabs,
-  useCategoryLabel,
 } from "@/components/LanguageCheck/shared";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
 import {
@@ -65,7 +65,6 @@ import {
 } from "@/constants/languageCheck";
 import { downscaleImage, readFileAsDataURL } from "@/utils/image";
 import { processPdfFile } from "@/utils/parser/pdfParser";
-import { exportLanguageCheckDocx } from "@/utils/languageCheckExport";
 import { parseError } from "@/utils/error";
 
 type View = "auto" | "review" | "results";
@@ -361,7 +360,6 @@ export default function LanguageCheckContainer() {
 function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const categoryLabel = useCategoryLabel();
   const { runCheck } = useLanguageCheck();
   const close = useLanguageCheckStore((s) => s.close);
   const save = useLanguageCheckStore((s) => s.save);
@@ -374,7 +372,7 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   const [resultsTab, setResultsTab] = useState<"assessment" | "corrections" | "enhanced">(
     "assessment",
   );
-  const [exporting, setExporting] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [learnOpen, setLearnOpen] = useState(false);
   const [title, setTitle] = useState(essay.title);
 
@@ -429,15 +427,8 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
     }
   }
 
-  async function handleExport() {
-    setExporting(true);
-    try {
-      await exportLanguageCheckDocx({ essay, language, t, categoryLabel });
-    } catch (error) {
-      toast.error(parseError(error));
-    } finally {
-      setExporting(false);
-    }
+  function handleExport() {
+    setExportOpen(true);
   }
 
   const hasResults = essay.status === "checked" && essay.checkedText.length > 0;
@@ -583,14 +574,10 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
             <Button
               variant="outline"
               size="sm"
-              disabled={exporting || !hasResults}
+              disabled={!hasResults}
               onClick={handleExport}
             >
-              {exporting ? (
-                <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="mr-1.5 h-4 w-4" />
-              )}
+              <Download className="mr-1.5 h-4 w-4" />
               {t("languageCheck.results.export")}
             </Button>
             <DropdownMenu>
@@ -695,6 +682,15 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
 
       {learnOpen && (
         <LearnSetupDialog essay={essay} open={learnOpen} onOpenChange={setLearnOpen} />
+      )}
+
+      {exportOpen && (
+        <ExportDialog
+          essay={essay}
+          language={language}
+          open={exportOpen}
+          onOpenChange={setExportOpen}
+        />
       )}
 
       <Dialog open={scanOpen} onOpenChange={setScanOpen}>

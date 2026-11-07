@@ -30,6 +30,49 @@ export interface LanguageCheckExportOptions {
   language: "en" | "zh";
   t: Translate;
   categoryLabel: (category: string) => string;
+  /**
+   * Selected sections in the order they should appear. Unavailable sections
+   * are skipped; omitted = every available section in default order. The
+   * title/subtitle, student block and footer are always included.
+   */
+  sections?: readonly LanguageCheckExportSection[];
+}
+
+/** Sections of the Word export the reader can pick and reorder, in default order. */
+export const LANGUAGE_CHECK_EXPORT_SECTIONS = [
+  "assessment",
+  "marked",
+  "notes",
+  "corrected",
+  "polished",
+  "enhanced-light",
+  "enhanced-heavy",
+] as const;
+
+export type LanguageCheckExportSection = (typeof LANGUAGE_CHECK_EXPORT_SECTIONS)[number];
+
+/**
+ * Sections this essay can actually fill. Assessment / Marked / Corrected are
+ * always offered (the export action only exists on checked essays);
+ * "polished" needs expression suggestions, "notes" needs corrections, and
+ * the enhanced essays must have been generated first.
+ */
+export function availableLanguageCheckExportSections(
+  essay: LanguageCheckEssay,
+): LanguageCheckExportSection[] {
+  const enhanced = essay.enhanced;
+  const available = new Set<LanguageCheckExportSection>([
+    "assessment",
+    "marked",
+    "corrected",
+  ]);
+  if (essay.corrections.some((e) => isExpressionCategory(e.category))) {
+    available.add("polished");
+  }
+  if (essay.corrections.length > 0) available.add("notes");
+  if (enhanced && enhanced.light.trim().length > 0) available.add("enhanced-light");
+  if (enhanced && enhanced.heavy.trim().length > 0) available.add("enhanced-heavy");
+  return LANGUAGE_CHECK_EXPORT_SECTIONS.filter((s) => available.has(s));
 }
 
 const RED = "C00000";
@@ -81,12 +124,13 @@ function toParagraphs(
   return paragraphs;
 }
 
-/** Word document: marked-up essay (tracked-change style), clean essay, notes. */
+/** Word document: header (mandatory), the picked sections in order, notes, footer. */
 export async function exportLanguageCheckDocx({
   essay,
   language,
   t,
   categoryLabel,
+  sections,
 }: LanguageCheckExportOptions): Promise<void> {
   const text = essay.checkedText;
   const errors = essay.corrections;
@@ -240,7 +284,7 @@ export async function exportLanguageCheckDocx({
     (language === "zh" ? b.zh : b.en).trim() || (b.en || b.zh).trim();
   const assessmentBlocks: Paragraph[] = [
     new Paragraph({
-      text: t("languageCheck.assessment.title"),
+      text: t("languageCheck.export.scores"),
       heading: HeadingLevel.HEADING_1,
       spacing: { before: 400 },
     }),
@@ -374,6 +418,76 @@ export async function exportLanguageCheckDocx({
     );
   }
 
+  // 4. Section blocks the reader can pick from, in default document order.
+  //    Each starts with its own H1 (the assessment block carries its own).
+  const sectionHeading = (text: string): Paragraph =>
+    new Paragraph({ text, heading: HeadingLevel.HEADING_1, spacing: { before: 400 } });
+
+  const enhancedFootnote = (meta: {
+    generatedAt: number;
+    model: string;
+  }): Paragraph =>
+    new Paragraph({
+      spacing: { before: 200 },
+      children: [
+        new TextRun({
+          text: [
+            t("languageCheck.enhanced.generatedOn", { date: formatDate(meta.generatedAt) }),
+            meta.model
+              ? t("languageCheck.results.checkedWith", { model: meta.model })
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" · "),
+          italics: true,
+          size: 18,
+          color: "7F7F7F",
+        }),
+      ],
+    });
+
+  const enhanced = essay.enhanced;
+  const sectionBlocks = new Map<LanguageCheckExportSection, Paragraph[]>();
+  sectionBlocks.set("assessment", assessmentBlocks);
+  sectionBlocks.set("marked", [
+    sectionHeading(t("languageCheck.export.marked")),
+    ...toParagraphs(markedParts),
+  ]);
+  sectionBlocks.set("corrected", [
+    sectionHeading(t("languageCheck.export.corrected")),
+    ...toParagraphs(cleanParts),
+  ]);
+  if (hasSuggestions) {
+    sectionBlocks.set("polished", [
+      sectionHeading(t("languageCheck.export.polished")),
+      ...toParagraphs(polishedParts),
+    ]);
+  }
+  if (notes.length > 0) {
+    sectionBlocks.set("notes", [sectionHeading(t("languageCheck.export.notes")), ...notes]);
+  }
+  if (enhanced && enhanced.light.trim().length > 0) {
+    sectionBlocks.set("enhanced-light", [
+      sectionHeading(t("languageCheck.export.enhancedLight")),
+      ...toParagraphs([{ text: enhanced.light, make: (x) => new TextRun({ text: x }) }]),
+      enhancedFootnote(enhanced),
+    ]);
+  }
+  if (enhanced && enhanced.heavy.trim().length > 0) {
+    sectionBlocks.set("enhanced-heavy", [
+      sectionHeading(t("languageCheck.export.enhancedHeavy")),
+      ...toParagraphs([{ text: enhanced.heavy, make: (x) => new TextRun({ text: x }) }]),
+      enhancedFootnote(enhanced),
+    ]);
+  }
+
+  // Selected sections render in the caller's order; unavailable ones are
+  // skipped silently.
+  const requested = sections ?? LANGUAGE_CHECK_EXPORT_SECTIONS;
+  const sectionChildren = requested
+    .filter((s) => sectionBlocks.has(s))
+    .flatMap((s) => sectionBlocks.get(s) as Paragraph[]);
+
   const doc = new Document({
     styles: {
       default: {
@@ -408,39 +522,7 @@ export async function exportLanguageCheckDocx({
             ],
           }),
           ...studentBlock,
-          ...assessmentBlocks,
-          new Paragraph({
-            text: t("languageCheck.export.marked"),
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 400 },
-          }),
-          ...toParagraphs(markedParts),
-          new Paragraph({
-            text: t("languageCheck.export.corrected"),
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 400 },
-          }),
-          ...toParagraphs(cleanParts),
-          ...(hasSuggestions
-            ? [
-                new Paragraph({
-                  text: t("languageCheck.export.polished"),
-                  heading: HeadingLevel.HEADING_1,
-                  spacing: { before: 400 },
-                }),
-                ...toParagraphs(polishedParts),
-              ]
-            : []),
-          ...(notes.length > 0
-            ? [
-                new Paragraph({
-                  text: t("languageCheck.export.notes"),
-                  heading: HeadingLevel.HEADING_1,
-                  spacing: { before: 400 },
-                }),
-                ...notes,
-              ]
-            : []),
+          ...sectionChildren,
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 600 },
