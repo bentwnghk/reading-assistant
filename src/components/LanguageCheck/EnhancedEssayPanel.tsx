@@ -167,7 +167,6 @@ export default function EnhancedEssayPanel({
               ]}
             />
             <Button
-              variant="outline"
               size="sm"
               onClick={handleLoadToReading}
               className="gap-1.5 transition-shadow duration-300 shadow-[0_0_10px_2px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_2px_rgba(125,211,252,0.6)] hover:shadow-[0_0_14px_4px_rgba(56,189,248,0.6)] dark:hover:shadow-[0_0_14px_4px_rgba(125,211,252,0.7)]"
