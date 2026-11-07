@@ -399,11 +399,12 @@
       "encounter": {
         "eyebrow": "Encounter",
         "title": "Any text in. A lesson out.",
-        "lede": "Snap a photo, drop a PDF, or pick from the Text Repository — every DSE past paper is already there. No text yet? Let the AI Text Generator write one for you, and the lesson begins.",
+        "lede": "Snap a photo, drop a PDF, pick from the Text Repository — every DSE past paper is already there — or continue from your own Writing Assessment. No text yet? Let the AI Text Generator write one for you, and the lesson begins.",
         "bullets": [
           "Snap a photo or upload a PDF",
           "Browse the shared Text Repository",
-          "Generate a fresh text with AI Text Generator"
+          "Generate a fresh text with AI Text Generator",
+          "Load an enhanced essay from the Writing Assessment — marked \"From Writing\""
         ]
       },
       "understand": {
@@ -503,12 +504,12 @@
       "writing": {
         "eyebrow": "Writing Assessment",
         "title": "From reading to writing.",
-        "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, generate two enhanced versions of your own essay (a light polish and an aspirational Level 5** rewrite), then turn every mistake into a lesson, practice and quiz built from your own writing. Teachers watch the whole class learn from their mistakes in one dashboard.",
+        "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, generate two enhanced versions of your own essay (a light polish and an aspirational Level 5** rewrite) that you can load straight back into the reading workflow, then turn every mistake into a lesson, practice and quiz built from your own writing. Teachers watch the whole class learn from their mistakes in one dashboard.",
         "bullets": [
           "Verbatim transcription you review beside the original scan",
           "Inline corrections with explanations — errors vs. suggestions",
           "AI Writing Assessment — HKDSE Content, Language and Organization, each on a 0–7 band",
-          "Enhanced Essays — a light polish and an aspirational Level 5** rewrite of your own essay",
+          "Enhanced Essays — a light polish and an aspirational Level 5** rewrite you can load as a reading text",
           "Learn from your mistakes: lesson → practice → quiz",
           "Saved sessions resume on any device, exportable to Word",
           "Student learning dashboards for every class"
@@ -650,7 +651,7 @@
       "fromWritingBadge": "From Writing",
       "help": {
         "title": "Select Text Guide",
-        "intro": "Choose how to load your reading material: upload your own photos or PDFs, pick a text your teacher has shared, or let AI generate one from a topic.",
+        "intro": "Choose how to load your reading material: upload your own photos or PDFs, pick a text your teacher has shared, let AI generate one from a topic — or bring an enhanced essay back from your Writing Assessment.",
         "items": {
           "upload": {
             "name": "Upload Image / PDF",
@@ -667,12 +668,16 @@
           "aiGenerate": {
             "name": "AI Text Generator",
             "desc": "Type a topic and pick a text type — AI writes an age-appropriate reading passage for you."
+          },
+          "fromWriting": {
+            "name": "From Writing Assessment",
+            "desc": "In your essay's Enhanced Essays tab, tap \"Use as reading text\" to load the light or heavy version here — marked \"From Writing\" so every reading tool can work on it."
           }
         },
         "stepsTitle": "How to get your text",
         "steps": {
           "s1": "Pick the Upload tab, the Text Repository tab, or the AI Generate tab.",
-          "s2": "Upload: drop your files and wait for the text to be extracted. Repository: tap a text to load it. AI Generate: enter a topic and tap Generate.",
+          "s2": "Upload: drop your files and wait for the text to be extracted. Repository: tap a text to load it. AI Generate: enter a topic and tap Generate. From Writing: open your essay's Enhanced Essays tab in the Writing Assessment and tap \"Use as reading text\".",
           "s3": "Once the text appears, all reading tools unlock. Tap New Text to start over."
         },
         "tipTitle": "Good to know",
@@ -2847,7 +2852,7 @@
         "items": {
           "statCards": {
             "name": "Summary Stat Cards",
-            "desc": "Three cards at the top show your total Reading Texts (with upload/repository breakdown), Total Vocabulary size, and Average Learning Progress across all sessions."
+            "desc": "Three cards at the top show your total Reading Texts (with a breakdown by source: uploaded, repository, AI-generated, shared, and texts loaded from your Writing Assessment — \"From Writing\"), Total Vocabulary size, and Average Learning Progress across all sessions."
           },
           "dailyActivity": {
             "name": "Daily Learning Activity",

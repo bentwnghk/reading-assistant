@@ -365,8 +365,8 @@ function ResultBeat() {
   );
 }
 
-/* ── 2. ENCOUNTER — Select Text: three clickable sources ── */
-type SourceTab = "upload" | "repository" | "ai";
+/* ── 2. ENCOUNTER — Select Text: three tabs + a "From Writing" beat ── */
+type SourceTab = "upload" | "repository" | "ai" | "fromWriting";
 
 export function UploadMockup() {
   const ref = useRef<HTMLDivElement>(null);
@@ -405,17 +405,24 @@ export function UploadMockup() {
     { key: "ai", label: "AI Generate", icon: <Sparkles className="h-3 w-3" /> },
   ];
 
-  // Auto-cycle the tabs every 5s. Re-runs on every `tab` change (including
-  // manual clicks), so each tab gets a full 5s before advancing. Paused when
-  // the mockup is scrolled out of view.
+  // Auto-cycle the tabs every 5s (the 4th beat shows the loaded "From
+  // Writing" card). Re-runs on every `tab` change (including manual clicks),
+  // so each tab gets a full 5s before advancing. Paused when the mockup is
+  // scrolled out of view.
   useEffect(() => {
     if (!inView) return;
-    const order: SourceTab[] = ["upload", "repository", "ai"];
+    const order: SourceTab[] = ["upload", "repository", "ai", "fromWriting"];
     const id = setTimeout(() => {
       setTab((cur) => order[(order.indexOf(cur) + 1) % order.length]);
     }, 5000);
     return () => clearTimeout(id);
   }, [tab, inView]);
+
+  // An enhanced essay loaded from the Writing Assessment lands in the Upload
+  // tab (as a card with a "From Writing" badge), so that tab stays lit
+  // during the fromWriting beat.
+  const activeTab: "upload" | "repository" | "ai" =
+    tab === "fromWriting" ? "upload" : tab;
 
   return (
     <MockupFrame label="SELECT TEXT · Mr.🆖 ProReader" frameRef={ref}>
@@ -427,7 +434,7 @@ export function UploadMockup() {
             type="button"
             onClick={() => setTab(t.key)}
             className={`flex items-center gap-1 border-b-2 px-2 py-1.5 text-[10px] font-medium transition-colors ${
-              tab === t.key
+              activeTab === t.key
                 ? "-mb-px border-[var(--lp-accent)] text-[var(--lp-accent)]"
                 : "border-transparent text-[var(--lp-ink-soft)] hover:text-[var(--lp-ink)]"
             }`}
@@ -446,6 +453,36 @@ export function UploadMockup() {
           </div>
           <p className="mt-2 text-sm font-semibold text-[var(--lp-ink)]">Drop an image or PDF here</p>
           <p className="text-xs text-[var(--lp-ink-soft)]">or click to select · PNG, JPG, PDF</p>
+        </div>
+      )}
+
+      {/* ── From Writing beat — an enhanced essay loaded via the Writing
+         Assessment's "Use as reading text" lands here as a card with a
+         "From Writing" badge (mirrors ImageUpload.tsx) ── */}
+      {tab === "fromWriting" && (
+        <div className="mt-3">
+          <div className="flex items-start gap-3 rounded-xl border border-[var(--lp-rule)] bg-[var(--lp-surface)] p-3">
+            <div className="shrink-0 rounded-lg bg-[var(--lp-paper-2)] p-2.5">
+              <FileText className="h-5 w-5 text-[var(--lp-ink-soft)]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="truncate text-[11px] font-semibold text-[var(--lp-ink)]">
+                  Plastic Pollution in Hong Kong
+                </span>
+                <span className="inline-flex items-center gap-0.5 rounded-md bg-amber-100 px-1.5 py-0.5 text-[9px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                  <PenLine className="h-2.5 w-2.5" /> From Writing
+                </span>
+              </div>
+              <p className="mt-1 text-[9.5px] leading-relaxed text-[var(--lp-ink-soft)]">
+                Everyone knows that plastic takes hundreds of years to break down. In Hong Kong, millions of plastic bottles are thrown away every day, and most of them end up in landfills or in the sea…
+              </p>
+            </div>
+          </div>
+          <p className="mt-2 flex items-center gap-1.5 text-[9.5px] text-[var(--lp-ink-soft)]">
+            <Wand2 className="h-3 w-3 shrink-0 text-amber-600 dark:text-amber-400" />
+            Loaded from your essay&apos;s Enhanced Essays tab — keep going with the mind map, adapted text and more.
+          </p>
         </div>
       )}
 
@@ -5877,23 +5914,29 @@ To begin with, the government should introduce a levy on plastic bags. Being mad
             </span>
           </div>
 
-          {/* Light / Heavy switcher + version description */}
+          {/* Light / Heavy switcher + "Use as reading text" + version description */}
           <div className="mt-2.5 flex flex-col gap-1.5">
-            <div className="flex w-fit gap-1 rounded-lg bg-muted p-1">
-              {(["light", "heavy"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setVersion(v)}
-                  className={`rounded-md px-2.5 py-1 text-[9.5px] font-medium transition-colors ${
-                    version === v
-                      ? "bg-background font-semibold text-[var(--lp-ink)] shadow-sm"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {v === "light" ? "Light Enhancement" : "Heavy Enhancement"}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex w-fit gap-1 rounded-lg bg-muted p-1">
+                {(["light", "heavy"] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setVersion(v)}
+                    className={`rounded-md px-2.5 py-1 text-[9.5px] font-medium transition-colors ${
+                      version === v
+                        ? "bg-background font-semibold text-[var(--lp-ink)] shadow-sm"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {v === "light" ? "Light Enhancement" : "Heavy Enhancement"}
+                  </button>
+                ))}
+              </div>
+              <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+                <BookOpen className="mr-1 h-3 w-3" />
+                Use as reading text
+              </span>
             </div>
             <p className="text-[9px] text-muted-foreground">{descriptions[version]}</p>
 
