@@ -22,11 +22,17 @@ import {
   languageCheckSystemPrompt,
   languageAssessmentPrompt,
   languageAssessmentSystemPrompt,
+  enhancedEssayPrompt,
+  enhancedEssaySystemPrompt,
 } from "@/constants/readingPrompts";
 import {
   languageAssessmentSchema,
   type StoredLanguageAssessment,
 } from "@/utils/languageCheckAssessment";
+import {
+  enhancedOutputSchema,
+  type StoredEnhanced,
+} from "@/utils/languageCheckEnhanced";
 import { fetchAppConfig } from "@/utils/app-config";
 import { parseError } from "@/utils/error";
 import {
@@ -257,6 +263,7 @@ export default function useLanguageCheck() {
         corrections: [],
         droppedCount: 0,
         assessment: null,
+        enhanced: null,
       });
       toast.success(
         verify && restored > 0
@@ -493,6 +500,7 @@ export default function useLanguageCheck() {
           status: "checked",
           ...result,
           assessment: null,
+          enhanced: null,
         });
         if (!assessment) return;
         try {
@@ -598,5 +606,46 @@ export default function useLanguageCheck() {
     return assessText(text, summary, taskOf(essay), signal, essay.questionImage || undefined);
   }
 
-  return { transcribe, runCheck, runStaffCheck, assessLanguage, generate: generateWithFallback };
+  /** Stateless AI enhanced essays (light polish + heavy HKDSE 5** rewrite). */
+  async function enhanceEssay(
+    essay: Pick<
+      LanguageCheckEssay,
+      "checkedText" | "transcript" | "corrections"
+    > &
+      Partial<
+        Pick<LanguageCheckEssay, "title" | "topic" | "essayType" | "questionImage">
+      >,
+    signal?: AbortSignal,
+  ): Promise<StoredEnhanced> {
+    const { languageCheckModel } = useSettingStore.getState();
+    const text = (essay.checkedText || essay.transcript).trim();
+    const ac = new AbortController();
+    signal?.addEventListener("abort", () => ac.abort());
+    try {
+      const output = await generateWithFallback(
+        languageCheckModel,
+        enhancedEssaySystemPrompt(),
+        enhancedEssayPrompt(text, summarizeErrors(essay.corrections), taskOf(essay)),
+        ac.signal,
+        essay.questionImage || undefined,
+      );
+      const parsed = enhancedOutputSchema.parse(JSON.parse(stripJsonFences(output)));
+      return { ...parsed, generatedAt: Date.now(), model: languageCheckModel };
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      if (error instanceof SyntaxError || (error as Error)?.name === "ZodError") {
+        throw new Error(i18next.t("languageCheck.check.parseError"));
+      }
+      throw new Error(describeGenerationError(error));
+    }
+  }
+
+  return {
+    transcribe,
+    runCheck,
+    runStaffCheck,
+    assessLanguage,
+    enhanceEssay,
+    generate: generateWithFallback,
+  };
 }

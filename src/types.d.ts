@@ -1215,6 +1215,14 @@ interface LanguageCheckAssessment {
   model: string;
 }
 
+/** Saved AI enhanced essays: a light polish and a heavy HKDSE 5** rewrite. */
+interface LanguageCheckEnhanced {
+  light: string;
+  heavy: string;
+  generatedAt: number;
+  model: string;
+}
+
 interface LanguageCheckEssay {
   id: string;
   title: string;
@@ -1231,6 +1239,8 @@ interface LanguageCheckEssay {
   droppedCount: number;
   /** Saved AI Language (L) assessment; null = never assessed. */
   assessment: LanguageCheckAssessment | null;
+  /** Saved enhanced essays; null/absent = never generated. */
+  enhanced?: LanguageCheckEnhanced | null;
   /** Writing-task snapshot taken from the Topic Library at upload ("" on older essays). */
   topic: string;
   essayType: LanguageCheckEssayTypeId | "";
@@ -1303,4 +1313,5 @@ interface LanguageCheckStaffDetail extends LanguageCheckStaffRow {
   checkModel: string;
   droppedCount: number;
   assessment: LanguageCheckAssessment | null;
+  enhanced?: LanguageCheckEnhanced | null;
 }

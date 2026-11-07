@@ -5057,10 +5057,26 @@
         "coherence": "條理性（連貫）"
       }
     },
+    "enhanced": {
+      "title": "優化文章",
+      "subtitle": "按需生成兩個改良版本",
+      "button": "生成優化文章",
+      "again": "重新生成",
+      "working": "生成中…",
+      "error": "無法生成優化文章，請再試一次。",
+      "saveError": "無法儲存優化文章。",
+      "generatedOn": "生成於 {{date}}",
+      "switchLabel": "優化程度",
+      "light": "輕度優化",
+      "heavy": "深度優化",
+      "lightDesc": "潤飾及小幅更正：修正筆誤、錯字、生硬的表達及標點，同時保留你自己的語氣、句式及想法。",
+      "heavyDesc": "提升語言、句式變化及水準：運用進階詞彙、多樣句式及更好的過渡，朝 HKDSE 5** 級邁進——以你自己的想法為基礎的示範範文。"
+    },
     "results": {
       "tabsLabel": "結果分頁",
       "tabAssessment": "AI 寫作評估",
       "tabCorrections": "更正及說明",
+      "tabEnhanced": "優化文章",
       "tierErrors": "錯誤",
       "tierSuggestions": "表達建議",
       "hideTier": "隱藏此組",

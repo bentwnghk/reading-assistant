@@ -39,6 +39,7 @@ import PageStaging, { type StagedPage } from "@/components/LanguageCheck/PageSta
 import ReviewStage from "@/components/LanguageCheck/ReviewStage";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
+import EnhancedEssayPanel from "@/components/LanguageCheck/EnhancedEssayPanel";
 import ScanViewer from "@/components/LanguageCheck/ScanViewer";
 import TopicPicker from "@/components/LanguageCheck/TopicPicker";
 import EssayTaskCard from "@/components/LanguageCheck/EssayTaskCard";
@@ -370,7 +371,7 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
   const generatingId = useLanguageCheckStore((s) => s.generatingEssayId);
   const [view, setView] = useState<View>("auto");
   const [scanOpen, setScanOpen] = useState(false);
-  const [resultsTab, setResultsTab] = useState<"assessment" | "corrections">(
+  const [resultsTab, setResultsTab] = useState<"assessment" | "corrections" | "enhanced">(
     "assessment",
   );
   const [exporting, setExporting] = useState(false);
@@ -645,6 +646,7 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
             options={[
               { value: "assessment", label: t("languageCheck.results.tabAssessment") },
               { value: "corrections", label: t("languageCheck.results.tabCorrections") },
+              { value: "enhanced", label: t("languageCheck.results.tabEnhanced") },
             ]}
           />
           {resultsTab === "assessment" ? (
@@ -654,6 +656,13 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
               allowReassess={isStaff}
               onSave={(assessment) =>
                 useLanguageCheckStore.getState().save(essay.id, { assessment })
+              }
+            />
+          ) : resultsTab === "enhanced" ? (
+            <EnhancedEssayPanel
+              essay={essay}
+              onSave={(enhanced) =>
+                useLanguageCheckStore.getState().save(essay.id, { enhanced })
               }
             />
           ) : (

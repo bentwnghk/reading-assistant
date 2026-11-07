@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
+import EnhancedEssayPanel from "@/components/LanguageCheck/EnhancedEssayPanel";
 import {
   ExplanationLanguageToggle,
   SegmentedTabs,
@@ -80,7 +81,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
 
   const [data, setData] = useState<StaffListResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [detailTab, setDetailTab] = useState<"assessment" | "corrections">(
+  const [detailTab, setDetailTab] = useState<"assessment" | "corrections" | "enhanced">(
     "assessment",
   );
   const [page, setPage] = useState(1);
@@ -521,6 +522,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                     options={[
                       { value: "assessment", label: t("languageCheck.results.tabAssessment") },
                       { value: "corrections", label: t("languageCheck.results.tabCorrections") },
+                      { value: "enhanced", label: t("languageCheck.results.tabEnhanced") },
                     ]}
                   />
                   {detailTab === "assessment" ? (
@@ -539,6 +541,24 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                         if (!res.ok) throw new Error("save failed");
                         setDetail((d) =>
                           d && d.id === detail.id ? { ...d, assessment } : d,
+                        );
+                      }}
+                    />
+                  ) : detailTab === "enhanced" ? (
+                    <EnhancedEssayPanel
+                      essay={detail}
+                      onSave={async (enhanced) => {
+                        const res = await fetch(
+                          `/api/writing-assessment/staff/${detail.id}/enhanced`,
+                          {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(enhanced),
+                          },
+                        );
+                        if (!res.ok) throw new Error("save failed");
+                        setDetail((d) =>
+                          d && d.id === detail.id ? { ...d, enhanced } : d,
                         );
                       }}
                     />

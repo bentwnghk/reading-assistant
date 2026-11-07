@@ -58,6 +58,7 @@ function mapEssay(row: Record<string, unknown>): LanguageCheckEssay {
     checkModel: (row.check_model as string) || "",
     droppedCount: Number(row.dropped_count) || 0,
     assessment: (row.assessment as LanguageCheckAssessment | null) ?? null,
+    enhanced: (row.enhanced as LanguageCheckEnhanced | null) ?? null,
     topic: (row.topic as string) || "",
     essayType: ((row.essay_type as string) || "") as LanguageCheckEssay["essayType"],
     questionImage: (row.question_image as string) || "",
@@ -244,6 +245,7 @@ export interface EssayPatch {
   checkModel?: string
   droppedCount?: number
   assessment?: LanguageCheckAssessment | null
+  enhanced?: LanguageCheckEnhanced | null
 }
 
 /** Partial update; only the provided fields are written. */
@@ -272,6 +274,12 @@ export async function updateEssay(
     add(
       "assessment",
       patch.assessment === null ? null : JSON.stringify(patch.assessment),
+      "::jsonb",
+    )
+  if (patch.enhanced !== undefined)
+    add(
+      "enhanced",
+      patch.enhanced === null ? null : JSON.stringify(patch.enhanced),
       "::jsonb",
     )
 
@@ -598,7 +606,7 @@ export async function getStaffEssay(
     `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
             e.user_id, u.name AS user_name, u.email AS user_email,
             e.transcript, e.checked_text, e.corrections,
-            e.ocr_model, e.check_model, e.dropped_count, e.assessment,
+            e.ocr_model, e.check_model, e.dropped_count, e.assessment, e.enhanced,
             e.topic, e.essay_type, e.question_image,
             jsonb_array_length(e.images) AS page_count
      ${STAFF_FROM}
@@ -626,6 +634,7 @@ export async function getStaffEssay(
     checkModel: (row.check_model as string) || "",
     droppedCount: Number(row.dropped_count) || 0,
     assessment: (row.assessment as LanguageCheckAssessment | null) ?? null,
+    enhanced: (row.enhanced as LanguageCheckEnhanced | null) ?? null,
     topic: (row.topic as string) || "",
     essayType: ((row.essay_type as string) || "") as LanguageCheckStaffDetail["essayType"],
     questionImage: (row.question_image as string) || "",
@@ -645,6 +654,21 @@ export async function setStaffAssessment(
   await getPool().query(
     `UPDATE language_check_essays SET assessment = $1::jsonb WHERE id = $2`,
     [JSON.stringify(assessment), id],
+  )
+  return true
+}
+
+/** Saves enhanced essays for an essay the staff member can see (scope-checked). */
+export async function setStaffEnhanced(
+  scope: LanguageCheckStaffScope,
+  id: string,
+  enhanced: LanguageCheckEnhanced,
+): Promise<boolean> {
+  const essay = await getStaffEssay(scope, id)
+  if (!essay) return false
+  await getPool().query(
+    `UPDATE language_check_essays SET enhanced = $1::jsonb WHERE id = $2`,
+    [JSON.stringify(enhanced), id],
   )
   return true
 }
@@ -677,7 +701,8 @@ export async function staffRecheckEssay(
          corrections = $2::jsonb,
          check_model = $3,
          dropped_count = $4,
-         assessment = NULL
+         assessment = NULL,
+         enhanced = NULL
      WHERE id = $5`,
     [
       patch.checkedText,

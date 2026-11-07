@@ -5066,10 +5066,26 @@
         "coherence": "Coherence"
       }
     },
+    "enhanced": {
+      "title": "Enhanced Essays",
+      "subtitle": "Two improved versions of your essay, generated on request",
+      "button": "Generate enhanced essays",
+      "again": "Regenerate",
+      "working": "Generating…",
+      "error": "Could not generate the enhanced essays. Please try again.",
+      "saveError": "The enhanced essays could not be saved.",
+      "generatedOn": "Generated {{date}}",
+      "switchLabel": "Enhancement level",
+      "light": "Light Enhancement",
+      "heavy": "Heavy Enhancement",
+      "lightDesc": "Polishing and minor corrections: fixes slips, typos, awkward phrasing and punctuation while keeping your own voice, sentence structures and ideas.",
+      "heavyDesc": "Upgraded language, variety and sophistication: advanced vocabulary, varied sentence structures and stronger transitions toward HKDSE Level 5** — an aspirational model built on your own ideas."
+    },
     "results": {
       "tabsLabel": "Results sections",
       "tabAssessment": "AI Writing Assessment",
       "tabCorrections": "Corrections & Explanations",
+      "tabEnhanced": "Enhanced Essays",
       "tierErrors": "Errors",
       "tierSuggestions": "Suggestions",
       "hideTier": "Hide group",

@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { storedAssessmentSchema } from "@/utils/languageCheckAssessment"
+import { storedEnhancedSchema } from "@/utils/languageCheckEnhanced"
 import {
   LANGUAGE_CHECK_CATEGORIES,
   LANGUAGE_CHECK_ESSAY_TYPES,
@@ -66,6 +67,7 @@ export const patchSchema = z.object({
   checkModel: z.string().max(100).optional(),
   droppedCount: z.number().int().min(0).max(1000).optional(),
   assessment: storedAssessmentSchema.nullable().optional(),
+  enhanced: storedEnhancedSchema.nullable().optional(),
 })
 
 /**

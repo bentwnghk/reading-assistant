@@ -899,6 +899,7 @@ CREATE TABLE language_check_essays (
   check_model   TEXT NOT NULL DEFAULT '',
   dropped_count INTEGER NOT NULL DEFAULT 0,
   assessment    JSONB,
+  enhanced      JSONB,
   -- Writing-task snapshot copied from the Topic Library at upload time.
   topic_id      TEXT REFERENCES language_check_topics(id) ON DELETE SET NULL,
   topic         TEXT NOT NULL DEFAULT '',
