@@ -4750,7 +4750,7 @@
         },
         "assessment": {
           "name": "AI Writing Assessment",
-          "desc": "Every check now ends with an automatic AI Writing Assessment: a 0–7 band for each HKDSE criterion — Content, Language and Organization — plus sub-scores and bilingual strengths and weaknesses. The overall also shows in the essay list. If the assessment pass fails, \"Get AI assessment\" runs it again. Students get one assessment per essay — staff can re-assess. Details in the Results tab."
+          "desc": "Every check now ends with an automatic AI Writing Assessment: a 0–7 band for each HKDSE criterion — Content, Language and Organization — plus sub-scores and bilingual strengths and weaknesses. Details in the Results tab."
         },
         "retention": {
           "name": "Storage & Privacy",
@@ -4796,11 +4796,11 @@
         },
         "assessment": {
           "name": "AI Writing Assessment",
-          "desc": "The first results tab, filled in automatically right after the check — the assessment reads the detected error counts as evidence. It scores HKDSE Content (C), Language (L) and Organization (O): a 0–7 band for each plus an overall, five Language sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve for each criterion. If it did not run — essays checked before this feature, or a failed pass — press \"Get AI assessment\" to run it manually. It is saved with the essay and the overall also shows in the essay list. Students get one assessment per essay — the saved result stays on the essay and cannot be re-run; teachers, admins and super-admins can re-assess it."
+          "desc": "The first results tab, filled in automatically right after the check — the assessment reads the detected error counts as evidence. It scores HKDSE Content (C), Language (L) and Organization (O): a 0–7 band for each plus an overall, five Language sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve for each criterion."
         },
         "enhanced": {
           "name": "Enhanced Essays",
-          "desc": "The third results tab. Press \"Generate enhanced essays\" and the AI produces two improved versions of your own essay: a Light polish (your voice and structures, cleaned up) and a Heavy rewrite (advanced vocabulary, varied structures and stronger transitions at HKDSE 5** level). Switch between them inside the panel. Nothing is generated until you ask. Press \"Use as reading text\" to load the selected version into the main page's Select Text section as a new reading text marked \"From Writing\", then continue with mind map, adapted text and the other reading activities. Students get one generation per essay — only staff can regenerate; a re-transcription or re-check resets it."
+          "desc": "The third results tab. Press \"Generate enhanced essays\" and the AI produces two improved versions of your own essay: a Light polish (your voice and structures, cleaned up) and a Heavy rewrite (advanced vocabulary, varied structures and stronger transitions at HKDSE 5** level). Switch between them inside the panel. Press \"Use as reading text\" to load the selected version into the main page's Select Text section as a new reading text marked \"From Writing\", then continue with mind map, adapted text and the other reading activities."
         },
         "filter": {
           "name": "Category Filter",
@@ -4812,7 +4812,7 @@
         },
         "export": {
           "name": "Export",
-          "desc": "Download a Word file containing the marked essay, the corrected essay, correction notes and a polished version."
+          "desc": "Download the results as a Word document — tick the sections to include (scores & feedback, marked essay, corrected essay, correction notes, polished essay, enhanced essays) and arrange the order they appear in."
         },
         "tip": {
           "title": "Tip:",

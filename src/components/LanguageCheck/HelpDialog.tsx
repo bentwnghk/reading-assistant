@@ -221,28 +221,28 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
               {t("languageCheck.help.results.intro")}
             </p>
             <HelpRow
-              icon={SpellCheck}
-              tone="bg-rose-500/10 text-rose-500"
-              name={t("languageCheck.help.results.tiers.name")}
-              desc={t("languageCheck.help.results.tiers.desc")}
-            />
-            <HelpRow
               icon={Award}
               tone="bg-violet-500/10 text-violet-500"
               name={t("languageCheck.help.results.assessment.name")}
               desc={t("languageCheck.help.results.assessment.desc")}
             />
             <HelpRow
-              icon={Wand2}
-              tone="bg-amber-500/10 text-amber-500"
-              name={t("languageCheck.help.results.enhanced.name")}
-              desc={t("languageCheck.help.results.enhanced.desc")}
+              icon={SpellCheck}
+              tone="bg-rose-500/10 text-rose-500"
+              name={t("languageCheck.help.results.tiers.name")}
+              desc={t("languageCheck.help.results.tiers.desc")}
             />
             <HelpRow
               icon={Filter}
               tone="bg-violet-500/10 text-violet-500"
               name={t("languageCheck.help.results.filter.name")}
               desc={t("languageCheck.help.results.filter.desc")}
+            />
+            <HelpRow
+              icon={Wand2}
+              tone="bg-amber-500/10 text-amber-500"
+              name={t("languageCheck.help.results.enhanced.name")}
+              desc={t("languageCheck.help.results.enhanced.desc")}
             />
             <HelpRow
               icon={Languages}
