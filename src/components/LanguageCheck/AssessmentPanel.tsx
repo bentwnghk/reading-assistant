@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Award, CheckCircle2, ChevronDown, LoaderCircle, Sparkles, TriangleAlert } from "lucide-react";
+import { Award, CheckCircle2, LoaderCircle, Sparkles, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/style";
@@ -61,9 +61,6 @@ export default function AssessmentPanel({
   const result =
     fresh && fresh.id === essay.id ? fresh.value : essay.assessment;
   const [loading, setLoading] = useState(false);
-  // Ephemeral view state (like ResultsView's category filter): whether the
-  // result body is expanded. A fresh assessment always expands it again.
-  const [open, setOpen] = useState(true);
   // Once an assessment exists, running again is a staff-only action.
   const canRun = !result || allowReassess;
 
@@ -74,7 +71,6 @@ export default function AssessmentPanel({
     try {
       const r = await assessLanguage(essay);
       setFresh({ id, value: r });
-      setOpen(true);
       try {
         await onSave(r);
       } catch {
@@ -120,43 +116,10 @@ export default function AssessmentPanel({
     <div className="shrink-0 overflow-hidden rounded-xl border bg-gradient-to-br from-violet-50 to-sky-50 p-4 dark:from-violet-950/30 dark:to-sky-950/30">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          {result && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 shrink-0"
-              aria-expanded={open}
-              aria-controls="lc-assessment-body"
-              title={t(
-                open
-                  ? "languageCheck.assessment.collapse"
-                  : "languageCheck.assessment.expand",
-              )}
-              onClick={() => setOpen((o) => !o)}
-            >
-              <ChevronDown
-                className={cn("h-4 w-4 transition-transform", open && "rotate-180")}
-              />
-              <span className="sr-only">
-                {t(
-                  open
-                    ? "languageCheck.assessment.collapse"
-                    : "languageCheck.assessment.expand",
-                )}
-              </span>
-            </Button>
-          )}
           <Award className="h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400" />
           <div className="min-w-0">
             <p className="flex flex-wrap items-center gap-2 text-sm font-semibold">
               {t("languageCheck.assessment.title")}
-              {/* Collapsed: keep the headline score visible in the header. */}
-              {result && !open && (
-                <span className="rounded-full bg-violet-600/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-violet-700 dark:bg-violet-400/10 dark:text-violet-300">
-                  {result.overall} {t("languageCheck.assessment.overallScale")}
-                </span>
-              )}
             </p>
             <p className="break-words text-xs text-muted-foreground">
               {t("languageCheck.assessment.subtitle")}
@@ -189,7 +152,7 @@ export default function AssessmentPanel({
         )}
       </div>
 
-      {result && open && (
+      {result && (
         <div id="lc-assessment-body" className="mt-4 flex flex-col gap-4">
           <div className="grid gap-3 sm:grid-cols-[9rem_minmax(0,1fr)]">
             <div className="flex flex-col items-center justify-center rounded-lg border bg-card p-3">
