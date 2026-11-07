@@ -187,7 +187,7 @@ export type GenerationType =
   | "collocations";
 
 type ReadingTestMode = "all-at-once" | "question-by-question";
-type TextSource = "upload" | "repository" | "shared" | "assignment" | "ai-generated";
+type TextSource = "upload" | "repository" | "shared" | "assignment" | "ai-generated" | "writing";
 
 export interface ReadingStore {
   id: string;
@@ -382,6 +382,12 @@ interface ReadingActions {
   clearDerivedData: () => void;
   loadFromRepository: (text: RepositoryText) => void;
   loadGeneratedText: (title: string, body: string[], meta: GeneratedTextMeta) => void;
+  /**
+   * Loads an enhanced essay from the Writing Assessment (light/heavy) as a
+   * fresh reading session marked `source: "writing"` so the rest of the
+   * reading pipeline (mind map, adapted text, …) can run on it.
+   */
+  loadFromWriting: (title: string, text: string) => void;
   setGeneratedTextMeta: (meta: GeneratedTextMeta | null) => void;
   setSource: (source: TextSource) => void;
   reset: () => void;
@@ -1514,6 +1520,40 @@ export const useReadingStore = create(
           extractedText: renderedText,
           generatedTextMeta: meta,
           source: "ai-generated",
+          createdAt: now,
+          updatedAt: now,
+          status: "idle",
+        };
+        set(() => newState as ReadingStore);
+        // Sync to the in-memory history store immediately so that useAutoSave
+        // sees the session as already existing and does not issue a duplicate
+        // POST /api/sessions alongside the one fired below.
+        syncToHistoryIfNeeded(newState as ReadingStore);
+        if (currentUserId) {
+          createSessionInAPI({ ...newState } as ReadingStore);
+        }
+        markLastOpenedSession(newId);
+      },
+      loadFromWriting: (title, text) => {
+        abortAllGenerations();
+        const newId = nanoid();
+        const now = Date.now();
+        // Prepend the essay title as the heading paragraph so the reading
+        // pipeline sees the same shape as an OCR upload (title = first line).
+        // Skip when the enhanced essay already opens with its own title.
+        const paragraphs = text.split(/\n{2,}/).filter((p) => p.trim().length > 0);
+        const alreadyTitled =
+          title.trim().length > 0 && paragraphs[0]?.trim() === title.trim();
+        const renderedText =
+          title.trim().length > 0 && !alreadyTitled
+            ? [title.trim(), ...paragraphs].join("\n\n")
+            : paragraphs.join("\n\n");
+        const newState: Partial<ReadingStore> = {
+          ...defaultValues,
+          id: newId,
+          docTitle: title,
+          extractedText: renderedText,
+          source: "writing",
           createdAt: now,
           updatedAt: now,
           status: "idle",

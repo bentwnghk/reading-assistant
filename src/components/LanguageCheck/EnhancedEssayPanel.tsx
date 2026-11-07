@@ -1,10 +1,20 @@
 "use client";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LoaderCircle, Sparkles, Wand2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { BookOpen, LoaderCircle, Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
+import { useReadingStore } from "@/store/reading";
 import { SegmentedTabs } from "@/components/LanguageCheck/shared";
 
 interface EnhancedEssayPanelProps {
@@ -41,7 +51,9 @@ export default function EnhancedEssayPanel({
   onSave,
 }: EnhancedEssayPanelProps) {
   const { t } = useTranslation();
+  const router = useRouter();
   const { enhanceEssay } = useLanguageCheck();
+  const loadFromWriting = useReadingStore((s) => s.loadFromWriting);
   const [fresh, setFresh] = useState<{
     id: string;
     value: LanguageCheckEnhanced;
@@ -49,6 +61,7 @@ export default function EnhancedEssayPanel({
   const result = fresh && fresh.id === essay.id ? fresh.value : (essay.enhanced ?? null);
   const [loading, setLoading] = useState(false);
   const [version, setVersion] = useState<Version>("light");
+  const [confirmLoad, setConfirmLoad] = useState(false);
   // Once enhanced essays exist, running again is a staff-only action.
   const canRun = !result || allowRegenerate;
 
@@ -71,6 +84,35 @@ export default function EnhancedEssayPanel({
     } finally {
       setLoading(false);
     }
+  }
+
+  // Loads the currently displayed version (light/heavy) into the main page's
+  // Select Text section as a fresh reading session marked "From Writing", so
+  // the rest of the reading pipeline (mind map, adapted text, …) can run on
+  // it. Deep-links straight to the section.
+  function doLoadToReading() {
+    if (!result) return;
+    loadFromWriting(
+      essay.title?.trim() || t("languageCheck.list.untitled"),
+      result[version],
+    );
+    toast.success(t("languageCheck.enhanced.loadedToReading"));
+    router.push("/?goto=section-upload");
+  }
+
+  function handleLoadToReading() {
+    // loadFromWriting calls abortAllGenerations(), which would cancel an
+    // in-flight reading generation — confirm first. Existing content alone is
+    // not a reason to block: pressing the button signals intent to replace it
+    // (mirrors the TextRepository / AiTextGenerator load guards).
+    const hasActiveGen = Object.values(
+      useReadingStore.getState().activeGenerations,
+    ).some(Boolean);
+    if (hasActiveGen) {
+      setConfirmLoad(true);
+      return;
+    }
+    doLoadToReading();
   }
 
   return (
@@ -113,16 +155,27 @@ export default function EnhancedEssayPanel({
 
       {result && (
         <div className="mt-4 flex flex-col gap-3">
-          <SegmentedTabs
-            value={version}
-            onChange={setVersion}
-            ariaLabel={t("languageCheck.enhanced.switchLabel")}
-            className="w-fit"
-            options={[
-              { value: "light", label: t("languageCheck.enhanced.light") },
-              { value: "heavy", label: t("languageCheck.enhanced.heavy") },
-            ]}
-          />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <SegmentedTabs
+              value={version}
+              onChange={setVersion}
+              ariaLabel={t("languageCheck.enhanced.switchLabel")}
+              className="w-fit"
+              options={[
+                { value: "light", label: t("languageCheck.enhanced.light") },
+                { value: "heavy", label: t("languageCheck.enhanced.heavy") },
+              ]}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLoadToReading}
+              className="gap-1.5"
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              {t("languageCheck.enhanced.loadToReading")}
+            </Button>
+          </div>
           <p className="text-xs text-muted-foreground">
             {t(`languageCheck.enhanced.${version}Desc`)}
           </p>
@@ -136,6 +189,28 @@ export default function EnhancedEssayPanel({
           </div>
         </div>
       )}
+
+      <Dialog open={confirmLoad} onOpenChange={setConfirmLoad}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("history.confirmSwitchTitle")}</DialogTitle>
+            <DialogDescription>{t("history.confirmSwitchDesc")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmLoad(false)}>
+              {t("setting.cancel")}
+            </Button>
+            <Button
+              onClick={() => {
+                setConfirmLoad(false);
+                doLoadToReading();
+              }}
+            >
+              {t("history.confirmSwitch")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

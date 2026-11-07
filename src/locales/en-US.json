@@ -647,6 +647,7 @@
       "untitled": "Untitled",
       "aiGeneratedBadge": "AI-generated",
       "repositoryBadge": "Repository",
+      "fromWritingBadge": "From Writing",
       "help": {
         "title": "Select Text Guide",
         "intro": "Choose how to load your reading material: upload your own photos or PDFs, pick a text your teacher has shared, or let AI generate one from a topic.",
@@ -2735,7 +2736,7 @@
     "empty": "No reading sessions yet. Start reading to see your Learning Journey!",
     "stats": {
       "totalTexts": "Reading Texts",
-      "sourceBreakdown": "{{upload}} from uploaded · {{repository}} from repository · {{aiGenerated}} from AI · {{shared}} from shared",
+      "sourceBreakdown": "{{upload}} from uploaded · {{repository}} from repository · {{aiGenerated}} from AI · {{shared}} from shared · {{writing}} from writing",
       "summaries": "Summaries",
       "mindMaps": "Mind Maps",
       "mindMapBreakdown": "{{en}} English · {{zh}} Chinese",
@@ -4794,7 +4795,7 @@
         },
         "enhanced": {
           "name": "Enhanced Essays",
-          "desc": "The third results tab. Press \"Generate enhanced essays\" and the AI produces two improved versions of your own essay: a Light polish (your voice and structures, cleaned up) and a Heavy rewrite (advanced vocabulary, varied structures and stronger transitions at HKDSE 5** level). Switch between them inside the panel. Nothing is generated until you ask. Students get one generation per essay — only staff can regenerate; a re-transcription or re-check resets it."
+          "desc": "The third results tab. Press \"Generate enhanced essays\" and the AI produces two improved versions of your own essay: a Light polish (your voice and structures, cleaned up) and a Heavy rewrite (advanced vocabulary, varied structures and stronger transitions at HKDSE 5** level). Switch between them inside the panel. Nothing is generated until you ask. Press \"Use as reading text\" to load the selected version into the main page's Select Text section as a new reading text marked \"From Writing\", then continue with mind map, adapted text and the other reading activities. Students get one generation per essay — only staff can regenerate; a re-transcription or re-check resets it."
         },
         "filter": {
           "name": "Category Filter",
@@ -5086,7 +5087,9 @@
       "light": "Light Enhancement",
       "heavy": "Heavy Enhancement",
       "lightDesc": "Polishing and minor corrections: fixes slips, typos, awkward phrasing and punctuation while keeping your own voice, sentence structures and ideas.",
-      "heavyDesc": "Upgraded language, variety and sophistication: advanced vocabulary, varied sentence structures and stronger transitions toward HKDSE Level 5** — an aspirational model built on your own ideas."
+      "heavyDesc": "Upgraded language, variety and sophistication: advanced vocabulary, varied sentence structures and stronger transitions toward HKDSE Level 5** — an aspirational model built on your own ideas.",
+      "loadToReading": "Use as reading text",
+      "loadedToReading": "Loaded into the Reading Assistant — continue with mind map, adapted text and more."
     },
     "results": {
       "tabsLabel": "Results sections",

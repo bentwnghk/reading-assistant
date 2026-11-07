@@ -446,6 +446,7 @@ export function OverviewTab() {
             repository: m.sessionsBySource.repository,
             aiGenerated: m.sessionsBySource.aiGenerated,
             shared: m.sessionsBySource.shared,
+            writing: m.sessionsBySource.writing,
           })}
         />
         <StatCard

@@ -2,7 +2,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
-import { Upload, Image as ImageIcon, LoaderCircle, X, Plus, Maximize2, Library, ScanText, Sparkles, FileText } from "lucide-react";
+import { Upload, Image as ImageIcon, LoaderCircle, X, Plus, Maximize2, Library, ScanText, Sparkles, FileText, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -375,6 +375,12 @@ function ImageUpload() {
                       <Badge className="bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300 gap-1">
                         <Sparkles className="h-3 w-3" />
                         {t("reading.imageUpload.aiGeneratedBadge")}
+                      </Badge>
+                    )}
+                    {source === "writing" && (
+                      <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 gap-1">
+                        <PenLine className="h-3 w-3" />
+                        {t("reading.imageUpload.fromWritingBadge")}
                       </Badge>
                     )}
                     {source === "repository" && (
