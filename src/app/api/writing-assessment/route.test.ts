@@ -71,6 +71,8 @@ vi.mock("@/lib/db", () => ({
         return { rows: [], rowCount: 1 };
       if (flat.startsWith("UPDATE language_check_essays SET assessment"))
         return { rows: [], rowCount: 1 };
+      if (flat.startsWith("UPDATE language_check_essays SET enhanced"))
+        return { rows: [], rowCount: 1 };
       return { rows: [], rowCount: 0 };
     },
   }),
@@ -263,5 +265,75 @@ describe("PATCH /api/writing-assessment/[id] (student re-assessment lock)", () =
     });
     expect(res.status).toBe(200);
     expect(assessmentPatch()).toBeDefined();
+  });
+});
+
+// Same lock for enhanced essays: the first saved generation is final for
+// students; only staff may regenerate. A null enhanced (the reset a fresh
+// transcription/check writes) must keep flowing for everyone.
+describe("PATCH /api/writing-assessment/[id] (student regeneration lock)", () => {
+  const ENHANCED: LanguageCheckEnhanced = {
+    light: "Polished.",
+    heavy: "Rewritten.",
+    generatedAt: 1700000000000,
+    model: "gpt-6.1-sol",
+  };
+
+  const enhancedPatch = () =>
+    queries.find((q) =>
+      q.sql.startsWith("UPDATE language_check_essays SET enhanced"),
+    );
+
+  it("rejects a student regenerating over the saved enhanced essays", async () => {
+    role = "student";
+    assessedRows = 1;
+    const res = await PATCH(patch({ enhanced: ENHANCED }), {
+      params: Promise.resolve({ id: "essay-1" }),
+    });
+    expect(res.status).toBe(403);
+    expect(enhancedPatch()).toBeUndefined();
+    // The lock is checked against the essay the caller owns/uploaded.
+    const guard = queries.find((q) =>
+      q.sql.startsWith("SELECT 1 FROM language_check_essays"),
+    )!;
+    expect(guard.sql).toContain("enhanced IS NOT NULL");
+    expect(guard.sql).toContain("OR uploaded_by = $");
+    expect(guard.values[0]).toBe("essay-1");
+  });
+
+  it("lets a student save the FIRST enhanced essays", async () => {
+    role = "student";
+    assessedRows = 0;
+    const res = await PATCH(patch({ enhanced: ENHANCED }), {
+      params: Promise.resolve({ id: "essay-1" }),
+    });
+    expect(res.status).toBe(200);
+    expect(enhancedPatch()).toBeDefined();
+  });
+
+  it("lets staff regenerate saved enhanced essays", async () => {
+    role = "teacher";
+    assessedRows = 1;
+    const res = await PATCH(patch({ enhanced: ENHANCED }), {
+      params: Promise.resolve({ id: "essay-1" }),
+    });
+    expect(res.status).toBe(200);
+    expect(enhancedPatch()).toBeDefined();
+    // No lock lookup for staff callers at all.
+    expect(
+      queries.find((q) =>
+        q.sql.startsWith("SELECT 1 FROM language_check_essays"),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("still lets a student PATCH the null reset a fresh check writes", async () => {
+    role = "student";
+    assessedRows = 1;
+    const res = await PATCH(patch({ enhanced: null }), {
+      params: Promise.resolve({ id: "essay-1" }),
+    });
+    expect(res.status).toBe(200);
+    expect(enhancedPatch()).toBeDefined();
   });
 });

@@ -60,6 +60,9 @@ beforeAll(async () => {
     CREATE TABLE user_roles (user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('super-admin', 'admin', 'teacher', 'student')));
     CREATE TABLE classes (id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), name TEXT, teacher_id TEXT, school_id TEXT);
     CREATE TABLE class_members (class_id TEXT, student_id TEXT, PRIMARY KEY (class_id, student_id));
+    -- Kept minimal but referenced by the essays table's topic_id FK
+    -- (scripts/add-language-check-topics.sql owns the real schema).
+    CREATE TABLE IF NOT EXISTS language_check_topics (id TEXT PRIMARY KEY);
     CREATE TABLE language_check_essays (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid(), user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       uploaded_by TEXT REFERENCES users(id) ON DELETE SET NULL,
@@ -67,6 +70,8 @@ beforeAll(async () => {
       status TEXT NOT NULL DEFAULT 'draft', checked_text TEXT NOT NULL DEFAULT '', corrections JSONB NOT NULL DEFAULT '[]',
       ocr_model TEXT NOT NULL DEFAULT '', check_model TEXT NOT NULL DEFAULT '', dropped_count INTEGER NOT NULL DEFAULT 0,
       assessment JSONB,
+      topic_id TEXT REFERENCES language_check_topics(id) ON DELETE SET NULL,
+      topic TEXT NOT NULL DEFAULT '', essay_type TEXT NOT NULL DEFAULT '', question_image TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW());
   `);
   await db.exec(fs.readFileSync("scripts/add-language-check-learn.sql", "utf8"));

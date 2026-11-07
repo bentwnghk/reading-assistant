@@ -315,6 +315,25 @@ export async function essayHasAssessment(
   return (rowCount ?? 0) > 0
 }
 
+/**
+ * Does this essay already carry saved enhanced essays (scoped to the owner /
+ * staff uploader)? Students may generate the FIRST version but never replace
+ * it — only staff (staff-log route, or the owner PATCH as uploader) may
+ * regenerate. Same rule as `essayHasAssessment`.
+ */
+export async function essayHasEnhanced(
+  userId: string,
+  id: string,
+): Promise<boolean> {
+  const { rowCount } = await getPool().query(
+    `SELECT 1 FROM language_check_essays
+     WHERE id = $1 AND enhanced IS NOT NULL
+       AND (user_id = $2 OR uploaded_by = $2)`,
+    [id, userId],
+  )
+  return (rowCount ?? 0) > 0
+}
+
 export async function deleteEssay(
   userId: string,
   id: string,

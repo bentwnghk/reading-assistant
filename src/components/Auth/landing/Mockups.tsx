@@ -101,6 +101,7 @@ import {
   Trash2,
   Bookmark,
   AlarmClock,
+  Wand2,
 } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -5178,6 +5179,7 @@ export function UnderstandDifficultyMockup() {
      1. ReviewStage.tsx + ScanViewer.tsx   — scan ↔ transcript review
      2. ResultsView.tsx + ErrorSpan.tsx + CorrectionCard.tsx
      3. AssessmentPanel.tsx                — AI Writing Assessment
+     3b. EnhancedEssayPanel.tsx            — Enhanced Essays (light / heavy)
      4. LessonView.tsx (+ LearnPath sidebar)
      5. PracticePlayer.tsx + ExerciseCard.tsx (practice mode)
      6. QuizPlayer.tsx + ExerciseCard.tsx (quiz mode)
@@ -5421,13 +5423,17 @@ export function LanguageCheckResultsMockup() {
         </div>
 
         {/* Results tabs — SegmentedTabs (shared.tsx): the essay workspace splits
-            into "AI Writing Assessment" and "Corrections & Explanations" */}
+            into "AI Writing Assessment", "Corrections & Explanations" and
+            "Enhanced Essays" */}
         <div className="flex w-fit gap-1 rounded-lg bg-muted p-1">
           <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
             AI Writing Assessment
           </span>
           <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-semibold text-[var(--lp-ink)] shadow-sm">
             Corrections & Explanations
+          </span>
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            Enhanced Essays
           </span>
         </div>
 
@@ -5677,6 +5683,9 @@ export function LanguageCheckAssessmentMockup() {
           <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
             Corrections & Explanations
           </span>
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            Enhanced Essays
+          </span>
         </div>
 
         {/* AssessmentPanel — expanded (chevron rotated, outline button) */}
@@ -5783,6 +5792,118 @@ export function LanguageCheckAssessmentMockup() {
               </div>
             </div>
           </section>
+        </div>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 06 · 3b. WRITING ASSESSMENT — Enhanced Essays tab (faithful) ──
+   Mirrors EnhancedEssayPanel.tsx on the results view's third tab: the amber
+   gradient panel with the light/heavy SegmentedTabs switcher, the version
+   description and the enhanced essay text. Nothing generates until the user
+   presses the button (students get one generation per essay). */
+export function LanguageCheckEnhancedMockup() {
+  // Interactive so the landing page can actually flip between the versions.
+  const [version, setVersion] = useState<"light" | "heavy">("light");
+  const lightText = `Everyone knows that plastic takes hundreds of years to break down. In Hong Kong, millions of plastic bottles are thrown away every day, and most of them end up in landfills or in the sea.
+
+First, the government should introduce a levy on plastic bags. When people have to pay, they will think twice before taking more bags than they need.`;
+  const heavyText = `It is widely acknowledged that plastic persists in our environment for centuries. In Hong Kong, millions of plastic bottles are discarded every single day — the majority of them destined for overflowing landfills or, worse still, our fragile marine ecosystems.
+
+To begin with, the government should introduce a levy on plastic bags. Being made to pay, even a little, would give customers pause for thought before taking more bags than they genuinely need.`;
+  const descriptions = {
+    light:
+      "Polishing and minor corrections: fixes slips, typos, awkward phrasing and punctuation while keeping your own voice, sentence structures and ideas.",
+    heavy:
+      "Upgraded language, variety and sophistication: advanced vocabulary, varied sentence structures and stronger transitions toward HKDSE Level 5**.",
+  } as const;
+  const text = version === "light" ? lightText : heavyText;
+
+  return (
+    <MockupFrame label="WRITING ASSESSMENT · Mr.🆖 ProReader">
+      <div className="space-y-2.5">
+        {/* Toolbar — same workspace chrome as the other slides */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2 py-1 text-[9px] text-[var(--lp-ink)]">
+            <span className="font-semibold">English</span>
+            <span className="inline-flex h-3.5 w-6 items-center rounded-full bg-muted-foreground/30 px-0.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-white" />
+            </span>
+            <span className="text-muted-foreground">繁體中文</span>
+          </span>
+          <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground">
+            <GraduationCap className="mr-1 h-3 w-3" />
+            Learn from mistakes
+          </span>
+          <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+            <Download className="mr-1 h-3 w-3" />
+            Export to Word
+          </span>
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border text-muted-foreground">
+            <MoreHorizontal className="h-3.5 w-3.5" />
+          </span>
+        </div>
+
+        {/* Results tabs — SegmentedTabs (shared.tsx), enhanced tab active */}
+        <div className="flex w-fit gap-1 rounded-lg bg-muted p-1">
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            AI Writing Assessment
+          </span>
+          <span className="rounded-md px-2.5 py-1 text-[9.5px] font-medium text-muted-foreground">
+            Corrections & Explanations
+          </span>
+          <span className="rounded-md bg-background px-2.5 py-1 text-[9.5px] font-semibold text-[var(--lp-ink)] shadow-sm">
+            Enhanced Essays
+          </span>
+        </div>
+
+        {/* EnhancedEssayPanel — generated state with the switcher working */}
+        <div className="rounded-xl border bg-gradient-to-br from-amber-50 to-rose-50 p-3 dark:from-amber-950/30 dark:to-rose-950/30">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <Wand2 className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-[var(--lp-ink)]">Enhanced Essays</p>
+                <p className="text-[9px] text-muted-foreground">
+                  Two improved versions of your essay, generated on request · Generated
+                  31/10/2026, 14:32
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center rounded-md border px-2 py-1 text-[10px] font-medium text-[var(--lp-ink)]">
+              <Sparkles className="mr-1 h-3 w-3" />
+              Regenerate
+            </span>
+          </div>
+
+          {/* Light / Heavy switcher + version description */}
+          <div className="mt-2.5 flex flex-col gap-1.5">
+            <div className="flex w-fit gap-1 rounded-lg bg-muted p-1">
+              {(["light", "heavy"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setVersion(v)}
+                  className={`rounded-md px-2.5 py-1 text-[9.5px] font-medium transition-colors ${
+                    version === v
+                      ? "bg-background font-semibold text-[var(--lp-ink)] shadow-sm"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {v === "light" ? "Light Enhancement" : "Heavy Enhancement"}
+                </button>
+              ))}
+            </div>
+            <p className="text-[9px] text-muted-foreground">{descriptions[version]}</p>
+
+            {/* The enhanced essay text */}
+            <div className="rounded-xl border bg-card p-3">
+              <p className="whitespace-pre-wrap text-[9.5px] leading-relaxed text-[var(--lp-ink)]">
+                {text}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </MockupFrame>

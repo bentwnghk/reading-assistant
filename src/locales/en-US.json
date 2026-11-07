@@ -503,11 +503,12 @@
       "writing": {
         "eyebrow": "Writing Assessment",
         "title": "From reading to writing.",
-        "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, then turn every mistake into a lesson, practice and quiz built from your own essay. Teachers watch the whole class learn from their mistakes in one dashboard.",
+        "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, generate two enhanced versions of your own essay (a light polish and an aspirational Level 5** rewrite), then turn every mistake into a lesson, practice and quiz built from your own writing. Teachers watch the whole class learn from their mistakes in one dashboard.",
         "bullets": [
           "Verbatim transcription you review beside the original scan",
           "Inline corrections with explanations — errors vs. suggestions",
           "AI Writing Assessment — HKDSE Content, Language and Organization, each on a 0–7 band",
+          "Enhanced Essays — a light polish and an aspirational Level 5** rewrite of your own essay",
           "Learn from your mistakes: lesson → practice → quiz",
           "Saved sessions resume on any device, exportable to Word",
           "Student learning dashboards for every class"
@@ -518,6 +519,7 @@
           "transcribe": "Transcription review",
           "results": "Corrections & popover",
           "assessment": "AI Writing Assessment",
+          "enhanced": "Enhanced Essays",
           "lesson": "Learn · lesson",
           "practice": "Learn · practice",
           "quiz": "Learn · quiz",
@@ -4781,7 +4783,7 @@
         }
       },
       "results": {
-        "intro": "Results open on the AI Writing Assessment tab — filled in automatically by the check, scoring the writing on the HKDSE Content, Language and Organization rubrics. The \"Corrections & Explanations\" tab holds the inline highlights, each numbered and paired with an explanation card.",
+        "intro": "Results open on the AI Writing Assessment tab — filled in automatically by the check, scoring the writing on the HKDSE Content, Language and Organization rubrics. The \"Corrections & Explanations\" tab holds the inline highlights, each numbered and paired with an explanation card. The \"Enhanced Essays\" tab generates a light polish and an aspirational heavy rewrite of your own essay on request.",
         "tiers": {
           "name": "Errors vs. Suggestions",
           "desc": "Errors (grammar and mechanics) get a solid underline; expression suggestions (phrasing, concision, stronger words) are optional polish with alternative ways to say it."
@@ -4789,6 +4791,10 @@
         "assessment": {
           "name": "AI Writing Assessment",
           "desc": "The first results tab, filled in automatically right after the check — the assessment reads the detected error counts as evidence. It scores HKDSE Content (C), Language (L) and Organization (O): a 0–7 band for each plus an overall, five Language sub-scores (grammar, sentence structure, vocabulary, spelling & punctuation, register/tone/style) and bilingual strengths & areas to improve for each criterion. If it did not run — essays checked before this feature, or a failed pass — press \"Get AI assessment\" to run it manually. It is saved with the essay and the overall also shows in the essay list. Students get one assessment per essay — the saved result stays on the essay and cannot be re-run; teachers, admins and super-admins can re-assess it."
+        },
+        "enhanced": {
+          "name": "Enhanced Essays",
+          "desc": "The third results tab. Press \"Generate enhanced essays\" and the AI produces two improved versions of your own essay: a Light polish (your voice and structures, cleaned up) and a Heavy rewrite (advanced vocabulary, varied structures and stronger transitions at HKDSE 5** level). Switch between them inside the panel. Nothing is generated until you ask. Students get one generation per essay — only staff can regenerate; a re-transcription or re-check resets it."
         },
         "filter": {
           "name": "Category Filter",

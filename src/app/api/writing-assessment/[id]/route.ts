@@ -6,6 +6,7 @@ import {
   updateEssay,
   deleteEssay,
   essayHasAssessment,
+  essayHasEnhanced,
   isStaffRole,
 } from "@/lib/language-check"
 import { patchSchema } from "@/lib/language-check-schema"
@@ -54,6 +55,20 @@ export async function PATCH(request: NextRequest, context: Ctx) {
       if (assessed) {
         return NextResponse.json(
           { error: "Essay already assessed" },
+          { status: 403 },
+        )
+      }
+    }
+    // Students cannot regenerate enhanced essays either: the first saved
+    // generation is final for them. Only staff may replace one (staff log
+    // route, or here when the staff caller is the essay's uploader). A null
+    // enhanced (the reset a fresh check/transcription writes) is still
+    // allowed — it makes the essay generatable again.
+    if (parsed.data.enhanced && !isStaffRole(session.user.role)) {
+      const enhanced = await essayHasEnhanced(session.user.id, id)
+      if (enhanced) {
+        return NextResponse.json(
+          { error: "Essay already enhanced" },
           { status: 403 },
         )
       }

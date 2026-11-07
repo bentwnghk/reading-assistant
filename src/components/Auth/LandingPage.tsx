@@ -57,6 +57,7 @@ import {
   LanguageCheckTranscribeMockup,
   LanguageCheckResultsMockup,
   LanguageCheckAssessmentMockup,
+  LanguageCheckEnhancedMockup,
   LearnLessonMockup,
   LearnPracticeMockup,
   LearnQuizMockup,
@@ -449,15 +450,16 @@ function PracticeCarousel() {
 }
 
 /* Writing Assessment carousel (Chapter 06) — mirrors MasterCarousel, cycling the
-   7 Writing Assessment views: transcription review, checked results, the AI
-   Writing Assessment, the three "Learn from your mistakes" stages and the
-   staff student-learning overview. */
+   8 Writing Assessment views: transcription review, checked results, the AI
+   Writing Assessment, the Enhanced Essays tab, the three "Learn from your
+   mistakes" stages and the staff student-learning overview. */
 function LanguageCheckCarousel() {
   const { t } = useTranslation();
   const slides = [
     { key: "transcribe", label: t("landing.chapters.writing.carousel.transcribe"), node: <LanguageCheckTranscribeMockup /> },
     { key: "results", label: t("landing.chapters.writing.carousel.results"), node: <LanguageCheckResultsMockup /> },
     { key: "assessment", label: t("landing.chapters.writing.carousel.assessment"), node: <LanguageCheckAssessmentMockup /> },
+    { key: "enhanced", label: t("landing.chapters.writing.carousel.enhanced"), node: <LanguageCheckEnhancedMockup /> },
     { key: "lesson", label: t("landing.chapters.writing.carousel.lesson"), node: <LearnLessonMockup /> },
     { key: "practice", label: t("landing.chapters.writing.carousel.practice"), node: <LearnPracticeMockup /> },
     { key: "quiz", label: t("landing.chapters.writing.carousel.quiz"), node: <LearnQuizMockup /> },

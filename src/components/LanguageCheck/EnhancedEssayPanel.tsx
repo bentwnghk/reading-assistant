@@ -20,6 +20,13 @@ interface EnhancedEssayPanelProps {
     >;
   /** Persists freshly generated essays; throwing shows a toast (result is still shown). */
   onSave: (enhanced: LanguageCheckEnhanced) => Promise<void>;
+  /**
+   * Whether an essay that already carries enhanced essays may be generated
+   * again. False for students in the owner workspace — their saved result
+   * stays visible but becomes read-only (only staff may regenerate). Saving
+   * the FIRST generation is always allowed. Defaults to true (staff log).
+   */
+  allowRegenerate?: boolean;
 }
 
 type Version = "light" | "heavy";
@@ -28,7 +35,11 @@ type Version = "light" | "heavy";
  * Third results tab: light (polish) and heavy (HKDSE 5**) enhanced essays.
  * Nothing is generated until the user presses Generate.
  */
-export default function EnhancedEssayPanel({ essay, onSave }: EnhancedEssayPanelProps) {
+export default function EnhancedEssayPanel({
+  essay,
+  allowRegenerate = true,
+  onSave,
+}: EnhancedEssayPanelProps) {
   const { t } = useTranslation();
   const { enhanceEssay } = useLanguageCheck();
   const [fresh, setFresh] = useState<{
@@ -38,6 +49,8 @@ export default function EnhancedEssayPanel({ essay, onSave }: EnhancedEssayPanel
   const result = fresh && fresh.id === essay.id ? fresh.value : (essay.enhanced ?? null);
   const [loading, setLoading] = useState(false);
   const [version, setVersion] = useState<Version>("light");
+  // Once enhanced essays exist, running again is a staff-only action.
+  const canRun = !result || allowRegenerate;
 
   async function run() {
     if (loading) return;
@@ -76,24 +89,26 @@ export default function EnhancedEssayPanel({ essay, onSave }: EnhancedEssayPanel
             </p>
           </div>
         </div>
-        <Button
-          size="lg"
-          onClick={run}
-          disabled={loading}
-          variant={result ? "outline" : "default"}
-          className={result ? undefined : "bg-amber-600 text-white hover:bg-amber-700"}
-        >
-          {loading ? (
-            <LoaderCircle className="h-4 w-4 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4" />
-          )}
-          {loading
-            ? t("languageCheck.enhanced.working")
-            : result
-              ? t("languageCheck.enhanced.again")
-              : t("languageCheck.enhanced.button")}
-        </Button>
+        {canRun && (
+          <Button
+            size="lg"
+            onClick={run}
+            disabled={loading}
+            variant={result ? "outline" : "default"}
+            className={result ? undefined : "bg-amber-600 text-white hover:bg-amber-700"}
+          >
+            {loading ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {loading
+              ? t("languageCheck.enhanced.working")
+              : result
+                ? t("languageCheck.enhanced.again")
+                : t("languageCheck.enhanced.button")}
+          </Button>
+        )}
       </div>
 
       {result && (

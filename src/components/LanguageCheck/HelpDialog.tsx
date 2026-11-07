@@ -21,6 +21,7 @@ import {
   SpellCheck,
   UserCog,
   Users,
+  Wand2,
 } from "lucide-react";
 import {
   Dialog,
@@ -230,6 +231,12 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
               tone="bg-violet-500/10 text-violet-500"
               name={t("languageCheck.help.results.assessment.name")}
               desc={t("languageCheck.help.results.assessment.desc")}
+            />
+            <HelpRow
+              icon={Wand2}
+              tone="bg-amber-500/10 text-amber-500"
+              name={t("languageCheck.help.results.enhanced.name")}
+              desc={t("languageCheck.help.results.enhanced.desc")}
             />
             <HelpRow
               icon={Filter}

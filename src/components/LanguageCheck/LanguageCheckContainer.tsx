@@ -661,6 +661,7 @@ function Workspace({ essay }: { essay: LanguageCheckEssay }) {
           ) : resultsTab === "enhanced" ? (
             <EnhancedEssayPanel
               essay={essay}
+              allowRegenerate={isStaff}
               onSave={(enhanced) =>
                 useLanguageCheckStore.getState().save(essay.id, { enhanced })
               }
