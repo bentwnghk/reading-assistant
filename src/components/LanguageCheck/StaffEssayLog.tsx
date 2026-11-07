@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Eye,
   LoaderCircle,
   RefreshCw,
@@ -31,6 +32,7 @@ import {
 import ResultsView from "@/components/LanguageCheck/ResultsView";
 import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
 import EnhancedEssayPanel from "@/components/LanguageCheck/EnhancedEssayPanel";
+import ExportDialog from "@/components/LanguageCheck/ExportDialog";
 import {
   ExplanationLanguageToggle,
   SegmentedTabs,
@@ -93,6 +95,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   const [search, setSearch] = useState("");
   const [detail, setDetail] = useState<LanguageCheckStaffDetail | null>(null);
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // A different class/student starts again from the first page.
   const selectionKey = `${classId}|${userId}`;
@@ -225,6 +228,21 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     : detailExpired
       ? t("languageCheck.results.expiredDisabled")
       : undefined;
+
+  // Map the staff detail onto the essay shape shared by the results view and
+  // the Word export (the export reads checkedText/corrections/assessment/
+  // enhanced plus the owner block — scans are never sent to staff).
+  const detailEssay: LanguageCheckEssay | null = detail
+    ? {
+        ...detail,
+        ownerId: detail.userId,
+        ownerName: detail.userName,
+        ownerEmail: detail.userEmail,
+        images: [],
+      }
+    : null;
+  const detailHasResults =
+    detail?.status === "checked" && detail.checkedText.length > 0;
 
   return (
     <section className="flex flex-col gap-3">
@@ -505,6 +523,16 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                       ? t("languageCheck.results.recheck")
                       : t("languageCheck.review.runCheck")}
                   </Button>
+                  {detailHasResults && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setExportOpen(true)}
+                    >
+                      <Download className="mr-1.5 h-4 w-4" />
+                      {t("languageCheck.results.export")}
+                    </Button>
+                  )}
                   <ExplanationLanguageToggle
                     language={language}
                     onChange={setLanguage}
@@ -562,19 +590,10 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                         );
                       }}
                     />
-                  ) : (
+                  ) : detailEssay ? (
                     // Same view students see (ResultsView never reads `images`).
-                    <ResultsView
-                      essay={{
-                        ...detail,
-                        ownerId: detail.userId,
-                        ownerName: detail.userName,
-                        images: [],
-                      }}
-                      language={language}
-                      embedded
-                    />
-                  )}
+                    <ResultsView essay={detailEssay} language={language} embedded />
+                  ) : null}
                 </div>
               ) : (
                 <div className="flex min-h-0 flex-col gap-4 overflow-y-auto">
@@ -595,6 +614,15 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
           )}
         </DialogContent>
       </Dialog>
+
+      {exportOpen && detailEssay && (
+        <ExportDialog
+          essay={detailEssay}
+          language={language}
+          open={exportOpen}
+          onOpenChange={setExportOpen}
+        />
+      )}
     </section>
   );
 }
