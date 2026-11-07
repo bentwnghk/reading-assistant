@@ -85,7 +85,11 @@ export default function QuizPlayer({
         <p className="mx-auto max-w-md text-muted-foreground">
           {t("languageCheck.learn.quiz.introBody", { count: items.length })}
         </p>
-        <Button size="lg" onClick={() => setStarted(true)}>
+        <Button
+          size="lg"
+          className="transition-shadow duration-300 shadow-[0_0_10px_2px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_2px_rgba(125,211,252,0.6)] hover:shadow-[0_0_14px_4px_rgba(56,189,248,0.6)] dark:hover:shadow-[0_0_14px_4px_rgba(125,211,252,0.7)]"
+          onClick={() => setStarted(true)}
+        >
           {t("languageCheck.learn.quiz.begin")}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
@@ -167,7 +171,10 @@ function QuizReview({
             )}
             {t("languageCheck.learn.quiz.retake")}
           </Button>
-          <Button onClick={onNext}>
+          <Button
+            className="transition-shadow duration-300 shadow-[0_0_10px_2px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_2px_rgba(125,211,252,0.6)] hover:shadow-[0_0_14px_4px_rgba(56,189,248,0.6)] dark:hover:shadow-[0_0_14px_4px_rgba(125,211,252,0.7)]"
+            onClick={onNext}
+          >
             {nextLabel}
             <ArrowRight className="ml-1.5 h-4 w-4" />
           </Button>

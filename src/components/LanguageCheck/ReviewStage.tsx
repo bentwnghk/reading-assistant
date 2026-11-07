@@ -180,6 +180,7 @@ export default function ReviewStage({ essay, onChecked }: ReviewStageProps) {
           ) : (
             <Button
               size="sm"
+              className="transition-shadow duration-300 shadow-[0_0_10px_2px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_2px_rgba(125,211,252,0.6)] hover:shadow-[0_0_14px_4px_rgba(56,189,248,0.6)] dark:hover:shadow-[0_0_14px_4px_rgba(125,211,252,0.7)]"
               disabled={ocrRunning || !!otherBusy || !essay.transcript.trim()}
               onClick={handleCheck}
             >

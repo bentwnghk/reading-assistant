@@ -245,7 +245,11 @@ export default function LessonView({
 
       {!readOnly && (
         <div className="flex justify-end pt-2">
-          <Button size="lg" onClick={onContinue}>
+          <Button
+            size="lg"
+            className="transition-shadow duration-300 shadow-[0_0_10px_2px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_2px_rgba(125,211,252,0.6)] hover:shadow-[0_0_14px_4px_rgba(56,189,248,0.6)] dark:hover:shadow-[0_0_14px_4px_rgba(125,211,252,0.7)]"
+            onClick={onContinue}
+          >
             {t("languageCheck.learn.lesson.startPractice")}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

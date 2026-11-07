@@ -155,7 +155,12 @@ export default function PageStaging({
             {t("languageCheck.staging.discard")}
           </Button>
         </div>
-        <Button size="sm" disabled={busy || pages.length === 0} onClick={onStart}>
+        <Button
+          size="sm"
+          className="transition-shadow duration-300 shadow-[0_0_10px_2px_rgba(56,189,248,0.5)] dark:shadow-[0_0_10px_2px_rgba(125,211,252,0.6)] hover:shadow-[0_0_14px_4px_rgba(56,189,248,0.6)] dark:hover:shadow-[0_0_14px_4px_rgba(125,211,252,0.7)]"
+          disabled={busy || pages.length === 0}
+          onClick={onStart}
+        >
           {busy ? (
             <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
           ) : (
