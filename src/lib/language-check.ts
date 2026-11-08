@@ -755,6 +755,28 @@ export async function setStaffEnhanced(
 }
 
 /**
+ * Renames an essay the staff member can see (scope-checked). The title is
+ * the per-essay snapshot — the Topic Library entry is never touched — and
+ * the updated_at trigger bumps the row under the staff list's default
+ * "Updated" sort, exactly like an owner rename in the workspace.
+ */
+export async function renameStaffEssay(
+  scope: LanguageCheckStaffScope,
+  id: string,
+  title: string,
+): Promise<boolean> {
+  // Scope check first (same pattern as setStaffAssessment): out-of-scope
+  // essays look identical to missing ones, and nothing is written.
+  const essay = await getStaffEssay(scope, id)
+  if (!essay) return false
+  await getPool().query(
+    `UPDATE language_check_essays SET title = $1 WHERE id = $2`,
+    [title, id],
+  )
+  return true
+}
+
+/**
  * Persists a staff-initiated re-check for an essay inside the caller's staff
  * scope. Mirrors what an owner re-check writes (runCheck): new corrections
  * anchored to `checkedText`, the model that produced them, and any dropped

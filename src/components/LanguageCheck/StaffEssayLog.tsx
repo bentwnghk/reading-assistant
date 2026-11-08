@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,6 +13,7 @@ import {
   Eye,
   LoaderCircle,
   PenLine,
+  Pencil,
   RefreshCw,
   Square,
   Trophy,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -140,6 +142,13 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   const [detail, setDetail] = useState<LanguageCheckStaffDetail | null>(null);
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  // Inline title rename (staff-only affordance in the Title column). The
+  // refs make commit idempotent across Enter→blur double fires and keep a
+  // cancelled edit from persisting after the input unmounts.
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const activeRenameRef = useRef<string | null>(null);
+  const renameCancelledRef = useRef(false);
 
   // A different class/student starts again from the first page, and drops
   // the topic pick — the topic options are narrowed by the class, so a
@@ -228,6 +237,64 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     // which case its summary is cached there too).
     void useLanguageCheckStore.getState().loadList(true);
     await Promise.all([openDetail(detail.id), load()]);
+  }
+
+  // --- Inline title rename (Title column) -------------------------------
+  // Staff may rename any in-scope essay directly in the table. The title is
+  // the per-essay snapshot (renaming never touches the Topic Library), and
+  // the server bumps updated_at, so the row re-sorts on the next load; here
+  // it is updated in place so the row does not jump mid-edit.
+  function startRename(row: LanguageCheckStaffRow) {
+    renameCancelledRef.current = false;
+    activeRenameRef.current = row.id;
+    setRenameValue(row.title);
+    setRenamingId(row.id);
+  }
+
+  function cancelRename() {
+    renameCancelledRef.current = true;
+    setRenamingId(null);
+  }
+
+  async function commitRename(row: LanguageCheckStaffRow) {
+    // Idempotent: Enter fires blur too, and Escape unmounts the input —
+    // both arrive after the first commit/cancel has cleared the ref.
+    if (activeRenameRef.current !== row.id) return;
+    activeRenameRef.current = null;
+    if (renameCancelledRef.current) {
+      renameCancelledRef.current = false;
+      return;
+    }
+    setRenamingId(null);
+    const next = renameValue.trim();
+    if (!next || next === row.title) return;
+    try {
+      const res = await fetch(`/api/writing-assessment/staff/${row.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: next }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || `HTTP ${res.status}`);
+      }
+      setData((d) =>
+        d
+          ? {
+              ...d,
+              rows: d.rows.map((r) =>
+                r.id === row.id ? { ...r, title: next } : r,
+              ),
+            }
+          : d,
+      );
+      setDetail((d) => (d && d.id === row.id ? { ...d, title: next } : d));
+      // The caller may be the uploader — their own essay list caches the
+      // title too (same reasoning as the staff re-check).
+      void useLanguageCheckStore.getState().loadList(true);
+    } catch (error) {
+      toast.error(parseError(error));
+    }
   }
 
   if (!isStaff) {
@@ -462,8 +529,39 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                         {row.userEmail}
                       </span>
                     </td>
-                    <td className="max-w-[12rem] truncate py-2 pr-3">
-                      {row.title || t("languageCheck.list.untitled")}
+                    <td className="max-w-[12rem] py-2 pr-3">
+                      {renamingId === row.id ? (
+                        <Input
+                          value={renameValue}
+                          maxLength={200}
+                          autoFocus
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onBlur={() => void commitRename(row)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.currentTarget.blur();
+                            else if (e.key === "Escape") cancelRename();
+                          }}
+                          aria-label={t("languageCheck.staff.rename")}
+                          className="h-8"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <span className="min-w-0 flex-1 truncate">
+                            {row.title || t("languageCheck.list.untitled")}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0 text-muted-foreground"
+                            title={t("languageCheck.staff.rename")}
+                            aria-label={t("languageCheck.staff.rename")}
+                            onClick={() => startRename(row)}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </td>
                     <td className="py-2 pr-3">
                       <span

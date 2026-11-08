@@ -5002,6 +5002,7 @@
       "colErrors": "Comments",
       "colUpdated": "Updated",
       "view": "View",
+      "rename": "Rename",
       "empty": "No essays yet.",
       "emptyFilter": "No essays match these filters.",
       "page": "Page {{page}} of {{total}}",

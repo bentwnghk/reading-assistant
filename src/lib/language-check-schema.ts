@@ -92,3 +92,15 @@ export const staffRecheckSchema = z.object({
   checkModel: z.string().max(100),
   droppedCount: z.number().int().min(0).max(1000),
 })
+
+/**
+ * Staff rename from the Student essays table (PATCH
+ * /api/writing-assessment/staff/[id]). Title only — a staff caller can never
+ * touch the transcript, status or corrections through this route. Non-empty
+ * after trim (blanking a learner's title is a mistake, not an action; the
+ * owner workspace remains the only place that may clear it to "Untitled"),
+ * same 200-char cap as the owner patch schema.
+ */
+export const staffRenameSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+})

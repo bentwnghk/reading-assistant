@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, cleanup, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, cleanup, fireEvent, within } from "@testing-library/react";
 import StaffEssayLog from "./StaffEssayLog";
 
 // Regression tests for the Student essays filters. Class and student now come
@@ -57,6 +57,8 @@ const ALL_TOPICS: LanguageCheckStaffTopic[] = [
 
 const staffRequests: string[] = [];
 const detailRequests: string[] = [];
+/** PATCH /api/writing-assessment/staff/:id captures (title rename). */
+const renameRequests: { id: string; body: unknown }[] = [];
 
 /** Mutable staff detail fixture (view dialog), re-set in beforeEach. */
 let detailFixture: Record<string, unknown>;
@@ -139,6 +141,7 @@ function staffResponse(url: URL) {
 beforeEach(() => {
   staffRequests.length = 0;
   detailRequests.length = 0;
+  renameRequests.length = 0;
   detailFixture = makeDetail();
   runStaffCheckSpy.mockReset();
   runStaffCheckSpy.mockResolvedValue(true);
@@ -171,7 +174,7 @@ beforeEach(() => {
       value: () => {},
     });
   }
-  global.fetch = vi.fn(async (input: RequestInfo | URL) => {
+  global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(String(input), "http://localhost");
     if (url.pathname === "/api/classes") {
       return {
@@ -193,6 +196,14 @@ beforeEach(() => {
       /^\/api\/writing-assessment\/staff\/([^/]+)$/,
     );
     if (detailMatch) {
+      // Title rename from the table (staff PATCH).
+      if (init?.method === "PATCH") {
+        renameRequests.push({
+          id: detailMatch[1],
+          body: JSON.parse(String(init.body)),
+        });
+        return { ok: true, json: async () => ({ success: true }) } as Response;
+      }
       detailRequests.push(detailMatch[1]);
       return {
         ok: true,
@@ -392,8 +403,11 @@ describe("StaffEssayLog view dialog re-check", () => {
   function viewButtonForRow(title: string): HTMLButtonElement {
     const row = screen.getByText(title).closest("tr");
     if (!row) throw new Error(`row ${title} not found`);
-    const button = row.querySelector("button");
-    if (!button) throw new Error(`view button for ${title} not found`);
+    // By accessible name, NOT querySelector("button") — the Title column's
+    // rename (pencil) button now precedes View in the DOM.
+    const button = within(row).getByRole("button", {
+      name: "languageCheck.staff.view",
+    });
     return button as HTMLButtonElement;
   }
 
@@ -461,5 +475,90 @@ describe("StaffEssayLog view dialog re-check", () => {
     expect(button.disabled).toBe(true);
     expect(button.title).toBe("languageCheck.check.noText");
     expect(runStaffCheckSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("StaffEssayLog title rename", () => {
+  /** The rename (pencil) button inside the row titled `title`. */
+  function renameButtonForRow(title: string): HTMLButtonElement {
+    const row = screen.getByText(title).closest("tr");
+    if (!row) throw new Error(`row ${title} not found`);
+    const button = within(row).getByRole("button", {
+      name: "languageCheck.staff.rename",
+    });
+    return button as HTMLButtonElement;
+  }
+
+  async function startRename(title: string): Promise<HTMLInputElement> {
+    // Capture the row BEFORE the click — starting the rename replaces the
+    // title span with the input, so getByText(title) would no longer match.
+    const row = screen.getByText(title).closest("tr");
+    if (!row) throw new Error(`row ${title} not found`);
+    fireEvent.click(renameButtonForRow(title));
+    return await waitFor(() => {
+      const input = row.querySelector(
+        'input[aria-label="languageCheck.staff.rename"]',
+      ) as HTMLInputElement | null;
+      expect(input).not.toBeNull();
+      return input as HTMLInputElement;
+    });
+  }
+
+  it("renames a row in place via the staff PATCH endpoint", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+
+    const input = await startRename("Alice essay");
+    expect(input.value).toBe("Alice essay");
+    fireEvent.change(input, { target: { value: "Alice retitled" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    // Enter blurs the input; fire blur explicitly too — commit is
+    // idempotent, so a double fire must still PATCH exactly once.
+    fireEvent.blur(input);
+
+    await waitFor(() => {
+      expect(renameRequests).toEqual([
+        { id: "e1", body: { title: "Alice retitled" } },
+      ]);
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Alice retitled")).toBeTruthy();
+    });
+  });
+
+  it("Escape cancels the edit without a request", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+
+    const input = await startRename("Alice essay");
+    fireEvent.change(input, { target: { value: "Discarded" } });
+    fireEvent.keyDown(input, { key: "Escape" });
+    fireEvent.blur(input);
+
+    expect(renameRequests).toEqual([]);
+    await waitFor(() => {
+      expect(screen.getByText("Alice essay")).toBeTruthy();
+    });
+  });
+
+  it("an unchanged or blank title is not sent", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+
+    // Unchanged value → no request.
+    let input = await startRename("Alice essay");
+    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.blur(input);
+    expect(renameRequests).toEqual([]);
+
+    // Blank value → no request (staff cannot blank a learner's title).
+    input = await startRename("Alice essay");
+    fireEvent.change(input, { target: { value: "   " } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.blur(input);
+    expect(renameRequests).toEqual([]);
+    await waitFor(() => {
+      expect(screen.getByText("Alice essay")).toBeTruthy();
+    });
   });
 });
