@@ -129,18 +129,7 @@ export default function TopicFormDialog({
         if (!res.ok) return;
         const raw = (await res.json()) as ClassInfo[];
         if (cancelled) return;
-        // Float the classes the caller teaches to the top of the list
-        // (stable sort — the API order is kept within each part): admins
-        // pick from their whole school, so their own classes must not get
-        // buried in it. For teachers (every class is theirs) and students
-        // (none are theirs) the sort is a no-op.
-        setClasses(
-          [...raw].sort(
-            (a, b) =>
-              Number(!!b.teacherId && b.teacherId === myId) -
-              Number(!!a.teacherId && a.teacherId === myId),
-          ),
-        );
+        setClasses(raw);
       } catch {
         // Keep the empty list; "No class" stays selectable.
       } finally {
@@ -151,6 +140,16 @@ export default function TopicFormDialog({
       cancelled = true;
     };
   }, [open, classesLoaded, myId]);
+
+  // Classes the caller teaches — the same "My Classes" derivation as the
+  // upload picker (teacherId === session user id). ClassCombobox floats
+  // them into a leading group: an admin's list is their whole school, so
+  // their own classes must not get buried in the subject groups. For
+  // teachers (every class is theirs) and students (none are theirs) the
+  // group is skipped and the list is unchanged.
+  const myClassIds = classes
+    .filter((c) => !!c.teacherId && c.teacherId === myId)
+    .map((c) => c.id);
 
   // Role default for NEW topics: applied when the options arrive, and only
   // while the user has not picked a class themselves.
@@ -247,6 +246,7 @@ export default function TopicFormDialog({
                 setClassId(v === "__none__" || v === null ? null : v);
               }}
               allowNone
+              mineIds={myClassIds}
               noneLabel={t("languageCheck.topics.form.noClass")}
               emptyLabel={t("languageCheck.topics.form.noClasses")}
             />

@@ -129,6 +129,8 @@ function CommandClassList({
   emptyLabel,
   header,
   footer,
+  floated,
+  floatedLabel,
 }: {
   options: ClassOption[]
   itemId: (c: ClassOption) => string
@@ -136,8 +138,15 @@ function CommandClassList({
   emptyLabel: string
   header?: React.ReactNode
   footer?: React.ReactNode
+  /** Classes surfaced in a labelled group ABOVE the subject groups. They
+   *  are removed from the subject groups so they never appear twice. */
+  floated?: ClassOption[]
+  floatedLabel?: string
 }) {
-  const groups = groupBySubject(options)
+  const floatedIds = new Set(floated?.map(c => c.id))
+  const groups = groupBySubject(
+    floated && floated.length > 0 ? options.filter(c => !floatedIds.has(c.id)) : options,
+  )
   // When the list spans multiple schools, show the school as secondary text
   // (super-admin scope); otherwise the teacher name (school-wide scope).
   const multiSchool = new Set(
@@ -149,6 +158,16 @@ function CommandClassList({
     <CommandList className="max-h-72">
       <CommandEmpty>{emptyLabel}</CommandEmpty>
       {header}
+      {floated && floated.length > 0 && (
+        <CommandGroup value="mine" heading={floatedLabel}>
+          {floated.map(c => (
+            <CommandItem key={itemId(c)} value={c.keywords} onSelect={() => {}}>
+              {renderItem(c, secondaryFor(c))}
+            </CommandItem>
+          ))}
+          <div className="h-1" />
+        </CommandGroup>
+      )}
       {groups.map((g, gi) => (
         <CommandGroup
           key={g.label || "ungrouped"}
@@ -189,6 +208,12 @@ export interface ClassComboboxProps {
    *  least one class. Default: false */
   allowMine?: boolean
   mineLabel?: string
+  /** Ids of the classes the viewer teaches ("My Classes"). They are
+   *  surfaced in a labelled group above the subject-grouped list — an
+   *  admin picks from their whole school, so their own classes must not
+   *  get buried in it. Skipped when empty or when they cover every class
+   *  (teachers keep the plain subject-grouped list). Default: none */
+  mineIds?: string[]
   /** Show a "No class" option that selects the "__none__" sentinel. Default: false */
   allowNone?: boolean
   noneLabel?: string
@@ -209,6 +234,7 @@ export function ClassCombobox({
   allowAll = false,
   allowMine = false,
   mineLabel,
+  mineIds,
   allowNone = false,
   noneLabel,
   customLabel,
@@ -218,6 +244,18 @@ export function ClassCombobox({
   const { t } = useTranslation()
   const [open, setOpen] = React.useState(false)
   const options = React.useMemo(() => toOptions(classes), [classes])
+  // Classes the viewer teaches, floated into a leading group above the
+  // subject groups. Only a PROPER subset is floated: when every class is
+  // the viewer's own (teachers), the subject-grouped list already shows
+  // them all — regrouping everything under "My classes" would only lose
+  // the subject grouping.
+  const floated = React.useMemo(() => {
+    if (!mineIds || mineIds.length === 0) return undefined
+    const ids = new Set(mineIds)
+    const mine = options.filter(c => ids.has(c.id))
+    if (mine.length === 0 || mine.length >= options.length) return undefined
+    return [...mine].sort(compareByGradeThenName)
+  }, [mineIds, options])
   const selected = options.find(c => c.id === value)
   const noneOptionLabel = noneLabel ?? t("classCombobox.noClass")
   const mineOptionLabel = mineLabel ?? t("classCombobox.mine")
@@ -266,6 +304,8 @@ export function ClassCombobox({
             options={options}
             itemId={c => c.id}
             emptyLabel={emptyLabel ?? t("classCombobox.empty")}
+            floated={floated}
+            floatedLabel={mineOptionLabel}
             header={
               allowMine ? (
                 <div className="border-b">
