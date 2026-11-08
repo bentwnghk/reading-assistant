@@ -870,12 +870,18 @@ CREATE TABLE language_check_topics (
   topic          TEXT NOT NULL,
   essay_type     TEXT NOT NULL CHECK (essay_type IN ('dse-part-a', 'dse-part-b')),
   question_image TEXT NOT NULL DEFAULT '',
+  -- Optional class target: the topic also appears in the Topic Library of
+  -- the class's members (and its teacher / school staff). NULL = personal.
+  class_id       TEXT REFERENCES classes(id) ON DELETE SET NULL,
   created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_language_check_topics_user
   ON language_check_topics(user_id, updated_at DESC);
+
+CREATE INDEX idx_language_check_topics_class
+  ON language_check_topics(class_id) WHERE class_id IS NOT NULL;
 
 CREATE TRIGGER update_language_check_topics_updated_at
     BEFORE UPDATE ON language_check_topics

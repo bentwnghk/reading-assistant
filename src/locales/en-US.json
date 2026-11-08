@@ -4710,7 +4710,7 @@
   "languageCheck": {
     "navTitle": "Writing Assessment",
     "title": "Writing Assessment",
-    "subtitle": "Upload a handwritten essay or scanned work. We digitise it, you review the transcript, then one check returns inline corrections with explanations plus an automatic AI Writing Assessment scored 0–7 on the HKDSE Content, Language and Organization criteria — and with \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
+    "subtitle": "Upload a handwritten essay or scanned work. Then one check returns inline corrections with explanations plus an automatic AI Writing Assessment scored on the HKDSE criteria — and with \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
     "back": "Back",
     "cancel": "Cancel",
     "stop": "Stop",
@@ -4868,15 +4868,19 @@
       "edit": "Edit topic",
       "delete": "Delete",
       "hasImage": "Question image",
-      "intro": "Save each writing task once — title, full instructions, an optional question image and the essay type — then reuse it for every essay you scan on that topic. The AI refers to the topic, question image and essay type when checking and assessing.",
+      "intro": "Save each writing task once — title, full instructions, an optional question image and the essay type — then reuse it for every essay you scan on that topic. The AI refers to the topic, question image and essay type when checking and assessing. Topics created for your classes also appear here.",
       "empty": "No topics yet. Create one to get started.",
       "deleteTitle": "Delete topic?",
       "deleteDesc": "\"{{title}}\" will be removed from your library. Essays already checked with it keep their own copy of the task.",
+      "by": "By {{name}}",
+      "classTopicTitle": "Created for this class — it appears in the topic lists of the class's students and its teacher.",
       "picker": {
         "label": "Writing topic",
         "placeholder": "Choose a saved topic",
         "empty": "No saved topics — create one",
-        "required": "Choose or create a writing topic before uploading an essay."
+        "required": "Choose or create a writing topic before uploading an essay.",
+        "mine": "My topics",
+        "classTopics": "Class topics"
       },
       "form": {
         "newTitle": "New writing topic",
@@ -4884,6 +4888,10 @@
         "desc": "The title becomes the default essay title. The topic, question image and essay type guide how the essay is checked and assessed.",
         "title": "Title",
         "titlePlaceholder": "e.g. S6 Writing 1",
+        "class": "Class",
+        "noClass": "No class (personal)",
+        "noClasses": "No classes available",
+        "classHint": "A topic created for a class also appears in the topic lists of the class's students and its teacher, so they can write to it. Leave it unset to keep the topic to yourself.",
         "essayType": "Essay type",
         "essayTypePlaceholder": "Select essay type",
         "topic": "Topic",

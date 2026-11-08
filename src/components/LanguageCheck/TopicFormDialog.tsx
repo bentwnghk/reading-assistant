@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import { ImagePlus, LoaderCircle, X } from "lucide-react";
 import { toast } from "sonner";
@@ -22,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ClassCombobox } from "@/components/Internal/ClassCombobox";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { downscaleImage, readFileAsDataURL } from "@/utils/image";
 import { parseError } from "@/utils/error";
@@ -41,6 +43,26 @@ interface TopicFormDialogProps {
   onSaved?: (topic: LanguageCheckTopic) => void;
 }
 
+/**
+ * Initial class selection for a NEW topic (an edit keeps the saved class):
+ * students default to one of their classes — English classes first, since
+ * writing tasks are English work. Everyone else (teachers, admins,
+ * super-admins) starts unassigned — a personal topic.
+ */
+function defaultTopicClassId(
+  role: string | undefined,
+  classes: ClassInfo[],
+): string | null {
+  if (role === "student") {
+    return (
+      classes.find((c) => /english/i.test(c.subjectName ?? ""))?.id ??
+      classes[0]?.id ??
+      null
+    );
+  }
+  return null;
+}
+
 /** Create / edit a writing topic (title, full prompt, optional question image, essay type). */
 export default function TopicFormDialog({
   open,
@@ -49,6 +71,7 @@ export default function TopicFormDialog({
   onSaved,
 }: TopicFormDialogProps) {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const saveTopic = useLanguageCheckStore((s) => s.saveTopic);
   const fetchTopic = useLanguageCheckStore((s) => s.fetchTopic);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -59,12 +82,25 @@ export default function TopicFormDialog({
   const [loadingImage, setLoadingImage] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Class target (null = personal). /api/classes already scopes the list by
+  // role: students see the classes they are in, teachers the classes they
+  // teach, admins their school's classes, super-admins everything.
+  const role = session?.user?.role;
+  const myId = session?.user?.id;
+  const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [classesLoaded, setClassesLoaded] = useState(false);
+  const [classId, setClassId] = useState<string | null>(null);
+  const classTouchedRef = useRef(false);
+
   useEffect(() => {
     if (!open) return;
     setTitle(topic?.title ?? "");
     setPrompt(topic?.topic ?? "");
     setEssayType(topic?.essayType ?? "");
     setImage("");
+    // Editing starts from the saved class and never takes the role default.
+    classTouchedRef.current = !!topic;
+    setClassId(topic?.classId ?? null);
     if (topic?.hasQuestionImage) {
       let cancelled = false;
       setLoadingImage(true);
@@ -81,6 +117,49 @@ export default function TopicFormDialog({
       };
     }
   }, [open, topic, fetchTopic]);
+
+  // Load the class options once per dialog lifetime (non-fatal on failure —
+  // a topic can still be saved without a class).
+  useEffect(() => {
+    if (!open || classesLoaded) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/classes");
+        if (!res.ok) return;
+        const raw = (await res.json()) as ClassInfo[];
+        if (cancelled) return;
+        // Float the classes the caller teaches to the top of the list
+        // (stable sort — the API order is kept within each part): admins
+        // pick from their whole school, so their own classes must not get
+        // buried in it. For teachers (every class is theirs) and students
+        // (none are theirs) the sort is a no-op.
+        setClasses(
+          [...raw].sort(
+            (a, b) =>
+              Number(!!b.teacherId && b.teacherId === myId) -
+              Number(!!a.teacherId && a.teacherId === myId),
+          ),
+        );
+      } catch {
+        // Keep the empty list; "No class" stays selectable.
+      } finally {
+        if (!cancelled) setClassesLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, classesLoaded, myId]);
+
+  // Role default for NEW topics: applied when the options arrive, and only
+  // while the user has not picked a class themselves.
+  useEffect(() => {
+    if (!open || topic || classTouchedRef.current) return;
+    setClassId((prev) =>
+      prev === null ? defaultTopicClassId(role, classes) : prev,
+    );
+  }, [open, topic, classes, role]);
 
   async function pickImage(file: File | undefined) {
     if (!file) return;
@@ -116,6 +195,7 @@ export default function TopicFormDialog({
           topic: prompt.trim(),
           essayType,
           questionImage: image,
+          classId,
         },
         topic?.id,
       );
@@ -150,6 +230,29 @@ export default function TopicFormDialog({
               placeholder={t("languageCheck.topics.form.titlePlaceholder")}
               onChange={(e) => setTitle(e.target.value)}
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label>
+              {t("languageCheck.topics.form.class")}{" "}
+              <span className="font-normal text-muted-foreground">
+                ({t("languageCheck.topics.form.optional")})
+              </span>
+            </Label>
+            <ClassCombobox
+              classes={classes}
+              value={classId ?? "__none__"}
+              onChange={(v) => {
+                classTouchedRef.current = true;
+                setClassId(v === "__none__" || v === null ? null : v);
+              }}
+              allowNone
+              noneLabel={t("languageCheck.topics.form.noClass")}
+              emptyLabel={t("languageCheck.topics.form.noClasses")}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("languageCheck.topics.form.classHint")}
+            </p>
           </div>
 
           <div className="flex flex-col gap-1.5">

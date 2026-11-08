@@ -1145,6 +1145,14 @@ interface LanguageCheckTopicSummary {
   essayType: LanguageCheckEssayTypeId;
   /** A question image is saved (the image itself is only on the full topic). */
   hasQuestionImage: boolean;
+  /** Creator of the topic; edit/delete is restricted to them. */
+  userId: string;
+  /** Class the topic was created for (null = personal to the creator). */
+  classId: string | null;
+  /** Display label of the assigned class ("S5 · English · Gp1"). */
+  className: string | null;
+  /** Creator's name — only filled for topics created by someone else. */
+  creatorName: string | null;
   createdAt: number;
   updatedAt: number;
 }

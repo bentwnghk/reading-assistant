@@ -38,6 +38,15 @@ export const topicSchema = z.object({
   topic: z.string().trim().min(1).max(LANGUAGE_CHECK_MAX_TOPIC_CHARS),
   essayType: z.enum(LANGUAGE_CHECK_ESSAY_TYPES),
   questionImage: imageSchema.or(z.literal("")).optional().default(""),
+  /**
+   * Optional class target: the topic also appears in the Topic Library of
+   * the class's members. Null/undefined (or "") = personal to the creator.
+   */
+  classId: z
+    .string()
+    .max(64)
+    .nullish()
+    .transform((v) => (v ? v : null)),
 })
 
 export const createSchema = z.object({

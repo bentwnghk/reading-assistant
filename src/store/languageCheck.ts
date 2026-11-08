@@ -67,6 +67,8 @@ interface LanguageCheckActions {
       topic: string;
       essayType: LanguageCheckEssayTypeId;
       questionImage: string;
+      /** Class the topic is created for (null = personal). */
+      classId: string | null;
     },
     id?: string,
   ) => Promise<LanguageCheckTopic>;

@@ -72,8 +72,13 @@ export async function POST(request: Request) {
 
     // The writing task comes from the caller's own Topic Library (a teacher
     // scanning for a student uses THEIR topic); it is snapshotted onto the
-    // essay so later library edits never change how it was assessed.
-    const topic = await getTopic(session.user.id, parsed.data.topicId)
+    // essay so later library edits never change how it was assessed. Class
+    // topics are resolvable too: a student may answer a topic created for
+    // one of their classes by its teacher.
+    const topic = await getTopic(
+      { id: session.user.id, role: session.user.role ?? "student" },
+      parsed.data.topicId,
+    )
     if (!topic) {
       return NextResponse.json({ error: "Topic not found" }, { status: 404 })
     }

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { parseError } from "@/utils/error"
-import { deleteTopic, getTopic, updateTopic } from "@/lib/language-check-topics"
+import {
+  canAssignTopicClass,
+  deleteTopic,
+  getTopic,
+  updateTopic,
+} from "@/lib/language-check-topics"
 import { topicSchema } from "@/lib/language-check-schema"
 
 type Ctx = { params: Promise<{ id: string }> }
@@ -13,7 +18,12 @@ export async function GET(_request: NextRequest, context: Ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     const { id } = await context.params
-    const topic = await getTopic(session.user.id, id)
+    // Readable by the creator and by anyone who can see the topic's class
+    // (members / teacher / school staff) — they may select it for upload.
+    const topic = await getTopic(
+      { id: session.user.id, role: session.user.role ?? "student" },
+      id,
+    )
     if (!topic) {
       return NextResponse.json({ error: "Topic not found" }, { status: 404 })
     }
@@ -37,7 +47,22 @@ export async function PUT(request: NextRequest, context: Ctx) {
         { status: 400 },
       )
     }
+    // A changed class target must stay within the viewer's own classes.
+    if (
+      parsed.data.classId &&
+      !(await canAssignTopicClass(
+        { id: session.user.id, role: session.user.role ?? "student" },
+        parsed.data.classId,
+      ))
+    ) {
+      return NextResponse.json(
+        { error: "You can only create topics for your own classes." },
+        { status: 403 },
+      )
+    }
     const { id } = await context.params
+    // updateTopic is scoped to the creator; a topic that exists but belongs
+    // to someone else is a plain 404 (no existence leak).
     const topic = await updateTopic(session.user.id, id, parsed.data)
     if (!topic) {
       return NextResponse.json({ error: "Topic not found" }, { status: 404 })
