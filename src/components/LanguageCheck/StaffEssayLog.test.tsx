@@ -508,6 +508,77 @@ describe("StaffEssayLog view dialog re-check", () => {
   });
 });
 
+describe("StaffEssayLog view dialog stays open when the Export dialog closes", () => {
+  /** The View button of the table row whose title cell is `title`. */
+  function viewButtonForRow(title: string): HTMLButtonElement {
+    const row = screen.getByText(title).closest("tr");
+    if (!row) throw new Error(`row ${title} not found`);
+    const button = within(row).getByRole("button", {
+      name: "languageCheck.staff.view",
+    });
+    return button as HTMLButtonElement;
+  }
+
+  /** Opens the view dialog, then the Export dialog on top of it. */
+  async function openExportDialog() {
+    fireEvent.click(viewButtonForRow("Alice essay"));
+    await screen.findByText("languageCheck.results.recheck");
+    fireEvent.click(
+      screen.getByRole("button", { name: "languageCheck.results.export" }),
+    );
+    await screen.findByText("languageCheck.exportDialog.title");
+  }
+
+  it("an outside interaction while the Export dialog is open never closes the view dialog", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    await openExportDialog();
+
+    // A tap/click outside both dialogs (e.g. on the backdrop) belongs to the
+    // Export dialog on top — the view dialog underneath must survive it.
+    fireEvent.pointerDown(document.body, { button: 0 });
+    await waitFor(() => {
+      expect(screen.getByText("languageCheck.results.recheck")).toBeTruthy();
+    });
+  });
+
+  it("ignores outside interactions whose target was removed from the DOM mid-event", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    fireEvent.click(viewButtonForRow("Alice essay"));
+    await screen.findByText("languageCheck.results.recheck");
+
+    // Touch race regression: on touch, Radix defers a dialog's
+    // outside-pointer check to the following click, and a tap on the Export
+    // dialog's Cancel/X unmounts that dialog inside the same click — so the
+    // view dialog receives an "outside" interaction whose target has already
+    // been removed from the DOM. Such stale interactions must be ignored.
+    const scratch = document.createElement("div");
+    document.body.appendChild(scratch);
+    document.addEventListener(
+      "pointerdown",
+      () => scratch.remove(),
+      { capture: true, once: true },
+    );
+    fireEvent.pointerDown(scratch, { button: 0 });
+    await waitFor(() => {
+      expect(screen.getByText("languageCheck.results.recheck")).toBeTruthy();
+    });
+  });
+
+  it("a genuine outside pointerdown still closes the view dialog", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    fireEvent.click(viewButtonForRow("Alice essay"));
+    await screen.findByText("languageCheck.results.recheck");
+
+    fireEvent.pointerDown(document.body, { button: 0 });
+    await waitFor(() => {
+      expect(screen.queryByText("languageCheck.results.recheck")).toBeNull();
+    });
+  });
+});
+
 describe("StaffEssayLog title rename", () => {
   /** The rename (pencil) button inside the row titled `title`. */
   function renameButtonForRow(title: string): HTMLButtonElement {

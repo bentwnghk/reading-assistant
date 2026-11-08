@@ -738,7 +738,28 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       )}
 
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="h-[92vh] max-w-[min(95vw,72rem)] grid-rows-[auto_minmax(0,1fr)]">
+        <DialogContent
+          className="h-[92vh] max-w-[min(95vw,72rem)] grid-rows-[auto_minmax(0,1fr)]"
+          onInteractOutside={(e) => {
+            // The Export dialog (and the Enhanced-Essays confirm dialog)
+            // stack on top of this one. While a child dialog is open, an
+            // outside interaction belongs to it — never to this dialog.
+            if (exportOpen) {
+              e.preventDefault();
+              return;
+            }
+            // On touch, Radix defers a dialog's outside-pointer check to the
+            // click that follows the tap. A tap on the child's Cancel/X
+            // unmounts the child dialog (it is conditionally mounted) within
+            // that same click, so this dialog is momentarily the top layer
+            // again and receives the tap as an "outside" interaction whose
+            // target has already been removed from the DOM — dismissing this
+            // dialog too and dropping the staff member back to the table.
+            // Stale interactions like that are ignored.
+            const target = e.detail.originalEvent.target as Node | null;
+            if (target && !target.isConnected) e.preventDefault();
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="flex flex-wrap items-center gap-2 pr-6">
               {detail?.title || t("languageCheck.list.untitled")}

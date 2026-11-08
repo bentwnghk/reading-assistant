@@ -964,3 +964,27 @@ A state-watching effect (`if (gameStatus === "completed") …`) whose dep array 
 - Fix pattern: one-shot ref guard (`completionFiredRef`), reset when leaving the completed state — same pattern as `newBestFiredRef`/`confettiFiredRef`, and it also survives StrictMode double-invoked effects.
 - Better still: fire completion side effects from an event handler / a timer-expiry effect, not a state-watching effect; keep completion-effect deps to stable primitives (the grammar games use `[gameStatus]` only).
 - Any `logActivity` inside an effect is a duplication risk by construction — it's fire-and-forget, so duplicates never error.
+
+### O. Stacked Radix dialogs: guard the PARENT against the touch close race
+
+When a child `Dialog` is opened on top of another modal `Dialog` and closed by a tap on a button **inside** it (Cancel / X / Confirm), on **touch** devices the parent dialog dismisses too — the user is dropped out of both dialogs back to the page. Mechanism: Radix `DismissableLayer` defers a dialog's outside-pointer check from `pointerdown` to the following `click` when `pointerType === "touch"`. The button's `onClick` runs first, and a conditionally-mounted child (`{open && <ChildDialog open={open}>}`) unmounts its layer **synchronously inside that same click** — so the parent is the top layer again when its deferred check runs, and the tap (whose target was just removed from the DOM) reads as an outside interaction on the parent. Mouse clicks are unaffected (the outside check fires immediately at `pointerdown`, while the child layer still shields the parent), which is why QA on desktop never sees it.
+
+**Rule**: any Dialog stacked over another Dialog puts an `onInteractOutside` guard on the **parent** `DialogContent` (see the staff view dialog in `StaffEssayLog.tsx`):
+
+```tsx
+onInteractOutside={(e) => {
+  // Child dialog stacked on top: outside interactions belong to it.
+  if (childOpen) { e.preventDefault(); return; }
+  // Touch race: the tap that closed the child unmounted it mid-event, so
+  // its target is already detached from the DOM — ignore the stale tap.
+  const target = e.detail.originalEvent.target as Node | null;
+  if (target && !target.isConnected) e.preventDefault();
+}}
+```
+
+- Guarding the parent protects **every** child stacked on it — the one guard on the staff view dialog covers both the Export dialog and the Enhanced-Essays confirm dialog.
+- A genuine tap on the parent's own overlay targets a *connected* element → still dismisses normally. Never blanket-prevent all outside interactions.
+- Do NOT rely on keeping the child mounted (`<Dialog open={open}>` without the conditional) instead: Presence's exit animation usually keeps the layer alive through the click, but with `prefers-reduced-motion` (or missing animation) it unmounts immediately and the race returns. The guard is the deterministic fix.
+- jsdom cannot reproduce the race (event/passive-effect ordering differs) — regression-test the guard's branches directly (dispatch an outside `pointerdown` on a target a capture-phase listener detaches mid-event; see `StaffEssayLog.test.tsx` "mid-event" test), and prove the end-to-end behavior in a real browser via CDP (`Input.dispatchTouchEvent`) if needed.
+- Symptom signature: "closing/canceling a dialog opened from inside another dialog closes both / kicks me back to the page" — reported from tablets/iPads (this is a classroom touch app), never reproducible with a mouse or in unit tests. Existing precedent: the `battleActive` guard in `Header.tsx`.
+
