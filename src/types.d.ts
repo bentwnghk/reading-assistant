@@ -1283,12 +1283,17 @@ interface LanguageCheckStaffUser {
 /** Scope-wide totals for the staff essay log. */
 interface LanguageCheckStaffStats {
   total: number;
-  checked: number;
-  transcribed: number;
-  draft: number;
   students: number;
-  pages: number;
-  corrections: number;
+  /** Distinct writing topics the in-scope essays were written on. */
+  topics: number;
+  /** Mean saved overall score over the assessed essays; null = none assessed. */
+  avgOverall: number | null;
+}
+
+/** Writing-topic option for the staff essay-log topic filter. */
+interface LanguageCheckStaffTopic {
+  id: string;
+  title: string;
 }
 
 /** One row of the staff essay log (lightweight; no scans, transcript or corrections). */

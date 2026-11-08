@@ -4,9 +4,9 @@ import { render, screen, waitFor, cleanup, fireEvent } from "@testing-library/re
 import StaffEssayLog from "./StaffEssayLog";
 
 // Regression tests for the Student essays filters. Class and student now come
-// from the shared staff filter bar as props; status (and title search) are
-// local. Every filter must fire a narrowed request, and narrow BOTH the table
-// rows and the stats cards.
+// from the shared staff filter bar as props; topic and status are local. Every
+// filter must fire a narrowed request, and narrow BOTH the table rows and the
+// stats cards.
 
 vi.mock("next-auth/react", () => ({
   useSession: () => ({
@@ -43,11 +43,16 @@ interface FixtureRow {
   userName: string;
   title: string;
   status: string;
+  topicId: string | null;
 }
 
 const ALL_ROWS: FixtureRow[] = [
-  { id: "e1", userId: "alice", userName: "Alice", title: "Alice essay", status: "checked" },
-  { id: "e2", userId: "bob", userName: "Bob", title: "Bob essay", status: "draft" },
+  { id: "e1", userId: "alice", userName: "Alice", title: "Alice essay", status: "checked", topicId: "topic-1" },
+  { id: "e2", userId: "bob", userName: "Bob", title: "Bob essay", status: "draft", topicId: null },
+];
+
+const ALL_TOPICS: LanguageCheckStaffTopic[] = [
+  { id: "topic-1", title: "S6 Writing 1" },
 ];
 
 const staffRequests: string[] = [];
@@ -95,10 +100,12 @@ function staffResponse(url: URL) {
   const userId = url.searchParams.get("userId");
   const status = url.searchParams.get("status");
   const classId = url.searchParams.get("classId");
+  const topicId = url.searchParams.get("topicId");
   const rows = ALL_ROWS.filter(
     (r) =>
       (!userId || r.userId === userId) &&
       (!status || r.status === status) &&
+      (!topicId || r.topicId === topicId) &&
       (!classId || r.userId === "alice"), // pretend class contains Alice
   );
   return {
@@ -119,13 +126,13 @@ function staffResponse(url: URL) {
     total: rows.length,
     stats: {
       total: rows.length,
-      checked: rows.filter((r) => r.status === "checked").length,
-      transcribed: 0,
-      draft: rows.filter((r) => r.status === "draft").length,
       students: new Set(rows.map((r) => r.userId)).size,
-      pages: rows.length,
-      corrections: 0,
+      topics: new Set(
+        rows.filter((r) => r.topicId).map((r) => r.topicId),
+      ).size,
+      avgOverall: null,
     },
+    topics: ALL_TOPICS,
   };
 }
 
@@ -205,11 +212,12 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-/** Stat card value shown next to its label (e.g. statEssays → "2"). */
+/** Stat card value shown under its label (e.g. statEssays → "2"). The Stat
+ *  card's first <p> is the label; the value <p> carries tabular-nums. */
 function statValue(label: string): string {
   const card = screen.getByText(label).closest("div");
   if (!card) throw new Error(`stat card ${label} not found`);
-  return card.querySelector("p")?.textContent ?? "";
+  return card.querySelector("p.tabular-nums")?.textContent ?? "";
 }
 
 async function chooseStatus(label: string) {
@@ -217,6 +225,22 @@ async function chooseStatus(label: string) {
     name: "languageCheck.staff.filterStatus",
   });
   fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+  fireEvent.click(trigger);
+  const option = await waitFor(() => {
+    const matches = screen
+      .getAllByText(label)
+      .filter((el) => el.closest("[role=option]") !== null);
+    expect(matches.length).toBeGreaterThan(0);
+    return matches[0];
+  });
+  fireEvent.click(option);
+}
+
+/** Picks a writing topic from the searchable topic dropdown. */
+async function chooseTopic(label: string) {
+  const trigger = screen.getByRole("combobox", {
+    name: "languageCheck.staff.filterTopic",
+  });
   fireEvent.click(trigger);
   const option = await waitFor(() => {
     const matches = screen
@@ -292,7 +316,64 @@ describe("StaffEssayLog filters", () => {
       expect(screen.getByText("Alice essay")).toBeTruthy();
       expect(screen.queryByText("Bob essay")).toBeNull();
       expect(statValue("languageCheck.staff.statEssays")).toBe("1");
-      expect(statValue("languageCheck.staff.statChecked")).toBe("1");
+      expect(statValue("languageCheck.staff.statTopics")).toBe("1");
+    });
+  });
+
+  it("picking a topic narrows the table and returns to the first page", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Alice essay")).toBeTruthy();
+      expect(screen.getByText("Bob essay")).toBeTruthy();
+    });
+    const before = staffRequests.length;
+
+    await chooseTopic("S6 Writing 1");
+
+    await waitFor(() => {
+      expect(staffRequests.length).toBeGreaterThan(before);
+      const last = staffRequests[staffRequests.length - 1];
+      expect(last).toContain("topicId=topic-1");
+      expect(last).toContain("page=1");
+    });
+    await waitFor(() => {
+      expect(screen.getByText("Alice essay")).toBeTruthy();
+      expect(screen.queryByText("Bob essay")).toBeNull();
+    });
+  });
+
+  it("clicking a sortable column header re-fetches with sort params", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+
+    // Student: first click = ascending, second click flips to descending.
+    const studentHeader = screen.getByRole("button", {
+      name: /languageCheck\.staff\.colStudent/,
+    });
+    fireEvent.click(studentHeader);
+    await waitFor(() => {
+      expect(staffRequests[staffRequests.length - 1]).toContain(
+        "sort=student&order=asc",
+      );
+    });
+    fireEvent.click(studentHeader);
+    await waitFor(() => {
+      expect(staffRequests[staffRequests.length - 1]).toContain(
+        "sort=student&order=desc",
+      );
+    });
+
+    // Overall defaults to descending (best first); not-assessed stay last.
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /languageCheck\.assessment\.overall/,
+      }),
+    );
+    await waitFor(() => {
+      expect(staffRequests[staffRequests.length - 1]).toContain(
+        "sort=overall&order=desc",
+      );
     });
   });
 

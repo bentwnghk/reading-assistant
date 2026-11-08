@@ -446,6 +446,42 @@ function scopeConditions(
 
 const STAFF_FROM = `FROM language_check_essays e JOIN users u ON u.id = e.user_id`
 
+/** Sortable columns of the staff essay-log table (§M: derive the API enum
+ *  from this list, never retype it). */
+export const STAFF_ESSAY_SORT_FIELDS = [
+  "updated",
+  "student",
+  "title",
+  "overall",
+] as const
+export type StaffEssaySortField = (typeof STAFF_ESSAY_SORT_FIELDS)[number]
+
+export const STAFF_ESSAY_SORT_ORDERS = ["asc", "desc"] as const
+export type StaffEssaySortOrder = (typeof STAFF_ESSAY_SORT_ORDERS)[number]
+
+/**
+ * ORDER BY clause for each sortable column. NULLS LAST keeps not-assessed
+ * essays at the end under "Overall" and untitled essays at the end under
+ * "Title" in BOTH directions; every sort falls back to recency (+ id) so
+ * pagination stays stable.
+ */
+function staffSortSql(
+  sort: StaffEssaySortField,
+  order: StaffEssaySortOrder,
+): string {
+  const dir = order === "asc" ? "ASC" : "DESC"
+  switch (sort) {
+    case "student":
+      return `u.name ${dir}, e.updated_at DESC, e.id DESC`
+    case "title":
+      return `NULLIF(e.title, '') ${dir} NULLS LAST, e.updated_at DESC, e.id DESC`
+    case "overall":
+      return `${OVERALL_SQL} ${dir} NULLS LAST, e.updated_at DESC, e.id DESC`
+    default:
+      return `e.updated_at ${dir}, e.id DESC`
+  }
+}
+
 /** Lightweight staff list: no images/transcript/corrections payloads. */
 export async function listStaffEssays(
   scope: LanguageCheckStaffScope,
@@ -454,8 +490,8 @@ export async function listStaffEssays(
     pageSize: number
     userId?: string
     status?: LanguageCheckStatus
-    /** Free-text search over essay titles only (students filter via userId). */
-    q?: string
+    /** Writing-topic filter: essays written on this topic only. */
+    topicId?: string
     /**
      * Class filter — narrows rows AND stats like the other filters, but is
      * the only filter that also narrows the student options (a class scope
@@ -469,12 +505,17 @@ export async function listStaffEssays(
      * teach). Same intersection semantics as classId.
      */
     mineTeacherId?: string
+    /** Sort column (default: recency). */
+    sort?: StaffEssaySortField
+    /** Sort direction (default: descending). */
+    order?: StaffEssaySortOrder
   },
 ): Promise<{
   rows: LanguageCheckStaffRow[]
   total: number
   stats: LanguageCheckStaffStats
   users: LanguageCheckStaffUser[]
+  topics: LanguageCheckStaffTopic[]
 }> {
   await sweepExpiredEssays()
 
@@ -486,7 +527,7 @@ export async function listStaffEssays(
   }
   if (opts.userId) add("e.user_id = @", opts.userId)
   if (opts.status) add("e.status = @", opts.status)
-  if (opts.q) add("e.title ILIKE @", `%${opts.q}%`)
+  if (opts.topicId) add("e.topic_id = @", opts.topicId)
   // The class filter narrows rows too. Every add() that feeds `where` must
   // run BEFORE it is stringified — a later add() pushes its value into
   // `params` while the clause lands in the already-built string's blind
@@ -500,10 +541,10 @@ export async function listStaffEssays(
   if (opts.mineTeacherId) add(inMineClasses, opts.mineTeacherId)
   const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : ""
 
-  // The student dropdown options reflect the scope + class filter only —
-  // NOT the student/status/search filters — so switching students (or
-  // keeping the picker usable while a status filter is active) never
-  // empties the list.
+  // The student and topic dropdown options reflect the scope + class filter
+  // only — NOT the student/status/topic filters — so switching students (or
+  // keeping the pickers usable while a status filter is active) never
+  // empties the lists.
   const scopeOnly = scopeConditions(scope)
   const scopeAdd = (sql: string, ...values: unknown[]) => {
     let i = 0
@@ -519,7 +560,9 @@ export async function listStaffEssays(
       ? `WHERE ${scopeOnly.clauses.join(" AND ")}`
       : ""
 
-  const [listRes, countRes, statsRes, usersRes] = await Promise.all([
+  const orderBy = staffSortSql(opts.sort ?? "updated", opts.order ?? "desc")
+
+  const [listRes, countRes, statsRes, usersRes, topicsRes] = await Promise.all([
     getPool().query(
       `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
               e.user_id, u.name AS user_name, u.email AS user_email,
@@ -529,7 +572,7 @@ export async function listStaffEssays(
               ${WORD_COUNT_SQL} AS word_count
        ${STAFF_FROM}
        ${where}
-       ORDER BY e.updated_at DESC
+       ORDER BY ${orderBy}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, opts.pageSize, (opts.page - 1) * opts.pageSize],
     ),
@@ -538,16 +581,13 @@ export async function listStaffEssays(
       params,
     ),
     // Stats reflect the full row filter set (scope + class/student/status/
-    // search) so the cards always describe exactly what the table shows;
+    // topic) so the cards always describe exactly what the table shows;
     // only page/pageSize are excluded, so the cards stay stable while paging.
     getPool().query(
       `SELECT COUNT(*)::int AS total,
-              COUNT(*) FILTER (WHERE e.status = 'checked')::int AS checked,
-              COUNT(*) FILTER (WHERE e.status = 'transcribed')::int AS transcribed,
-              COUNT(*) FILTER (WHERE e.status = 'draft')::int AS draft,
               COUNT(DISTINCT e.user_id)::int AS students,
-              COALESCE(SUM(jsonb_array_length(e.images)), 0)::int AS pages,
-              COALESCE(SUM(jsonb_array_length(e.corrections)), 0)::int AS corrections
+              COUNT(DISTINCT e.topic_id)::int AS topics,
+              ROUND(AVG(${OVERALL_SQL}), 1) AS avg_overall
        ${STAFF_FROM}
        ${where}`,
       params,
@@ -558,6 +598,21 @@ export async function listStaffEssays(
        ${scopeWhere}
        GROUP BY e.user_id, u.name, u.email
        ORDER BY u.name
+       LIMIT 1000`,
+      scopeOnly.params,
+    ),
+    // Topic options follow the same rule as the student options: scope +
+    // class only, never the student/status/topic filters, so the picker
+    // stays usable while those are active. Topics deleted from the library
+    // drop out (their essays keep the snapshot but can no longer be grouped
+    // by id).
+    getPool().query(
+      `SELECT t.id, t.title
+       ${STAFF_FROM}
+       JOIN language_check_topics t ON t.id = e.topic_id
+       ${scopeWhere}
+       GROUP BY t.id, t.title
+       ORDER BY t.title
        LIMIT 1000`,
       scopeOnly.params,
     ),
@@ -586,18 +641,25 @@ export async function listStaffEssays(
     total: Number(countRes.rows[0]?.n) || 0,
     stats: {
       total: Number(statsRes.rows[0]?.total) || 0,
-      checked: Number(statsRes.rows[0]?.checked) || 0,
-      transcribed: Number(statsRes.rows[0]?.transcribed) || 0,
-      draft: Number(statsRes.rows[0]?.draft) || 0,
       students: Number(statsRes.rows[0]?.students) || 0,
-      pages: Number(statsRes.rows[0]?.pages) || 0,
-      corrections: Number(statsRes.rows[0]?.corrections) || 0,
+      topics: Number(statsRes.rows[0]?.topics) || 0,
+      avgOverall:
+        statsRes.rows[0]?.avg_overall === null ||
+        statsRes.rows[0]?.avg_overall === undefined
+          ? null
+          : Number(statsRes.rows[0].avg_overall),
     },
     users: usersRes.rows.map(
       (row: Record<string, unknown>): LanguageCheckStaffUser => ({
         id: row.id as string,
         name: (row.name as string) || (row.email as string) || "",
         email: (row.email as string) || "",
+      }),
+    ),
+    topics: topicsRes.rows.map(
+      (row: Record<string, unknown>): LanguageCheckStaffTopic => ({
+        id: row.id as string,
+        title: (row.title as string) || "",
       }),
     ),
   }

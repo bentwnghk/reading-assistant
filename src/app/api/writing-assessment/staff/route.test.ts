@@ -4,7 +4,8 @@ import type { NextRequest } from "next/server";
 // Run the REAL staff route handler against a mocked pg pool and record the
 // exact SQL + params for each filter combination. Regression tests for the
 // Essay Activity Log filters: rows, count AND stats must all narrow by
-// class/student/status/search; only the student options stay scope+class.
+// class/student/status/topic; only the student + topic options stay
+// scope+class. Sort params must shape the ORDER BY only.
 
 const queries: Array<{ sql: string; values: unknown[] }> = [];
 
@@ -19,8 +20,8 @@ vi.mock("@/lib/db", () => ({
       // Return shape-compatible rows for each of the staff queries.
       if (sql.includes("AS user_name")) return { rows: [] }; // list
       if (sql.includes("COUNT(*)::int AS n")) return { rows: [{ n: 0 }] }; // count
-      if (sql.includes("AS checked")) return { rows: [{ total: 0, checked: 0, transcribed: 0, draft: 0, students: 0, pages: 0, corrections: 0 }] }; // stats
-      return { rows: [] }; // users
+      if (sql.includes("AS topics")) return { rows: [{ total: 0, students: 0, topics: 0, avg_overall: null }] }; // stats
+      return { rows: [] }; // users / topic options
     },
   }),
 }));
@@ -39,8 +40,10 @@ beforeEach(() => {
 });
 
 const listQuery = () => queries.find((q) => q.sql.includes("AS user_name"))!;
-const statsQuery = () => queries.find((q) => q.sql.includes("AS checked"))!;
+const statsQuery = () => queries.find((q) => q.sql.includes("AS topics"))!;
 const usersQuery = () => queries.find((q) => q.sql.includes("AS id"))!;
+const topicsQuery = () =>
+  queries.find((q) => q.sql.includes("JOIN language_check_topics"))!;
 
 describe("staff route: real handler, recorded SQL", () => {
   it("student filter without class narrows rows, count AND stats", async () => {
@@ -101,12 +104,29 @@ describe("staff route: real handler, recorded SQL", () => {
     expect(list.values).toEqual(["teacher-1", "student-9", "class-7", 20, 0]);
   });
 
-  it("title search narrows rows and stats but not student options", async () => {
-    const res = await GET(makeRequest("page=1&pageSize=20&q=homework"));
+  it("topic filter narrows rows and stats but not student/topic options", async () => {
+    const res = await GET(makeRequest("page=1&pageSize=20&topicId=topic-3"));
     expect(res.status).toBe(200);
-    expect(listQuery().sql).toContain("e.title ILIKE $2");
-    expect(statsQuery().sql).toContain("e.title ILIKE $2");
-    expect(usersQuery().sql).not.toContain("ILIKE");
+    expect(listQuery().sql).toContain("e.topic_id = $2");
+    expect(listQuery().values).toEqual(["teacher-1", "topic-3", 20, 0]);
+    expect(statsQuery().sql).toContain("e.topic_id = $2");
+    expect(usersQuery().sql).not.toContain("e.topic_id = $2");
+    expect(topicsQuery().sql).not.toContain("e.topic_id = $2");
+  });
+
+  it("sort/order shape the ORDER BY but add no filter params", async () => {
+    const res = await GET(makeRequest("page=1&pageSize=20&sort=title&order=asc"));
+    expect(res.status).toBe(200);
+    const list = listQuery();
+    expect(list.sql).toContain("NULLIF(e.title, '') ASC NULLS LAST");
+    expect(list.values).toEqual(["teacher-1", 20, 0]);
+    expect(statsQuery().values).toEqual(["teacher-1"]);
+  });
+
+  it("sort=overall desc keeps not-assessed essays last", async () => {
+    const res = await GET(makeRequest("page=1&pageSize=20&sort=overall"));
+    expect(res.status).toBe(200);
+    expect(listQuery().sql).toContain("DESC NULLS LAST");
   });
 
   it("paging does not add page params to stats", async () => {

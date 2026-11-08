@@ -232,12 +232,7 @@ export default function TopicFormDialog({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label>
-              {t("languageCheck.topics.form.class")}{" "}
-              <span className="font-normal text-muted-foreground">
-                ({t("languageCheck.topics.form.optional")})
-              </span>
-            </Label>
+            <Label>{t("languageCheck.topics.form.class")} *</Label>
             <ClassCombobox
               classes={classes}
               value={classId ?? "__none__"}

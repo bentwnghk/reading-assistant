@@ -3,18 +3,23 @@ import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  BookMarked,
   ChevronLeft,
   ChevronRight,
   Download,
   Eye,
   LoaderCircle,
+  PenLine,
   RefreshCw,
-  Search,
   Square,
+  Trophy,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -33,6 +38,8 @@ import ResultsView from "@/components/LanguageCheck/ResultsView";
 import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
 import EnhancedEssayPanel from "@/components/LanguageCheck/EnhancedEssayPanel";
 import ExportDialog from "@/components/LanguageCheck/ExportDialog";
+import TopicCombobox from "@/components/LanguageCheck/TopicCombobox";
+import { Stat } from "@/components/LanguageCheck/Learn/LearnDashboardView";
 import {
   ExplanationLanguageToggle,
   SegmentedTabs,
@@ -55,6 +62,7 @@ interface StaffListResponse {
   rows: LanguageCheckStaffRow[];
   total: number;
   stats: LanguageCheckStaffStats;
+  topics: LanguageCheckStaffTopic[];
 }
 
 interface StaffEssayLogProps {
@@ -63,13 +71,48 @@ interface StaffEssayLogProps {
   userId: string | null;
 }
 
+/** Sortable columns of the student essays table (mirrors the server-side
+ *  STAFF_ESSAY_SORT_FIELDS — client components cannot import from
+ *  src/lib/language-check.ts, which pulls `pg`). */
+type StaffSortField = "updated" | "student" | "title" | "overall";
+type StaffSortOrder = "asc" | "desc";
+
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
+/** Table-header sort button: label + direction arrow (ArrowUpDown when the
+ *  column is not the active sort). */
+function SortHeader({
+  label,
+  field,
+  sort,
+  order,
+  onSort,
+}: {
+  label: string;
+  field: StaffSortField;
+  sort: StaffSortField;
+  order: StaffSortOrder;
+  onSort: (field: StaffSortField) => void;
+}) {
+  const active = sort === field;
+  const Icon = !active ? ArrowUpDown : order === "asc" ? ArrowUp : ArrowDown;
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(field)}
+      className="-ml-1 flex items-center gap-1 uppercase tracking-wide transition-colors hover:text-foreground"
+    >
+      {label}
+      <Icon className={cn("h-3 w-3", !active && "opacity-60")} />
+    </button>
+  );
+}
 
 /**
  * Staff "Student essays" tab on /writing-assessment. Renders nothing for students.
  * Teachers see their classes' students, admins their school, super-admins
- * everyone. Class and student come from the shared staff filter bar; status
- * and title search are essay-specific and live here.
+ * everyone. Class and student come from the shared staff filter bar; topic
+ * and status are essay-specific and live here.
  */
 export default function StaffEssayLog({ classId: classProp, userId: userProp }: StaffEssayLogProps) {
   const { t } = useTranslation();
@@ -91,29 +134,23 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   const classId = classProp ?? "all";
   const userId = userProp ?? "all";
   const [status, setStatus] = useState("all");
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
+  const [topicId, setTopicId] = useState("all");
+  const [sort, setSort] = useState<StaffSortField>("updated");
+  const [order, setOrder] = useState<StaffSortOrder>("desc");
   const [detail, setDetail] = useState<LanguageCheckStaffDetail | null>(null);
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
 
-  // A different class/student starts again from the first page.
+  // A different class/student starts again from the first page, and drops
+  // the topic pick — the topic options are narrowed by the class, so a
+  // topic from another class would only show an empty table.
   const selectionKey = `${classId}|${userId}`;
   const [lastSelection, setLastSelection] = useState(selectionKey);
   if (lastSelection !== selectionKey) {
     setLastSelection(selectionKey);
     setPage(1);
+    setTopicId("all");
   }
-
-  // Debounce the free-text search so typing doesn't fire a request per key.
-  useEffect(() => {
-    const value = searchInput.trim();
-    const timer = window.setTimeout(() => {
-      setSearch(value);
-      setPage(1);
-    }, 300);
-    return () => window.clearTimeout(timer);
-  }, [searchInput]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -121,12 +158,14 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       const params = new URLSearchParams({
         page: String(page),
         pageSize: String(pageSize),
+        sort,
+        order,
       });
       if (classId === "__mine__") params.set("mine", "1");
       else if (classId !== "all") params.set("classId", classId);
       if (userId !== "all") params.set("userId", userId);
       if (status !== "all") params.set("status", status);
-      if (search) params.set("q", search);
+      if (topicId !== "all") params.set("topicId", topicId);
       const res = await fetch(`/api/writing-assessment/staff?${params.toString()}`);
       const body = await res.json().catch(() => null);
       if (!res.ok) {
@@ -138,7 +177,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, classId, userId, status, search]);
+  }, [page, pageSize, classId, userId, status, topicId, sort, order]);
 
   // Role comes from the session, which loads asynchronously: while it is
   // still undefined the guard below skips the fetch, and the effect re-runs
@@ -201,14 +240,19 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const safePage = Math.min(page, totalPages);
   const hasFilters =
-    classId !== "all" || userId !== "all" || status !== "all" || search !== "";
+    classId !== "all" || userId !== "all" || status !== "all" || topicId !== "all";
 
-  const statCards: { label: string; value: number | undefined }[] = [
-    { label: t("languageCheck.staff.statEssays"), value: stats?.total },
-    { label: t("languageCheck.staff.statChecked"), value: stats?.checked },
-    { label: t("languageCheck.staff.statStudents"), value: stats?.students },
-    { label: t("languageCheck.staff.statPages"), value: stats?.pages },
-  ];
+  // Clicking the active column's header flips the direction; clicking
+  // another column activates it with its natural default direction.
+  function handleSort(field: StaffSortField) {
+    if (sort === field) {
+      setOrder((o) => (o === "asc" ? "desc" : "asc"));
+    } else {
+      setSort(field);
+      setOrder(field === "student" || field === "title" ? "asc" : "desc");
+    }
+    setPage(1);
+  }
 
   // Re-check availability — same archive semantics as the owner workspace:
   // past the retention window the essay stays viewable but stops mutating,
@@ -247,17 +291,50 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   return (
     <section className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {statCards.map((card) => (
-          <div key={card.label} className="rounded-xl border bg-card px-3 py-2.5">
-            <p className="text-xl font-semibold leading-tight tabular-nums">
-              {card.value ?? "…"}
-            </p>
-            <p className="text-xs text-muted-foreground">{card.label}</p>
-          </div>
-        ))}
+        <Stat
+          icon={BookMarked}
+          label={t("languageCheck.staff.statTopics")}
+          value={stats ? stats.topics : "…"}
+          tone="text-amber-500"
+        />
+        <Stat
+          icon={PenLine}
+          label={t("languageCheck.staff.statEssays")}
+          value={stats ? stats.total : "…"}
+          tone="text-sky-500"
+        />
+        <Stat
+          icon={Users}
+          label={t("languageCheck.staff.statStudents")}
+          value={stats ? stats.students : "…"}
+          tone="text-indigo-500"
+        />
+        <Stat
+          icon={Trophy}
+          label={t("languageCheck.staff.statAvgScore")}
+          // "—" when nothing in the filter set has been assessed (never a fake 0).
+          value={
+            stats ? (stats.avgOverall === null ? "—" : stats.avgOverall.toFixed(1)) : "…"
+          }
+          hint={t("languageCheck.assessment.overallScale")}
+          tone="text-green-500"
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <TopicCombobox
+          topics={data?.topics ?? []}
+          value={topicId === "all" ? null : topicId}
+          onChange={(id) => {
+            setTopicId(id ?? "all");
+            setPage(1);
+          }}
+          ariaLabel={t("languageCheck.staff.filterTopic")}
+          placeholder={t("languageCheck.staff.allTopics")}
+          allLabel={t("languageCheck.staff.allTopics")}
+          emptyLabel={t("languageCheck.staff.noTopics")}
+          searchPlaceholder={t("languageCheck.staff.searchTopics")}
+        />
         <Select
           value={status}
           onValueChange={(v) => {
@@ -279,15 +356,6 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
             ))}
           </SelectContent>
         </Select>
-        <div className="relative min-w-[12rem] flex-1 sm:max-w-xs">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("languageCheck.staff.search")}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-8"
-          />
-        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -320,11 +388,29 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
             <table className="w-full min-w-[62rem] text-sm">
               <thead>
                 <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="py-2 pr-3 font-medium">
-                    {t("languageCheck.staff.colStudent")}
+                  <th
+                    className="py-2 pr-3 font-medium"
+                    aria-sort={sort === "student" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  >
+                    <SortHeader
+                      label={t("languageCheck.staff.colStudent")}
+                      field="student"
+                      sort={sort}
+                      order={order}
+                      onSort={handleSort}
+                    />
                   </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {t("languageCheck.staff.colTitle")}
+                  <th
+                    className="py-2 pr-3 font-medium"
+                    aria-sort={sort === "title" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  >
+                    <SortHeader
+                      label={t("languageCheck.staff.colTitle")}
+                      field="title"
+                      sort={sort}
+                      order={order}
+                      onSort={handleSort}
+                    />
                   </th>
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colStatus")}
@@ -338,11 +424,29 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colErrors")}
                   </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {t("languageCheck.assessment.overall")}
+                  <th
+                    className="py-2 pr-3 font-medium"
+                    aria-sort={sort === "overall" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  >
+                    <SortHeader
+                      label={t("languageCheck.assessment.overall")}
+                      field="overall"
+                      sort={sort}
+                      order={order}
+                      onSort={handleSort}
+                    />
                   </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {t("languageCheck.staff.colUpdated")}
+                  <th
+                    className="py-2 pr-3 font-medium"
+                    aria-sort={sort === "updated" ? (order === "asc" ? "ascending" : "descending") : "none"}
+                  >
+                    <SortHeader
+                      label={t("languageCheck.staff.colUpdated")}
+                      field="updated"
+                      sort={sort}
+                      order={order}
+                      onSort={handleSort}
+                    />
                   </th>
                   <th className="py-2 font-medium" />
                 </tr>

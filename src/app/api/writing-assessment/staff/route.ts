@@ -6,6 +6,8 @@ import {
   isStaffRole,
   listStaffEssays,
   resolveStaffScope,
+  STAFF_ESSAY_SORT_FIELDS,
+  STAFF_ESSAY_SORT_ORDERS,
 } from "@/lib/language-check"
 import { LANGUAGE_CHECK_STATUSES } from "@/constants/languageCheck"
 
@@ -20,7 +22,10 @@ const querySchema = z.object({
    */
   mine: z.enum(["0", "1"]).optional(),
   status: z.enum(LANGUAGE_CHECK_STATUSES).optional(),
-  q: z.string().trim().min(1).max(100).optional(),
+  /** Writing-topic filter: essays written on this topic only. */
+  topicId: z.string().min(1).optional(),
+  sort: z.enum(STAFF_ESSAY_SORT_FIELDS).default("updated"),
+  order: z.enum(STAFF_ESSAY_SORT_ORDERS).default("desc"),
 })
 
 /** Staff essay log: scoped list + scope-wide stats + student filter options. */
