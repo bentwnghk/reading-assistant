@@ -4738,7 +4738,7 @@
         },
         "topic": {
           "name": "Pick a Topic First",
-          "desc": "Every essay answers a writing task. Choose a topic from your Topic Library above the upload area — a title, the full prompt, an optional question image and the DSE Part A/B essay type. Its title becomes the essay's default title, and the task guides both the check and the assessment."
+          "desc": "Every essay answers a writing task. Choose a topic from your Topic Library above the upload area — a title, the full prompt, an optional question image and the DSE Part A/B essay type. Its title becomes the essay's default title, and the task guides both the check and the assessment. The picker splits into \"My topics\" and \"Class topics\": a topic created for a class you are in (or teach) shows its class name and creator, so you can answer the task your teacher set."
         },
         "upload": {
           "name": "Uploading",
@@ -4762,7 +4762,7 @@
         },
         "staff": {
           "name": "Staff View",
-          "desc": "Switch between \"My work\" and \"My students\". Under \"My students\" the two sections become \"Student essays\" and \"Student learning\", sharing one class and student filter — teachers see their classes, admins their school."
+          "desc": "Switch between \"My work\" and \"My students\". Under \"My students\" the two sections become \"Student essays\" and \"Student learning\", sharing one class and student filter — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns."
         },
         "tip": {
           "title": "Tip:",
