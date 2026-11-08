@@ -306,12 +306,13 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     }
   }
 
-  // --- Topic re-link (Topic column) -------------------------------------
+  // --- Topic re-link / unlink (link button in the Title column) ---------
   // Staff may re-point an essay at any topic from THEIR Topic Library (own
-  // + class-visible — same resolution as an upload). The server re-snapshots
-  // the topic's task / essay type / question image onto the essay; the essay
-  // title is untouched. Re-linking to the SAME topic refreshes the snapshot
-  // from a possibly-edited library entry.
+  // + class-visible — same resolution as an upload) or remove the link
+  // entirely. The server re-snapshots the topic's task / essay type /
+  // question image onto the essay; the essay title is untouched. Re-linking
+  // to the SAME topic refreshes the snapshot from a possibly-edited library
+  // entry.
   async function openRelink(row: LanguageCheckStaffRow) {
     setRelinkRow(row);
     setRelinkPick(row.topicId);
@@ -331,10 +332,11 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   }
 
   async function handleRelink() {
-    if (!relinkRow || !relinkPick || relinking) return;
+    if (!relinkRow || relinking) return;
     const row = relinkRow;
     setRelinking(true);
     try {
+      // topicId null = unlink (remove the link entirely).
       const res = await fetch(`/api/writing-assessment/staff/${row.id}/topic`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -515,7 +517,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       ) : (
         <>
           <div className={cn("overflow-x-auto rounded-xl border bg-card px-3", loading && "opacity-60")}>
-            <table className="w-full min-w-[68rem] text-sm">
+            <table className="w-full min-w-[62rem] text-sm">
               <thead>
                 <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <th
@@ -541,9 +543,6 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                       order={order}
                       onSort={handleSort}
                     />
-                  </th>
-                  <th className="py-2 pr-3 font-medium">
-                    {t("languageCheck.staff.colTopic")}
                   </th>
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colStatus")}
@@ -626,34 +625,18 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0 text-muted-foreground"
+                            title={t("languageCheck.staff.relink")}
+                            aria-label={t("languageCheck.staff.relink")}
+                            onClick={() => void openRelink(row)}
+                          >
+                            <Link2 className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
                       )}
-                    </td>
-                    <td className="max-w-[10rem] py-2 pr-3">
-                      <div className="flex items-center gap-1">
-                        <span
-                          className={cn(
-                            "min-w-0 flex-1 truncate",
-                            !row.topicTitle &&
-                              (row.topicId ? "italic" : "text-muted-foreground"),
-                          )}
-                        >
-                          {row.topicTitle ||
-                            (row.topicId
-                              ? t("languageCheck.staff.topicDeleted")
-                              : "—")}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 shrink-0 text-muted-foreground"
-                          title={t("languageCheck.staff.relink")}
-                          aria-label={t("languageCheck.staff.relink")}
-                          onClick={() => void openRelink(row)}
-                        >
-                          <Link2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
                     </td>
                     <td className="py-2 pr-3">
                       <span
@@ -946,6 +929,9 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                 }
                 ariaLabel={t("languageCheck.staff.relinkPick")}
                 placeholder={t("languageCheck.staff.relinkPick")}
+                // Pinned null-emitting option = unlink (Save then removes
+                // the essay's topic link instead of re-pointing it).
+                allLabel={t("languageCheck.staff.unlink")}
                 emptyLabel={
                   libraryTopics === null
                     ? t("languageCheck.staff.loadingStudents")
@@ -965,9 +951,12 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                 <Button
                   size="sm"
                   disabled={
-                    !relinkPick ||
-                    !libraryTopics?.some((tp) => tp.id === relinkPick) ||
-                    relinking
+                    relinking ||
+                    // Unlink needs a link to remove; re-link needs a pick
+                    // that resolves to a visible library topic.
+                    (relinkPick === null
+                      ? !relinkRow.topicId
+                      : !libraryTopics?.some((tp) => tp.id === relinkPick))
                   }
                   onClick={() => void handleRelink()}
                 >
@@ -976,7 +965,9 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                   ) : (
                     <Link2 className="mr-1.5 h-4 w-4" />
                   )}
-                  {t("languageCheck.staff.relinkSave")}
+                  {relinkPick === null
+                    ? t("languageCheck.staff.unlink")
+                    : t("languageCheck.staff.relinkSave")}
                 </Button>
               </div>
             </div>

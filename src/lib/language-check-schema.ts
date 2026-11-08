@@ -106,13 +106,20 @@ export const staffRenameSchema = z.object({
 })
 
 /**
- * Staff re-link of an essay to a Topic Library entry (PUT
- * /api/writing-assessment/staff/[id]/topic). The topic must resolve against
- * the CALLER's own / class-visible topics (same rule as an upload); its
- * task, essay type and question image are re-snapshotted onto the essay —
- * the essay title is left alone. Re-linking to the SAME topic is allowed:
- * it refreshes the snapshot from the (possibly edited) library entry.
+ * Staff re-link (PUT /api/writing-assessment/staff/[id]/topic). topicId =
+ * an existing Topic Library entry visible to the CALLER (own / class topics
+ * — the same resolution as an upload), whose task, essay type and question
+ * image are re-snapshotted onto the essay; the essay title is left alone.
+ * topicId = null UNLINKS the essay (topic_id NULL + empty snapshot fields,
+ * exactly like a legacy pre-topics essay). Re-linking to the SAME topic is
+ * allowed: it refreshes the snapshot from the possibly-edited library
+ * entry.
  */
 export const staffRelinkSchema = z.object({
-  topicId: z.string().min(1).max(64),
+  topicId: z
+    .string()
+    .min(1)
+    .max(64)
+    .nullish()
+    .transform((v) => (v ? v : null)),
 })

@@ -11,13 +11,14 @@ import { staffRelinkSchema } from "@/lib/language-check-schema"
 type Ctx = { params: Promise<{ id: string }> }
 
 /**
- * Staff re-link an essay (from the Student essays table) to an existing
- * Topic Library entry, so the topic filter groups it again after e.g. the
- * original topic was deleted or the essay was uploaded against the wrong
- * task. The topic must be visible to the CALLER (own library or their
- * classes' topics — the same resolution as an upload); its task, essay type
- * and question image are re-snapshotted onto the essay, and the essay title
- * is left alone.
+ * Staff re-link (or unlink) an essay (from the Student essays table) to an
+ * existing Topic Library entry, so the topic filter groups it correctly
+ * after e.g. the original topic was deleted or the essay was uploaded
+ * against the wrong task. The topic must be visible to the CALLER (own
+ * library or their classes' topics — the same resolution as an upload);
+ * its task, essay type and question image are re-snapshotted onto the
+ * essay, and the essay title is left alone. A null topicId removes the
+ * link entirely (legacy untopped shape).
  */
 export async function PUT(request: NextRequest, context: Ctx) {
   try {

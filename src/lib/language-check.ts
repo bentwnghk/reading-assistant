@@ -789,26 +789,38 @@ export async function renameStaffEssay(
 }
 
 /**
- * Re-links an essay the staff member can see to a Topic Library entry
- * (scope-checked). The topic resolves against the CALLER's own /
+ * Re-links or unlinks an essay the staff member can see (scope-checked).
+ * With a topicId the topic resolves against the CALLER's own /
  * class-visible topics — the same rule as an upload ("a teacher scanning
  * for a student uses THEIR topic") — and its task, essay type and question
- * image are re-snapshotted onto the essay exactly like at upload. The essay
- * title is deliberately left alone (it may have been renamed on purpose),
- * so unlike upload the topic title does NOT become the essay title. A
- * missing/invisible topic and an out-of-scope essay both return false —
- * indistinguishable, same as the other staff writers.
+ * image are re-snapshotted onto the essay exactly like at upload. With null
+ * the link is removed entirely (same shape as a legacy pre-topics essay),
+ * dropping the essay out of the topic filter. The essay title is
+ * deliberately left alone either way (it may have been renamed on
+ * purpose). A missing/invisible topic and an out-of-scope essay both
+ * return false — indistinguishable, same as the other staff writers.
  */
 export async function relinkStaffEssay(
   scope: LanguageCheckStaffScope,
   viewer: TopicViewer,
   id: string,
-  topicId: string,
+  topicId: string | null,
 ): Promise<boolean> {
-  const topic = await getTopic(viewer, topicId)
-  if (!topic) return false
+  // Scope check first (same pattern as setStaffAssessment): out-of-scope
+  // essays look identical to missing ones, and nothing is written.
   const essay = await getStaffEssay(scope, id)
   if (!essay) return false
+  if (topicId === null) {
+    await getPool().query(
+      `UPDATE language_check_essays
+       SET topic_id = NULL, topic = '', essay_type = '', question_image = ''
+       WHERE id = $1`,
+      [id],
+    )
+    return true
+  }
+  const topic = await getTopic(viewer, topicId)
+  if (!topic) return false
   await getPool().query(
     `UPDATE language_check_essays
      SET topic_id = $1, topic = $2, essay_type = $3, question_image = $4

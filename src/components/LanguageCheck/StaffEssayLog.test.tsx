@@ -604,13 +604,38 @@ describe("StaffEssayLog topic re-link", () => {
     return button as HTMLButtonElement;
   }
 
-  it("shows each row's live topic title and flags deleted topics", async () => {
+  it("unlinking sends a null topicId and refreshes the table", async () => {
     render(<StaffEssayLog classId={null} userId={null} />);
     await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    const before = staffRequests.length;
 
-    // e1 is linked to a live library topic; e2's topic was deleted.
-    expect(screen.getByText("S6 Writing 1")).toBeTruthy();
-    expect(screen.getByText("languageCheck.staff.topicDeleted")).toBeTruthy();
+    fireEvent.click(relinkButtonForRow("Alice essay"));
+    const trigger = await screen.findByRole("combobox", {
+      name: "languageCheck.staff.relinkPick",
+    });
+    // The pinned "Remove topic" option emits null = unlink.
+    fireEvent.click(trigger);
+    const option = await waitFor(() => {
+      const matches = screen
+        .getAllByText("languageCheck.staff.unlink")
+        .filter((el) => el.closest("[role=option]") !== null);
+      expect(matches.length).toBeGreaterThan(0);
+      return matches[0];
+    });
+    fireEvent.click(option);
+    // Save's label flips to "Remove topic" once the pick is null.
+    fireEvent.click(
+      screen.getByRole("button", { name: "languageCheck.staff.unlink" }),
+    );
+
+    await waitFor(() => {
+      expect(relinkRequests).toEqual([
+        { id: "e1", body: { topicId: null } },
+      ]);
+    });
+    await waitFor(() => {
+      expect(staffRequests.length).toBeGreaterThan(before);
+    });
   });
 
   it("re-links a row to a library topic and refreshes the table", async () => {
