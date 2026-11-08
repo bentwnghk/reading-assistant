@@ -1614,7 +1614,7 @@
       "tabQuiz": "Quiz",
       "tabSpelling": "Spelling",
       "wordsEmpty": "No single words in this glossary.",
-      "phrasesEmpty": "No multi-word phrases in this glossary.",
+      "phrasesEmpty": "No phrases in this glossary.",
       "prioritizeHard": "Prioritize hard words",
       "prioritizeHardDesc": "Focus on words you rated as hard first",
       "wordStats": "{{hard}} hard, {{medium}} medium, {{easy}} easy",

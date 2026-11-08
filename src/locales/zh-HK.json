@@ -1614,7 +1614,7 @@
       "tabQuiz": "測驗",
       "tabSpelling": "拼字",
       "wordsEmpty": "此詞彙表沒有單詞。",
-      "phrasesEmpty": "此詞彙表沒有多詞詞組。",
+      "phrasesEmpty": "此詞彙表沒有詞組。",
       "prioritizeHard": "優先複習難字",
       "prioritizeHardDesc": "先練習你標記為困難的詞彙",
       "wordStats": "{{hard}} 個難，{{medium}} 個中，{{easy}} 個易",
