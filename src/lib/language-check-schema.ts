@@ -104,3 +104,15 @@ export const staffRecheckSchema = z.object({
 export const staffRenameSchema = z.object({
   title: z.string().trim().min(1).max(200),
 })
+
+/**
+ * Staff re-link of an essay to a Topic Library entry (PUT
+ * /api/writing-assessment/staff/[id]/topic). The topic must resolve against
+ * the CALLER's own / class-visible topics (same rule as an upload); its
+ * task, essay type and question image are re-snapshotted onto the essay —
+ * the essay title is left alone. Re-linking to the SAME topic is allowed:
+ * it refreshes the snapshot from the (possibly edited) library entry.
+ */
+export const staffRelinkSchema = z.object({
+  topicId: z.string().min(1).max(64),
+})

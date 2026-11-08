@@ -1,5 +1,6 @@
 import { getPool } from "./db"
 import { getSchoolForUser } from "./users"
+import { getTopic, type TopicViewer } from "./language-check-topics"
 import { countWords } from "@/utils/languageCheck"
 import {
   LANGUAGE_CHECK_DRAFT_RETENTION_DAYS,
@@ -566,11 +567,13 @@ export async function listStaffEssays(
     getPool().query(
       `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
               e.user_id, u.name AS user_name, u.email AS user_email,
+              e.topic_id, lt.title AS topic_title,
               jsonb_array_length(e.images) AS page_count,
               jsonb_array_length(e.corrections) AS error_count,
               ${OVERALL_SQL} AS overall,
               ${WORD_COUNT_SQL} AS word_count
        ${STAFF_FROM}
+       LEFT JOIN language_check_topics lt ON lt.id = e.topic_id
        ${where}
        ORDER BY ${orderBy}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -627,6 +630,11 @@ export async function listStaffEssays(
         userEmail: (row.user_email as string) || "",
         title: (row.title as string) || "",
         status: row.status as LanguageCheckStaffRow["status"],
+        // Live library title for the row's topic link; a set id with a null
+        // title means the topic was deleted (the snapshot stays, but the
+        // essay drops out of the topic filter until re-linked).
+        topicId: (row.topic_id as string) || null,
+        topicTitle: (row.topic_title as string) || null,
         pageCount: Number(row.page_count) || 0,
         errorCount: Number(row.error_count) || 0,
         overall:
@@ -686,11 +694,13 @@ export async function getStaffEssay(
   const { rows } = await getPool().query(
     `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
             e.user_id, u.name AS user_name, u.email AS user_email,
+            e.topic_id, lt.title AS topic_title,
             e.transcript, e.checked_text, e.corrections,
             e.ocr_model, e.check_model, e.dropped_count, e.assessment, e.enhanced,
             e.topic, e.essay_type, e.question_image,
             jsonb_array_length(e.images) AS page_count
      ${STAFF_FROM}
+     LEFT JOIN language_check_topics lt ON lt.id = e.topic_id
      WHERE ${clauses.join(" AND ")}`,
     params,
   )
@@ -703,6 +713,8 @@ export async function getStaffEssay(
     userEmail: (row.user_email as string) || "",
     title: (row.title as string) || "",
     status: row.status as LanguageCheckStaffDetail["status"],
+    topicId: (row.topic_id as string) || null,
+    topicTitle: (row.topic_title as string) || null,
     pageCount: Number(row.page_count) || 0,
     errorCount: arrayOf<LanguageCheckError>(row.corrections).length,
     wordCount: countWords((row.transcript as string) || ""),
@@ -772,6 +784,36 @@ export async function renameStaffEssay(
   await getPool().query(
     `UPDATE language_check_essays SET title = $1 WHERE id = $2`,
     [title, id],
+  )
+  return true
+}
+
+/**
+ * Re-links an essay the staff member can see to a Topic Library entry
+ * (scope-checked). The topic resolves against the CALLER's own /
+ * class-visible topics — the same rule as an upload ("a teacher scanning
+ * for a student uses THEIR topic") — and its task, essay type and question
+ * image are re-snapshotted onto the essay exactly like at upload. The essay
+ * title is deliberately left alone (it may have been renamed on purpose),
+ * so unlike upload the topic title does NOT become the essay title. A
+ * missing/invisible topic and an out-of-scope essay both return false —
+ * indistinguishable, same as the other staff writers.
+ */
+export async function relinkStaffEssay(
+  scope: LanguageCheckStaffScope,
+  viewer: TopicViewer,
+  id: string,
+  topicId: string,
+): Promise<boolean> {
+  const topic = await getTopic(viewer, topicId)
+  if (!topic) return false
+  const essay = await getStaffEssay(scope, id)
+  if (!essay) return false
+  await getPool().query(
+    `UPDATE language_check_essays
+     SET topic_id = $1, topic = $2, essay_type = $3, question_image = $4
+     WHERE id = $5`,
+    [topic.id, topic.topic, topic.essayType, topic.questionImage, id],
   )
   return true
 }

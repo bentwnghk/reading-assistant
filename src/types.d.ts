@@ -1304,6 +1304,12 @@ interface LanguageCheckStaffRow {
   userEmail: string;
   title: string;
   status: "draft" | "transcribed" | "checked";
+  /** Topic Library link (snapshot id from upload, or a later staff re-link). */
+  topicId: string | null;
+  /** LIVE library title for that link — a set id with a null title means the
+   *  topic was deleted (the essay keeps its snapshot but drops out of the
+   *  topic filter until staff re-link it). */
+  topicTitle: string | null;
   pageCount: number;
   errorCount: number;
   /** Saved AI Writing Assessment overall (0-21 = Content+Language+Organization sum); null = not assessed. */

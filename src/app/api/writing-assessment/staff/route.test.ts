@@ -42,8 +42,11 @@ beforeEach(() => {
 const listQuery = () => queries.find((q) => q.sql.includes("AS user_name"))!;
 const statsQuery = () => queries.find((q) => q.sql.includes("AS topics"))!;
 const usersQuery = () => queries.find((q) => q.sql.includes("AS id"))!;
+// The topic-options query JOINs the library with alias `t` — distinct from
+// the LIST query's `LEFT JOIN language_check_topics lt` (live topicTitle
+// column for each row), which must not be picked up here.
 const topicsQuery = () =>
-  queries.find((q) => q.sql.includes("JOIN language_check_topics"))!;
+  queries.find((q) => q.sql.includes("JOIN language_check_topics t ON"))!;
 
 describe("staff route: real handler, recorded SQL", () => {
   it("student filter without class narrows rows, count AND stats", async () => {

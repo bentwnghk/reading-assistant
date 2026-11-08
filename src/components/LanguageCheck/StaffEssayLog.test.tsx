@@ -44,21 +44,30 @@ interface FixtureRow {
   title: string;
   status: string;
   topicId: string | null;
+  topicTitle: string | null;
 }
 
 const ALL_ROWS: FixtureRow[] = [
-  { id: "e1", userId: "alice", userName: "Alice", title: "Alice essay", status: "checked", topicId: "topic-1" },
-  { id: "e2", userId: "bob", userName: "Bob", title: "Bob essay", status: "draft", topicId: null },
+  { id: "e1", userId: "alice", userName: "Alice", title: "Alice essay", status: "checked", topicId: "topic-1", topicTitle: "S6 Writing 1" },
+  { id: "e2", userId: "bob", userName: "Bob", title: "Bob essay", status: "draft", topicId: "topic-gone", topicTitle: null },
 ];
 
 const ALL_TOPICS: LanguageCheckStaffTopic[] = [
   { id: "topic-1", title: "S6 Writing 1" },
 ];
 
+/** The caller's Topic Library (GET /api/writing-assessment/topics). */
+const LIBRARY_TOPICS: LanguageCheckStaffTopic[] = [
+  { id: "topic-1", title: "S6 Writing 1" },
+  { id: "topic-2", title: "S7 Writing" },
+];
+
 const staffRequests: string[] = [];
 const detailRequests: string[] = [];
 /** PATCH /api/writing-assessment/staff/:id captures (title rename). */
 const renameRequests: { id: string; body: unknown }[] = [];
+/** PUT /api/writing-assessment/staff/:id/topic captures (topic re-link). */
+const relinkRequests: { id: string; body: unknown }[] = [];
 
 /** Mutable staff detail fixture (view dialog), re-set in beforeEach. */
 let detailFixture: Record<string, unknown>;
@@ -118,6 +127,8 @@ function staffResponse(url: URL) {
       userEmail: `${r.userId}@example.com`,
       title: r.title,
       status: r.status,
+      topicId: r.topicId,
+      topicTitle: r.topicTitle,
       pageCount: 1,
       errorCount: i,
       overall: null,
@@ -142,6 +153,7 @@ beforeEach(() => {
   staffRequests.length = 0;
   detailRequests.length = 0;
   renameRequests.length = 0;
+  relinkRequests.length = 0;
   detailFixture = makeDetail();
   runStaffCheckSpy.mockReset();
   runStaffCheckSpy.mockResolvedValue(true);
@@ -208,6 +220,24 @@ beforeEach(() => {
       return {
         ok: true,
         json: async () => detailFixture,
+      } as Response;
+    }
+    // Topic re-link from the table (staff PUT).
+    const relinkMatch = url.pathname.match(
+      /^\/api\/writing-assessment\/staff\/([^/]+)\/topic$/,
+    );
+    if (relinkMatch && init?.method === "PUT") {
+      relinkRequests.push({
+        id: relinkMatch[1],
+        body: JSON.parse(String(init.body)),
+      });
+      return { ok: true, json: async () => ({ success: true }) } as Response;
+    }
+    // The caller's Topic Library (re-link picker options).
+    if (url.pathname === "/api/writing-assessment/topics") {
+      return {
+        ok: true,
+        json: async () => LIBRARY_TOPICS,
       } as Response;
     }
     // The caller's own essay list (languageCheck store loadList refresh).
@@ -560,5 +590,77 @@ describe("StaffEssayLog title rename", () => {
     await waitFor(() => {
       expect(screen.getByText("Alice essay")).toBeTruthy();
     });
+  });
+});
+
+describe("StaffEssayLog topic re-link", () => {
+  /** The re-link (link) button inside the row titled `title`. */
+  function relinkButtonForRow(title: string): HTMLButtonElement {
+    const row = screen.getByText(title).closest("tr");
+    if (!row) throw new Error(`row ${title} not found`);
+    const button = within(row).getByRole("button", {
+      name: "languageCheck.staff.relink",
+    });
+    return button as HTMLButtonElement;
+  }
+
+  it("shows each row's live topic title and flags deleted topics", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+
+    // e1 is linked to a live library topic; e2's topic was deleted.
+    expect(screen.getByText("S6 Writing 1")).toBeTruthy();
+    expect(screen.getByText("languageCheck.staff.topicDeleted")).toBeTruthy();
+  });
+
+  it("re-links a row to a library topic and refreshes the table", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+    const before = staffRequests.length;
+
+    fireEvent.click(relinkButtonForRow("Alice essay"));
+
+    // The picker fetches the caller's Topic Library, preselects the current
+    // link, and offers the other library topics.
+    const trigger = await screen.findByRole("combobox", {
+      name: "languageCheck.staff.relinkPick",
+    });
+    fireEvent.click(trigger);
+    const option = await waitFor(() => {
+      const matches = screen
+        .getAllByText("S7 Writing")
+        .filter((el) => el.closest("[role=option]") !== null);
+      expect(matches.length).toBeGreaterThan(0);
+      return matches[0];
+    });
+    fireEvent.click(option);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "languageCheck.staff.relinkSave" }),
+    );
+
+    await waitFor(() => {
+      expect(relinkRequests).toEqual([
+        { id: "e1", body: { topicId: "topic-2" } },
+      ]);
+    });
+    // The table re-fetches: the row's Topic column, the topic filter
+    // options and the Topics stat card all depend on the new link.
+    await waitFor(() => {
+      expect(staffRequests.length).toBeGreaterThan(before);
+    });
+  });
+
+  it("Save stays disabled until a topic is picked", async () => {
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Bob essay")).toBeTruthy());
+
+    // Bob's link is dangling (deleted topic) → nothing preselected.
+    fireEvent.click(relinkButtonForRow("Bob essay"));
+    const save = (await screen.findByRole("button", {
+      name: "languageCheck.staff.relinkSave",
+    })) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+    expect(relinkRequests).toEqual([]);
   });
 });

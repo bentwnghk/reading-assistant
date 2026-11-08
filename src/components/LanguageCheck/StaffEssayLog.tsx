@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Download,
   Eye,
+  Link2,
   LoaderCircle,
   PenLine,
   Pencil,
@@ -149,6 +150,14 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   const [renameValue, setRenameValue] = useState("");
   const activeRenameRef = useRef<string | null>(null);
   const renameCancelledRef = useRef(false);
+  // Topic re-link (staff-only affordance in the Topic column): the row being
+  // re-linked, the picked topic, and the caller's Topic Library options
+  // (lazy-loaded on first open — the filter dropdown's options are only the
+  // topics in-scope essays were written on, useless for picking a new one).
+  const [relinkRow, setRelinkRow] = useState<LanguageCheckStaffRow | null>(null);
+  const [relinkPick, setRelinkPick] = useState<string | null>(null);
+  const [relinking, setRelinking] = useState(false);
+  const [libraryTopics, setLibraryTopics] = useState<LanguageCheckStaffTopic[] | null>(null);
 
   // A different class/student starts again from the first page, and drops
   // the topic pick — the topic options are narrowed by the class, so a
@@ -294,6 +303,60 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       void useLanguageCheckStore.getState().loadList(true);
     } catch (error) {
       toast.error(parseError(error));
+    }
+  }
+
+  // --- Topic re-link (Topic column) -------------------------------------
+  // Staff may re-point an essay at any topic from THEIR Topic Library (own
+  // + class-visible — same resolution as an upload). The server re-snapshots
+  // the topic's task / essay type / question image onto the essay; the essay
+  // title is untouched. Re-linking to the SAME topic refreshes the snapshot
+  // from a possibly-edited library entry.
+  async function openRelink(row: LanguageCheckStaffRow) {
+    setRelinkRow(row);
+    setRelinkPick(row.topicId);
+    if (libraryTopics) return;
+    try {
+      const res = await fetch("/api/writing-assessment/topics");
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(body?.error || `HTTP ${res.status}`);
+      }
+      setLibraryTopics(
+        (Array.isArray(body) ? body : []) as LanguageCheckStaffTopic[],
+      );
+    } catch (error) {
+      toast.error(parseError(error));
+    }
+  }
+
+  async function handleRelink() {
+    if (!relinkRow || !relinkPick || relinking) return;
+    const row = relinkRow;
+    setRelinking(true);
+    try {
+      const res = await fetch(`/api/writing-assessment/staff/${row.id}/topic`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topicId: relinkPick }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || `HTTP ${res.status}`);
+      }
+      setRelinkRow(null);
+      // The caller may be the uploader — their own essay list caches the
+      // snapshot topic too (same reasoning as the staff re-check).
+      void useLanguageCheckStore.getState().loadList(true);
+      // The dialog (if open on this essay) shows the re-snapshotted task.
+      if (detail?.id === row.id) void openDetail(row.id);
+      // Refresh the table: the row's Topic column, the topic filter options
+      // (they JOIN the live library) and the Topics stat card all change.
+      await load();
+    } catch (error) {
+      toast.error(parseError(error));
+    } finally {
+      setRelinking(false);
     }
   }
 
@@ -452,7 +515,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       ) : (
         <>
           <div className={cn("overflow-x-auto rounded-xl border bg-card px-3", loading && "opacity-60")}>
-            <table className="w-full min-w-[62rem] text-sm">
+            <table className="w-full min-w-[68rem] text-sm">
               <thead>
                 <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                   <th
@@ -478,6 +541,9 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                       order={order}
                       onSort={handleSort}
                     />
+                  </th>
+                  <th className="py-2 pr-3 font-medium">
+                    {t("languageCheck.staff.colTopic")}
                   </th>
                   <th className="py-2 pr-3 font-medium">
                     {t("languageCheck.staff.colStatus")}
@@ -562,6 +628,32 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                           </Button>
                         </div>
                       )}
+                    </td>
+                    <td className="max-w-[10rem] py-2 pr-3">
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={cn(
+                            "min-w-0 flex-1 truncate",
+                            !row.topicTitle &&
+                              (row.topicId ? "italic" : "text-muted-foreground"),
+                          )}
+                        >
+                          {row.topicTitle ||
+                            (row.topicId
+                              ? t("languageCheck.staff.topicDeleted")
+                              : "—")}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 shrink-0 text-muted-foreground"
+                          title={t("languageCheck.staff.relink")}
+                          aria-label={t("languageCheck.staff.relink")}
+                          onClick={() => void openRelink(row)}
+                        >
+                          <Link2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </td>
                     <td className="py-2 pr-3">
                       <span
@@ -816,6 +908,81 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
           )}
         </DialogContent>
       </Dialog>
+
+      {relinkRow && (
+        <Dialog open onOpenChange={(o) => !o && setRelinkRow(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {t("languageCheck.staff.relinkTitle")}
+              </DialogTitle>
+              <DialogDescription>
+                {t("languageCheck.staff.relinkDesc")}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-3">
+              <p className="truncate text-sm">
+                <span className="text-muted-foreground">
+                  {t("languageCheck.staff.relinkCurrent")}:
+                </span>{" "}
+                <span className="font-medium">
+                  {relinkRow.topicTitle ||
+                    (relinkRow.topicId
+                      ? t("languageCheck.staff.topicDeleted")
+                      : "—")}
+                </span>
+              </p>
+              <TopicCombobox
+                topics={libraryTopics ?? []}
+                value={relinkPick}
+                onChange={setRelinkPick}
+                // Keeps the current link readable even when it is dangling
+                // (deleted topics are not in the library options).
+                customLabel={
+                  relinkRow.topicId
+                    ? relinkRow.topicTitle ||
+                      t("languageCheck.staff.topicDeleted")
+                    : undefined
+                }
+                ariaLabel={t("languageCheck.staff.relinkPick")}
+                placeholder={t("languageCheck.staff.relinkPick")}
+                emptyLabel={
+                  libraryTopics === null
+                    ? t("languageCheck.staff.loadingStudents")
+                    : t("languageCheck.staff.noTopics")
+                }
+                searchPlaceholder={t("languageCheck.staff.searchTopics")}
+                className="w-full"
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setRelinkRow(null)}
+                >
+                  {t("languageCheck.cancel")}
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={
+                    !relinkPick ||
+                    !libraryTopics?.some((tp) => tp.id === relinkPick) ||
+                    relinking
+                  }
+                  onClick={() => void handleRelink()}
+                >
+                  {relinking ? (
+                    <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Link2 className="mr-1.5 h-4 w-4" />
+                  )}
+                  {t("languageCheck.staff.relinkSave")}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {exportOpen && detailEssay && (
         <ExportDialog
