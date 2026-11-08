@@ -507,8 +507,8 @@
         "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, generate two enhanced versions of your own essay (a light polish and an aspirational Level 5** rewrite) that you can load straight back into the reading workflow, then turn every mistake into a lesson, practice and quiz built from your own writing. Teachers watch the whole class learn from their mistakes in one dashboard.",
         "bullets": [
           "Verbatim transcription you review beside the original scan",
-          "Inline corrections with explanations — errors vs. suggestions",
           "AI Writing Assessment — HKDSE Content, Language and Organization, each on a 0–7 band",
+          "Inline corrections with explanations — errors vs. suggestions",
           "Enhanced Essays — a light polish and an aspirational Level 5** rewrite you can load as a reading text",
           "Learn from your mistakes: lesson → practice → quiz",
           "Saved sessions resume on any device, exportable to Word",

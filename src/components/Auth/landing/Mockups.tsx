@@ -371,7 +371,7 @@ type SourceTab = "upload" | "repository" | "ai" | "fromWriting";
 export function UploadMockup() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref);
-  const [tab, setTab] = useState<SourceTab>("ai");
+  const [tab, setTab] = useState<SourceTab>("upload");
   const newVocab = ["shimmering", "reluctantly", "horizon", "tide pool"];
   const repoRows = [
     {
