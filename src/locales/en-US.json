@@ -404,7 +404,7 @@
           "Snap a photo or upload a PDF",
           "Browse the shared Text Repository",
           "Generate a fresh text with AI Text Generator",
-          "Load an enhanced essay from the Writing Assessment — marked \"From Writing\""
+          "Load an enhanced essay from the Writing Assessment"
         ]
       },
       "understand": {
@@ -450,7 +450,7 @@
           "Flashcards with spaced repetition",
           "4 spelling & vocabulary games",
           "5 grammar games",
-          "Multiplayer spelling battles against classmates 🆕"
+          "Multiplayer spelling battles against classmates"
         ],
         "carousel": {
           "label": "Practice features",
@@ -4887,7 +4887,7 @@
         "editTitle": "Edit writing topic",
         "desc": "The title becomes the default essay title. The topic, question image and essay type guide how the essay is checked and assessed.",
         "title": "Title",
-        "titlePlaceholder": "e.g. S6 Writing 1",
+        "titlePlaceholder": "e.g. 2026-27 S6 Writing 1",
         "class": "Class",
         "noClass": "No class (personal)",
         "noClasses": "No classes available",
