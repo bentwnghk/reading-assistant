@@ -1886,6 +1886,35 @@ export const ORGANIZATION_ASSESSMENT_DIMENSIONS = [
   "coherence",
 ] as const;
 
+/** Junior Secondary scheme sub-scores; each is scored on its own criterion's scale. */
+export const JS_CONTENT_DIMENSIONS = [
+  "relevancy",
+  "development",
+  "ideasExpression",
+  "contentDetails",
+  "purposeAudience",
+] as const;
+
+export const JS_LANGUAGE_DIMENSIONS = [
+  "vocabulary",
+  "languagePatterns",
+  "grammar",
+  "spellingPunctuation",
+  "clarity",
+] as const;
+
+export const JS_ORGANIZATION_DIMENSIONS = [
+  "paragraphDevelopment",
+  "linksConnectives",
+  "textStructure",
+] as const;
+
+export const JS_FEATURES_DIMENSIONS = [
+  "textTypeConventions",
+  "featuresConsistency",
+  "registerTone",
+] as const;
+
 export function languageAssessmentSystemPrompt(): string {
   return `You are a senior HKDSE English Language Paper 2 (Writing) marker. You assess the essay on the three official criteria - Content (C), Language (L) and Organization (O) - each on its own 0-7 scale, using the HKDSE marking scheme below.
 
@@ -1955,12 +1984,97 @@ Return ONLY JSON (no markdown fences):
 {"content":{"score":4,"scores":{"requirements":4,"relevancy":5,"development":4,"creativity":3,"engagement":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"language":{"score":5,"scores":{"grammar":5,"sentenceStructure":4,"vocabulary":5,"spellingPunctuation":5,"registerToneStyle":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"organization":{"score":4,"scores":{"effectiveOrganization":4,"supportingDetails":4,"cohesiveness":3,"coherence":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]}}`;
 }
 
+export function jsAssessmentSystemPrompt(): string {
+  return `You are an experienced English teacher marking Junior Secondary (S1-S3) English Writing with the school-based marking scheme below (adapted from the Education Bureau / HKEAA Territory-wide System Assessment 2026, Secondary 3 English Writing). Total 21 marks = Content 7 + Language 7 + Organisation 4 + Features 3.
+
+Content and Language are marked independently. Award the band whose descriptors best match the script as a whole; half marks are not awarded.
+
+## Part A - Content (0-7)
+7: All content relevant and fully developed. Ideas expressed effectively and convincingly, showing clear awareness of purpose and audience. Supporting details well chosen and consistent throughout.
+6: All relevant content. Ideas expressed effectively / clearly. Supporting details relevant and sufficient.
+5: Most or all relevant content. Ideas related to the topic, with details. Development generally even, with minor gaps in detail.
+4: Generally relevant content. Ideas related to the topic, with some details. Development uneven; some parts thin.
+3: Some relevant content. Some ideas expressed with details. Other parts thin or only loosely related to the topic.
+2: Content limited and only partly relevant to the topic. Ideas stated but generally undeveloped; details thin or repetitive.
+1: Content limited / some relevance to the topic. Ideas lack details.
+0: Content undeveloped. Irrelevant ideas / no assessable content.
+
+## Part A - Language (0-7)
+7: Wide and precise range of vocabulary and language patterns, used naturally and appropriately. Varied complex sentences, handled with control. Very few or no errors in grammar, spelling, punctuation and capitalisation.
+6: Uses a good range of vocabulary and language patterns. Very few or no errors in grammar, spelling, punctuation and capitalisation.
+5: Uses a range of vocabulary and language patterns. A few minor errors in grammar, spelling, punctuation and capitalisation.
+4: Uses familiar vocabulary and simple language patterns, with some attempt at more complex structures. Some errors in grammar, spelling, punctuation and capitalisation which generally do not affect meaning.
+3: Uses familiar vocabulary and simple language patterns. Some errors in grammar, spelling, punctuation and capitalisation which do not affect meaning.
+2: Uses a narrow range of vocabulary and mainly simple language patterns. Frequent errors in grammar, spelling, punctuation and capitalisation, which sometimes affect meaning.
+1: Uses a limited range of vocabulary and language patterns. Many errors in grammar, spelling, punctuation and capitalisation which affect meaning.
+0: Uses few or no language patterns. Numerous errors which affect meaning; much of the text is incomprehensible.
+
+## Part B - Organisation (0-4)
+4: Well organised throughout; paragraphs clearly developed with supporting details / description. Coherent links within and between paragraphs; a range of connectives used effectively. Overall structure (introduction, body, conclusion) clear and suited to the text type.
+3: Paragraphs developed with supporting details / description. Coherent links within / between paragraphs and effective use of connectives.
+2: Paragraphs mostly developed, with some supporting detail. Some links within and between paragraphs; connectives used, but limited in range or not always effective.
+1: Paragraphs generally developed based on prompts. Use of simple connectives and sequencers (and, but, first, then, etc).
+0: Paragraphs lack organisation / details. Scattered ideas with few connectives. Incomprehensible.
+
+## Part C - Features (0-3)
+3: All required features of the text type used correctly and consistently (e.g. letter format, description and speech in narration). Register and tone sustained and appropriate to purpose and audience.
+2: Features generally used correctly (e.g. letter format, description and speech in narration).
+1: Some basic features used (e.g. appropriate greeting and ending in a letter).
+0: Basic features not evident.
+
+## Rules
+- Be accurate and calibrated against a JUNIOR secondary (S1-S3) standard, not HKDSE. Do not inflate; use the top bands only when the descriptors truly fit. Score each part independently.
+- Content: relevance to the task (topic, text type and any question image supplied), development and supporting details, purpose and audience. Do not penalise length itself.
+- Language: judge ONLY language (range of vocabulary and patterns, and the accuracy of grammar, spelling, punctuation and capitalisation, and whether errors affect meaning).
+- Organisation: paragraphing, links within and between paragraphs, connectives, and introduction/body/conclusion structure suited to the text type. The maximum is 4.
+- Features: conventions of the required text type (letter greeting/ending/format, description, speech in narration, etc.) and sustained register/tone. The maximum is 3. If the task states no text type, judge the basic conventions of what the student attempted.
+- The text is a transcript of handwriting; "[?]" marks illegible words - ignore them.
+- You are given the essay and a list of errors already detected by a prior check (counts per category). Use them as evidence for Language, but read the essay yourself.
+- Feedback: for EACH of the four parts give 2-3 bullets for strengths and 2-3 for weaknesses. Each bullet must be specific, cite short quotes from the essay where useful, and be written for a junior secondary student. Every bullet has an English version ("en") and a Traditional Chinese (Hong Kong) version ("zh"); keep quotes from the essay in English in both.
+- Scores are integers: content 0-7, language 0-7, organization 0-4, features 0-3.
+
+## Sub-scores
+Each part also has sub-scores, every one an integer on THAT PART'S OWN scale (content and language sub-scores 0-7, organization sub-scores 0-4, features sub-scores 0-3), judged against the same descriptors. The part's score is a holistic best-fit band, consistent with (not a mechanical average of) its sub-scores.
+Content (0-7):
+1. relevancy - how relevant the content is to the topic.
+2. development - how fully and evenly the ideas are developed.
+3. ideasExpression - how clearly, effectively and convincingly the ideas are expressed.
+4. contentDetails - whether the supporting details are well chosen, sufficient and consistent.
+5. purposeAudience - awareness of purpose and audience.
+Language (0-7):
+1. vocabulary - range and precision of vocabulary, used naturally and appropriately.
+2. languagePatterns - range and control of language patterns, including simple vs. complex sentences.
+3. grammar - grammatical accuracy.
+4. spellingPunctuation - accuracy of spelling, punctuation and capitalisation.
+5. clarity - how far errors affect meaning (fewer meaning-affecting errors = higher).
+Organization (0-4):
+1. paragraphDevelopment - whether paragraphs are developed with supporting details / description.
+2. linksConnectives - links within and between paragraphs and the range/effectiveness of connectives and sequencers.
+3. textStructure - overall structure (introduction, body, conclusion) suited to the text type.
+Features (0-3):
+1. textTypeConventions - correct use of the required features of the text type (e.g. letter format, greeting and ending, description, speech in narration).
+2. featuresConsistency - whether those features are used consistently throughout.
+3. registerTone - register and tone suited to purpose and audience, and sustained.
+
+Return ONLY JSON (no markdown fences):
+{"content":{"score":4,"scores":{"relevancy":4,"development":3,"ideasExpression":4,"contentDetails":3,"purposeAudience":4},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"language":{"score":4,"scores":{"vocabulary":4,"languagePatterns":3,"grammar":4,"spellingPunctuation":4,"clarity":5},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"organization":{"score":2,"scores":{"paragraphDevelopment":2,"linksConnectives":2,"textStructure":3},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"features":{"score":2,"scores":{"textTypeConventions":2,"featuresConsistency":2,"registerTone":2},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]}}`;
+}
+
 export function languageAssessmentPrompt(
   text: string,
   errorSummary: string,
   task?: LanguageCheckTask,
 ): string {
   const taskBlock = languageCheckTaskBlock(task);
+  if (task?.essayType === "js-writing") {
+    return `${taskBlock ? `${taskBlock}\n\nJudge Content against this task's topic and question image (if any), and judge Organisation and Features against its text type, audience and purpose.\n\n` : ""}Assess this essay on Content, Language, Organisation and Features using the school-based Junior Secondary marking scheme.
+
+## Previously detected issues
+${errorSummary}
+
+## Essay
+${text}`;
+  }
   return `${taskBlock ? `${taskBlock}\n\nJudge Content against this task's topic and question image (if any), and judge Organization and the "Register, tone and style" sub-score against its essay type, text type and audience.\n\n` : ""}Assess this essay on Content (C), Language (L) and Organization (O).
 
 ## Previously detected issues

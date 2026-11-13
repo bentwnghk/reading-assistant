@@ -868,7 +868,7 @@ CREATE TABLE language_check_topics (
   user_id        TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title          TEXT NOT NULL,
   topic          TEXT NOT NULL,
-  essay_type     TEXT NOT NULL CHECK (essay_type IN ('dse-part-a', 'dse-part-b')),
+  essay_type     TEXT NOT NULL CHECK (essay_type IN ('dse-part-a', 'dse-part-b', 'js-writing')),
   question_image TEXT NOT NULL DEFAULT '',
   -- Optional class target: the topic also appears in the Topic Library of
   -- the class's members (and its teacher / school staff). NULL = personal.

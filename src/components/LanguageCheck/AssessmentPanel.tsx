@@ -8,9 +8,14 @@ import { cn } from "@/utils/style";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
 import {
   CONTENT_ASSESSMENT_DIMENSIONS,
+  JS_CONTENT_DIMENSIONS,
+  JS_FEATURES_DIMENSIONS,
+  JS_LANGUAGE_DIMENSIONS,
+  JS_ORGANIZATION_DIMENSIONS,
   LANGUAGE_ASSESSMENT_DIMENSIONS,
   ORGANIZATION_ASSESSMENT_DIMENSIONS,
 } from "@/constants/readingPrompts";
+import { LANGUAGE_ASSESSMENT_MAX, type LanguageAssessmentScheme } from "@/constants/languageCheck";
 import type { ExplanationLanguage } from "@/store/languageCheck";
 
 interface AssessmentPanelProps {
@@ -33,10 +38,21 @@ interface AssessmentPanelProps {
   onSave: (assessment: LanguageCheckAssessment) => Promise<void>;
 }
 
-const DIMENSIONS: Record<"content" | "language" | "organization", readonly string[]> = {
-  content: CONTENT_ASSESSMENT_DIMENSIONS,
-  language: LANGUAGE_ASSESSMENT_DIMENSIONS,
-  organization: ORGANIZATION_ASSESSMENT_DIMENSIONS,
+type CriterionKey = "content" | "language" | "organization" | "features";
+
+const DIMENSIONS: Record<LanguageAssessmentScheme, Record<CriterionKey, readonly string[]>> = {
+  hkdse: {
+    content: CONTENT_ASSESSMENT_DIMENSIONS,
+    language: LANGUAGE_ASSESSMENT_DIMENSIONS,
+    organization: ORGANIZATION_ASSESSMENT_DIMENSIONS,
+    features: [],
+  },
+  js: {
+    content: JS_CONTENT_DIMENSIONS,
+    language: JS_LANGUAGE_DIMENSIONS,
+    organization: JS_ORGANIZATION_DIMENSIONS,
+    features: JS_FEATURES_DIMENSIONS,
+  },
 };
 
 function tone(score: number): string {
@@ -88,8 +104,10 @@ export default function AssessmentPanel({
   // Bullets quote long runs of learner text (English in ASCII quotes joined
   // by CJK punctuation, e.g. "xxx"、"yyy"); without a soft-wrap rule their
   // min-content width blows the grid past the card/dialog edge.
+  const scheme = result?.scheme === "js" ? "js" : "hkdse";
+  const maxOf = (key: CriterionKey): number => LANGUAGE_ASSESSMENT_MAX[scheme][key];
   const criteria: {
-    key: "content" | "language" | "organization";
+    key: CriterionKey;
     score: number;
     subScores?: Record<string, number>;
     strengths: { en: string; zh: string }[];
@@ -107,6 +125,7 @@ export default function AssessmentPanel({
         ...(result.organization
           ? [{ key: "organization" as const, ...result.organization, subScores: result.organization.scores }]
           : []),
+        ...(result.features ? [{ key: "features" as const, ...result.features, subScores: result.features.scores }] : []),
       ]
     : [];
   const bullets = (items: { en: string; zh: string }[]) =>
@@ -122,7 +141,11 @@ export default function AssessmentPanel({
               {t("languageCheck.assessment.title")}
             </p>
             <p className="break-words text-xs text-muted-foreground">
-              {t("languageCheck.assessment.subtitle")}
+              {t(
+                scheme === "js"
+                  ? "languageCheck.assessment.subtitleJs"
+                  : "languageCheck.assessment.subtitle",
+              )}
               {result &&
                 ` · ${t("languageCheck.assessment.assessedOn", {
                   date: new Date(result.assessedAt).toLocaleString(),
@@ -167,7 +190,7 @@ export default function AssessmentPanel({
                 </span>
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className={cn("grid gap-3", criteria.length === 4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
               {criteria.map((c) => (
                 <div
                   key={c.key}
@@ -179,8 +202,7 @@ export default function AssessmentPanel({
                   <span className="text-2xl font-bold tabular-nums">
                     {c.score}
                     <span className="text-sm font-normal text-muted-foreground">
-                      {" "}
-                      {t("languageCheck.assessment.scale")}
+                      {" "}/ {maxOf(c.key)}
                     </span>
                   </span>
                 </div>
@@ -204,7 +226,7 @@ export default function AssessmentPanel({
                   {t(`languageCheck.assessment.criteria.${c.key}`)}
                 </h3>
                 <span className="rounded-full bg-violet-600/10 px-2 py-0.5 text-xs font-semibold tabular-nums text-violet-700 dark:bg-violet-400/10 dark:text-violet-300">
-                  {c.score} {t("languageCheck.assessment.scale")}
+                  {c.score} / {maxOf(c.key)}
                 </span>
               </div>
               {c.subScores && (
@@ -212,15 +234,15 @@ export default function AssessmentPanel({
                   <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {t("languageCheck.assessment.subScores")}
                   </span>
-                  {DIMENSIONS[c.key].map((d) => (
+                  {DIMENSIONS[scheme][c.key].map((d) => (
                     <div key={d} className="flex min-w-0 items-center gap-2 text-sm">
                       <span className="w-32 shrink-0 sm:w-44">
                         {t(`languageCheck.assessment.dim.${d}`)}
                       </span>
                       <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
                         <div
-                          className={cn("h-full rounded-full", tone(c.subScores?.[d] ?? 0))}
-                          style={{ width: `${((c.subScores?.[d] ?? 0) / 7) * 100}%` }}
+                          className={cn("h-full rounded-full", tone(((c.subScores?.[d] ?? 0) / maxOf(c.key)) * 7))}
+                          style={{ width: `${((c.subScores?.[d] ?? 0) / maxOf(c.key)) * 100}%` }}
                         />
                       </div>
                       <span className="w-8 shrink-0 text-right font-semibold tabular-nums">

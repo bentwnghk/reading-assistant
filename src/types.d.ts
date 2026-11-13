@@ -1135,7 +1135,7 @@ interface LanguageCheckError {
   alternatives?: string[];
 }
 
-type LanguageCheckEssayTypeId = "dse-part-a" | "dse-part-b";
+type LanguageCheckEssayTypeId = "dse-part-a" | "dse-part-b" | "js-writing";
 
 /** The writing task an essay answers (entered once, saved in the Topic Library). */
 interface LanguageCheckTopicSummary {
@@ -1206,19 +1206,17 @@ interface LanguageCheckAssessment {
   overall: number;
   /** Language (L) score; absent on legacy assessments (use `overall`). */
   languageScore?: number;
-  /** Language block (top level for backward compatibility). */
-  scores: {
-    grammar: number;
-    sentenceStructure: number;
-    vocabulary: number;
-    spellingPunctuation: number;
-    registerToneStyle: number;
-  };
+  /** Language block (top level for backward compatibility); absent for the JS scheme (no sub-scores). */
+  scores?: Record<string, number>;
   strengths: { en: string; zh: string }[];
   weaknesses: { en: string; zh: string }[];
   /** Absent on legacy (Language-only) assessments. */
   content?: LanguageCheckCriterionFeedback;
   organization?: LanguageCheckCriterionFeedback;
+  /** Marking scheme used; absent = HKDSE (older assessments). */
+  scheme?: "hkdse" | "js";
+  /** JS scheme only (0-3). */
+  features?: LanguageCheckCriterionFeedback;
   assessedAt: number;
   model: string;
 }

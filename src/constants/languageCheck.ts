@@ -311,7 +311,7 @@ export const LANGUAGE_CHECK_MAX_ESSAYS = 100;
 
 // ─── Writing topics (Topic Library) ──────────────────────────────────────────
 
-export const LANGUAGE_CHECK_ESSAY_TYPES = ["dse-part-a", "dse-part-b"] as const;
+export const LANGUAGE_CHECK_ESSAY_TYPES = ["dse-part-a", "dse-part-b", "js-writing"] as const;
 export type LanguageCheckEssayType = (typeof LANGUAGE_CHECK_ESSAY_TYPES)[number];
 
 /** What the marker should know about each essay type (injected into the AI prompts). */
@@ -329,7 +329,19 @@ export const LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE: Record<
     guidance:
       "HKDSE English Language Paper 2 Writing Part B: the elective, longer creative/extended writing question (roughly 400 words). Judge register, tone and style against the genre the chosen question calls for (e.g. narrative voice for a story, persuasive register for a speech or debate).",
   },
+  "js-writing": {
+    label: "JS Writing",
+    guidance:
+      "Junior Secondary (S1-S3) school-based English writing, marked with the school-based Junior Secondary marking scheme (adapted from the EDB / HKEAA TSA Secondary 3 English Writing scheme): Content 7 + Language 7 + Organisation 4 + Features 3 = 21 marks. The writer is a S1-S3 learner, so judge the language against a junior secondary level (familiar vocabulary, simple patterns, some attempts at complex structures) - do not hold the script to HKDSE standards. Features means the conventions of the required text type (e.g. letter greeting/ending and format, description and speech in narration, register and tone suited to purpose and audience).",
+  },
 };
+
+/** Marks available per criterion for each marking scheme (the overall is their sum). */
+export const LANGUAGE_ASSESSMENT_MAX = {
+  hkdse: { content: 7, language: 7, organization: 7, features: 0 },
+  js: { content: 7, language: 7, organization: 4, features: 3 },
+} as const;
+export type LanguageAssessmentScheme = keyof typeof LANGUAGE_ASSESSMENT_MAX;
 
 export const LANGUAGE_CHECK_MAX_TOPICS = 200;
 export const LANGUAGE_CHECK_MAX_TOPIC_TITLE_CHARS = 200;

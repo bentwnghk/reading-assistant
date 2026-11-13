@@ -11,12 +11,17 @@ import {
 import { saveAs } from "file-saver";
 import {
   DEFAULT_CATEGORY_STYLE,
+  LANGUAGE_ASSESSMENT_MAX,
   LANGUAGE_CHECK_CATEGORY_STYLES,
   isExpressionCategory,
   type LanguageCheckCategory,
 } from "@/constants/languageCheck";
 import {
   CONTENT_ASSESSMENT_DIMENSIONS,
+  JS_CONTENT_DIMENSIONS,
+  JS_FEATURES_DIMENSIONS,
+  JS_LANGUAGE_DIMENSIONS,
+  JS_ORGANIZATION_DIMENSIONS,
   LANGUAGE_ASSESSMENT_DIMENSIONS,
   ORGANIZATION_ASSESSMENT_DIMENSIONS,
 } from "@/constants/readingPrompts";
@@ -324,12 +329,15 @@ export async function exportLanguageCheckDocx({
         {
           key: "language",
           score: assessment.languageScore ?? assessment.overall,
-          subScores: assessment.scores as Record<string, number>,
+          subScores: assessment.scores as Record<string, number> | undefined,
           strengths: assessment.strengths,
           weaknesses: assessment.weaknesses,
         },
         ...(assessment.organization
           ? [{ key: "organization", ...assessment.organization, subScores: assessment.organization.scores }]
+          : []),
+        ...(assessment.features
+          ? [{ key: "features", ...assessment.features, subScores: assessment.features.scores }]
           : []),
       ].flatMap((c) => [
         new Paragraph({
@@ -341,18 +349,30 @@ export async function exportLanguageCheckDocx({
               size: 26,
             }),
             new TextRun({
-              text: `${c.score} ${t("languageCheck.assessment.scale")}`,
+              text: `${c.score} / ${
+                LANGUAGE_ASSESSMENT_MAX[assessment.scheme === "js" ? "js" : "hkdse"][
+                  c.key as "content" | "language" | "organization" | "features"
+                ]
+              }`,
               bold: true,
               size: 26,
             }),
           ],
         }),
         ...(c.subScores
-          ? (c.key === "content"
-              ? CONTENT_ASSESSMENT_DIMENSIONS
-              : c.key === "organization"
-                ? ORGANIZATION_ASSESSMENT_DIMENSIONS
-                : LANGUAGE_ASSESSMENT_DIMENSIONS
+          ? (assessment.scheme === "js"
+              ? c.key === "content"
+                ? JS_CONTENT_DIMENSIONS
+                : c.key === "organization"
+                  ? JS_ORGANIZATION_DIMENSIONS
+                  : c.key === "features"
+                    ? JS_FEATURES_DIMENSIONS
+                    : JS_LANGUAGE_DIMENSIONS
+              : c.key === "content"
+                ? CONTENT_ASSESSMENT_DIMENSIONS
+                : c.key === "organization"
+                  ? ORGANIZATION_ASSESSMENT_DIMENSIONS
+                  : LANGUAGE_ASSESSMENT_DIMENSIONS
             ).map(
               (d: string) =>
                 new Paragraph({
@@ -363,7 +383,11 @@ export async function exportLanguageCheckDocx({
                       color: "404040",
                     }),
                     new TextRun({
-                      text: `${c.subScores?.[d] ?? "–"} ${t("languageCheck.assessment.scale")}`,
+                      text: `${c.subScores?.[d] ?? "–"} / ${
+                        LANGUAGE_ASSESSMENT_MAX[assessment.scheme === "js" ? "js" : "hkdse"][
+                          c.key as "content" | "language" | "organization" | "features"
+                        ]
+                      }`,
                       bold: true,
                     }),
                   ],

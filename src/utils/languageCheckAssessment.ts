@@ -1,6 +1,10 @@
 import { z } from "zod";
 import {
   CONTENT_ASSESSMENT_DIMENSIONS,
+  JS_CONTENT_DIMENSIONS,
+  JS_FEATURES_DIMENSIONS,
+  JS_LANGUAGE_DIMENSIONS,
+  JS_ORGANIZATION_DIMENSIONS,
   LANGUAGE_ASSESSMENT_DIMENSIONS,
   ORGANIZATION_ASSESSMENT_DIMENSIONS,
 } from "@/constants/readingPrompts";
@@ -35,6 +39,33 @@ const aiOutputSchema = z.object({
   organization: feedback.extend({ scores: organizationScores }),
 });
 
+const bounded = (max: number) =>
+  z.coerce.number().transform((n) => Math.min(max, Math.max(0, Math.round(n))));
+
+/**
+ * Raw AI output for the school-based Junior Secondary scheme: Content 7 +
+ * Language 7 + Organisation 4 + Features 3 = 21. The scheme has no
+ * sub-scores, so each criterion is just a band + bilingual feedback.
+ */
+const jsCriterion = <T extends readonly string[]>(max: number, keys: T) => {
+  const sub = bounded(max);
+  return z.object({
+    score: bounded(max),
+    scores: z.object(
+      Object.fromEntries(keys.map((d) => [d, sub])) as Record<T[number], typeof sub>,
+    ),
+    strengths: bullets,
+    weaknesses: bullets,
+  });
+};
+
+const jsOutputSchema = z.object({
+  content: jsCriterion(7, JS_CONTENT_DIMENSIONS),
+  language: jsCriterion(7, JS_LANGUAGE_DIMENSIONS),
+  organization: jsCriterion(4, JS_ORGANIZATION_DIMENSIONS),
+  features: jsCriterion(3, JS_FEATURES_DIMENSIONS),
+});
+
 const criterionShape = z.object({
   score: z.number().int().min(0).max(7),
   // Absent on assessments saved before Content/Organization had sub-scores.
@@ -53,11 +84,14 @@ const criterionShape = z.object({
 const assessmentShape = z.object({
   overall: overallScore,
   languageScore: score.optional(),
-  scores: languageScores,
+  // HKDSE language dimensions, or the JS scheme's own (see JS_LANGUAGE_DIMENSIONS).
+  scores: z.record(z.string(), z.number().int().min(0).max(7)).optional(),
   strengths: bullets,
   weaknesses: bullets,
   content: criterionShape.optional(),
   organization: criterionShape.optional(),
+  scheme: z.enum(["hkdse", "js"]).optional(),
+  features: criterionShape.optional(),
 });
 
 export const languageAssessmentSchema = aiOutputSchema.transform((o) => ({
@@ -68,6 +102,18 @@ export const languageAssessmentSchema = aiOutputSchema.transform((o) => ({
   weaknesses: o.language.weaknesses,
   content: o.content,
   organization: o.organization,
+}));
+
+export const jsLanguageAssessmentSchema = jsOutputSchema.transform((o) => ({
+  overall: o.content.score + o.language.score + o.organization.score + o.features.score,
+  languageScore: o.language.score,
+  scores: o.language.scores as Record<string, number>,
+  strengths: o.language.strengths,
+  weaknesses: o.language.weaknesses,
+  content: o.content,
+  organization: o.organization,
+  features: o.features,
+  scheme: "js" as const,
 }));
 
 export type LanguageAssessment = z.infer<typeof assessmentShape>;

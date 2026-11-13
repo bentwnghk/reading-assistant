@@ -22,11 +22,13 @@ import {
   languageCheckSystemPrompt,
   languageAssessmentPrompt,
   languageAssessmentSystemPrompt,
+  jsAssessmentSystemPrompt,
   enhancedEssayPrompt,
   enhancedEssaySystemPrompt,
 } from "@/constants/readingPrompts";
 import {
   languageAssessmentSchema,
+  jsLanguageAssessmentSchema,
   type StoredLanguageAssessment,
 } from "@/utils/languageCheckAssessment";
 import {
@@ -570,16 +572,18 @@ export default function useLanguageCheck() {
     const ac = new AbortController();
     signal?.addEventListener("abort", () => ac.abort());
     try {
+      const isJs = task?.essayType === "js-writing";
       const output = await generateWithFallback(
         languageCheckModel,
-        languageAssessmentSystemPrompt(),
+        isJs ? jsAssessmentSystemPrompt() : languageAssessmentSystemPrompt(),
         languageAssessmentPrompt(text, errorSummary, task),
         ac.signal,
         image,
       );
-      const parsed = languageAssessmentSchema.parse(
-        JSON.parse(stripJsonFences(output)),
-      );
+      const json: unknown = JSON.parse(stripJsonFences(output));
+      const parsed = isJs
+        ? jsLanguageAssessmentSchema.parse(json)
+        : languageAssessmentSchema.parse(json);
       return { ...parsed, assessedAt: Date.now(), model: languageCheckModel };
     } catch (error) {
       if (isAbortError(error)) throw error;
