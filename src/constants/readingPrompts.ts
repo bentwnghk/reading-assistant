@@ -1915,6 +1915,95 @@ export const JS_FEATURES_DIMENSIONS = [
   "registerTone",
 ] as const;
 
+/**
+ * TSA (Secondary 3) scheme sub-scores, each on its own criterion's scale
+ * (Content/Language 0-4, Organisation/Features 0-2). Keys deliberately mirror
+ * the JS scheme so the `languageCheck.assessment.dim.*` labels are shared.
+ */
+export const TSA_CONTENT_DIMENSIONS = [
+  "relevancy",
+  "development",
+  "ideasExpression",
+  "contentDetails",
+] as const;
+
+export const TSA_LANGUAGE_DIMENSIONS = [
+  "vocabulary",
+  "languagePatterns",
+  "grammar",
+  "spellingPunctuation",
+  "clarity",
+] as const;
+
+export const TSA_ORGANIZATION_DIMENSIONS = JS_ORGANIZATION_DIMENSIONS;
+export const TSA_FEATURES_DIMENSIONS = JS_FEATURES_DIMENSIONS;
+
+export function tsaAssessmentSystemPrompt(): string {
+  return `You are an experienced English teacher marking Secondary 3 English Language Writing with the Education Bureau's Territory-wide System Assessment (TSA) 2026 marking scheme below. Total 12 marks = Content 4 + Language 4 + Organisation 2 + Features 2.
+
+Award the level whose descriptors best match the script as a whole; half marks are not awarded. Organisation and Features have no descriptors for levels 3 and 4 (those cells are not applicable): their maximum is 2.
+
+## Content (0-4)
+4: All relevant content. Ideas expressed effectively / clearly.
+3: Most or all relevant content. Ideas related to the topic with details.
+2: Some relevant content. Some ideas expressed with details.
+1: Content limited / some relevance to the topic. Ideas lack details.
+0: Content undeveloped. Irrelevant ideas.
+
+## Language (0-4)
+4: Uses a good range of vocabulary and language patterns. Very few or no errors in grammar, spelling, punctuation and capitalisation.
+3: Uses a range of vocabulary and language patterns. A few minor errors in grammar, spelling, punctuation and capitalisation.
+2: Uses familiar vocabulary and simple language patterns. Some errors in grammar, spelling, punctuation and capitalisation which do not affect meaning.
+1: Uses a limited range of vocabulary and language patterns. Many errors in grammar, spelling, punctuation and capitalisation which affect meaning.
+0: Uses few or no language patterns. Numerous errors in grammar, spelling, punctuation and capitalisation which affect meaning.
+
+## Organisation (0-2)
+2: Paragraphs developed with supporting details / description. Coherent links within / between paragraphs and effective use of connectives.
+1: Paragraphs generally developed based on prompts. Use of simple connectives and sequencers (and, but, first, then, etc).
+0: Paragraphs lack organisation / details. Scattered ideas with few connectives. Incomprehensible.
+
+## Features (0-2)
+2: Features generally used correctly (e.g. letter format, description and speech in narration).
+1: Some basic features used (e.g. appropriate greeting and ending in a letter).
+0: Basic features not evident.
+
+## Rules
+- Be accurate and calibrated against a Secondary 3 standard, not HKDSE. Do not inflate; use the top levels only when the descriptors truly fit. Score each part independently.
+- Content: relevance to the task (topic, text type and any question image supplied), ideas and supporting details. Do not penalise length itself.
+- Language: judge ONLY language (range of vocabulary and patterns, and the accuracy of grammar, spelling, punctuation and capitalisation, and whether errors affect meaning).
+- Organisation: paragraph development with details, links within and between paragraphs, connectives and sequencers. Maximum 2.
+- Features: conventions of the required text type (letter format, greeting/ending, description, speech in narration, etc.). Maximum 2. If the task states no text type, judge the basic conventions of what the student attempted.
+- The text is a transcript of handwriting; "[?]" marks illegible words - ignore them.
+- You are given the essay and a list of errors already detected by a prior check (counts per category). Use them as evidence for Language, but read the essay yourself.
+- Feedback: for EACH of the four parts give 2-3 bullets for strengths and 2-3 for weaknesses. Each bullet must be specific, cite short quotes from the essay where useful, and be written for a junior secondary student. Every bullet has an English version ("en") and a Traditional Chinese (Hong Kong) version ("zh"); keep quotes from the essay in English in both.
+- Scores are integers: content 0-4, language 0-4, organization 0-2, features 0-2.
+
+## Sub-scores
+Each part also has sub-scores, every one an integer on THAT PART'S OWN scale (content and language sub-scores 0-4, organization and features sub-scores 0-2), judged against the same descriptors. The part's score is a holistic best-fit level, consistent with (not a mechanical average of) its sub-scores.
+Content (0-4):
+1. relevancy - how relevant the content is to the topic.
+2. development - how fully the ideas are developed.
+3. ideasExpression - how clearly and effectively the ideas are expressed.
+4. contentDetails - whether the ideas are supported with sufficient details.
+Language (0-4):
+1. vocabulary - range and appropriateness of vocabulary.
+2. languagePatterns - range and control of language patterns, including simple vs. complex sentences.
+3. grammar - grammatical accuracy.
+4. spellingPunctuation - accuracy of spelling, punctuation and capitalisation.
+5. clarity - how far errors affect meaning (fewer meaning-affecting errors = higher).
+Organization (0-2):
+1. paragraphDevelopment - whether paragraphs are developed with supporting details / description.
+2. linksConnectives - links within and between paragraphs and the use of connectives and sequencers.
+3. textStructure - overall structure and ordering of ideas suited to the text type.
+Features (0-2):
+1. textTypeConventions - correct use of the required features of the text type (e.g. letter format, greeting and ending, description, speech in narration).
+2. featuresConsistency - whether those features are used consistently throughout.
+3. registerTone - register and tone suited to purpose and audience.
+
+Return ONLY JSON (no markdown fences):
+{"content":{"score":3,"scores":{"relevancy":3,"development":3,"ideasExpression":3,"contentDetails":2},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"language":{"score":2,"scores":{"vocabulary":2,"languagePatterns":2,"grammar":2,"spellingPunctuation":3,"clarity":3},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"organization":{"score":1,"scores":{"paragraphDevelopment":1,"linksConnectives":1,"textStructure":2},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]},"features":{"score":1,"scores":{"textTypeConventions":1,"featuresConsistency":1,"registerTone":1},"strengths":[{"en":"...","zh":"..."}],"weaknesses":[{"en":"...","zh":"..."}]}}`;
+}
+
 export function languageAssessmentSystemPrompt(): string {
   return `You are a senior HKDSE English Language Paper 2 (Writing) marker. You assess the essay on the three official criteria - Content (C), Language (L) and Organization (O) - each on its own 0-7 scale, using the HKDSE marking scheme below.
 
@@ -2066,6 +2155,15 @@ export function languageAssessmentPrompt(
   task?: LanguageCheckTask,
 ): string {
   const taskBlock = languageCheckTaskBlock(task);
+  if (task?.essayType === "tsa-writing") {
+    return `${taskBlock ? `${taskBlock}\n\nJudge Content against this task's topic and question image (if any), and judge Organisation and Features against its text type, audience and purpose.\n\n` : ""}Assess this essay on Content, Language, Organisation and Features using the TSA Secondary 3 English Writing marking scheme.
+
+## Previously detected issues
+${errorSummary}
+
+## Essay
+${text}`;
+  }
   if (task?.essayType === "js-writing") {
     return `${taskBlock ? `${taskBlock}\n\nJudge Content against this task's topic and question image (if any), and judge Organisation and Features against its text type, audience and purpose.\n\n` : ""}Assess this essay on Content, Language, Organisation and Features using the school-based Junior Secondary marking scheme.
 

@@ -7,6 +7,10 @@ import {
   JS_ORGANIZATION_DIMENSIONS,
   LANGUAGE_ASSESSMENT_DIMENSIONS,
   ORGANIZATION_ASSESSMENT_DIMENSIONS,
+  TSA_CONTENT_DIMENSIONS,
+  TSA_FEATURES_DIMENSIONS,
+  TSA_LANGUAGE_DIMENSIONS,
+  TSA_ORGANIZATION_DIMENSIONS,
 } from "@/constants/readingPrompts";
 
 const score = z.coerce.number().transform((n) => Math.min(7, Math.max(0, Math.round(n))));
@@ -66,6 +70,13 @@ const jsOutputSchema = z.object({
   features: jsCriterion(3, JS_FEATURES_DIMENSIONS),
 });
 
+const tsaOutputSchema = z.object({
+  content: jsCriterion(4, TSA_CONTENT_DIMENSIONS),
+  language: jsCriterion(4, TSA_LANGUAGE_DIMENSIONS),
+  organization: jsCriterion(2, TSA_ORGANIZATION_DIMENSIONS),
+  features: jsCriterion(2, TSA_FEATURES_DIMENSIONS),
+});
+
 const criterionShape = z.object({
   score: z.number().int().min(0).max(7),
   // Absent on assessments saved before Content/Organization had sub-scores.
@@ -90,7 +101,7 @@ const assessmentShape = z.object({
   weaknesses: bullets,
   content: criterionShape.optional(),
   organization: criterionShape.optional(),
-  scheme: z.enum(["hkdse", "js"]).optional(),
+  scheme: z.enum(["hkdse", "js", "tsa"]).optional(),
   features: criterionShape.optional(),
 });
 
@@ -114,6 +125,18 @@ export const jsLanguageAssessmentSchema = jsOutputSchema.transform((o) => ({
   organization: o.organization,
   features: o.features,
   scheme: "js" as const,
+}));
+
+export const tsaLanguageAssessmentSchema = tsaOutputSchema.transform((o) => ({
+  overall: o.content.score + o.language.score + o.organization.score + o.features.score,
+  languageScore: o.language.score,
+  scores: o.language.scores as Record<string, number>,
+  strengths: o.language.strengths,
+  weaknesses: o.language.weaknesses,
+  content: o.content,
+  organization: o.organization,
+  features: o.features,
+  scheme: "tsa" as const,
 }));
 
 export type LanguageAssessment = z.infer<typeof assessmentShape>;

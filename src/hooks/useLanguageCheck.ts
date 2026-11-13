@@ -23,12 +23,14 @@ import {
   languageAssessmentPrompt,
   languageAssessmentSystemPrompt,
   jsAssessmentSystemPrompt,
+  tsaAssessmentSystemPrompt,
   enhancedEssayPrompt,
   enhancedEssaySystemPrompt,
 } from "@/constants/readingPrompts";
 import {
   languageAssessmentSchema,
   jsLanguageAssessmentSchema,
+  tsaLanguageAssessmentSchema,
   type StoredLanguageAssessment,
 } from "@/utils/languageCheckAssessment";
 import {
@@ -573,17 +575,24 @@ export default function useLanguageCheck() {
     signal?.addEventListener("abort", () => ac.abort());
     try {
       const isJs = task?.essayType === "js-writing";
+      const isTsa = task?.essayType === "tsa-writing";
       const output = await generateWithFallback(
         languageCheckModel,
-        isJs ? jsAssessmentSystemPrompt() : languageAssessmentSystemPrompt(),
+        isTsa
+          ? tsaAssessmentSystemPrompt()
+          : isJs
+            ? jsAssessmentSystemPrompt()
+            : languageAssessmentSystemPrompt(),
         languageAssessmentPrompt(text, errorSummary, task),
         ac.signal,
         image,
       );
       const json: unknown = JSON.parse(stripJsonFences(output));
-      const parsed = isJs
-        ? jsLanguageAssessmentSchema.parse(json)
-        : languageAssessmentSchema.parse(json);
+      const parsed = isTsa
+        ? tsaLanguageAssessmentSchema.parse(json)
+        : isJs
+          ? jsLanguageAssessmentSchema.parse(json)
+          : languageAssessmentSchema.parse(json);
       return { ...parsed, assessedAt: Date.now(), model: languageCheckModel };
     } catch (error) {
       if (isAbortError(error)) throw error;

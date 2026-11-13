@@ -4710,7 +4710,7 @@
   "languageCheck": {
     "navTitle": "Writing Assessment",
     "title": "Writing Assessment",
-    "subtitle": "Choose a writing topic, then upload a handwritten essay or scanned work. One check returns inline corrections with explanations plus an automatic AI Writing Assessment — scored on the HKDSE criteria for DSE topics, or the school-based Junior Secondary marking scheme (21 marks) for JS Writing topics. With \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
+    "subtitle": "Choose a writing topic, then upload a handwritten essay or scanned work. One check returns inline corrections with explanations plus an automatic AI Writing Assessment — scored on the HKDSE criteria for DSE topics, the school-based Junior Secondary scheme (21 marks) for JS Writing topics, or the Education Bureau TSA Secondary 3 scheme (12 marks) for TSA Writing topics. With \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
     "back": "Back",
     "cancel": "Cancel",
     "stop": "Stop",
@@ -4731,14 +4731,14 @@
         "learning": "Learning"
       },
       "overview": {
-        "intro": "Pick a topic, upload a handwritten or scanned essay and review the verbatim transcript — then one check returns inline corrections with explanations and automatically scores the writing with the AI Writing Assessment. The marking scheme follows the topic's essay type: HKDSE Content, Language and Organization (DSE Part A/B), or the school-based Junior Secondary scheme (JS Writing).",
+        "intro": "Pick a topic, upload a handwritten or scanned essay and review the verbatim transcript — then one check returns inline corrections with explanations and automatically scores the writing with the AI Writing Assessment. The marking scheme follows the topic's essay type: HKDSE Content, Language and Organization (DSE Part A/B), the school-based Junior Secondary scheme (JS Writing) or the Education Bureau TSA Secondary 3 scheme (TSA Writing).",
         "sections": {
           "name": "Two Sections",
           "desc": "\"My essays\" holds the upload area and your saved essays; \"My learning\" holds saved learning sessions, a progress dashboard and an activity log."
         },
         "topic": {
           "name": "Pick a Topic First",
-          "desc": "Every essay answers a writing task. Choose a topic from your Topic Library above the upload area — a title, the full prompt, an optional question image and the essay type (DSE Part A, DSE Part B or JS Writing). Its title becomes the essay's default title, and the task guides both the check and the assessment. The picker splits into \"My topics\" and \"Class topics\": a topic created for a class you are in (or teach) shows its class name and creator, so you can answer the task your teacher set."
+          "desc": "Every essay answers a writing task. Choose a topic from your Topic Library above the upload area — a title, the full prompt, an optional question image and the essay type (DSE Part A, DSE Part B, JS Writing or TSA Writing). Its title becomes the essay's default title, and the task guides both the check and the assessment. The picker splits into \"My topics\" and \"Class topics\": a topic created for a class you are in (or teach) shows its class name and creator, so you can answer the task your teacher set."
         },
         "upload": {
           "name": "Uploading",
@@ -4750,7 +4750,7 @@
         },
         "assessment": {
           "name": "AI Writing Assessment",
-          "desc": "Every check ends with an automatic AI Writing Assessment, marked with the scheme for the topic's essay type: DSE topics get a 0–7 band for each HKDSE criterion (Content, Language, Organization, total 21); JS Writing topics use the Junior Secondary scheme — Content 7 + Language 7 + Organisation 4 + Features 3 = 21. Bilingual strengths and weaknesses are included. Details in the Results tab."
+          "desc": "Every check ends with an automatic AI Writing Assessment, marked with the scheme for the topic's essay type: DSE topics get a 0–7 band for each HKDSE criterion (Content, Language, Organization, total 21); JS Writing topics use the Junior Secondary scheme — Content 7 + Language 7 + Organisation 4 + Features 3 = 21; TSA Writing topics use the Education Bureau TSA Secondary 3 scheme — Content 4 + Language 4 + Organisation 2 + Features 2 = 12. Bilingual strengths and weaknesses are included. Details in the Results tab."
         },
         "retention": {
           "name": "Storage & Privacy",
@@ -4796,7 +4796,7 @@
         },
         "assessment": {
           "name": "AI Writing Assessment",
-          "desc": "The first results tab, filled in automatically right after the check — the assessment reads the detected error counts as evidence. DSE topics are scored on HKDSE Content (C), Language (L) and Organization (O): a 0–7 band for each plus an overall, sub-scores for each criterion and bilingual strengths & areas to improve. JS Writing topics use the school-based Junior Secondary scheme: Content (0–7), Language (0–7), Organisation (0–4) and Features (0–3, the conventions of the text type such as letter format or speech in narration), totalling 21, each with sub-scores (Content and Language 5, Organisation and Features 3), bilingual feedback and an S1–S3 standard."
+          "desc": "The first results tab, filled in automatically right after the check — the assessment reads the detected error counts as evidence. DSE topics are scored on HKDSE Content (C), Language (L) and Organization (O): a 0–7 band for each plus an overall, sub-scores for each criterion and bilingual strengths & areas to improve. JS Writing topics use the school-based Junior Secondary scheme: Content (0–7), Language (0–7), Organisation (0–4) and Features (0–3, the conventions of the text type such as letter format or speech in narration), totalling 21, each with sub-scores (Content and Language 5, Organisation and Features 3), bilingual feedback and an S1–S3 standard. TSA Writing topics use the Education Bureau TSA Secondary 3 marking scheme: Content (0–4), Language (0–4), Organisation (0–2) and Features (0–2), totalling 12 (Organisation and Features have no level 3–4 descriptors), with sub-scores (Content 4, Language 5, Organisation and Features 3 — scored on each criterion's own scale), bilingual feedback and an S3 standard."
         },
         "enhanced": {
           "name": "Enhanced Essays",
@@ -4961,7 +4961,7 @@
       "words_other": "{{count}} words",
       "errors_one": "{{count}} comment",
       "errors_other": "{{count}} comments",
-      "overall": "Overall {{score}}/21",
+      "overall": "Overall score {{score}}",
       "status": {
         "draft": "Draft",
         "transcribed": "Transcribed",
@@ -4982,6 +4982,7 @@
       "statStudents": "Students",
       "statTopics": "Topics",
       "statAvgScore": "Average score",
+      "avgScoreHint": "marks (max varies by essay type)",
       "filterStudent": "Student",
       "allStudents": "All students",
       "filterTopic": "Topic",
@@ -5063,6 +5064,7 @@
       "title": "AI Writing Assessment",
       "subtitle": "Each HKDSE Writing criterion (Content, Language, Organization) is scored 0–7; the overall is their sum, out of 21",
       "subtitleJs": "School-based Junior Secondary scheme: Content 7 + Language 7 + Organisation 4 + Features 3 = 21 marks",
+      "subtitleTsa": "TSA Secondary 3 scheme: Content 4 + Language 4 + Organisation 2 + Features 2 = 12 marks",
       "legacy": "This assessment was made before Content and Organization were added and covers Language only. Re-assess to get all three criteria.",
       "criteria": {
         "content": "Content (C)",

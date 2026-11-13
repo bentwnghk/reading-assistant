@@ -448,7 +448,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
           value={
             stats ? (stats.avgOverall === null ? "—" : stats.avgOverall.toFixed(1)) : "…"
           }
-          hint={t("languageCheck.assessment.overallScale")}
+          hint={t("languageCheck.staff.avgScoreHint")}
           tone="text-green-500"
         />
       </div>

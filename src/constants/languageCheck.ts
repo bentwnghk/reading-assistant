@@ -311,7 +311,12 @@ export const LANGUAGE_CHECK_MAX_ESSAYS = 100;
 
 // ─── Writing topics (Topic Library) ──────────────────────────────────────────
 
-export const LANGUAGE_CHECK_ESSAY_TYPES = ["dse-part-a", "dse-part-b", "js-writing"] as const;
+export const LANGUAGE_CHECK_ESSAY_TYPES = [
+  "dse-part-a",
+  "dse-part-b",
+  "js-writing",
+  "tsa-writing",
+] as const;
 export type LanguageCheckEssayType = (typeof LANGUAGE_CHECK_ESSAY_TYPES)[number];
 
 /** What the marker should know about each essay type (injected into the AI prompts). */
@@ -334,14 +339,31 @@ export const LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE: Record<
     guidance:
       "Junior Secondary (S1-S3) school-based English writing, marked with the school-based Junior Secondary marking scheme (adapted from the EDB / HKEAA TSA Secondary 3 English Writing scheme): Content 7 + Language 7 + Organisation 4 + Features 3 = 21 marks. The writer is a S1-S3 learner, so judge the language against a junior secondary level (familiar vocabulary, simple patterns, some attempts at complex structures) - do not hold the script to HKDSE standards. Features means the conventions of the required text type (e.g. letter greeting/ending and format, description and speech in narration, register and tone suited to purpose and audience).",
   },
+  "tsa-writing": {
+    label: "TSA Writing",
+    guidance:
+      "Territory-wide System Assessment (TSA) Secondary 3 English Language Writing, marked with the Education Bureau TSA marking scheme: Content 0-4 + Language 0-4 + Organisation 0-2 + Features 0-2 = 12 marks. Organisation and Features are only scored at levels 0-2 (the top two levels are not applicable). The writer is a S3 learner, so judge the language against a junior secondary level (familiar vocabulary, simple patterns, some attempts at complex structures) - do not hold the script to HKDSE standards. Features means the conventions of the required text type (e.g. letter format, appropriate greeting and ending, description, and speech in narration).",
+  },
 };
 
 /** Marks available per criterion for each marking scheme (the overall is their sum). */
 export const LANGUAGE_ASSESSMENT_MAX = {
   hkdse: { content: 7, language: 7, organization: 7, features: 0 },
   js: { content: 7, language: 7, organization: 4, features: 3 },
+  tsa: { content: 4, language: 4, organization: 2, features: 2 },
 } as const;
 export type LanguageAssessmentScheme = keyof typeof LANGUAGE_ASSESSMENT_MAX;
+
+/** Maps a stored assessment's `scheme` (absent on legacy HKDSE ones) to a known scheme. */
+export function assessmentSchemeOf(scheme?: string | null): LanguageAssessmentScheme {
+  return scheme === "js" || scheme === "tsa" ? scheme : "hkdse";
+}
+
+/** Total marks of a scheme (sum of its criteria maxima). */
+export function assessmentOverallMax(scheme: LanguageAssessmentScheme): number {
+  const m = LANGUAGE_ASSESSMENT_MAX[scheme];
+  return m.content + m.language + m.organization + m.features;
+}
 
 export const LANGUAGE_CHECK_MAX_TOPICS = 200;
 export const LANGUAGE_CHECK_MAX_TOPIC_TITLE_CHARS = 200;

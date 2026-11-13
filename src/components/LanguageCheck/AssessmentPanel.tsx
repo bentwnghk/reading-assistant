@@ -14,8 +14,17 @@ import {
   JS_ORGANIZATION_DIMENSIONS,
   LANGUAGE_ASSESSMENT_DIMENSIONS,
   ORGANIZATION_ASSESSMENT_DIMENSIONS,
+  TSA_CONTENT_DIMENSIONS,
+  TSA_FEATURES_DIMENSIONS,
+  TSA_LANGUAGE_DIMENSIONS,
+  TSA_ORGANIZATION_DIMENSIONS,
 } from "@/constants/readingPrompts";
-import { LANGUAGE_ASSESSMENT_MAX, type LanguageAssessmentScheme } from "@/constants/languageCheck";
+import {
+  LANGUAGE_ASSESSMENT_MAX,
+  assessmentOverallMax,
+  assessmentSchemeOf,
+  type LanguageAssessmentScheme,
+} from "@/constants/languageCheck";
 import type { ExplanationLanguage } from "@/store/languageCheck";
 
 interface AssessmentPanelProps {
@@ -53,6 +62,18 @@ const DIMENSIONS: Record<LanguageAssessmentScheme, Record<CriterionKey, readonly
     organization: JS_ORGANIZATION_DIMENSIONS,
     features: JS_FEATURES_DIMENSIONS,
   },
+  tsa: {
+    content: TSA_CONTENT_DIMENSIONS,
+    language: TSA_LANGUAGE_DIMENSIONS,
+    organization: TSA_ORGANIZATION_DIMENSIONS,
+    features: TSA_FEATURES_DIMENSIONS,
+  },
+};
+
+const SUBTITLE_KEYS: Record<LanguageAssessmentScheme, string> = {
+  hkdse: "languageCheck.assessment.subtitle",
+  js: "languageCheck.assessment.subtitleJs",
+  tsa: "languageCheck.assessment.subtitleTsa",
 };
 
 function tone(score: number): string {
@@ -104,7 +125,7 @@ export default function AssessmentPanel({
   // Bullets quote long runs of learner text (English in ASCII quotes joined
   // by CJK punctuation, e.g. "xxx"、"yyy"); without a soft-wrap rule their
   // min-content width blows the grid past the card/dialog edge.
-  const scheme = result?.scheme === "js" ? "js" : "hkdse";
+  const scheme = assessmentSchemeOf(result?.scheme);
   const maxOf = (key: CriterionKey): number => LANGUAGE_ASSESSMENT_MAX[scheme][key];
   const criteria: {
     key: CriterionKey;
@@ -141,11 +162,7 @@ export default function AssessmentPanel({
               {t("languageCheck.assessment.title")}
             </p>
             <p className="break-words text-xs text-muted-foreground">
-              {t(
-                scheme === "js"
-                  ? "languageCheck.assessment.subtitleJs"
-                  : "languageCheck.assessment.subtitle",
-              )}
+              {t(SUBTITLE_KEYS[scheme])}
               {result &&
                 ` · ${t("languageCheck.assessment.assessedOn", {
                   date: new Date(result.assessedAt).toLocaleString(),
@@ -186,7 +203,7 @@ export default function AssessmentPanel({
                 {result.overall}
                 <span className="text-base font-normal text-muted-foreground">
                   {" "}
-                  {t("languageCheck.assessment.overallScale")}
+                  / {assessmentOverallMax(scheme)}
                 </span>
               </span>
             </div>

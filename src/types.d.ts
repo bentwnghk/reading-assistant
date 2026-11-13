@@ -1135,7 +1135,7 @@ interface LanguageCheckError {
   alternatives?: string[];
 }
 
-type LanguageCheckEssayTypeId = "dse-part-a" | "dse-part-b" | "js-writing";
+type LanguageCheckEssayTypeId = "dse-part-a" | "dse-part-b" | "js-writing" | "tsa-writing";
 
 /** The writing task an essay answers (entered once, saved in the Topic Library). */
 interface LanguageCheckTopicSummary {
@@ -1214,7 +1214,7 @@ interface LanguageCheckAssessment {
   content?: LanguageCheckCriterionFeedback;
   organization?: LanguageCheckCriterionFeedback;
   /** Marking scheme used; absent = HKDSE (older assessments). */
-  scheme?: "hkdse" | "js";
+  scheme?: "hkdse" | "js" | "tsa";
   /** JS scheme only (0-3). */
   features?: LanguageCheckCriterionFeedback;
   assessedAt: number;
