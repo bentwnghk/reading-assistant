@@ -294,7 +294,7 @@ export default function TopicReportContainer() {
               <p className="mb-3 text-sm font-semibold">{t("languageCheck.reports.distribution")}</p>
               <div className="flex h-28 items-end gap-3">
                 {bands.map((b, i) => (
-                  <div key={b.key} className="flex flex-1 flex-col items-center justify-end gap-1">
+                  <div key={b.key} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                     <span className="text-xs font-semibold tabular-nums">{report.distribution[i]}</span>
                     <div
                       className={cn("w-full rounded-t-md", b.color)}
