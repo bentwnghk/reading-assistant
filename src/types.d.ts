@@ -1332,3 +1332,93 @@ interface LanguageCheckStaffDetail extends LanguageCheckStaffRow {
   assessment: LanguageCheckAssessment | null;
   enhanced?: LanguageCheckEnhanced | null;
 }
+
+// ─── Topic reports (staff, /writing-assessment?view=students&tab=reports) ────
+
+/** Per-criterion class averages (1 dp); null = nobody assessed on it. */
+interface LanguageCheckCriterionAverages {
+  content: number | null;
+  language: number | null;
+  organization: number | null;
+  features: number | null;
+  overall: number | null;
+}
+
+/** One saved writing topic with its class completion + average score. */
+interface LanguageCheckTopicReportCard {
+  id: string;
+  title: string;
+  essayType: LanguageCheckEssayTypeId;
+  classId: string | null;
+  /** Display label of the class ("S5 · English · Gp1"); null = no class. */
+  className: string | null;
+  creatorName: string | null;
+  /** Students in the class; null when the topic has no class. */
+  studentCount: number | null;
+  /** Students with a checked essay on the topic. */
+  checkedCount: number;
+  /** Of those, students with a saved AI assessment. */
+  assessedCount: number;
+  avgOverall: number | null;
+  /** Marks available in the topic's marking scheme. */
+  overallMax: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** One student on a topic report (latest essay on the topic). */
+interface LanguageCheckTopicReportStudent {
+  essayId: string;
+  userId: string;
+  name: string;
+  email: string;
+  status: "draft" | "transcribed" | "checked";
+  wordCount: number;
+  errorCount: number;
+  content: number | null;
+  language: number | null;
+  organization: number | null;
+  features: number | null;
+  overall: number | null;
+  updatedAt: number;
+}
+
+/** A class member without a checked essay on the topic. */
+interface LanguageCheckTopicReportPending {
+  userId: string;
+  name: string;
+  email: string;
+  /** Latest essay on the topic, when one exists (draft / transcribed). */
+  essayId: string | null;
+  status: "none" | "draft" | "transcribed";
+}
+
+interface LanguageCheckTopicReport {
+  topic: {
+    id: string;
+    title: string;
+    topic: string;
+    essayType: LanguageCheckEssayTypeId;
+    hasQuestionImage: boolean;
+    classId: string | null;
+    className: string | null;
+    creatorName: string | null;
+    createdAt: number;
+  };
+  /** Marks per criterion for the topic's marking scheme. */
+  max: { content: number; language: number; organization: number; features: number; overall: number };
+  studentCount: number | null;
+  checkedCount: number;
+  assessedCount: number;
+  averages: LanguageCheckCriterionAverages;
+  avgWords: number | null;
+  avgErrors: number | null;
+  highest: number | null;
+  lowest: number | null;
+  /** Assessed students per overall-score band (<40%, 40–59%, 60–79%, 80%+). */
+  distribution: [number, number, number, number];
+  /** Most frequent error categories across the checked essays. */
+  commonErrors: { category: string; count: number }[];
+  students: LanguageCheckTopicReportStudent[];
+  pending: LanguageCheckTopicReportPending[];
+}

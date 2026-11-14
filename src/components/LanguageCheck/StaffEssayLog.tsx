@@ -9,14 +9,12 @@ import {
   BookMarked,
   ChevronLeft,
   ChevronRight,
-  Download,
   Eye,
   Link2,
   LoaderCircle,
   PenLine,
   Pencil,
   RefreshCw,
-  Square,
   Trophy,
   Users,
 } from "lucide-react";
@@ -37,27 +35,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import ResultsView from "@/components/LanguageCheck/ResultsView";
-import AssessmentPanel from "@/components/LanguageCheck/AssessmentPanel";
-import EnhancedEssayPanel from "@/components/LanguageCheck/EnhancedEssayPanel";
-import ExportDialog from "@/components/LanguageCheck/ExportDialog";
+import StaffEssayDialog from "@/components/LanguageCheck/StaffEssayDialog";
 import TopicCombobox from "@/components/LanguageCheck/TopicCombobox";
 import { Stat } from "@/components/LanguageCheck/Learn/LearnDashboardView";
+import { STATUS_TONE } from "@/components/LanguageCheck/shared";
 import {
-  ExplanationLanguageToggle,
-  SegmentedTabs,
-  STATUS_TONE,
-} from "@/components/LanguageCheck/shared";
-import useLanguageCheck from "@/hooks/useLanguageCheck";
-import {
-  abortLanguageCheck,
   useLanguageCheckStore,
 } from "@/store/languageCheck";
 import { cn } from "@/utils/style";
 import { formatDateTime } from "@/utils/formatDate";
 import { parseError } from "@/utils/error";
 import {
-  LANGUAGE_CHECK_RETENTION_DAYS,
   LANGUAGE_CHECK_STATUSES,
 } from "@/constants/languageCheck";
 
@@ -120,18 +108,10 @@ function SortHeader({
 export default function StaffEssayLog({ classId: classProp, userId: userProp }: StaffEssayLogProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const { runStaffCheck } = useLanguageCheck();
-  const language = useLanguageCheckStore((s) => s.explanationLanguage);
-  const setLanguage = useLanguageCheckStore((s) => s.setExplanationLanguage);
-  const generating = useLanguageCheckStore((s) => s.activeGenerations);
-  const generatingId = useLanguageCheckStore((s) => s.generatingEssayId);
   const role = session?.user?.role;
 
   const [data, setData] = useState<StaffListResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [detailTab, setDetailTab] = useState<"assessment" | "corrections" | "enhanced">(
-    "assessment",
-  );
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const classId = classProp ?? "all";
@@ -140,9 +120,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   const [topicId, setTopicId] = useState("all");
   const [sort, setSort] = useState<StaffSortField>("updated");
   const [order, setOrder] = useState<StaffSortOrder>("desc");
-  const [detail, setDetail] = useState<LanguageCheckStaffDetail | null>(null);
-  const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
-  const [exportOpen, setExportOpen] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
   // Inline title rename (staff-only affordance in the Title column). The
   // refs make commit idempotent across Enter→blur double fires and keep a
   // cancelled edit from persisting after the input unmounts.
@@ -207,47 +185,6 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     void load();
   }, [load, isStaff]);
 
-  async function openDetail(id: string) {
-    setDetailLoadingId(id);
-    try {
-      const res = await fetch(`/api/writing-assessment/staff/${id}`);
-      const body = await res.json().catch(() => null);
-      if (!res.ok) {
-        throw new Error(body?.error || `HTTP ${res.status}`);
-      }
-      setDetail(body as LanguageCheckStaffDetail);
-    } catch (error) {
-      toast.error(parseError(error));
-    } finally {
-      setDetailLoadingId(null);
-    }
-  }
-
-  // Re-check the open student's essay. The generation pipeline (toasts,
-  // progress, abort, the one-at-a-time guard) is shared with the owner
-  // workspace; only the persist step goes through the staff endpoint.
-  const checkRunning =
-    !!detail && generatingId === detail.id && !!generating["language-check"];
-
-  async function handleStaffRecheck() {
-    if (!detail) return;
-    const ok = await runStaffCheck({
-      id: detail.id,
-      transcript: detail.transcript,
-      title: detail.title,
-      topic: detail.topic,
-      essayType: detail.essayType,
-      questionImage: detail.questionImage,
-    });
-    if (!ok) return;
-    setDetailTab("assessment");
-    // Refresh the dialog, this table — and the caller's own essay list in
-    // the languageCheck store (they may be the uploader of this essay, in
-    // which case its summary is cached there too).
-    void useLanguageCheckStore.getState().loadList(true);
-    await Promise.all([openDetail(detail.id), load()]);
-  }
-
   // --- Inline title rename (Title column) -------------------------------
   // Staff may rename any in-scope essay directly in the table. The title is
   // the per-essay snapshot (renaming never touches the Topic Library), and
@@ -297,7 +234,6 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
             }
           : d,
       );
-      setDetail((d) => (d && d.id === row.id ? { ...d, title: next } : d));
       // The caller may be the uploader — their own essay list caches the
       // title too (same reasoning as the staff re-check).
       void useLanguageCheckStore.getState().loadList(true);
@@ -350,8 +286,6 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       // The caller may be the uploader — their own essay list caches the
       // snapshot topic too (same reasoning as the staff re-check).
       void useLanguageCheckStore.getState().loadList(true);
-      // The dialog (if open on this essay) shows the re-snapshotted task.
-      if (detail?.id === row.id) void openDetail(row.id);
       // Refresh the table: the row's Topic column, the topic filter options
       // (they JOIN the live library) and the Topics stat card all change.
       await load();
@@ -385,40 +319,6 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
     }
     setPage(1);
   }
-
-  // Re-check availability — same archive semantics as the owner workspace:
-  // past the retention window the essay stays viewable but stops mutating,
-  // and without a transcript there is nothing to check.
-  const detailExpired =
-    !!detail &&
-    Date.now() - detail.createdAt >=
-      LANGUAGE_CHECK_RETENTION_DAYS * 86_400_000;
-  const hasTranscript = !!detail?.transcript.trim();
-  const recheckDisabled =
-    checkRunning ||
-    !!generating["language-check"] ||
-    !hasTranscript ||
-    detailExpired;
-  const recheckTitle = !hasTranscript
-    ? t("languageCheck.check.noText")
-    : detailExpired
-      ? t("languageCheck.results.expiredDisabled")
-      : undefined;
-
-  // Map the staff detail onto the essay shape shared by the results view and
-  // the Word export (the export reads checkedText/corrections/assessment/
-  // enhanced plus the owner block — scans are never sent to staff).
-  const detailEssay: LanguageCheckEssay | null = detail
-    ? {
-        ...detail,
-        ownerId: detail.userId,
-        ownerName: detail.userName,
-        ownerEmail: detail.userEmail,
-        images: [],
-      }
-    : null;
-  const detailHasResults =
-    detail?.status === "checked" && detail.checkedText.length > 0;
 
   return (
     <section className="flex flex-col gap-3">
@@ -663,17 +563,10 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                       <Button
                         variant="ghost"
                         size="sm"
-                        disabled={detailLoadingId === row.id}
-                        onClick={() => void openDetail(row.id)}
+                        onClick={() => setOpenId(row.id)}
                       >
-                        {detailLoadingId === row.id ? (
-                          <LoaderCircle className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Eye className="mr-1 h-4 w-4" />
-                            {t("languageCheck.staff.view")}
-                          </>
-                        )}
+                        <Eye className="mr-1 h-4 w-4" />
+                        {t("languageCheck.staff.view")}
                       </Button>
                     </td>
                   </tr>
@@ -737,181 +630,11 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
         </>
       )}
 
-      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent
-          className="h-[92vh] max-w-[min(95vw,72rem)] grid-rows-[auto_minmax(0,1fr)]"
-          onInteractOutside={(e) => {
-            // The Export dialog (and the Enhanced-Essays confirm dialog)
-            // stack on top of this one. While a child dialog is open, an
-            // outside interaction belongs to it — never to this dialog.
-            if (exportOpen) {
-              e.preventDefault();
-              return;
-            }
-            // On touch, Radix defers a dialog's outside-pointer check to the
-            // click that follows the tap. A tap on the child's Cancel/X
-            // unmounts the child dialog (it is conditionally mounted) within
-            // that same click, so this dialog is momentarily the top layer
-            // again and receives the tap as an "outside" interaction whose
-            // target has already been removed from the DOM — dismissing this
-            // dialog too and dropping the staff member back to the table.
-            // Stale interactions like that are ignored.
-            const target = e.detail.originalEvent.target as Node | null;
-            if (target && !target.isConnected) e.preventDefault();
-          }}
-        >
-          <DialogHeader>
-            <DialogTitle className="flex flex-wrap items-center gap-2 pr-6">
-              {detail?.title || t("languageCheck.list.untitled")}
-              {detail && (
-                <span
-                  className={cn(
-                    "rounded-full px-2 py-0.5 text-[11px] font-medium",
-                    STATUS_TONE[detail.status],
-                  )}
-                >
-                  {t(`languageCheck.list.status.${detail.status}`)}
-                </span>
-              )}
-            </DialogTitle>
-            {detail && (
-              <DialogDescription>
-                {detail.userName} · {detail.userEmail} ·{" "}
-                {t("languageCheck.list.pages", { count: detail.pageCount })}
-                {detail.wordCount > 0 &&
-                  ` · ${t("languageCheck.list.words", { count: detail.wordCount })}`}
-                {detail.status === "checked" &&
-                  ` · ${t("languageCheck.list.errors", { count: detail.errorCount })}`}
-              </DialogDescription>
-            )}
-          </DialogHeader>
-
-          {detail && (
-            <div className="flex min-h-0 flex-col gap-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
-                  {formatDateTime(detail.createdAt)}
-                  {detail.checkModel &&
-                    ` · ${t("languageCheck.results.checkedWith", { model: detail.checkModel })}`}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  {checkRunning && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => abortLanguageCheck("language-check")}
-                    >
-                      <Square className="mr-1.5 h-3.5 w-3.5" />
-                      {t("languageCheck.stop")}
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={recheckDisabled}
-                    title={recheckTitle}
-                    onClick={() => void handleStaffRecheck()}
-                  >
-                    {checkRunning ? (
-                      <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="mr-1.5 h-4 w-4" />
-                    )}
-                    {detail.status === "checked"
-                      ? t("languageCheck.results.recheck")
-                      : t("languageCheck.review.runCheck")}
-                  </Button>
-                  {detailHasResults && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setExportOpen(true)}
-                    >
-                      <Download className="mr-1.5 h-4 w-4" />
-                      {t("languageCheck.results.export")}
-                    </Button>
-                  )}
-                  <ExplanationLanguageToggle
-                    language={language}
-                    onChange={setLanguage}
-                  />
-                </div>
-              </div>
-
-              {detail.status === "checked" && detail.checkedText ? (
-                <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
-                  <SegmentedTabs
-                    value={detailTab}
-                    onChange={setDetailTab}
-                    ariaLabel={t("languageCheck.results.tabsLabel")}
-                    className="w-fit"
-                    options={[
-                      { value: "assessment", label: t("languageCheck.results.tabAssessment") },
-                      { value: "corrections", label: t("languageCheck.results.tabCorrections") },
-                      { value: "enhanced", label: t("languageCheck.results.tabEnhanced") },
-                    ]}
-                  />
-                  {detailTab === "assessment" ? (
-                    <AssessmentPanel
-                      essay={detail}
-                      language={language}
-                      onSave={async (assessment) => {
-                        const res = await fetch(
-                          `/api/writing-assessment/staff/${detail.id}/assessment`,
-                          {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(assessment),
-                          },
-                        );
-                        if (!res.ok) throw new Error("save failed");
-                        setDetail((d) =>
-                          d && d.id === detail.id ? { ...d, assessment } : d,
-                        );
-                      }}
-                    />
-                  ) : detailTab === "enhanced" ? (
-                    <EnhancedEssayPanel
-                      essay={detail}
-                      onSave={async (enhanced) => {
-                        const res = await fetch(
-                          `/api/writing-assessment/staff/${detail.id}/enhanced`,
-                          {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(enhanced),
-                          },
-                        );
-                        if (!res.ok) throw new Error("save failed");
-                        setDetail((d) =>
-                          d && d.id === detail.id ? { ...d, enhanced } : d,
-                        );
-                      }}
-                    />
-                  ) : detailEssay ? (
-                    // Same view students see (ResultsView never reads `images`).
-                    <ResultsView essay={detailEssay} language={language} embedded />
-                  ) : null}
-                </div>
-              ) : (
-                <div className="flex min-h-0 flex-col gap-4 overflow-y-auto">
-                  <p className="rounded-lg border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-                    {t("languageCheck.staff.detailNoCorrections")}
-                  </p>
-                  <div>
-                    <p className="mb-2 text-sm font-semibold">
-                      {t("languageCheck.staff.detailTranscript")}
-                    </p>
-                    <p className="max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border bg-muted/30 p-3 text-sm leading-relaxed">
-                      {detail.transcript || "—"}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <StaffEssayDialog
+        essayId={openId}
+        onClose={() => setOpenId(null)}
+        onChanged={() => void load()}
+      />
 
       {relinkRow && (
         <Dialog open onOpenChange={(o) => !o && setRelinkRow(null)}>
@@ -996,14 +719,6 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
         </Dialog>
       )}
 
-      {exportOpen && detailEssay && (
-        <ExportDialog
-          essay={detailEssay}
-          language={language}
-          open={exportOpen}
-          onOpenChange={setExportOpen}
-        />
-      )}
     </section>
   );
 }

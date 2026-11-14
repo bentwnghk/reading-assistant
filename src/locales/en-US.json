@@ -4939,6 +4939,7 @@
         },
         "students": {
           "essays": "Student essays",
+          "reports": "Topic reports",
           "learning": "Student learning"
         }
       },
@@ -4972,6 +4973,64 @@
       "deleteDesc": "\"{{title}}\" and its scans and corrections will be permanently deleted.",
       "retentionHint": "Original scans are automatically deleted {{days}} days after upload.",
       "rowsPerPage": "Per page"
+    },
+    "reports": {
+      "statTopics": "Topics",
+      "statChecked": "Checked essays",
+      "statComplete": "Fully checked",
+      "statCompleteHint": "Every class student done",
+      "search": "Search topics or classes…",
+      "sortLabel": "Sort",
+      "sort": {
+        "recent": "Most recent",
+        "completion": "Completion",
+        "score": "Average score",
+        "title": "Title (A–Z)"
+      },
+      "empty": "No writing topics yet. Create one in the Topic Library under My work.",
+      "emptySearch": "Nothing matches your search.",
+      "noClass": "No class",
+      "checkedLabel": "Checked essays",
+      "percentDone": "{{percent}}% done",
+      "noRoster": "No class assigned",
+      "avg": "Avg",
+      "back": "Back to Topic reports",
+      "outOf": "Marked out of {{max}}",
+      "showTask": "Show task",
+      "hideTask": "Hide task",
+      "classPerformance": "Class performance",
+      "avgOutOf": "Average / {{max}}",
+      "notScored": "Not scored in this scheme",
+      "avgOverall": "Average overall",
+      "submitted": "Checked essays",
+      "highLow": "Highest / lowest",
+      "highLowHint": "Overall score",
+      "avgWords": "Avg. word count",
+      "avgErrors": "~{{count}} errors per essay",
+      "distribution": "Score distribution (overall)",
+      "band": {
+        "low": "<40%",
+        "fair": "40–59%",
+        "good": "60–79%",
+        "excellent": "80%+"
+      },
+      "commonErrors": "Most common errors",
+      "noErrors": "No errors recorded.",
+      "students": "Students",
+      "searchStudents": "Search students…",
+      "studentSort": {
+        "overall": "Highest score",
+        "name": "Name (A–Z)",
+        "words": "Word count"
+      },
+      "noStudents": "No checked essays on this topic yet.",
+      "notAssessed": "Checked, but no AI assessment saved yet.",
+      "pending": "Not yet checked ({{count}})",
+      "pendingStatus": {
+        "none": "no essay",
+        "draft": "draft",
+        "transcribed": "transcribed"
+      }
     },
     "staff": {
       "title": "Essay activity log",

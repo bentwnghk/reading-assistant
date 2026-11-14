@@ -9,7 +9,7 @@ import {
   type LanguageCheckStatus,
 } from "@/constants/languageCheck"
 
-function toMs(value: unknown): number {
+export function toMs(value: unknown): number {
   return value ? new Date(value as string).getTime() : 0
 }
 
@@ -24,10 +24,10 @@ function arrayOf<T>(value: unknown): T[] {
  * derived in SQL exactly like page_count / error_count.
  */
 /** Saved Language (L) assessment overall (NULL when not assessed / malformed). */
-const OVERALL_SQL = `CASE WHEN jsonb_typeof(e.assessment) = 'object'
+export const OVERALL_SQL = `CASE WHEN jsonb_typeof(e.assessment) = 'object'
      THEN (e.assessment->>'overall')::int END`
 
-const WORD_COUNT_SQL = `CASE WHEN btrim(e.transcript) = '' THEN 0
+export const WORD_COUNT_SQL = `CASE WHEN btrim(e.transcript) = '' THEN 0
      ELSE array_length(regexp_split_to_array(btrim(e.transcript), '\\s+'), 1) END`
 
 function mapSummary(row: Record<string, unknown>): LanguageCheckEssaySummary {
@@ -420,7 +420,7 @@ export async function resolveStaffScope(
  * queries (`e` = language_check_essays, `u` = users). "@" placeholders are
  * replaced with sequential $N params.
  */
-function scopeConditions(
+export function scopeConditions(
   scope: LanguageCheckStaffScope,
 ): { clauses: string[]; params: unknown[] } {
   const clauses: string[] = []

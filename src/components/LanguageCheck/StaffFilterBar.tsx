@@ -30,6 +30,8 @@ interface StaffFilterBarProps {
    * Consumers must translate "__mine__" the same way (mine=1).
    */
   allowMine?: boolean;
+  /** Hide the student picker (views that are about a whole class, e.g. Topic reports). */
+  hideStudent?: boolean;
 }
 
 /**
@@ -45,6 +47,7 @@ export default function StaffFilterBar({
   onChange,
   studentsEndpoint = "/api/writing-assessment/staff/students",
   allowMine = false,
+  hideStudent = false,
 }: StaffFilterBarProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -150,7 +153,7 @@ export default function StaffFilterBar({
             allowMine={allowMine && myClasses.length > 0}
           />
         </div>
-        <div className="w-full sm:w-56">
+        <div className={hideStudent ? "hidden" : "w-full sm:w-56"}>
           <StudentCombobox
             users={users}
             value={value.userId}

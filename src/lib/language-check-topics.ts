@@ -52,7 +52,7 @@ LEFT JOIN users cu ON cu.id = t.user_id`
  * classes they teach, admin → classes in their school, super-admin → all.
  * `$N` placeholders start at `start`.
  */
-async function visibleClassIds(
+export async function visibleClassIds(
   viewer: TopicViewer,
   start: number,
 ): Promise<{ sql: string; params: unknown[] }> {

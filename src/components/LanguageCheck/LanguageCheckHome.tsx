@@ -3,13 +3,14 @@ import { useState, type ComponentProps } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
-import { BookMarked, FileText, GraduationCap, HelpCircle, SpellCheck } from "lucide-react";
+import { BarChart3, BookMarked, FileText, GraduationCap, HelpCircle, SpellCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EssayList from "@/components/LanguageCheck/EssayList";
 import HelpDialog from "@/components/LanguageCheck/HelpDialog";
 import MyLearning from "@/components/LanguageCheck/Learn/MyLearning";
 import StaffLearning from "@/components/LanguageCheck/Learn/StaffLearning";
 import TopicLibrary from "@/components/LanguageCheck/TopicLibrary";
+import TopicReports from "@/components/LanguageCheck/TopicReports";
 import StaffEssayLog from "@/components/LanguageCheck/StaffEssayLog";
 import StaffFilterBar, {
   EMPTY_STAFF_SELECTION,
@@ -19,9 +20,9 @@ import { SegmentedTabs } from "@/components/LanguageCheck/shared";
 import { cn } from "@/utils/style";
 
 type Scope = "mine" | "students";
-type Section = "essays" | "learning" | "topics";
+type Section = "essays" | "learning" | "topics" | "reports";
 
-const SECTIONS: Section[] = ["essays", "learning"];
+const SECTIONS: Section[] = ["essays", "reports", "learning"];
 // The Topic Library is personal (not a student-scope view), so it only
 // exists next to "My essays" / "My learning".
 const MINE_SECTIONS: Section[] = ["essays", "topics", "learning"];
@@ -61,7 +62,9 @@ export default function LanguageCheckHome({
       ? "learning"
       : tab === "topics" && scope === "mine"
         ? "topics"
-        : "essays";
+        : tab === "reports" && scope === "students"
+          ? "reports"
+          : "essays";
 
   function navigate(next: { view?: Scope; tab?: Section }) {
     const q = new URLSearchParams(params.toString());
@@ -69,7 +72,11 @@ export default function LanguageCheckHome({
     const nextTab = next.tab ?? section;
     if (view === "students") q.set("view", "students");
     else q.delete("view");
-    if (nextTab === "learning" || (nextTab === "topics" && view === "mine"))
+    if (
+      nextTab === "learning" ||
+      (nextTab === "topics" && view === "mine") ||
+      (nextTab === "reports" && view === "students")
+    )
       q.set("tab", nextTab);
     else q.delete("tab");
     const qs = q.toString();
@@ -131,6 +138,7 @@ export default function LanguageCheckHome({
               {x === "essays" && <FileText className="h-4 w-4" />}
               {x === "learning" && <GraduationCap className="h-4 w-4" />}
               {x === "topics" && <BookMarked className="h-4 w-4" />}
+              {x === "reports" && <BarChart3 className="h-4 w-4" />}
               {x === "topics"
                 ? t("languageCheck.topics.tab")
                 : t(`languageCheck.page.sections.${scope}.${x}`)}
@@ -153,9 +161,12 @@ export default function LanguageCheckHome({
               value={selection}
               onChange={setSelection}
               allowMine
+              hideStudent={section === "reports"}
             />
             {section === "essays" ? (
               <StaffEssayLog classId={selection.classId} userId={selection.userId} />
+            ) : section === "reports" ? (
+              <TopicReports classId={selection.classId} />
             ) : (
               <StaffLearning
                 classId={selection.classId}

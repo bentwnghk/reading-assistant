@@ -4936,6 +4936,7 @@
         },
         "students": {
           "essays": "學生作文",
+          "reports": "題目報告",
           "learning": "學生學習"
         }
       },
@@ -4966,6 +4967,64 @@
       "deleteDesc": "「{{title}}」及其掃描圖片和更正內容將被永久刪除。",
       "retentionHint": "原始掃描圖片會在上傳 {{days}} 天後自動刪除。",
       "rowsPerPage": "每頁"
+    },
+    "reports": {
+      "statTopics": "題目",
+      "statChecked": "已批改作文",
+      "statComplete": "全班完成",
+      "statCompleteHint": "全班學生均已完成",
+      "search": "搜尋題目或班別…",
+      "sortLabel": "排序",
+      "sort": {
+        "recent": "最近",
+        "completion": "完成度",
+        "score": "平均分",
+        "title": "標題 (A–Z)"
+      },
+      "empty": "暫無寫作題目。請在「我的作業」的題目庫建立。",
+      "emptySearch": "沒有符合搜尋的項目。",
+      "noClass": "未指定班別",
+      "checkedLabel": "已批改作文",
+      "percentDone": "完成 {{percent}}%",
+      "noRoster": "未指定班別",
+      "avg": "平均",
+      "back": "返回題目報告",
+      "outOf": "滿分 {{max}}",
+      "showTask": "顯示題目",
+      "hideTask": "隱藏題目",
+      "classPerformance": "全班表現",
+      "avgOutOf": "平均 / {{max}}",
+      "notScored": "此評分準則不評此項",
+      "avgOverall": "平均總分",
+      "submitted": "已批改作文",
+      "highLow": "最高 / 最低",
+      "highLowHint": "總分",
+      "avgWords": "平均字數",
+      "avgErrors": "每篇約 {{count}} 個錯誤",
+      "distribution": "分數分佈（總分）",
+      "band": {
+        "low": "<40%",
+        "fair": "40–59%",
+        "good": "60–79%",
+        "excellent": "80%+"
+      },
+      "commonErrors": "最常見錯誤",
+      "noErrors": "沒有錯誤記錄。",
+      "students": "學生",
+      "searchStudents": "搜尋學生…",
+      "studentSort": {
+        "overall": "最高分",
+        "name": "姓名 (A–Z)",
+        "words": "字數"
+      },
+      "noStudents": "此題目暫無已批改作文。",
+      "notAssessed": "已批改，但尚未儲存 AI 評估。",
+      "pending": "尚未批改 ({{count}})",
+      "pendingStatus": {
+        "none": "未有作文",
+        "draft": "草稿",
+        "transcribed": "已轉錄"
+      }
     },
     "staff": {
       "title": "作文活動記錄",
