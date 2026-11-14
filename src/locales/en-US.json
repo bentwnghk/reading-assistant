@@ -285,10 +285,10 @@
         },
         "languageCheck": {
           "title": "Writing Assessment",
-          "desc": "Snap a handwritten essay: AI transcribes it, marks every mistake with HKDSE-aligned corrections, scores it like an examiner, and turns your errors into lessons, practice and quizzes. Enhanced Essays polish your writing or rewrite it at Level 5** — and load it straight back into your reading journey, where your own words fuel a deeper learning experience: mind maps, analysis, vocabulary and more."
+          "desc": "Pick a real writing task — DSE Part A/B, JS or TSA Writing — then snap the handwritten essay: AI transcribes it word for word, marks every error with examiner-style notes (plus polish suggestions), and scores it on the task's own marking scheme. Enhanced Essays lift your own words toward Level 5**, Learn from your mistakes turns errors into lessons, practice and quizzes, and any version loads straight back into your reading journey."
         },
         "classReport": {
-          "title": "Class Assessment Report",
+          "title": "Writing: Class Assessment Report",
           "desc": "For teachers: from any Topic report, AI reads the whole class's checked essays and writes a printable teaching report — criterion findings, common mistakes with real examples, teaching priorities and differentiation groups. One more press turns those mistakes into a follow-up fix-it worksheet with a teacher answer key."
         },
         "assignments": {
