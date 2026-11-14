@@ -1093,7 +1093,7 @@ export function LandingPage() {
     },
   ];
 
-  const faqCount = faqExpanded ? 12 : 5;
+  const faqCount = faqExpanded ? 14 : 5;
 
   return (
     <div className="min-h-screen bg-[var(--lp-paper)] text-[var(--lp-ink)] font-sans selection:bg-[var(--lp-highlight-soft)] overflow-x-hidden">

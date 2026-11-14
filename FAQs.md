@@ -380,7 +380,23 @@ A new **real-time** multiplayer mode inside the existing Spelling Challenge. Her
 
 ---
 
-## Q13: I'm an English teacher. After my class's essays are checked in Writing Assessment, can I see how the whole class did — and get follow-up practice for their common mistakes?
+## Q13: Can Mr.🆖 ProReader mark my handwritten English essays?
+
+Yes — **Writing Assessment** (from the navigation menu) is a dedicated essay-marking workspace, separate from your reading sessions. Here's the flow:
+
+1. **Pick a topic** from the **Topic Library** — every essay answers a writing task: a title, the full prompt, an optional question image and the essay type (DSE Part A, DSE Part B, JS Writing or TSA Writing). Topics your teacher created for your class appear under **Class topics**.
+2. **Upload** a handwritten essay or scanned work (photos, images or PDF, up to 10 pages). Pages wait in a tray where you can crop each one to just the handwriting; on a phone, take photos one page at a time with the camera.
+3. **Review the transcript** — the AI transcribes your handwriting *exactly as written*, mistakes included, because they are what gets checked. A word it cannot read appears as `[?]` for you to fill in (an optional **Double-check transcription** pass catches anything the AI quietly fixed). Fix any misread words beside the zoomable original scan.
+4. **Run the check** — every mistake is highlighted inline and colour-coded by category, with a hover/tap card showing the correction and a short grammar note. **Errors** are things that are wrong (agreement, tense, articles, prepositions, spelling, punctuation…); **suggestions** sit under a dotted underline and are optional polish — awkward phrasing, Chinglish, wordiness and stronger word choices, each with other ways to say it.
+5. **AI Writing Assessment** — the check also scores your writing like an examiner, using the marking scheme for the topic's essay type (HKDSE Content, Language and Organization, each 0–7 for a total of 21; JS Writing and TSA Writing have their own schemes), with colour-coded sub-scores and bilingual strengths / areas to improve that quote your own sentences.
+6. **Enhanced Essays** — generate two improved versions of your own essay: a **Light** polish that fixes slips while strictly keeping your voice, and a **Heavy** rewrite lifted toward HKDSE Level 5**. Press **Use as reading text** to load either version straight into the reading workflow — mind map, adapted text, games and all.
+7. **Learn from your mistakes** — turn the corrections into a study plan built from your own writing: lessons, practice and quizzes per error category, saved to your account and resumable on any device.
+
+Everything can be exported to Word, and the notes switch between English and 繁體中文. Original scans are deleted 30 days after upload; the transcript, corrections and assessment stay for review. Teachers can also scan and check an essay on a student's behalf — and review the whole class's results; see the next question.
+
+---
+
+## Q14: I'm an English teacher. After my class's essays are checked in Writing Assessment, can I see how the whole class did — and get follow-up practice for their common mistakes?
 
 Yes. Under **Writing Assessment → My students → Topic reports**, every writing topic your students have written on is a card with its class, checked-essay count and class average. Open one for the class statistics — per-criterion averages, the score distribution, most common errors and one card per student — and then press **Generate AI assessment report** (it needs at least one checked essay) for the **Class Assessment Report**:
 
