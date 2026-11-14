@@ -4724,7 +4724,7 @@
   "languageCheck": {
     "navTitle": "Writing Assessment",
     "title": "Writing Assessment",
-    "subtitle": "Choose a writing topic, then upload a handwritten essay or scanned work. One check returns inline corrections with explanations plus an automatic AI Writing Assessment — scored on the HKDSE criteria for DSE topics, the school-based Junior Secondary scheme (21 marks) for JS Writing topics, or the Education Bureau TSA Secondary 3 scheme (12 marks) for TSA Writing topics. With \"Learn from your mistakes\", those corrections become lessons, practice and quizzes built from your own writing.",
+    "subtitle": "Choose a writing topic and upload a handwritten essay: one check gives inline corrections, an automatic AI Writing Assessment on the task's marking scheme and Enhanced Essays of your own writing — then turns your mistakes into lessons, practice and quizzes. Teachers also get class assessment reports and follow-up worksheets.",
     "back": "Back",
     "cancel": "Cancel",
     "stop": "Stop",
