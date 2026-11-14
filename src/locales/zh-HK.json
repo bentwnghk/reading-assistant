@@ -4974,6 +4974,7 @@
     },
     "aiReport": {
       "button": "生成 AI 評估報告",
+      "viewButton": "查看 AI 評估報告",
       "needChecked": "至少需要一份已批改作文",
       "title": "全班評估報告",
       "backToTopic": "返回題目報告",

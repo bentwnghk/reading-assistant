@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   BookMarked,
   CheckCircle2,
+  Eye,
   FileText,
   LoaderCircle,
   PenLine,
@@ -99,6 +100,7 @@ export default function TopicReportContainer() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<StudentSort>("overall");
   const [showTopic, setShowTopic] = useState(false);
+  const [hasAiReport, setHasAiReport] = useState(false);
   const categoryLabel = useCategoryLabel();
 
   useEffect(() => {
@@ -127,6 +129,31 @@ export default function TopicReportContainer() {
     })();
     return () => ac.abort();
   }, [session, isStaff, topicId, reloadKey, router]);
+
+  // Whether an AI assessment report has already been saved for this topic —
+  // drives the header button's label (Generate → Show). Re-checked whenever
+  // the report reloads, so returning from the report page (same tab) picks
+  // up the newly saved report.
+  useEffect(() => {
+    if (!session || !isStaff || !topicId) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(
+          `/api/writing-assessment/staff/topic-reports/${encodeURIComponent(topicId)}/ai-report`,
+        );
+        const body = await res.json().catch(() => null);
+        if (!res.ok || cancelled) return;
+        setHasAiReport(!!body?.saved);
+      } catch {
+        // Status unknown: keep offering "Generate" — the report page
+        // re-checks and loads the saved report itself.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [session, isStaff, topicId, reloadKey]);
 
   const students = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -201,19 +228,27 @@ export default function TopicReportContainer() {
             )}
             <Button
               size="sm"
-              disabled={report.checkedCount === 0}
-              title={report.checkedCount === 0 ? t("languageCheck.aiReport.needChecked") : undefined}
+              disabled={!hasAiReport && report.checkedCount === 0}
+              title={
+                !hasAiReport && report.checkedCount === 0
+                  ? t("languageCheck.aiReport.needChecked")
+                  : undefined
+              }
               className="bg-gradient-to-r from-violet-600 to-sky-600 text-white shadow-sm hover:from-violet-700 hover:to-sky-700"
               onClick={() =>
-                window.open(
+                router.push(
                   `/writing-assessment/topic-report/ai?topic=${encodeURIComponent(topic.id)}`,
-                  "_blank",
-                  "noopener",
                 )
               }
             >
-              <Sparkles className="mr-1.5 h-4 w-4" />
-              {t("languageCheck.aiReport.button")}
+              {hasAiReport ? (
+                <Eye className="mr-1.5 h-4 w-4" />
+              ) : (
+                <Sparkles className="mr-1.5 h-4 w-4" />
+              )}
+              {hasAiReport
+                ? t("languageCheck.aiReport.viewButton")
+                : t("languageCheck.aiReport.button")}
             </Button>
           </div>
         </div>

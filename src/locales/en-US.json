@@ -4980,6 +4980,7 @@
     },
     "aiReport": {
       "button": "Generate AI assessment report",
+      "viewButton": "Show AI assessment report",
       "needChecked": "Needs at least one checked essay",
       "title": "Class Assessment Report",
       "backToTopic": "Back to topic report",
