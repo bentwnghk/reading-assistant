@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, useInView } from "motion/react";
 import { Plus, Minus } from "lucide-react";
+import { ABOUT_FEATURES } from "@/constants/aboutFeatures";
 
 const easeOut: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94];
 
@@ -17,35 +18,10 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.04 } },
 };
 
-// Same features and emojis as the About dialog's "Powerful Features"
-// grid (header.about.features.*). Titles/descriptions are pulled from i18n.
-const FEATURES: { key: string; emoji: string }[] = [
-  { key: "ocr", emoji: "📷" },
-  { key: "aiTextGenerator", emoji: "✨" },
-  { key: "preReading", emoji: "🧭" },
-  { key: "visual", emoji: "🧠" },
-  { key: "visualization", emoji: "🖼️" },
-  { key: "difficulty", emoji: "📊" },
-  { key: "cefrHighlight", emoji: "🎨" },
-  { key: "adaptation", emoji: "✏️" },
-  { key: "tts", emoji: "🔊" },
-  { key: "tutor", emoji: "🤖" },
-  { key: "sentenceAnalysis", emoji: "💬" },
-  { key: "glossary", emoji: "📖" },
-  { key: "flashcard", emoji: "🃏" },
-  { key: "spelling", emoji: "🎮" },
-  { key: "multiplayer", emoji: "⚔️" },
-  { key: "quiz", emoji: "📋" },
-  { key: "test", emoji: "📝" },
-  { key: "grammar", emoji: "📐" },
-  { key: "grammarGames", emoji: "🎮" },
-  { key: "vocabularyPage", emoji: "📚" },
-  { key: "assignments", emoji: "📋" },
-  { key: "languageCheck", emoji: "🔍" },
-  { key: "achievements", emoji: "🏆" },
-  { key: "leaderboard", emoji: "🏅" },
-  { key: "wordExport", emoji: "📄" },
-];
+// The cards come from ABOUT_FEATURES (src/constants/aboutFeatures.ts) — the
+// single source of truth shared with the About dialog's "Powerful Features"
+// grid, so the two surfaces can never drift. Titles/descriptions are pulled
+// from i18n (header.about.features.<key>.{title,desc}).
 
 export function FeaturesShowcase() {
   const { t } = useTranslation();
@@ -100,7 +76,7 @@ export function FeaturesShowcase() {
           animate="visible"
           className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {FEATURES.map((f) => (
+          {ABOUT_FEATURES.map((f) => (
             <motion.div
               key={f.key}
               variants={fadeUp}

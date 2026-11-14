@@ -48,6 +48,7 @@ import { Button } from "@/components/Internal/Button";
 import { Button as UiButton } from "@/components/ui/button";
 import SectionNavSheet from "@/components/Internal/SectionNavSheet";
 import UserManagementPanel from "@/components/UserManagement/UserManagementPanel";
+import { ABOUT_FEATURES } from "@/constants/aboutFeatures";
 import {
   Dialog,
   DialogContent,
@@ -725,188 +726,15 @@ function Header() {
                 {t("header.about.features.title")}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📷</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.ocr.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.ocr.desc")}</div>
+                {ABOUT_FEATURES.map((f) => (
+                  <div key={f.key} className="flex items-start gap-2 bg-card border rounded-md p-2">
+                    <span className="text-lg leading-none mt-0.5 shrink-0">{f.emoji}</span>
+                    <div>
+                      <div className="font-medium">{t(`header.about.features.${f.key}.title`)}</div>
+                      <div className="text-xs text-muted-foreground">{t(`header.about.features.${f.key}.desc`)}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">✨</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.aiTextGenerator.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.aiTextGenerator.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🧭</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.preReading.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.preReading.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🧠</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.visual.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.visual.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🖼️</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.visualization.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.visualization.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📊</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.difficulty.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.difficulty.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🎨</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.cefrHighlight.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.cefrHighlight.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">✏️</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.adaptation.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.adaptation.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🔊</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.tts.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.tts.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🤖</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.tutor.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.tutor.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">💬</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.sentenceAnalysis.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.sentenceAnalysis.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📖</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.glossary.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.glossary.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🃏</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.flashcard.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.flashcard.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🎮</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.spelling.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.spelling.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">⚔️</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.multiplayer.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.multiplayer.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📋</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.quiz.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.quiz.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📝</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.test.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.test.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📐</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.grammar.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.grammar.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🎮</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.grammarGames.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.grammarGames.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📚</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.vocabularyPage.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.vocabularyPage.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📋</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.assignments.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.assignments.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🔍</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.languageCheck.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.languageCheck.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📊</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.classReport.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.classReport.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🏆</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.achievements.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.achievements.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">🏅</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.leaderboard.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.leaderboard.desc")}</div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2 bg-card border rounded-md p-2">
-                  <span className="text-lg leading-none mt-0.5 shrink-0">📄</span>
-                  <div>
-                    <div className="font-medium">{t("header.about.features.wordExport.title")}</div>
-                    <div className="text-xs text-muted-foreground">{t("header.about.features.wordExport.desc")}</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
