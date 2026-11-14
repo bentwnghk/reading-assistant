@@ -4994,6 +4994,8 @@
       "part2Hint": "{{count}} questions on the mistakes above. Write your answers in the spaces.",
       "sectionA": "A. Fix the error",
       "sectionB": "B. Fill in the blank",
+      "instructionA": "Each sentence has one mistake. Find it, then write the corrected sentence on the line.",
+      "instructionB": "Complete each sentence with the missing word or words. Write them in the blanks.",
       "rewriteCorrect": "Write the corrected words or sentence",
       "wrong": "Wrong",
       "right": "Correct",

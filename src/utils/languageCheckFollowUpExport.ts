@@ -520,8 +520,8 @@ export function buildFollowUpDocx({
       children.push(...exerciseBlock(it.exercise, n, it.category, o));
     }
   };
-  section(t("languageCheck.followUp.sectionA"), t("languageCheck.learn.exercise.instructions.errorCorrection"), fix);
-  section(t("languageCheck.followUp.sectionB"), t("languageCheck.learn.exercise.instructions.fillBlank"), fill);
+  section(t("languageCheck.followUp.sectionA"), t("languageCheck.followUp.instructionA"), fix);
+  section(t("languageCheck.followUp.sectionB"), t("languageCheck.followUp.instructionB"), fill);
 
   children.push(...answerKey(ordered, o));
   children.push(
