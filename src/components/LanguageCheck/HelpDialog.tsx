@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Award,
+  BarChart3,
   BookOpen,
   ClipboardList,
   Cloud,
@@ -176,6 +177,14 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
                 tone="bg-amber-500/10 text-amber-500"
                 name={t("languageCheck.help.overview.staff.name")}
                 desc={t("languageCheck.help.overview.staff.desc")}
+              />
+            )}
+            {isStaff && (
+              <HelpRow
+                icon={BarChart3}
+                tone="bg-cyan-500/10 text-cyan-500"
+                name={t("languageCheck.help.overview.topicReports.name")}
+                desc={t("languageCheck.help.overview.topicReports.desc")}
               />
             )}
             <HelpTip

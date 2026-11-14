@@ -4760,9 +4760,13 @@
           "name": "Checking for a Student",
           "desc": "Teachers can pick a student above the upload zone and scan that student's handwritten essay for them. The checked essay lands in the student's \"My essays\" list exactly as if they had uploaded it, ready for them to learn from the corrections."
         },
+        "topicReports": {
+          "name": "Topic Reports",
+          "desc": "Under \"My students\" → \"Topic reports\", each saved writing topic is a card showing its class and how many students have a checked essay (with the class average). Open one for per-criterion class averages, the score distribution, common errors and one card per student — clicking a student opens their essay, exactly like View in Student essays."
+        },
         "staff": {
           "name": "Staff View",
-          "desc": "Switch between \"My work\" and \"My students\". Under \"My students\" the two sections become \"Student essays\" and \"Student learning\", sharing one class and student filter — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns."
+          "desc": "Switch between \"My work\" and \"My students\". Under \"My students\" the sections become \"Student essays\", \"Topic reports\" and \"Student learning\", sharing one class and student filter (Topic reports follows the class only) — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns."
         },
         "tip": {
           "title": "Tip:",
