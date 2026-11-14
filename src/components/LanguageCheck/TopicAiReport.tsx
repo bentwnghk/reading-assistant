@@ -17,6 +17,7 @@ import {
   Users,
   XCircle,
   CheckCircle2,
+  FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import useLanguageCheck from "@/hooks/useLanguageCheck";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE } from "@/constants/languageCheck";
 import { parseError } from "@/utils/error";
+import { exportFollowUpDocx } from "@/utils/languageCheckFollowUpExport";
 import { cn } from "@/utils/style";
 import { percentOf, percentTone, SCORE_KEYS, type ScoreKey } from "@/utils/languageCheckTopicReport";
 import { groupStudents, newSubmissionsSince, type StudentInsight } from "@/utils/languageCheckAiReport";
@@ -128,7 +130,7 @@ export default function TopicAiReport() {
   const { data: session } = useSession();
   const topicId = params.get("topic");
   const isStaff = ["teacher", "admin", "super-admin"].includes(session?.user?.role ?? "");
-  const { generateTopicAiReport } = useLanguageCheck();
+  const { generateTopicAiReport, generateFollowUpExercises } = useLanguageCheck();
   const language = useLanguageCheckStore((s) => s.explanationLanguage);
   const setLanguage = useLanguageCheckStore((s) => s.setExplanationLanguage);
   const categoryLabel = useCategoryLabel();
@@ -137,6 +139,7 @@ export default function TopicAiReport() {
   const [currentCount, setCurrentCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [followUpBusy, setFollowUpBusy] = useState(false);
   const started = useRef(false);
 
   const backUrl = topicId
@@ -188,6 +191,20 @@ export default function TopicAiReport() {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, isStaff, topicId]);
+
+  async function generateFollowUp() {
+    if (!report || followUpBusy) return;
+    setFollowUpBusy(true);
+    try {
+      const items = await generateFollowUpExercises(report, categoryLabel);
+      await exportFollowUpDocx({ report, items, language, t, categoryLabel });
+      toast.success(t("languageCheck.followUp.done"));
+    } catch (error) {
+      toast.error(parseError(error));
+    } finally {
+      setFollowUpBusy(false);
+    }
+  }
 
   if (loading || (!report && generating)) {
     return (
@@ -257,6 +274,12 @@ export default function TopicAiReport() {
               <Printer className="mr-1.5 h-4 w-4" />
               {t("languageCheck.aiReport.print")}
             </Button>
+            {insights.mistakes.length > 0 && (
+              <Button variant="outline" size="sm" disabled={followUpBusy} onClick={() => void generateFollowUp()}>
+                {followUpBusy ? <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" /> : <FileDown className="mr-1.5 h-4 w-4 text-sky-500" />}
+                {followUpBusy ? t("languageCheck.followUp.generating") : t("languageCheck.followUp.button")}
+              </Button>
+            )}
             <Button variant="outline" size="sm" disabled={generating} onClick={() => void generate()}>
               {generating ? <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4 text-amber-500" />}
               {t("languageCheck.aiReport.regenerate")}

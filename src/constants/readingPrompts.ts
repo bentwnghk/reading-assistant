@@ -1833,6 +1833,62 @@ Quality checklist - verify before answering:
 6. Chinese ("Zh" fields) is Traditional Chinese.`;
 }
 
+/** Class-level follow-up worksheet: "Fix the error" + "Fill in the blank" on the report's common mistakes. */
+export function followUpExercisesPrompt(args: {
+  age: number;
+  count: number;
+  patterns: {
+    category: string;
+    categoryLabel: string;
+    title: string;
+    rule: string;
+    examples: { original: string; correction: string }[];
+  }[];
+}): string {
+  const { age, count, patterns } = args;
+  const profile = learnerProfile(age);
+  const per = Math.ceil(count / 2);
+  const blocks = patterns
+    .map(
+      (p, i) =>
+        `${i + 1}. category="${p.category}" (${p.categoryLabel}) - ${p.title}\n   Rule: ${p.rule}\n${
+          p.examples.length
+            ? p.examples.map((e) => `   Class mistake: "${e.original}" -> "${e.correction || "(delete)"}"`).join("\n")
+            : "   (no recorded examples)"
+        }`,
+    )
+    .join("\n");
+  return `Create a printable remedial worksheet of ${count} exercises that drill the EXACT error patterns a whole class made. It is a follow-up to their essay, NOT a new writing task.
+
+<learner>
+Level: ${profile.label} - target CEFR ${profile.cefr}
+Sentences: at most ${profile.maxWords} words, topics such as ${profile.contexts}.
+${profile.style}
+</learner>
+
+<error-patterns>
+${blocks}
+</error-patterns>
+
+Allowed exercise types (use ONLY these, as the "type" value):
+- error-correction: ${EXERCISE_SPECS["error-correction"]}
+- fill-blank: ${EXERCISE_SPECS["fill-blank"]}
+
+Return a JSON ARRAY of exactly ${count} objects: ${per} "error-correction" and ${count - per} "fill-blank". Every object ALSO has "category": the exact category id from the list above that it practises.
+
+Design:
+- Spread the exercises evenly across the error patterns (each pattern gets at least one of each type when there are few patterns).
+- Every exercise must contain/test the same kind of error as its pattern, in a NEW sentence (never copy a class mistake word for word).
+- error-correction: exactly ONE error per passage. fill-blank: 1 gap (2 only if natural); put the base word in brackets or in "hint" when more than one fill could fit, so the answer is unambiguous.
+- "hint" is a short nudge that does not give the answer. "explanation" is one short sentence giving the rule. Chinese ("Zh") fields are Traditional Chinese.
+- Order each type from easier to harder.
+
+Quality checklist - verify before answering:
+1. Every sentence, answer and "right" is correct English; the passage has no unlisted errors.
+2. fill-blank: number of arrays in "answers" equals the number of ___ gaps and lists every acceptable fill.
+3. error-correction: "wrong" is copied exactly from the passage.`;
+}
+
 export function learnEvaluatePrompt(args: {
   type: "rewrite" | "compose";
   age: number;

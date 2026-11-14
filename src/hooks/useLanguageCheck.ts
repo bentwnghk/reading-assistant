@@ -28,7 +28,10 @@ import {
   enhancedEssaySystemPrompt,
   topicAiReportSystemPrompt,
   topicAiReportPrompt,
+  learnSystemPrompt,
+  followUpExercisesPrompt,
 } from "@/constants/readingPrompts";
+import { parseExercises, type LearnExercise } from "@/utils/languageCheckLearn";
 import {
   languageAssessmentSchema,
   jsLanguageAssessmentSchema,
@@ -762,9 +765,77 @@ export default function useLanguageCheck() {
     return (body as { saved: LanguageCheckAiReport }).saved;
   }
 
+  /**
+   * Staff: build the 10 follow-up questions (5 "Fix the error" + 5 "Fill in the
+   * blank") for a saved class report, drilling its "Common mistakes" patterns.
+   */
+  async function generateFollowUpExercises(
+    report: LanguageCheckAiReport,
+    categoryLabel: (category: string) => string,
+    signal?: AbortSignal,
+  ): Promise<{ exercise: LearnExercise; category: string }[]> {
+    const { languageCheckModel } = useSettingStore.getState();
+    const errorCats = new Set(report.categories.filter((c) => !c.expression).map((c) => c.category));
+    const mistakes = report.insights.mistakes.filter((m) => errorCats.has(m.category));
+    const source = (mistakes.length ? mistakes : report.insights.mistakes).slice(0, 5);
+    if (source.length === 0) throw new Error(i18next.t("languageCheck.followUp.noMistakes"));
+
+    const patterns = source.map((m) => ({
+      category: m.category,
+      categoryLabel: categoryLabel(m.category),
+      title: m.title,
+      rule: m.rule,
+      examples: (report.categories.find((c) => c.category === m.category)?.examples ?? [])
+        .slice(0, 3)
+        .map((e) => ({ original: `${e.before ?? ""}${e.original}${e.after ?? ""}`.trim(), correction: e.correction })),
+    }));
+    const known = new Set(patterns.map((p) => p.category));
+    const age = useLanguageCheckStore.getState().learnAge;
+    const ac = new AbortController();
+    signal?.addEventListener("abort", () => ac.abort());
+
+    try {
+      const output = await generateWithFallback(
+        languageCheckModel,
+        learnSystemPrompt(),
+        followUpExercisesPrompt({ age, count: 12, patterns }),
+        ac.signal,
+      );
+      const json = JSON.parse(stripJsonFences(output));
+      const list: unknown[] = Array.isArray(json) ? json : Array.isArray(json?.exercises) ? json.exercises : [];
+      const parsed: { exercise: LearnExercise; category: string }[] = [];
+      for (const raw of list) {
+        const { items } = parseExercises([raw], {
+          idPrefix: `fu${parsed.length}`,
+          allowed: ["error-correction", "fill-blank"],
+          max: 1,
+        });
+        if (!items[0]) continue;
+        const cat = String((raw as { category?: unknown })?.category ?? "");
+        parsed.push({ exercise: items[0], category: known.has(cat) ? cat : patterns[parsed.length % patterns.length].category });
+      }
+      const fix = parsed.filter((p) => p.exercise.type === "error-correction");
+      const fill = parsed.filter((p) => p.exercise.type === "fill-blank");
+      let picked = [...fix.slice(0, 5), ...fill.slice(0, 5)];
+      if (picked.length < 10) {
+        const rest = [...fix.slice(5), ...fill.slice(5)];
+        picked = [...picked, ...rest.slice(0, 10 - picked.length)];
+      }
+      if (picked.length < 6) throw new SyntaxError("too few valid exercises");
+      return picked;
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      if (error instanceof SyntaxError || (error as Error)?.name === "ZodError") {
+        throw new Error(i18next.t("languageCheck.check.parseError"));
+      }
+      throw new Error(describeGenerationError(error));
+    }
+  }
+
   return {
     transcribe,
     generateTopicAiReport,
+    generateFollowUpExercises,
     runCheck,
     runStaffCheck,
     assessLanguage,
