@@ -1446,7 +1446,15 @@ interface LanguageCheckAiCategoryEvidence {
   count: number;
   /** Distinct students (latest essay) with at least one. */
   students: number;
-  examples: { original: string; correction: string; explanation: string; explanationZh: string }[];
+  examples: {
+    /** Surrounding sentence text before/after `original` (absent on reports saved earlier). */
+    before?: string;
+    after?: string;
+    original: string;
+    correction: string;
+    explanation: string;
+    explanationZh: string;
+  }[];
 }
 
 /** What the AI sees: aggregated, anonymous evidence from the class's latest checked essays. */

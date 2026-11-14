@@ -3,10 +3,12 @@ import { toMs, sweepExpiredEssays, staffEssayConditions, type LanguageCheckStaff
 import type { TopicViewer } from "./language-check-topics"
 import { getTopicReport } from "./language-check-topic-report"
 import { isExpressionCategory } from "@/constants/languageCheck"
+import { contextAround } from "@/utils/languageCheck"
 
 const MAX_EXAMPLES = 4
 const MAX_NOTES = 25
 const MAX_EXAMPLE_CHARS = 90
+const MAX_CONTEXT_SIDE = 120
 
 const CRITERIA = ["content", "language", "organization", "features"] as const
 
@@ -33,7 +35,7 @@ export async function getTopicAiEvidence(
 
   const { where, params } = staffEssayConditions(scope, {})
   const { rows } = await getPool().query(
-    `SELECT DISTINCT ON (e.user_id) e.user_id, e.corrections, e.assessment
+    `SELECT DISTINCT ON (e.user_id) e.user_id, e.corrections, e.assessment, e.checked_text
      FROM language_check_essays e JOIN users u ON u.id = e.user_id
      ${where ? `${where} AND` : "WHERE"} e.topic_id = $${params.length + 1} AND e.status = 'checked'
      ORDER BY e.user_id, e.updated_at DESC`,
@@ -51,6 +53,7 @@ export async function getTopicAiEvidence(
   for (const r of rows as Record<string, unknown>[]) {
     const uid = r.user_id as string
     const corrections = Array.isArray(r.corrections) ? (r.corrections as LanguageCheckError[]) : []
+    const checkedText = typeof r.checked_text === "string" ? r.checked_text : ""
     const mine = new Map<string, LanguageCheckAiCategoryEvidence["examples"]>()
     for (const c of corrections) {
       if (!c?.category) continue
@@ -60,7 +63,13 @@ export async function getTopicAiEvidence(
       cats.set(c.category, entry)
       if (c.original && c.original.length <= MAX_EXAMPLE_CHARS && c.correction !== c.original) {
         const list = mine.get(c.category) ?? []
+        const ctx =
+          checkedText && checkedText.slice(c.start, c.end) === c.original
+            ? contextAround(checkedText, c.start, c.end, MAX_CONTEXT_SIDE)
+            : null
         list.push({
+          before: ctx?.before ?? "",
+          after: ctx?.after ?? "",
           original: c.original,
           correction: c.correction ?? "",
           explanation: c.explanation ?? "",

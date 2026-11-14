@@ -432,11 +432,19 @@ export default function TopicAiReport() {
                     <div key={j} className="rounded-xl border bg-muted/30 p-3 text-sm">
                       <p className="flex items-start gap-2 text-red-600 dark:text-red-400">
                         <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                        <span className="line-through decoration-red-400/60">{e.original}</span>
+                        <span>
+                          {e.before}
+                          <span className="line-through decoration-red-400/60">{e.original}</span>
+                          {e.after}
+                        </span>
                       </p>
                       <p className="mt-1 flex items-start gap-2 text-green-700 dark:text-green-400">
                         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                        <span className="font-medium">{e.correction || t("languageCheck.aiReport.delete")}</span>
+                        <span>
+                          {e.before}
+                          <span className="font-medium">{e.correction || t("languageCheck.aiReport.delete")}</span>
+                          {e.after}
+                        </span>
                       </p>
                       <p className="mt-1.5 text-xs text-muted-foreground">
                         {(language === "zh" ? e.explanationZh : e.explanation) || e.explanation}
