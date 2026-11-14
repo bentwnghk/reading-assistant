@@ -26,6 +26,8 @@ import {
   tsaAssessmentSystemPrompt,
   enhancedEssayPrompt,
   enhancedEssaySystemPrompt,
+  topicAiReportSystemPrompt,
+  topicAiReportPrompt,
 } from "@/constants/readingPrompts";
 import {
   languageAssessmentSchema,
@@ -37,6 +39,8 @@ import {
   enhancedOutputSchema,
   type StoredEnhanced,
 } from "@/utils/languageCheckEnhanced";
+import { aiInsightsSchema } from "@/utils/languageCheckAiReport";
+import { LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE } from "@/constants/languageCheck";
 import { fetchAppConfig } from "@/utils/app-config";
 import { parseError } from "@/utils/error";
 import {
@@ -653,8 +657,114 @@ export default function useLanguageCheck() {
     }
   }
 
+
+  /**
+   * Staff: generate the comprehensive AI assessment report for a writing topic.
+   * Evidence (anonymous class corrections) comes from the server; the result is
+   * saved server-side with a snapshot of the class statistics.
+   */
+  async function generateTopicAiReport(
+    topicId: string,
+    language: "en" | "zh",
+    signal?: AbortSignal,
+  ): Promise<LanguageCheckAiReport> {
+    const { languageCheckModel } = useSettingStore.getState();
+    const base = `/api/writing-assessment/staff/topic-reports/${encodeURIComponent(topicId)}`;
+    const getJson = async (url: string) => {
+      const res = await fetch(url, { signal });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+      return body;
+    };
+    const [report, ev] = await Promise.all([
+      getJson(base) as Promise<LanguageCheckTopicReport>,
+      getJson(`${base}/ai-report?evidence=1`) as Promise<{ evidence: LanguageCheckAiEvidence }>,
+    ]);
+    const evidence = ev.evidence;
+    if (evidence.studentsAnalysed === 0) {
+      throw new Error(i18next.t("languageCheck.aiReport.noData"));
+    }
+
+    const { max, averages } = report;
+    const pct = (v: number | null, m: number) =>
+      v === null || m <= 0 ? "n/a" : `${v}/${m} (${Math.round((v / m) * 100)}%)`;
+    const stats = [
+      `Students analysed: ${evidence.studentsAnalysed}` +
+        (report.studentCount ? ` of ${report.studentCount} in class` : ""),
+      `Average overall: ${pct(averages.overall, max.overall)}`,
+      ...(["content", "language", "organization", "features"] as const)
+        .filter((k) => max[k] > 0)
+        .map((k) => `Average ${k}: ${pct(averages[k], max[k])}`),
+      `Score bands (<20, 20-39, 40-59, 60-79, 80+ %): ${report.distribution.join(", ")}`,
+      `Average words: ${report.avgWords ?? "n/a"}; average comments per essay: ${report.avgErrors ?? "n/a"}`,
+    ].join("\n");
+
+    const lines: string[] = [];
+    lines.push("### Error / suggestion categories (ranked by students affected)");
+    for (const c of evidence.categories.slice(0, 12)) {
+      lines.push(
+        `- ${c.category}${c.expression ? " [suggestion tier]" : ""}: ${c.count} items, ${c.students} students`,
+      );
+      for (const e of c.examples) {
+        lines.push(`    e.g. "${e.original}" -> "${e.correction}" (${e.explanation})`);
+      }
+    }
+    for (const k of ["content", "language", "organization", "features"] as const) {
+      const n = evidence.notes[k];
+      if (!n.strengths.length && !n.weaknesses.length) continue;
+      lines.push(`### Marker notes on ${k} (from individual assessments)`);
+      if (n.strengths.length) lines.push(`Strengths: ${n.strengths.join(" | ")}`);
+      if (n.weaknesses.length) lines.push(`Weaknesses: ${n.weaknesses.join(" | ")}`);
+    }
+
+    const ac = new AbortController();
+    signal?.addEventListener("abort", () => ac.abort());
+    let insights: LanguageCheckAiInsights;
+    try {
+      const output = await generateWithFallback(
+        languageCheckModel,
+        topicAiReportSystemPrompt(),
+        topicAiReportPrompt({
+          title: report.topic.title,
+          task: report.topic.topic,
+          essayType: LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE[report.topic.essayType]?.label ?? report.topic.essayType,
+          className: report.topic.className,
+          language,
+          stats,
+          evidence: lines.join("\n"),
+        }),
+        ac.signal,
+      );
+      insights = aiInsightsSchema.parse(JSON.parse(stripJsonFences(output)));
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      if (error instanceof SyntaxError || (error as Error)?.name === "ZodError") {
+        throw new Error(i18next.t("languageCheck.check.parseError"));
+      }
+      throw new Error(describeGenerationError(error));
+    }
+    // Only categories the evidence actually contains may be referenced.
+    const known = new Set(evidence.categories.map((c) => c.category));
+    insights.mistakes = insights.mistakes.filter((m) => known.has(m.category));
+
+    const res = await fetch(`${base}/ai-report`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: languageCheckModel,
+        categories: evidence.categories,
+        insights,
+      }),
+      signal,
+    });
+    const body = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+    return (body as { saved: LanguageCheckAiReport }).saved;
+  }
+
   return {
     transcribe,
+    generateTopicAiReport,
     runCheck,
     runStaffCheck,
     assessLanguage,

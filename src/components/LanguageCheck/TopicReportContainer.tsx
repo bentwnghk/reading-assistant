@@ -12,6 +12,7 @@ import {
   LoaderCircle,
   PenLine,
   Search,
+  Sparkles,
   Trophy,
   Users,
 } from "lucide-react";
@@ -191,12 +192,30 @@ export default function TopicReportContainer() {
               </span>
             </div>
           </div>
-          {topic.topic && (
-            <Button variant="outline" size="sm" onClick={() => setShowTopic((v) => !v)}>
-              <FileText className="mr-1.5 h-4 w-4" />
-              {showTopic ? t("languageCheck.reports.hideTask") : t("languageCheck.reports.showTask")}
+          <div className="flex flex-wrap items-center gap-2">
+            {topic.topic && (
+              <Button variant="outline" size="sm" onClick={() => setShowTopic((v) => !v)}>
+                <FileText className="mr-1.5 h-4 w-4" />
+                {showTopic ? t("languageCheck.reports.hideTask") : t("languageCheck.reports.showTask")}
+              </Button>
+            )}
+            <Button
+              size="sm"
+              disabled={report.checkedCount === 0}
+              title={report.checkedCount === 0 ? t("languageCheck.aiReport.needChecked") : undefined}
+              className="bg-gradient-to-r from-violet-600 to-sky-600 text-white shadow-sm hover:from-violet-700 hover:to-sky-700"
+              onClick={() =>
+                window.open(
+                  `/writing-assessment/topic-report/ai?topic=${encodeURIComponent(topic.id)}`,
+                  "_blank",
+                  "noopener",
+                )
+              }
+            >
+              <Sparkles className="mr-1.5 h-4 w-4" />
+              {t("languageCheck.aiReport.button")}
             </Button>
-          )}
+          </div>
         </div>
         {showTopic && (
           <p className="max-h-60 overflow-y-auto whitespace-pre-wrap rounded-xl border bg-muted/30 p-3 text-sm leading-relaxed">

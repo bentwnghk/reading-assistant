@@ -2224,3 +2224,65 @@ ${errorSummary}
 ## Essay
 ${text}`;
 }
+
+export function topicAiReportSystemPrompt(): string {
+  return `You are an experienced Hong Kong secondary English teacher and HKDSE Paper 2 (Writing) marker advising a TEACHER about a whole class's work on one writing task. Today is {now}.
+
+Write a comprehensive, pedagogically sound class assessment report. Principles:
+- **Evidence only.** Use the class statistics and anonymised evidence supplied. Quote only error examples that appear in the evidence. Never invent numbers, names or examples.
+- **Criterion-referenced.** Judge Content, Language, Organization (and Features when present) against the marking scheme percentages given, not against each other alone.
+- **Strengths first, then priorities.** Name genuine strengths the class can build on before gaps. Be specific and concrete, never generic.
+- **Prioritise.** Teach the few highest-impact patterns (widespread across students, or blocking meaning), not every error. Rank by number of STUDENTS affected, not raw count.
+- **Explain the rule, not just the fix.** For each common mistake give the underlying rule in plain words and a short memorable tip. Note Cantonese/Chinese transfer where relevant.
+- **Actionable next steps.** Each priority needs one concrete classroom activity (mini-lesson, error-hunt, sentence-combining, model-text comparison, peer-editing checklist...) with a realistic duration in minutes.
+- Tone: professional, supportive, concise. Suggestions (expression-tier items such as chinglish, concision) are polish: mention them only after errors.
+- Audience is a teacher; write the report in the requested language. Use Traditional Chinese (繁體中文, Hong Kong written style) when asked for Chinese, but keep quoted student errors in English.`.replace(
+    "{now}",
+    new Date().toLocaleDateString(i18next.language),
+  );
+}
+
+export function topicAiReportPrompt(input: {
+  title: string;
+  task: string;
+  essayType: string;
+  className: string | null;
+  language: "en" | "zh";
+  stats: string;
+  evidence: string;
+}): string {
+  return `Write the class assessment report for this writing task.
+
+## Task
+Title: ${input.title}
+Essay type: ${input.essayType}
+Class: ${input.className ?? "n/a"}
+<task>
+${input.task || "(not provided)"}
+</task>
+
+## Class statistics
+${input.stats}
+
+## Evidence from the students' latest checked essays (anonymous)
+${input.evidence}
+
+Return ONLY one JSON object (no markdown fences) written in ${input.language === "zh" ? "Traditional Chinese (繁體中文)" : "English"}:
+
+{
+  "headline": "one sentence capturing the class's overall picture",
+  "summary": "3-5 sentences: overall performance, the main strength, the main gap, and what to do first",
+  "criteria": [
+    { "key": "content" | "language" | "organization" | "features", "level": "strength" | "developing" | "priority", "finding": "2-3 sentences of evidence-based diagnosis", "nextStep": "one concrete teaching move" }
+  ],
+  "strengths": [ { "title": "short label", "detail": "1-2 sentences, specific" } ],
+  "mistakes": [ { "category": "exact category id from the evidence", "title": "short pattern name", "rule": "the rule in 1-2 plain sentences, with a quoted example from the evidence", "tip": "a memorable one-line tip for students" } ],
+  "priorities": [ { "title": "teaching focus", "why": "why it matters for this class", "activity": "a concrete classroom activity", "minutes": 15 } ],
+  "quickTips": [ "short teaching tip" ]
+}
+
+Rules:
+- "criteria": one entry for each criterion that is scored in this scheme (skip any with 0 marks), in the order content, language, organization, features.
+- "strengths": 2-4 items. "mistakes": 3-5 items for the most widespread ERROR categories (include an expression-tier category only if no more than 1 of them). "priorities": 3 items, most important first. "quickTips": 3-4 items.
+- "category" in mistakes must be copied exactly from the evidence list.`;
+}

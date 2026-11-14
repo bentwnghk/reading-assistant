@@ -1020,6 +1020,17 @@ CREATE INDEX idx_lc_learn_events_created
 CREATE INDEX idx_lc_learn_events_session
   ON language_check_learn_events(session_id);
 
+-- Writing Assessment: AI assessment report per topic (staff).
+CREATE TABLE IF NOT EXISTS language_check_topic_ai_reports (
+  topic_id     TEXT NOT NULL REFERENCES language_check_topics(id) ON DELETE CASCADE,
+  user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  report       JSONB NOT NULL,
+  essay_count  INTEGER NOT NULL DEFAULT 0,
+  model        TEXT NOT NULL DEFAULT '',
+  generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  PRIMARY KEY (topic_id, user_id)
+);
+
 -- Grant permissions
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO reading_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO reading_user;

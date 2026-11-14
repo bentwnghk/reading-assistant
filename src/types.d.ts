@@ -1433,3 +1433,52 @@ interface LanguageCheckTopicReport {
   students: LanguageCheckTopicReportStudent[];
   pending: LanguageCheckTopicReportPending[];
 }
+
+// ─── AI assessment report for a writing topic (staff) ────────────────────────
+
+type LanguageCheckAiCriterionKey = "content" | "language" | "organization" | "features";
+
+/** Real corrections gathered across the class (anonymous) for one category. */
+interface LanguageCheckAiCategoryEvidence {
+  category: string;
+  expression: boolean;
+  /** Total corrections of this category over the analysed essays. */
+  count: number;
+  /** Distinct students (latest essay) with at least one. */
+  students: number;
+  examples: { original: string; correction: string; explanation: string; explanationZh: string }[];
+}
+
+/** What the AI sees: aggregated, anonymous evidence from the class's latest checked essays. */
+interface LanguageCheckAiEvidence {
+  studentsAnalysed: number;
+  categories: LanguageCheckAiCategoryEvidence[];
+  notes: Record<LanguageCheckAiCriterionKey, { strengths: string[]; weaknesses: string[] }>;
+}
+
+interface LanguageCheckAiInsights {
+  headline: string;
+  summary: string;
+  criteria: {
+    key: LanguageCheckAiCriterionKey;
+    level: "strength" | "developing" | "priority";
+    finding: string;
+    nextStep: string;
+  }[];
+  strengths: { title: string; detail: string }[];
+  mistakes: { category: string; title: string; rule: string; tip: string }[];
+  priorities: { title: string; why: string; activity: string; minutes: number }[];
+  quickTips: string[];
+}
+
+/** Saved report: a snapshot, so charts and AI text always describe the same data. */
+interface LanguageCheckAiReport {
+  version: 1;
+  generatedAt: number;
+  model: string;
+  /** Checked essay rows the report was generated from. */
+  essayCount: number;
+  base: LanguageCheckTopicReport;
+  categories: LanguageCheckAiCategoryEvidence[];
+  insights: LanguageCheckAiInsights;
+}
