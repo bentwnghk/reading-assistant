@@ -1353,11 +1353,19 @@ interface LanguageCheckTopicReportCard {
   /** Display label of the class ("S5 · English · Gp1"); null = no class. */
   className: string | null;
   creatorName: string | null;
-  /** Students in the class; null when the topic has no class. */
+  /** Non-banned students in the class; null when the topic has no class. */
   studentCount: number | null;
-  /** Students with a checked essay on the topic. */
+  /**
+   * Checked essay ROWS on the topic — every in-scope checked essay, retakes
+   * included (mirrors the Student essays tab filtered to topic + checked).
+   */
   checkedCount: number;
-  /** Of those, students with a saved AI assessment. */
+  /**
+   * Distinct students counted toward class completion: topic's class members
+   * with a checked essay (all distinct students when the topic has no class).
+   */
+  doneStudents: number;
+  /** Of those students, ones with a saved AI assessment (latest checked essay). */
   assessedCount: number;
   avgOverall: number | null;
   /** Marks available in the topic's marking scheme. */
@@ -1408,7 +1416,10 @@ interface LanguageCheckTopicReport {
   /** Marks per criterion for the topic's marking scheme. */
   max: { content: number; language: number; organization: number; features: number; overall: number };
   studentCount: number | null;
+  /** Checked essay rows on the topic (every in-scope checked essay, retakes included). */
   checkedCount: number;
+  /** Distinct students of the topic's class with a checked essay (roster numerator). */
+  doneStudents: number;
   assessedCount: number;
   averages: LanguageCheckCriterionAverages;
   avgWords: number | null;

@@ -445,6 +445,48 @@ export function scopeConditions(
   return { clauses, params }
 }
 
+/**
+ * WHERE over the staff essay set: staff scope plus the shared filter picks
+ * (student / status / topic and the class / "My Classes" filters, which
+ * narrow by WRITER membership). The Student essays tab AND the Topic
+ * reports tab both build their queries from this one fragment so the two
+ * tabs always count over identical rows — their Topics / Checked essays
+ * stat cards must tally.
+ */
+export function staffEssayConditions(
+  scope: LanguageCheckStaffScope,
+  opts: {
+    userId?: string
+    status?: string
+    topicId?: string
+    classId?: string
+    mineTeacherId?: string
+  },
+): { where: string; params: unknown[] } {
+  const { clauses, params } = scopeConditions(scope)
+  const add = (sql: string, ...values: unknown[]) => {
+    let i = 0
+    clauses.push(sql.replace(/@/g, () => `$${params.length + 1 + i++}`))
+    params.push(...values)
+  }
+  if (opts.userId) add("e.user_id = @", opts.userId)
+  if (opts.status) add("e.status = @", opts.status)
+  if (opts.topicId) add("e.topic_id = @", opts.topicId)
+  if (opts.classId) {
+    add(
+      `e.user_id IN (SELECT student_id FROM class_members WHERE class_id = @)`,
+      opts.classId,
+    )
+  }
+  if (opts.mineTeacherId) {
+    add(
+      `e.user_id IN (SELECT mcm.student_id FROM class_members mcm JOIN classes mc ON mc.id = mcm.class_id WHERE mc.teacher_id = @)`,
+      opts.mineTeacherId,
+    )
+  }
+  return { where: clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : "", params }
+}
+
 const STAFF_FROM = `FROM language_check_essays e JOIN users u ON u.id = e.user_id`
 
 /** Sortable columns of the staff essay-log table (§M: derive the API enum
@@ -520,46 +562,25 @@ export async function listStaffEssays(
 }> {
   await sweepExpiredEssays()
 
-  const { clauses, params } = scopeConditions(scope)
-  const add = (sql: string, ...values: unknown[]) => {
-    let i = 0
-    clauses.push(sql.replace(/@/g, () => `$${params.length + 1 + i++}`))
-    params.push(...values)
-  }
-  if (opts.userId) add("e.user_id = @", opts.userId)
-  if (opts.status) add("e.status = @", opts.status)
-  if (opts.topicId) add("e.topic_id = @", opts.topicId)
-  // The class filter narrows rows too. Every add() that feeds `where` must
-  // run BEFORE it is stringified — a later add() pushes its value into
-  // `params` while the clause lands in the already-built string's blind
-  // spot, shifting the LIMIT/OFFSET numbering (LIMIT $3 with no $2 anywhere
-  // → "could not determine data type of parameter $2").
-  const inClass =
-    "e.user_id IN (SELECT student_id FROM class_members WHERE class_id = @)"
-  const inMineClasses =
-    "e.user_id IN (SELECT mcm.student_id FROM class_members mcm JOIN classes mc ON mc.id = mcm.class_id WHERE mc.teacher_id = @)"
-  if (opts.classId) add(inClass, opts.classId)
-  if (opts.mineTeacherId) add(inMineClasses, opts.mineTeacherId)
-  const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : ""
+  // Shared with the Topic reports tab (staffEssayConditions) so both tabs
+  // count over identical rows — their Topics / Checked essays stats tally.
+  const { where, params } = staffEssayConditions(scope, {
+    userId: opts.userId,
+    status: opts.status,
+    topicId: opts.topicId,
+    classId: opts.classId,
+    mineTeacherId: opts.mineTeacherId,
+  })
 
   // The student and topic dropdown options reflect the scope + class filter
   // only — NOT the student/status/topic filters — so switching students (or
   // keeping the pickers usable while a status filter is active) never
   // empties the lists.
-  const scopeOnly = scopeConditions(scope)
-  const scopeAdd = (sql: string, ...values: unknown[]) => {
-    let i = 0
-    scopeOnly.clauses.push(
-      sql.replace(/@/g, () => `$${scopeOnly.params.length + 1 + i++}`),
-    )
-    scopeOnly.params.push(...values)
-  }
-  if (opts.classId) scopeAdd(inClass, opts.classId)
-  if (opts.mineTeacherId) scopeAdd(inMineClasses, opts.mineTeacherId)
-  const scopeWhere =
-    scopeOnly.clauses.length > 0
-      ? `WHERE ${scopeOnly.clauses.join(" AND ")}`
-      : ""
+  const scopeOnly = staffEssayConditions(scope, {
+    classId: opts.classId,
+    mineTeacherId: opts.mineTeacherId,
+  })
+  const scopeWhere = scopeOnly.where
 
   const orderBy = staffSortSql(opts.sort ?? "updated", opts.order ?? "desc")
 
@@ -586,12 +607,17 @@ export async function listStaffEssays(
     // Stats reflect the full row filter set (scope + class/student/status/
     // topic) so the cards always describe exactly what the table shows;
     // only page/pageSize are excluded, so the cards stay stable while paging.
+    // Topics counts LIVE library topics only (COUNT over the joined topic id,
+    // so dangling links to deleted topics are skipped) — the same set the
+    // topic filter options and the Topic reports grid offer, so all three
+    // agree.
     getPool().query(
       `SELECT COUNT(*)::int AS total,
               COUNT(DISTINCT e.user_id)::int AS students,
-              COUNT(DISTINCT e.topic_id)::int AS topics,
+              COUNT(DISTINCT lt.id)::int AS topics,
               ROUND(AVG(${OVERALL_SQL}), 1) AS avg_overall
        ${STAFF_FROM}
+       LEFT JOIN language_check_topics lt ON lt.id = e.topic_id
        ${where}`,
       params,
     ),

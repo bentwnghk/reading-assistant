@@ -31,23 +31,34 @@ import { percentOf, percentTone } from "@/utils/languageCheckTopicReport";
 
 type SortKey = "recent" | "completion" | "score" | "title";
 
+interface TopicReportsResponse {
+  topics: LanguageCheckTopicReportCard[];
+  /**
+   * Checked essays in scope (incl. essays with no topic link) — always equal
+   * to the Student essays tab's checked count under the same class filter.
+   */
+  checkedEssays: number;
+}
+
 export function topicReportUrl(id: string): string {
   return `/writing-assessment/topic-report?topic=${encodeURIComponent(id)}`;
 }
 
 function completionOf(c: LanguageCheckTopicReportCard): number | null {
-  return c.studentCount ? c.checkedCount / c.studentCount : null;
+  return c.studentCount ? c.doneStudents / c.studentCount : null;
 }
 
 /**
- * Staff "Topic reports" tab: one card per saved writing topic showing the
- * class and how many of its students have a checked essay. Clicking a card
- * opens the full class report page.
+ * Staff "Topic reports" tab: one card per live topic that at least one
+ * in-scope student has written on, showing the class and how many checked
+ * essays it has. The stat cards mirror the Student essays tab (same essay
+ * set), so Topics / Checked essays tally between the two tabs. Clicking a
+ * card opens the full class report page.
  */
 export default function TopicReports({ classId }: { classId: string | null }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const [cards, setCards] = useState<LanguageCheckTopicReportCard[] | null>(null);
+  const [data, setData] = useState<TopicReportsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
   const [query, setQuery] = useState("");
@@ -69,7 +80,7 @@ export default function TopicReports({ classId }: { classId: string | null }) {
         });
         const body = await res.json().catch(() => null);
         if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
-        setCards((body as { topics: LanguageCheckTopicReportCard[] }).topics);
+        setData(body as TopicReportsResponse);
         setLoading(false);
       } catch (error) {
         if (ac.signal.aborted) return;
@@ -82,7 +93,7 @@ export default function TopicReports({ classId }: { classId: string | null }) {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const list = (cards ?? []).filter(
+    const list = (data?.topics ?? []).filter(
       (c) =>
         !q ||
         c.title.toLowerCase().includes(q) ||
@@ -96,14 +107,18 @@ export default function TopicReports({ classId }: { classId: string | null }) {
       title: (a, b) => a.title.localeCompare(b.title),
     };
     return [...list].sort(by[sort]);
-  }, [cards, query, sort]);
+  }, [data, query, sort]);
 
+  // Topics = cards (topics with ≥1 in-scope essay); Checked essays comes
+  // from the server (it also counts essays with no topic link, which have
+  // no card) so it always equals the Student essays tab's checked count.
+  // "Fully checked" stays roster-based: every non-banned class student has
+  // a checked essay.
   const totals = useMemo(() => {
-    const list = cards ?? [];
-    const checked = list.reduce((n, c) => n + c.checkedCount, 0);
-    const done = list.filter((c) => c.studentCount && c.checkedCount >= c.studentCount).length;
-    return { topics: list.length, checked, done };
-  }, [cards]);
+    const list = data?.topics ?? [];
+    const done = list.filter((c) => c.studentCount && c.doneStudents >= c.studentCount).length;
+    return { topics: list.length, checked: data?.checkedEssays ?? 0, done };
+  }, [data]);
 
   return (
     <section className="flex flex-col gap-3">
@@ -111,19 +126,19 @@ export default function TopicReports({ classId }: { classId: string | null }) {
         <Stat
           icon={BookMarked}
           label={t("languageCheck.reports.statTopics")}
-          value={cards ? totals.topics : "…"}
+          value={data ? totals.topics : "…"}
           tone="text-amber-500"
         />
         <Stat
           icon={CheckCircle2}
           label={t("languageCheck.reports.statChecked")}
-          value={cards ? totals.checked : "…"}
+          value={data ? totals.checked : "…"}
           tone="text-green-500"
         />
         <Stat
           icon={Trophy}
           label={t("languageCheck.reports.statComplete")}
-          value={cards ? totals.done : "…"}
+          value={data ? totals.done : "…"}
           hint={t("languageCheck.reports.statCompleteHint")}
           tone="text-indigo-500"
         />
@@ -168,13 +183,13 @@ export default function TopicReports({ classId }: { classId: string | null }) {
         </Button>
       </div>
 
-      {loading && !cards ? (
+      {loading && !data ? (
         <div className="flex justify-center py-10">
           <LoaderCircle className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       ) : visible.length === 0 ? (
         <p className="rounded-xl border border-dashed bg-card px-4 py-10 text-center text-sm text-muted-foreground">
-          {cards && cards.length > 0
+          {data && data.topics.length > 0
             ? t("languageCheck.reports.emptySearch")
             : t("languageCheck.reports.empty")}
         </p>
@@ -233,12 +248,9 @@ function TopicCard({
             <Users className="h-3.5 w-3.5" />
             {t("languageCheck.reports.checkedLabel")}
           </span>
-          <span className="font-semibold tabular-nums">
-            {card.checkedCount}
-            {card.studentCount !== null && (
-              <span className="font-normal text-muted-foreground"> / {card.studentCount}</span>
-            )}
-          </span>
+          {/* Essay rows (matches the essay log filtered to this topic), so a
+              retake counts — the roster ratio below is per student. */}
+          <span className="font-semibold tabular-nums">{card.checkedCount}</span>
         </div>
         <div
           className="h-2 overflow-hidden rounded-full bg-muted"
@@ -255,7 +267,10 @@ function TopicCard({
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>
             {ratio !== null
-              ? t("languageCheck.reports.percentDone", { percent: Math.round(ratio * 100) })
+              ? t("languageCheck.reports.rosterDone", {
+                  done: card.doneStudents,
+                  total: card.studentCount,
+                })
               : t("languageCheck.reports.noRoster")}
           </span>
           <span>

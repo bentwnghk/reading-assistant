@@ -4762,7 +4762,7 @@
         },
         "topicReports": {
           "name": "Topic Reports",
-          "desc": "Under \"My students\" → \"Topic reports\", each saved writing topic is a card showing its class and how many students have a checked essay (with the class average). Open one for per-criterion class averages, the score distribution, common errors and one card per student — clicking a student opens their essay, exactly like View in Student essays."
+          "desc": "Under \"My students\" → \"Topic reports\", every topic your students have written on is a card showing its class, its checked-essay count and how many of the class are done (with the class average). The Topics and Checked essays cards count over the same essays as the Student essays tab, so the two tabs always tally. Open one for per-criterion class averages, the score distribution, common errors and one card per student — clicking a student opens their essay, exactly like View in Student essays."
         },
         "staff": {
           "name": "Staff View",
@@ -4991,11 +4991,12 @@
         "score": "Average score",
         "title": "Title (A–Z)"
       },
-      "empty": "No writing topics yet. Create one in the Topic Library under My work.",
+      "empty": "No topic essays yet — a card appears as soon as a student in scope writes on a topic from your Topic Library.",
       "emptySearch": "Nothing matches your search.",
       "noClass": "No class",
       "checkedLabel": "Checked essays",
       "percentDone": "{{percent}}% done",
+      "rosterDone": "{{done}}/{{total}} done",
       "noRoster": "No class assigned",
       "avg": "Avg",
       "back": "Back to Topic reports",

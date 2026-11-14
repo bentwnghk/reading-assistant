@@ -150,9 +150,11 @@ export default function TopicReportContainer() {
 
   const { max, averages, topic } = report;
   const overallPct = percentOf(averages.overall, max.overall);
+  // Roster completion is per STUDENT; checkedCount counts essay rows (mirrors
+  // the card and the essay log), so the ratio must not divide rows by roster.
   const completion =
     report.studentCount && report.studentCount > 0
-      ? Math.round((report.checkedCount / report.studentCount) * 100)
+      ? Math.round((report.doneStudents / report.studentCount) * 100)
       : null;
   const distMax = Math.max(1, ...report.distribution);
   const bands = [
@@ -258,14 +260,7 @@ export default function TopicReportContainer() {
           <Stat
             icon={Users}
             label={t("languageCheck.reports.submitted")}
-            value={
-              <>
-                {report.checkedCount}
-                {report.studentCount !== null && (
-                  <span className="text-sm font-normal text-muted-foreground"> / {report.studentCount}</span>
-                )}
-              </>
-            }
+            value={report.checkedCount}
             hint={completion !== null ? t("languageCheck.reports.percentDone", { percent: completion }) : undefined}
             tone="text-indigo-500"
           />

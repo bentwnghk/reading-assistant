@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const parsed = querySchema.safeParse(Object.fromEntries(request.nextUrl.searchParams))
     if (!parsed.success) return invalid(parsed.error)
     const session = await auth()
-    const cards = await listTopicReportCards(
+    const data = await listTopicReportCards(
       staff.scope,
       { id: staff.userId, role: session?.user?.role ?? "teacher" },
       {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
         mineTeacherId: parsed.data.mine === "1" && !parsed.data.classId ? staff.userId : undefined,
       },
     )
-    return NextResponse.json({ topics: cards })
+    return NextResponse.json(data)
   } catch (error) {
     console.error("Error listing topic reports:", error)
     return NextResponse.json({ error: parseError(error) }, { status: 500 })
