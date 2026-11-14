@@ -5007,7 +5007,8 @@
       "avgErrors": "每篇約 {{count}} 個錯誤",
       "distribution": "分數分佈（總分）",
       "band": {
-        "low": "<40%",
+        "veryLow": "<20%",
+        "low": "20–39%",
         "fair": "40–59%",
         "good": "60–79%",
         "excellent": "80%+"

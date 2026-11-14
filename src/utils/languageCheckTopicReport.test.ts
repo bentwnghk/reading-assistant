@@ -31,6 +31,8 @@ describe("topic report maths", () => {
 
   it("buckets overall scores into percentage bands", () => {
     expect(percentOf(null, 21)).toBeNull();
-    expect(distributionOf([21, 17, 13, 8, 2, null], 21)).toEqual([2, 0, 1, 2]);
+    expect(distributionOf([21, 17, 13, 8, 2, null], 21)).toEqual([1, 1, 0, 1, 2]);
+    // exact 20/40/60/80 percent cuts: 19%→0, 20%→1, 40%→2, 60%→3, 80%→4
+    expect(distributionOf([4, 4.2, 8.4, 10.5, 12.6, 16.8], 21)).toEqual([1, 1, 2, 1, 1]);
   });
 });

@@ -44,16 +44,16 @@ export function percentOf(score: number | null, max: number): number | null {
   return Math.round((score / max) * 100);
 }
 
-/** Overall-score band: 0 = <40%, 1 = 40–59%, 2 = 60–79%, 3 = 80%+. */
-export function scoreBand(percent: number): 0 | 1 | 2 | 3 {
-  return percent >= 80 ? 3 : percent >= 60 ? 2 : percent >= 40 ? 1 : 0;
+/** Overall-score band: 0 = <20%, 1 = 20–39%, 2 = 40–59%, 3 = 60–79%, 4 = 80%+. */
+export function scoreBand(percent: number): 0 | 1 | 2 | 3 | 4 {
+  return percent >= 80 ? 4 : percent >= 60 ? 3 : percent >= 40 ? 2 : percent >= 20 ? 1 : 0;
 }
 
 export function distributionOf(
   overalls: (number | null)[],
   max: number,
-): [number, number, number, number] {
-  const out: [number, number, number, number] = [0, 0, 0, 0];
+): [number, number, number, number, number] {
+  const out: [number, number, number, number, number] = [0, 0, 0, 0, 0];
   for (const o of overalls) {
     const p = percentOf(o, max);
     if (p !== null) out[scoreBand(p)] += 1;

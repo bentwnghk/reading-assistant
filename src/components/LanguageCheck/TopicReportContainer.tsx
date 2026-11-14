@@ -156,7 +156,8 @@ export default function TopicReportContainer() {
       : null;
   const distMax = Math.max(1, ...report.distribution);
   const bands = [
-    { key: "low", color: "bg-red-500" },
+    { key: "veryLow", color: "bg-red-500" },
+    { key: "low", color: "bg-orange-500" },
     { key: "fair", color: "bg-amber-500" },
     { key: "good", color: "bg-lime-500" },
     { key: "excellent", color: "bg-green-500" },

@@ -1415,8 +1415,8 @@ interface LanguageCheckTopicReport {
   avgErrors: number | null;
   highest: number | null;
   lowest: number | null;
-  /** Assessed students per overall-score band (<40%, 40–59%, 60–79%, 80%+). */
-  distribution: [number, number, number, number];
+  /** Assessed students per overall-score band (<20%, 20–39%, 40–59%, 60–79%, 80%+). */
+  distribution: [number, number, number, number, number];
   /** Most frequent error categories across the checked essays. */
   commonErrors: { category: string; count: number }[];
   students: LanguageCheckTopicReportStudent[];
