@@ -5,7 +5,6 @@ import {
   Footer,
   Header,
   HeadingLevel,
-  LeaderType,
   Packer,
   PageNumber,
   Paragraph,
@@ -45,6 +44,8 @@ export interface FollowUpExportOptions {
   report: LanguageCheckAiReport;
   items: FollowUpItem[];
   language: "en" | "zh";
+  /** Viewer's school name — shown above the worksheet title. */
+  schoolName?: string;
   t: Translate;
   categoryLabel: (category: string) => string;
   now?: Date;
@@ -171,18 +172,6 @@ function sectionBanner(title: string, sub: string, color: string = C.ink): Parag
     para([run(title, { bold: true, color, size: 32 })], { before: 120, after: 40, keepNext: true }),
     ...(sub ? [para([run(sub, { color: C.muted, size: 21 })], { after: 140, keepNext: true })] : []),
   ];
-}
-
-function ruledLines(count: number): Paragraph[] {
-  return Array.from(
-    { length: count },
-    () =>
-      new Paragraph({
-        tabStops: [{ type: TabStopType.RIGHT, position: WIDTH - 520, leader: LeaderType.UNDERSCORE }],
-        spacing: { before: 200, after: 0, line: 300 },
-        children: [new TextRun({ children: ["\t"], color: "94A3B8", size: 22 })],
-      }),
-  );
 }
 
 function categoryHex(category: string): string {
@@ -335,12 +324,11 @@ function exerciseBlock(
     }
   } else if (item.type === "error-correction") {
     body.push(
-      para([run(item.passage, { size: 25 })], { after: 80, line: 380, keepNext: true }),
-      para(
-        [run(t("languageCheck.followUp.rewriteCorrect"), { bold: true, color: C.muted, size: 18, caps: true, spacing: 16 })],
-        { after: 0, keepNext: true },
-      ),
-      ...ruledLines(1),
+      // Blank space above the sentence: students underline the mistake and
+      // write the correction (or the added word) above the line, or cross
+      // the extra word out.
+      para([run("", { size: 22 })], { after: 0, line: 640 }),
+      para([run(item.passage, { size: 25 })], { after: 0, line: 380 }),
     );
   }
   return [box(body, { border: C.line }), gap(110)];
@@ -443,6 +431,7 @@ export function buildFollowUpDocx({
   report,
   items,
   language,
+  schoolName,
   t,
   categoryLabel,
   now = new Date(),
@@ -462,9 +451,10 @@ export function buildFollowUpDocx({
   const ordered = [...fix, ...fill];
 
   const children: (Paragraph | Table)[] = [
-    para([run(t("languageCheck.followUp.docLabel"), { bold: true, color: C.muted, size: 22, caps: true, spacing: 40 })], {
-      after: 40,
-    }),
+    para(
+      [run(schoolName || t("languageCheck.followUp.docLabel"), { bold: true, color: C.muted, size: 22, caps: true, spacing: 40 })],
+      { after: 40 },
+    ),
     new Paragraph({
       heading: HeadingLevel.TITLE,
       spacing: { before: 0, after: 80 },

@@ -17,10 +17,18 @@ import {
   Users,
   XCircle,
   CheckCircle2,
-  FileDown,
+  ChevronDown,
+  Download,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   ExplanationLanguageToggle,
   categoryStyle,
@@ -30,7 +38,7 @@ import useLanguageCheck from "@/hooks/useLanguageCheck";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE } from "@/constants/languageCheck";
 import { parseError } from "@/utils/error";
-import { exportFollowUpDocx } from "@/utils/languageCheckFollowUpExport";
+import { exportFollowUpDocx, type FollowUpItem } from "@/utils/languageCheckFollowUpExport";
 import { cn } from "@/utils/style";
 import { percentOf, percentTone, SCORE_KEYS, type ScoreKey } from "@/utils/languageCheckTopicReport";
 import { groupStudents, newSubmissionsSince, type StudentInsight } from "@/utils/languageCheckAiReport";
@@ -140,6 +148,8 @@ export default function TopicAiReport() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [followUpBusy, setFollowUpBusy] = useState(false);
+  const [followUpItems, setFollowUpItems] = useState<FollowUpItem[] | null>(null);
+  const [schoolName, setSchoolName] = useState<string | null | undefined>(undefined);
   const started = useRef(false);
 
   const backUrl = topicId
@@ -152,6 +162,8 @@ export default function TopicAiReport() {
     try {
       const saved = await generateTopicAiReport(topicId, language);
       setReport(saved);
+      // New report snapshot: the previously generated worksheet no longer matches.
+      setFollowUpItems(null);
       setCurrentCount(saved.essayCount);
       toast.success(t("languageCheck.aiReport.done"));
     } catch (error) {
@@ -192,12 +204,40 @@ export default function TopicAiReport() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, isStaff, topicId]);
 
+  /** The school name tops the worksheet; fetched once and cached (the status
+   * route returns it for any staff viewer, subscription or not). */
+  async function resolveSchoolName(): Promise<string | undefined> {
+    let school = schoolName;
+    if (school === undefined) {
+      school = await fetch("/api/subscription/school/status")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((b: { schoolName?: unknown } | null) => (typeof b?.schoolName === "string" && b.schoolName ? b.schoolName : null))
+        .catch(() => null);
+      setSchoolName(school);
+    }
+    return school ?? undefined;
+  }
+
+  async function downloadFollowUp(items: FollowUpItem[]) {
+    if (!report || followUpBusy) return;
+    setFollowUpBusy(true);
+    try {
+      await exportFollowUpDocx({ report, items, language, schoolName: await resolveSchoolName(), t, categoryLabel });
+      toast.success(t("languageCheck.followUp.done"));
+    } catch (error) {
+      toast.error(parseError(error));
+    } finally {
+      setFollowUpBusy(false);
+    }
+  }
+
   async function generateFollowUp() {
     if (!report || followUpBusy) return;
     setFollowUpBusy(true);
     try {
       const items = await generateFollowUpExercises(report, categoryLabel);
-      await exportFollowUpDocx({ report, items, language, t, categoryLabel });
+      setFollowUpItems(items);
+      await exportFollowUpDocx({ report, items, language, schoolName: await resolveSchoolName(), t, categoryLabel });
       toast.success(t("languageCheck.followUp.done"));
     } catch (error) {
       toast.error(parseError(error));
@@ -274,12 +314,43 @@ export default function TopicAiReport() {
               <Printer className="mr-1.5 h-4 w-4" />
               {t("languageCheck.aiReport.print")}
             </Button>
-            {insights.mistakes.length > 0 && (
-              <Button variant="outline" size="sm" disabled={followUpBusy} onClick={() => void generateFollowUp()}>
-                {followUpBusy ? <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" /> : <FileDown className="mr-1.5 h-4 w-4 text-sky-500" />}
-                {followUpBusy ? t("languageCheck.followUp.generating") : t("languageCheck.followUp.button")}
-              </Button>
-            )}
+            {insights.mistakes.length > 0 &&
+              (followUpItems === null ? (
+                <Button
+                  size="sm"
+                  disabled={followUpBusy}
+                  className="bg-gradient-to-r from-violet-600 to-sky-600 text-white shadow-sm hover:from-violet-700 hover:to-sky-700"
+                  onClick={() => void generateFollowUp()}
+                >
+                  {followUpBusy ? <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4" />}
+                  {followUpBusy ? t("languageCheck.followUp.generating") : t("languageCheck.followUp.button")}
+                </Button>
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      disabled={followUpBusy}
+                      title={t("languageCheck.followUp.button")}
+                      className="bg-gradient-to-r from-violet-600 to-sky-600 text-white shadow-sm hover:from-violet-700 hover:to-sky-700"
+                    >
+                      {followUpBusy ? <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4" />}
+                      {followUpBusy ? t("languageCheck.followUp.generating") : t("languageCheck.followUp.button")}
+                      <ChevronDown className="ml-1 h-4 w-4 text-white/80" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => void downloadFollowUp(followUpItems)}>
+                      <Download className="mr-2 h-4 w-4" />
+                      {t("languageCheck.followUp.downloadAgain")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => void generateFollowUp()}>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      {t("languageCheck.followUp.regenerate")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ))}
             <Button variant="outline" size="sm" disabled={generating} onClick={() => void generate()}>
               {generating ? <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4 text-amber-500" />}
               {t("languageCheck.aiReport.regenerate")}
