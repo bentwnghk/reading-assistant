@@ -138,9 +138,15 @@ export default function TopicAiReport() {
   const { data: session } = useSession();
   const topicId = params.get("topic");
   const isStaff = ["teacher", "admin", "super-admin"].includes(session?.user?.role ?? "");
-  const { generateTopicAiReport, generateFollowUpExercises } = useLanguageCheck();
+  const { generateTopicAiReport, generateFollowUpExercises, persistFollowUpWorksheet } = useLanguageCheck();
   const language = useLanguageCheckStore((s) => s.explanationLanguage);
   const setLanguage = useLanguageCheckStore((s) => s.setExplanationLanguage);
+  // Worksheet cache lives in the store so the dropdown survives SPA navigation (§A).
+  const cachedWorksheet = useLanguageCheckStore((s) =>
+    topicId ? s.followUpWorksheets[topicId] : undefined,
+  );
+  const cacheFollowUpWorksheet = useLanguageCheckStore((s) => s.cacheFollowUpWorksheet);
+  const clearFollowUpWorksheet = useLanguageCheckStore((s) => s.clearFollowUpWorksheet);
   const categoryLabel = useCategoryLabel();
 
   const [report, setReport] = useState<LanguageCheckAiReport | null>(null);
@@ -148,7 +154,6 @@ export default function TopicAiReport() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [followUpBusy, setFollowUpBusy] = useState(false);
-  const [followUpItems, setFollowUpItems] = useState<FollowUpItem[] | null>(null);
   const [schoolName, setSchoolName] = useState<string | null | undefined>(undefined);
   const started = useRef(false);
 
@@ -163,7 +168,7 @@ export default function TopicAiReport() {
       const saved = await generateTopicAiReport(topicId, language);
       setReport(saved);
       // New report snapshot: the previously generated worksheet no longer matches.
-      setFollowUpItems(null);
+      clearFollowUpWorksheet(topicId);
       setCurrentCount(saved.essayCount);
       toast.success(t("languageCheck.aiReport.done"));
     } catch (error) {
@@ -190,7 +195,18 @@ export default function TopicAiReport() {
         if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
         setCurrentCount(body.currentCount ?? 0);
         if (body.saved) {
-          setReport(body.saved as LanguageCheckAiReport);
+          const saved = body.saved as LanguageCheckAiReport;
+          setReport(saved);
+          // Hydrate the persisted worksheet cache (survives reload / other devices).
+          const fu = body.followUp as { generatedAt?: unknown; items?: unknown } | null | undefined;
+          if (
+            fu &&
+            typeof fu.generatedAt === "number" &&
+            Array.isArray(fu.items) &&
+            fu.generatedAt === saved.generatedAt
+          ) {
+            cacheFollowUpWorksheet(topicId, fu.generatedAt, fu.items as FollowUpItem[]);
+          }
         } else {
           void generate();
         }
@@ -236,7 +252,14 @@ export default function TopicAiReport() {
     setFollowUpBusy(true);
     try {
       const items = await generateFollowUpExercises(report, categoryLabel);
-      setFollowUpItems(items);
+      if (topicId) {
+        cacheFollowUpWorksheet(topicId, report.generatedAt, items);
+        // Background save so the worksheet survives reload / sign-out / other
+        // devices; a failure keeps this session's local cache and only warns.
+        void persistFollowUpWorksheet(topicId, report.generatedAt, items).catch((err) => {
+          console.warn("Failed to persist follow-up worksheet:", err);
+        });
+      }
       await exportFollowUpDocx({ report, items, language, schoolName: await resolveSchoolName(), t, categoryLabel });
       toast.success(t("languageCheck.followUp.done"));
     } catch (error) {
@@ -288,6 +311,9 @@ export default function TopicAiReport() {
   const groups = groupStudents(base.students, max);
   const stale = newSubmissionsSince(report, currentCount);
   const exampleFor = (cat: string) => categories.find((c) => c.category === cat)?.examples ?? [];
+  // A cached worksheet only counts while it was built from the shown report snapshot.
+  const followUpItems =
+    cachedWorksheet && cachedWorksheet.generatedAt === report.generatedAt ? cachedWorksheet.items : null;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-10 print:gap-5">

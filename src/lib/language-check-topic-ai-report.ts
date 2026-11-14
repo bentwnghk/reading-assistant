@@ -4,6 +4,10 @@ import type { TopicViewer } from "./language-check-topics"
 import { getTopicReport } from "./language-check-topic-report"
 import { isExpressionCategory } from "@/constants/languageCheck"
 import { contextAround } from "@/utils/languageCheck"
+import type { FollowUpItem } from "@/utils/languageCheckLearn"
+
+/** Saved follow-up worksheet: items + the report snapshot (ms) they were built from. */
+export type SavedFollowUp = { generatedAt: number; items: FollowUpItem[] }
 
 const MAX_EXAMPLES = 4
 const MAX_NOTES = 25
@@ -121,14 +125,45 @@ export async function getTopicAiEvidence(
 export async function getSavedAiReport(
   topicId: string,
   userId: string,
-): Promise<{ report: LanguageCheckAiReport; generatedAt: number } | null> {
+): Promise<{ report: LanguageCheckAiReport; generatedAt: number; followUp: SavedFollowUp | null } | null> {
   const { rows } = await getPool().query(
-    `SELECT report, generated_at FROM language_check_topic_ai_reports
+    `SELECT report, generated_at, follow_up FROM language_check_topic_ai_reports
      WHERE topic_id = $1 AND user_id = $2`,
     [topicId, userId],
   )
   if (!rows[0]) return null
-  return { report: rows[0].report as LanguageCheckAiReport, generatedAt: toMs(rows[0].generated_at) }
+  const fu = rows[0].follow_up as { generatedAt?: unknown; items?: unknown } | null
+  const followUp =
+    fu && typeof fu.generatedAt === "number" && Array.isArray(fu.items)
+      ? { generatedAt: fu.generatedAt, items: fu.items as FollowUpItem[] }
+      : null
+  return { report: rows[0].report as LanguageCheckAiReport, generatedAt: toMs(rows[0].generated_at), followUp }
+}
+
+/**
+ * Persist a generated follow-up worksheet on the saved report's row. The
+ * update is guarded by the report snapshot it was generated from, so a report
+ * regenerated in the meantime is never paired with a stale worksheet.
+ */
+export async function saveFollowUpWorksheet(
+  topicId: string,
+  userId: string,
+  generatedAt: number,
+  items: FollowUpItem[],
+): Promise<"saved" | "no-report" | "stale"> {
+  const { rows } = await getPool().query(
+    `UPDATE language_check_topic_ai_reports
+     SET follow_up = $3::jsonb, follow_up_generated_at = now()
+     WHERE topic_id = $1 AND user_id = $2 AND (report->>'generatedAt')::bigint = $4
+     RETURNING topic_id`,
+    [topicId, userId, JSON.stringify({ generatedAt, items }), generatedAt],
+  )
+  if (rows.length > 0) return "saved"
+  const { rows: existing } = await getPool().query(
+    `SELECT 1 FROM language_check_topic_ai_reports WHERE topic_id = $1 AND user_id = $2`,
+    [topicId, userId],
+  )
+  return existing.length === 0 ? "no-report" : "stale"
 }
 
 export async function saveAiReport(
@@ -141,7 +176,8 @@ export async function saveAiReport(
      VALUES ($1, $2, $3::jsonb, $4, $5, now())
      ON CONFLICT (topic_id, user_id) DO UPDATE
        SET report = EXCLUDED.report, essay_count = EXCLUDED.essay_count,
-           model = EXCLUDED.model, generated_at = now()`,
+           model = EXCLUDED.model, generated_at = now(),
+           follow_up = NULL, follow_up_generated_at = NULL`,
     [topicId, userId, JSON.stringify(report), report.essayCount, report.model],
   )
 }

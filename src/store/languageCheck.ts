@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { LANGUAGE_CHECK_LEARN_DEFAULT_AGE } from "@/constants/languageCheck";
 import { useLanguageCheckLearnStore } from "@/store/languageCheckLearn";
 import { countWords } from "@/utils/languageCheck";
+import type { FollowUpItem } from "@/utils/languageCheckFollowUpExport";
 
 /**
  * Writing Assessment store — fully independent of the reading/history stores.
@@ -47,6 +48,13 @@ interface LanguageCheckState {
   /** Essay id the running generation belongs to. */
   generatingEssayId: string | null;
   progress: LanguageCheckProgress | null;
+  /**
+   * Generated follow-up worksheets, keyed by topic id and tied to the report's
+   * `generatedAt` snapshot. Store-level (not persisted, §A) so the report
+   * page's button stays a dropdown across SPA navigation; entries whose
+   * `generatedAt` no longer matches the shown report are ignored.
+   */
+  followUpWorksheets: Record<string, { generatedAt: number; items: FollowUpItem[] }>;
 }
 
 interface LanguageCheckActions {
@@ -56,6 +64,10 @@ interface LanguageCheckActions {
   setGenerating: (type: LanguageCheckGeneration, active: boolean) => void;
   setGeneratingEssayId: (id: string | null) => void;
   setProgress: (progress: LanguageCheckProgress | null) => void;
+  /** Remember a generated worksheet so it can be re-downloaded without a new AI run. */
+  cacheFollowUpWorksheet: (topicId: string, generatedAt: number, items: FollowUpItem[]) => void;
+  /** Drop a cached worksheet (e.g. the report was regenerated). */
+  clearFollowUpWorksheet: (topicId: string) => void;
   loadList: (force?: boolean) => Promise<void>;
   loadTopics: (force?: boolean) => Promise<void>;
   selectTopic: (id: string | null) => void;
@@ -165,6 +177,7 @@ const initialData: Pick<
   | "activeGenerations"
   | "generatingEssayId"
   | "progress"
+  | "followUpWorksheets"
 > = {
   essays: [],
   listLoaded: false,
@@ -178,6 +191,7 @@ const initialData: Pick<
   activeGenerations: {},
   generatingEssayId: null,
   progress: null,
+  followUpWorksheets: {},
 };
 
 export const useLanguageCheckStore = create(
@@ -207,6 +221,24 @@ export const useLanguageCheckStore = create(
         })),
       setGeneratingEssayId: (generatingEssayId) => set({ generatingEssayId }),
       setProgress: (progress) => set({ progress }),
+
+      cacheFollowUpWorksheet: (topicId, generatedAt, items) =>
+        set((s) => {
+          // Re-insert last so the cap drops the least recently generated.
+          const rest = { ...s.followUpWorksheets };
+          delete rest[topicId];
+          const keys = Object.keys(rest);
+          if (keys.length >= 8) delete rest[keys[0]];
+          return { followUpWorksheets: { ...rest, [topicId]: { generatedAt, items } } };
+        }),
+
+      clearFollowUpWorksheet: (topicId) =>
+        set((s) => {
+          if (!s.followUpWorksheets[topicId]) return {};
+          const rest = { ...s.followUpWorksheets };
+          delete rest[topicId];
+          return { followUpWorksheets: rest };
+        }),
 
       loadList: async (force = false) => {
         const { listLoaded, listLoading } = get();

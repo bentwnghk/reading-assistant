@@ -62,6 +62,7 @@ import {
   LearnPracticeMockup,
   LearnQuizMockup,
   LanguageCheckStaffOverviewMockup,
+  LanguageCheckClassReportMockup,
 } from "@/components/Auth/landing/Mockups";
 import { FeaturesShowcase } from "@/components/Auth/landing/FeaturesShowcase";
 import { Footer } from "@/components/Internal/Footer";
@@ -450,9 +451,10 @@ function PracticeCarousel() {
 }
 
 /* Writing Assessment carousel (Chapter 06) — mirrors MasterCarousel, cycling the
-   8 Writing Assessment views: transcription review, the AI Writing Assessment,
+   9 Writing Assessment views: transcription review, the AI Writing Assessment,
    checked results, the Enhanced Essays tab, the three "Learn from your
-   mistakes" stages and the staff student-learning overview. */
+   mistakes" stages, the staff student-learning overview and the Class
+   Assessment Report. */
 function LanguageCheckCarousel() {
   const { t } = useTranslation();
   const slides = [
@@ -464,6 +466,7 @@ function LanguageCheckCarousel() {
     { key: "practice", label: t("landing.chapters.writing.carousel.practice"), node: <LearnPracticeMockup /> },
     { key: "quiz", label: t("landing.chapters.writing.carousel.quiz"), node: <LearnQuizMockup /> },
     { key: "staffOverview", label: t("landing.chapters.writing.carousel.staffOverview"), node: <LanguageCheckStaffOverviewMockup /> },
+    { key: "classReport", label: t("landing.chapters.writing.carousel.classReport"), node: <LanguageCheckClassReportMockup /> },
   ];
   const count = slides.length;
   const carouselRef = useRef<HTMLDivElement>(null);

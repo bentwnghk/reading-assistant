@@ -24,7 +24,9 @@ import {
   LANGUAGE_CHECK_CATEGORY_STYLES,
   type LanguageCheckCategory,
 } from "@/constants/languageCheck";
-import { pickLang, splitAtBlanks, type LearnExercise } from "@/utils/languageCheckLearn";
+import { pickLang, splitAtBlanks, type FollowUpItem, type LearnExercise } from "@/utils/languageCheckLearn";
+
+export type { FollowUpItem };
 
 /**
  * Word export of the class "follow-up exercise" worksheet: a short error summary
@@ -34,11 +36,6 @@ import { pickLang, splitAtBlanks, type LearnExercise } from "@/utils/languageChe
  */
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;
-
-export interface FollowUpItem {
-  exercise: LearnExercise;
-  category: string;
-}
 
 export interface FollowUpExportOptions {
   report: LanguageCheckAiReport;

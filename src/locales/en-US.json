@@ -287,6 +287,10 @@
           "title": "Writing Assessment",
           "desc": "Snap a handwritten essay: AI transcribes it, marks every mistake with HKDSE-aligned corrections, scores it like an examiner, and turns your errors into lessons, practice and quizzes. Enhanced Essays polish your writing or rewrite it at Level 5** — and load it straight back into your reading journey, where your own words fuel a deeper learning experience: mind maps, analysis, vocabulary and more."
         },
+        "classReport": {
+          "title": "Class Assessment Report",
+          "desc": "For teachers: from any Topic report, AI reads the whole class's checked essays and writes a printable teaching report — criterion findings, common mistakes with real examples, teaching priorities and differentiation groups. One more press turns those mistakes into a follow-up fix-it worksheet with a teacher answer key."
+        },
         "assignments": {
           "title": "Assignments",
           "desc": "Turn any reading session into homework for a whole class. Track each student's live progress and scores, flag who's stuck, and export the roster to Excel."
@@ -504,7 +508,7 @@
       "writing": {
         "eyebrow": "Writing Assessment",
         "title": "From reading to writing.",
-        "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, generate two enhanced versions of your own essay (a light polish and an aspirational Level 5** rewrite) that you can load straight back into the reading workflow, then turn every mistake into a lesson, practice and quiz built from your own writing. Teachers watch the whole class learn from their mistakes in one dashboard.",
+        "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, generate two enhanced versions of your own essay (a light polish and an aspirational Level 5** rewrite) that you can load straight back into the reading workflow, then turn every mistake into a lesson, practice and quiz built from your own writing. Teachers watch the whole class learn from their mistakes in one dashboard — and press once more for an AI Class Assessment Report with differentiation groups, then a printable follow-up worksheet drilling the class's common mistakes.",
         "bullets": [
           "Verbatim transcription you review beside the original scan",
           "AI Writing Assessment — HKDSE Content, Language and Organization, each on a 0–7 band",
@@ -512,7 +516,8 @@
           "Enhanced Essays — a light polish and an aspirational Level 5** rewrite you can load as a reading text",
           "Learn from your mistakes: lesson → practice → quiz",
           "Saved sessions resume on any device, exportable to Word",
-          "Student learning dashboards for every class"
+          "Student learning dashboards for every class",
+          "Class Assessment Report — an AI teaching report per topic, plus a printable fix-it follow-up worksheet"
         ],
         "carousel": {
           "label": "Writing Assessment features",
@@ -525,6 +530,7 @@
           "practice": "Learn · practice",
           "quiz": "Learn · quiz",
           "staffOverview": "Student learning overview",
+          "classReport": "Class Assessment Report",
           "prev": "Previous slide",
           "next": "Next slide",
           "goTo": "Go to slide {{n}} of {{count}}: {{label}}",
@@ -4763,6 +4769,10 @@
         "topicReports": {
           "name": "Topic Reports",
           "desc": "Under \"My students\" → \"Topic reports\", every topic your students have written on is a card showing its class, its checked-essay count and how many of the class are done (with the class average). The Topics and Checked essays cards count over the same essays as the Student essays tab, so the two tabs always tally. Open one for per-criterion class averages, the score distribution, common errors and one card per student — clicking a student opens their essay, exactly like View in Student essays."
+        },
+        "classReport": {
+          "name": "Class Assessment Report",
+          "desc": "From any topic report, press \"Generate AI assessment report\" (needs at least one checked essay): the AI reads the whole class's checked essays and writes a printable report — criterion findings with next steps, common mistakes with real examples from their essays, teaching priorities, differentiation groups and quick tips. It is saved with the topic and warns you when new checked essays arrive. \"Generate follow-up exercise\" then turns those mistakes into a Word worksheet that downloads automatically — rule recap, fix-the-error and fill-in-the-blank practice, and a teacher answer key."
         },
         "staff": {
           "name": "Staff View",

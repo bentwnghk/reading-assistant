@@ -378,3 +378,17 @@ A new **real-time** multiplayer mode inside the existing Spelling Challenge. Her
 
 - **Class-Battle Notification:** Students receive a persistent toast (doesn't auto-dismiss until the room is closed or they join) and a red badge on the header bell. Both disappear when they join the battle or the room is destroyed.
 
+---
+
+## Q13: I'm an English teacher. After my class's essays are checked in Writing Assessment, can I see how the whole class did — and get follow-up practice for their common mistakes?
+
+Yes. Under **Writing Assessment → My students → Topic reports**, every writing topic your students have written on is a card with its class, checked-essay count and class average. Open one for the class statistics — per-criterion averages, the score distribution, most common errors and one card per student — and then press **Generate AI assessment report** (it needs at least one checked essay) for the **Class Assessment Report**:
+
+- **What the AI reads** — every student's *latest* checked essay, anonymised into error categories with real example sentences, plus the marker notes from each student's AI Writing Assessment.
+- **What you get** — an overview with a headline and class statistics; performance by criterion, each tagged *Strength*, *Developing* or *Priority* with a finding and a next step; common mistakes with the rules behind them, quoting your class's own wrong→corrected sentences; numbered teaching priorities with suggested activities and rough minutes; differentiation groups (*Needs support* <40%, *Developing* 40–69%, *Secure* 70%+) that tag each student's weakest criterion; and quick teaching tips.
+- **Save, print, refresh** — the report is saved with the topic and reopens instantly, follows the English / 繁體中文 switch, and prints cleanly (**Print / PDF**). A banner warns you when new checked essays arrive, and **Regenerate** rewrites it. It's AI-generated — review it before sharing.
+
+From the same page, **Generate follow-up exercise** turns the report's common mistakes into a Word worksheet that downloads automatically: a recap of each rule with wrong/correct sentence pairs, then ten practice questions — **A. Fix the error** and **B. Fill in the blank** — pitched at your students' level, with name/class/date lines ready to hand out and a **teacher answer key** on a separate page. You can download the worksheet again or regenerate it any time.
+
+**Pro tip:** Run the Class Assessment Report right after the class's essays are checked, hand out the follow-up worksheet in the next lesson, then have students rewrite their essays and check them again — the report's differentiation groups tell you who needs small-group reteaching first.
+

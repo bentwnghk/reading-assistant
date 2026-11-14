@@ -1028,6 +1028,8 @@ CREATE TABLE IF NOT EXISTS language_check_topic_ai_reports (
   essay_count  INTEGER NOT NULL DEFAULT 0,
   model        TEXT NOT NULL DEFAULT '',
   generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  follow_up    JSONB,
+  follow_up_generated_at TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (topic_id, user_id)
 );
 

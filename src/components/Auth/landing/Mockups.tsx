@@ -12,6 +12,7 @@ import {
   Sparkles,
   Target,
   Timer,
+  ThumbsUp,
   BookOpen,
   BookText,
   Gamepad2,
@@ -60,6 +61,7 @@ import {
   History,
   Layers,
   Play,
+  Printer,
   Library,
   Search,
   Globe,
@@ -6733,6 +6735,404 @@ export function LanguageCheckStaffOverviewMockup() {
             Practice accuracy is self-reported by the learner&apos;s browser; quiz scores are
             re-marked by the server.
           </span>
+        </p>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 06 · 9. CLASS ASSESSMENT REPORT — the staff AI teaching report (faithful, static) ──
+   Mirrors TopicAiReport.tsx: the header (topic meta + Print / follow-up exercise /
+   Regenerate actions), the gradient overview hero with stat tiles and the criteria
+   radar, per-criterion cards with Strength / Developing / Priority badges, the score
+   distribution + strengths pair, the mistake-frequency chart, a common-mistake card
+   quoting the class's own wrong → corrected sentences, teaching priorities, the three
+   differentiation tiers and quick tips. Data continues the chapter's plastic-levy
+   story (same class, students and sentences as the earlier slides). */
+const CRIT_TONE = {
+  content: { bar: "bg-sky-500", soft: "border-sky-200 bg-sky-50/70 dark:border-sky-900 dark:bg-sky-950/40", text: "text-sky-700 dark:text-sky-300" },
+  language: { bar: "bg-violet-500", soft: "border-violet-200 bg-violet-50/70 dark:border-violet-900 dark:bg-violet-950/40", text: "text-violet-700 dark:text-violet-300" },
+  organization: { bar: "bg-emerald-500", soft: "border-emerald-200 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300" },
+} as const;
+const LEVEL_TONE = {
+  strength: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300",
+  developing: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+  priority: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
+} as const;
+const TIER_TONE = {
+  support: { dot: "bg-red-500", box: "border-red-200 bg-red-50/60 dark:border-red-900 dark:bg-red-950/30" },
+  developing: { dot: "bg-amber-500", box: "border-amber-200 bg-amber-50/60 dark:border-amber-900 dark:bg-amber-950/30" },
+  secure: { dot: "bg-green-500", box: "border-green-200 bg-green-50/60 dark:border-green-900 dark:bg-green-950/30" },
+} as const;
+
+export function LanguageCheckClassReportMockup() {
+  /* Radar — same polar maths as the page's Radar() (rings at .25/.5/.75/1, violet
+     polygon, criterion-coloured dots), scaled for the frame. */
+  const radar = [
+    { label: "Content", pct: 66, hex: "#0ea5e9" },
+    { label: "Language", pct: 61, hex: "#8b5cf6" },
+    { label: "Organization", pct: 72, hex: "#10b981" },
+  ];
+  const size = 176;
+  const c = size / 2;
+  const R = 46;
+  const pt = (i: number, f: number): [number, number] => {
+    const a = (Math.PI * 2 * i) / radar.length - Math.PI / 2;
+    return [c + Math.cos(a) * R * f, c + Math.sin(a) * R * f];
+  };
+  const poly = (f: (i: number) => number) => radar.map((_, i) => pt(i, f(i)).join(",")).join(" ");
+
+  const criteria = [
+    { key: "content" as const, avg: "4.6", max: "7", pct: 66, level: "developing" as const, finding: "Points are relevant and letter format is secure, but most paragraphs stop after the first idea.", next: "Push each paragraph to add one concrete example or effect." },
+    { key: "language" as const, avg: "4.3", max: "7", pct: 61, level: "priority" as const, finding: "Subject–verb agreement and tense slips appear in over half of the class's letters.", next: "Reteach third-person -s using the class's own sentences." },
+    { key: "organization" as const, avg: "5.0", max: "7", pct: 72, level: "strength" as const, finding: "Clear paragraphs with logical linking — the class's strongest criterion.", next: "Extend with varied paragraph openings." },
+  ];
+  const distribution = [1, 6, 9, 6, 1];
+  const bandLabels = ["<20%", "20–39%", "40–59%", "60–79%", "80%+"];
+  const bandColors = ["bg-red-500", "bg-orange-500", "bg-amber-500", "bg-lime-500", "bg-green-500"];
+  const frequency = [
+    { cat: "svo" as const, students: 18, pct: 78, suggestion: false },
+    { cat: "tense" as const, students: 13, pct: 57, suggestion: false },
+    { cat: "plural" as const, students: 10, pct: 43, suggestion: false },
+    { cat: "choice" as const, students: 8, pct: 35, suggestion: false },
+    { cat: "chinglish" as const, students: 7, pct: 30, suggestion: true },
+  ];
+  const priorities = [
+    { title: "Reteach third-person -s and tense consistency", minutes: 15, why: "The two most widespread error patterns, both mechanical and quick to fix.", activity: "Sort the class's own sentences into right / wrong on the board, then rewrite three together." },
+    { title: "Model one fully developed paragraph", minutes: 10, why: "Content loses marks to under-developed points, not off-topic ones.", activity: "Expand a “point → explain → example” paragraph from the levy task as a class." },
+  ];
+  const tiers = [
+    { tier: "support" as const, hint: "Below 40% — small-group reteaching", students: [{ name: "Jason Ho", weak: "language" as const, pct: 38 }, { name: "Tiffany Lau", weak: "content" as const, pct: 44 }] },
+    { tier: "developing" as const, hint: "40–69% — targeted practice", students: [{ name: "Ka Yan Lam", weak: "language" as const, pct: 58 }, { name: "Marcus Wong", weak: "content" as const, pct: 63 }] },
+    { tier: "secure" as const, hint: "70%+ — extend and stretch", students: [{ name: "Chloe Chan", weak: null, pct: 86 }, { name: "Wing Yan Cheung", weak: null, pct: 78 }] },
+  ];
+  const freqMax = Math.max(...frequency.map((f) => f.students));
+
+  return (
+    <MockupFrame label="CLASS ASSESSMENT REPORT · Mr.🆖 ProReader">
+      <div className="space-y-2.5">
+        {/* Header — back link, title + topic meta, action row */}
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="flex items-center gap-1 text-[8px] text-muted-foreground">
+              <ArrowLeft className="h-2.5 w-2.5" />
+              Back to topic report
+            </p>
+            <h3 className="mt-0.5 text-[14px] font-extrabold tracking-tight text-[var(--lp-ink)]">
+              Class Assessment Report
+            </h3>
+            <p className="text-[10px] text-muted-foreground">Letter to the editor — the plastic levy</p>
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[8px] text-muted-foreground">
+              <span className="font-semibold text-primary">4A</span>
+              <span>· DSE Part A</span>
+              <span>· 23 checked essays analysed</span>
+              <span>· Generated 14/11/2026, 09:32</span>
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-md border px-1.5 py-1 text-[8px] font-medium text-[var(--lp-ink)]">
+              <Languages className="h-2.5 w-2.5" />
+              EN
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-md border px-1.5 py-1 text-[8px] font-medium text-[var(--lp-ink)]">
+              <Printer className="h-2.5 w-2.5" />
+              Print / PDF
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-md bg-gradient-to-r from-violet-600 to-sky-600 px-2 py-1 text-[8px] font-medium text-white shadow-sm">
+              <Sparkles className="h-2.5 w-2.5" />
+              Generate follow-up exercise
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-md border px-1.5 py-1 text-[8px] font-medium text-[var(--lp-ink)]">
+              <RefreshCw className="h-2.5 w-2.5" />
+              Regenerate
+            </span>
+          </div>
+        </div>
+
+        {/* Overview hero — gradient card, headline + summary + stat tiles, radar */}
+        <div className="overflow-hidden rounded-xl border bg-gradient-to-br from-violet-50 via-background to-sky-50 p-3 dark:from-violet-950/30 dark:to-sky-950/20">
+          <div className="grid items-center gap-3 grid-cols-[1fr_150px]">
+            <div className="flex flex-col gap-1.5">
+              <p className="flex items-center gap-1 text-[10px] font-bold text-violet-700 dark:text-violet-300">
+                <Sparkles className="h-3 w-3" />
+                Overview
+              </p>
+              <p className="text-[10.5px] font-semibold leading-snug text-[var(--lp-ink)]">
+                Ideas are on topic and well organised — accuracy is what holds the class back.
+              </p>
+              <p className="text-[8.5px] leading-relaxed text-muted-foreground">
+                Most students answered the letter task with relevant points and a clear format. Errors
+                cluster in subject–verb agreement and tense, which caps the Language band.
+              </p>
+              <div className="grid grid-cols-4 gap-1">
+                {[
+                  { label: "Average overall", value: <span>13.9<span className="font-normal text-muted-foreground"> / 21</span></span> },
+                  { label: "Highest / lowest", value: "18 / 8" },
+                  { label: "Avg. word count", value: "268" },
+                  { label: "Avg. comments / essay", value: "14" },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-lg border bg-card p-1.5">
+                    <p className="text-[7px] leading-tight text-muted-foreground">{s.label}</p>
+                    <p className="text-[11px] font-bold tabular-nums text-[var(--lp-ink)]">{s.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Criteria radar */}
+            <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto h-[9.5rem] w-[9.5rem]" role="img">
+              {[0.25, 0.5, 0.75, 1].map((f) => (
+                <polygon key={f} points={poly(() => f)} fill="none" className="stroke-muted-foreground/25" strokeWidth="1" />
+              ))}
+              {radar.map((_, i) => {
+                const [x, y] = pt(i, 1);
+                return <line key={i} x1={c} y1={c} x2={x} y2={y} className="stroke-muted-foreground/25" />;
+              })}
+              <polygon
+                points={poly((i) => Math.max(0.03, radar[i].pct / 100))}
+                fill="#8b5cf6"
+                fillOpacity="0.25"
+                stroke="#8b5cf6"
+                strokeWidth="2"
+              />
+              {radar.map((it, i) => {
+                const [x, y] = pt(i, Math.max(0.03, it.pct / 100));
+                const [lx, ly] = pt(i, 1.34);
+                return (
+                  <g key={it.label}>
+                    <circle cx={x} cy={y} r="4" fill={it.hex} />
+                    <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" className="fill-foreground text-[8px] font-medium">
+                      {it.label}
+                    </text>
+                    <text x={lx} y={ly + 8} textAnchor="middle" dominantBaseline="middle" className="fill-muted-foreground text-[7px]">
+                      {it.pct}%
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        </div>
+
+        {/* Performance by criterion — level badge, score bar, finding + next step */}
+        <div>
+          <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-sky-700 dark:text-sky-300">
+            <Target className="h-3 w-3" />
+            Performance by criterion
+          </p>
+          <div className="grid grid-cols-3 gap-1.5">
+            {criteria.map((k) => (
+              <div key={k.key} className={`flex flex-col gap-1.5 rounded-xl border p-2 ${CRIT_TONE[k.key].soft}`}>
+                <div className="flex items-center justify-between gap-1">
+                  <span className={`text-[9px] font-bold capitalize ${CRIT_TONE[k.key].text}`}>{k.key}</span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[7px] font-semibold capitalize ${LEVEL_TONE[k.level]}`}>{k.level}</span>
+                </div>
+                <div>
+                  <div className="mb-0.5 flex items-baseline justify-between text-[8px]">
+                    <span className="font-semibold tabular-nums text-[var(--lp-ink)]">{k.avg} / {k.max}</span>
+                    <span className="text-muted-foreground">{k.pct}%</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-background/80">
+                    <div className={`h-full rounded-full ${CRIT_TONE[k.key].bar}`} style={{ width: `${k.pct}%` }} />
+                  </div>
+                </div>
+                <p className="text-[8px] leading-snug text-[var(--lp-ink)]">{k.finding}</p>
+                <p className="flex items-start gap-1 rounded-md bg-background/70 p-1 text-[8px] leading-snug text-[var(--lp-ink)]">
+                  <ArrowRight className={`mt-0.5 h-2.5 w-2.5 shrink-0 ${CRIT_TONE[k.key].text}`} />
+                  <span>{k.next}</span>
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Score distribution + strengths */}
+        <div className="grid grid-cols-2 gap-1.5">
+          <div className="rounded-xl border bg-card p-2">
+            <p className="mb-1 text-[8.5px] font-semibold text-[var(--lp-ink)]">Score distribution (overall)</p>
+            <div className="flex h-16 items-end gap-1.5">
+              {distribution.map((n, i) => (
+                <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-0.5">
+                  <span className="text-[7px] font-semibold tabular-nums text-[var(--lp-ink)]">{n}</span>
+                  <div className={`w-full rounded-t-sm ${bandColors[i]}`} style={{ height: `${Math.max(6, (n / 9) * 72)}%` }} />
+                  <span className="text-[6.5px] text-muted-foreground">{bandLabels[i]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-green-700 dark:text-green-400">
+              <ThumbsUp className="h-3 w-3" />
+              What the class does well
+            </p>
+            <ul className="flex flex-col gap-1">
+              {[
+                { title: "Letter format mastered", detail: "21 of 23 used a correct opening and closing." },
+                { title: "Strong topic vocabulary", detail: "levy, disposable and landfills recycled accurately." },
+              ].map((s) => (
+                <li key={s.title} className="flex gap-1.5 rounded-lg border border-green-200 bg-green-50/70 p-1.5 dark:border-green-900 dark:bg-green-950/30">
+                  <CheckCircle2 className="mt-0.5 h-2.5 w-2.5 shrink-0 text-green-600" />
+                  <p className="text-[8px] leading-snug text-[var(--lp-ink)]">
+                    <span className="font-semibold">{s.title}. </span>
+                    {s.detail}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Mistake frequency — share of students per category */}
+        <div>
+          <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-red-700 dark:text-red-400">
+            <TriangleAlert className="h-3 w-3" />
+            How widespread are the mistakes?
+          </p>
+          <div className="flex flex-col gap-1 rounded-xl border bg-card p-2">
+            {frequency.map((f) => (
+              <div key={f.cat} className="flex items-center gap-2 text-[8px]">
+                <span className="w-24 shrink-0 truncate text-[var(--lp-ink)]">
+                  {LC_STYLE[f.cat].label.split(" (")[0]}
+                  {f.suggestion && <span className="ml-0.5 text-[6.5px] text-muted-foreground">(suggestion)</span>}
+                </span>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={`h-full rounded-full ${LC_STYLE[f.cat].dot} ${f.suggestion ? "opacity-60" : ""}`}
+                    style={{ width: `${(f.students / freqMax) * 100}%` }}
+                  />
+                </div>
+                <span className="w-16 shrink-0 text-right text-[7px] tabular-nums text-muted-foreground">
+                  {f.students} students · {f.pct}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Common mistakes — rule + the class's own wrong → corrected sentences */}
+        <div>
+          <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-red-700 dark:text-red-400">
+            <XCircle className="h-3 w-3" />
+            Common mistakes &amp; the rules behind them
+          </p>
+          <div className={`flex flex-col gap-1.5 rounded-xl border border-l-4 bg-card p-2 ${LC_STYLE.svo.border}`}>
+            <div className="flex flex-wrap items-center justify-between gap-1">
+              <span className="text-[9px] font-bold text-[var(--lp-ink)]">Third-person singular -s</span>
+              <span className={`rounded-full px-1.5 py-0.5 text-[6.5px] font-semibold text-white ${LC_STYLE.svo.badge}`}>
+                {LC_STYLE.svo.label}
+              </span>
+            </div>
+            <p className="text-[7.5px] text-muted-foreground">18 students · 78%</p>
+            <p className="text-[8px] leading-snug text-[var(--lp-ink)]">
+              In the simple present, he / she / it verbs take -s: <em>everyone knows</em>, <em>the government plans</em>.
+            </p>
+            {[
+              {
+                wrong: <span>Everyone <span className="line-through decoration-red-400/60">know</span> that plastic takes hundreds of years.</span>,
+                right: <span>Everyone <span className="font-medium">knows</span> that plastic takes hundreds of years.</span>,
+                note: "Everyone = he / she / it, so the verb takes -s.",
+              },
+              {
+                wrong: <span>My brother <span className="line-through decoration-red-400/60">think</span> the levy is too high.</span>,
+                right: <span>My brother <span className="font-medium">thinks</span> the levy is too high.</span>,
+                note: "A singular subject needs the -s form.",
+              },
+            ].map((e, i) => (
+              <div key={i} className="rounded-lg border bg-muted/30 p-1.5">
+                <p className="flex items-start gap-1 text-[8px] text-red-600 dark:text-red-400">
+                  <XCircle className="mt-0.5 h-2.5 w-2.5 shrink-0" />
+                  <span>{e.wrong}</span>
+                </p>
+                <p className="mt-0.5 flex items-start gap-1 text-[8px] text-green-700 dark:text-green-400">
+                  <CheckCircle2 className="mt-0.5 h-2.5 w-2.5 shrink-0" />
+                  <span>{e.right}</span>
+                </p>
+                <p className="mt-0.5 text-[7px] text-muted-foreground">{e.note}</p>
+              </div>
+            ))}
+            <p className="flex items-start gap-1 rounded-md bg-amber-50 p-1 text-[8px] leading-snug text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+              <Lightbulb className="mt-0.5 h-2.5 w-2.5 shrink-0" />
+              <span>Drill with a “spot the -s” starter — project sentences from their own letters.</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Teaching priorities */}
+        <div>
+          <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-orange-700 dark:text-orange-400">
+            <Target className="h-3 w-3" />
+            Teaching priorities
+          </p>
+          <ol className="flex flex-col gap-1.5">
+            {priorities.map((p, i) => (
+              <li key={p.title} className="flex gap-2 rounded-xl border bg-card p-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold text-white">
+                  {i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-1">
+                    <span className="text-[8.5px] font-bold text-[var(--lp-ink)]">{p.title}</span>
+                    <span className="flex items-center gap-0.5 rounded-full bg-muted px-1.5 py-0.5 text-[7px] text-muted-foreground">
+                      <Clock className="h-2 w-2" />
+                      ~{p.minutes} min
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[7.5px] text-muted-foreground">{p.why}</p>
+                  <p className="mt-1 rounded-md bg-orange-50 p-1 text-[8px] leading-snug text-[var(--lp-ink)] dark:bg-orange-950/30">{p.activity}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {/* Differentiation — three tiers, weakest criterion tagged */}
+        <div>
+          <p className="mb-1 flex items-center gap-1 text-[10px] font-bold text-indigo-700 dark:text-indigo-300">
+            <Users className="h-3 w-3" />
+            Differentiation: who needs what
+          </p>
+          <div className="grid grid-cols-3 gap-1.5">
+            {tiers.map((t) => (
+              <div key={t.tier} className={`flex flex-col gap-1 rounded-xl border p-2 ${TIER_TONE[t.tier].box}`}>
+                <p className="flex items-center gap-1 text-[8.5px] font-bold text-[var(--lp-ink)]">
+                  <span className={`h-1.5 w-1.5 rounded-full ${TIER_TONE[t.tier].dot}`} />
+                  {t.tier === "support" ? "Needs support" : t.tier === "developing" ? "Developing" : "Secure"}
+                  <span className="ml-auto text-[7.5px] font-normal text-muted-foreground">{t.students.length}</span>
+                </p>
+                <p className="text-[6.5px] leading-tight text-muted-foreground">{t.hint}</p>
+                <ul className="flex flex-col gap-0.5">
+                  {t.students.map((s) => (
+                    <li key={s.name} className="flex items-center justify-between gap-1 text-[8px] text-[var(--lp-ink)]">
+                      <span className="truncate">{s.name}</span>
+                      <span className="flex shrink-0 items-center gap-1 text-[7px] text-muted-foreground">
+                        {s.weak && (
+                          <span className={`rounded px-1 py-0.5 ${CRIT_TONE[s.weak].soft} ${CRIT_TONE[s.weak].text}`}>
+                            {s.weak === "language" ? "Lang." : s.weak === "content" ? "Content" : "Org."}
+                          </span>
+                        )}
+                        <span className="tabular-nums">{s.pct}%</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick teaching tips */}
+        <div className="rounded-xl border border-yellow-300 bg-yellow-50 p-2 dark:border-yellow-800 dark:bg-yellow-950/30">
+          <p className="mb-1 flex items-center gap-1 text-[9.5px] font-bold text-yellow-800 dark:text-yellow-300">
+            <Lightbulb className="h-3 w-3" />
+            Quick teaching tips
+          </p>
+          <ul className="list-disc space-y-0.5 pl-4 text-[8px] text-yellow-900 dark:text-yellow-200">
+            <li>Collect the follow-up worksheet as an exit ticket — same patterns, ten questions.</li>
+            <li>Pair a “secure” student with a “needs support” student to compare first drafts.</li>
+          </ul>
+        </div>
+
+        <p className="text-center text-[7px] text-muted-foreground">
+          AI-generated from the students&apos; checked essays (gpt-6.1-sol). Review before sharing.
         </p>
       </div>
     </MockupFrame>

@@ -31,7 +31,7 @@ import {
   learnSystemPrompt,
   followUpExercisesPrompt,
 } from "@/constants/readingPrompts";
-import { parseExercises, type LearnExercise } from "@/utils/languageCheckLearn";
+import { parseExercises, type FollowUpItem, type LearnExercise } from "@/utils/languageCheckLearn";
 import {
   languageAssessmentSchema,
   jsLanguageAssessmentSchema,
@@ -773,7 +773,7 @@ export default function useLanguageCheck() {
     report: LanguageCheckAiReport,
     categoryLabel: (category: string) => string,
     signal?: AbortSignal,
-  ): Promise<{ exercise: LearnExercise; category: string }[]> {
+  ): Promise<FollowUpItem[]> {
     const { languageCheckModel } = useSettingStore.getState();
     const errorCats = new Set(report.categories.filter((c) => !c.expression).map((c) => c.category));
     const mistakes = report.insights.mistakes.filter((m) => errorCats.has(m.category));
@@ -832,10 +832,34 @@ export default function useLanguageCheck() {
     }
   }
 
+  /**
+   * Staff: persist a generated follow-up worksheet on its saved report row so
+   * it survives reloads, sign-out and other devices ("download again").
+   */
+  async function persistFollowUpWorksheet(
+    topicId: string,
+    generatedAt: number,
+    items: FollowUpItem[],
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const res = await fetch(
+      `/api/writing-assessment/staff/topic-reports/${encodeURIComponent(topicId)}/ai-report/follow-up`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ generatedAt, items }),
+        signal,
+      },
+    );
+    const body = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+  }
+
   return {
     transcribe,
     generateTopicAiReport,
     generateFollowUpExercises,
+    persistFollowUpWorksheet,
     runCheck,
     runStaffCheck,
     assessLanguage,

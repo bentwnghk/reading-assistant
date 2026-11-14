@@ -331,6 +331,12 @@ export type FindFixExercise = (
 export type RewriteExercise = ExerciseByType["rewrite"] & { id: string };
 export type ComposeExercise = ExerciseByType["compose"] & { id: string };
 
+/** A generated remedial exercise tagged with the mistake category it drills. */
+export interface FollowUpItem {
+  category: string;
+  exercise: LearnExercise;
+}
+
 export interface ParsedExercises {
   items: LearnExercise[];
   dropped: number;

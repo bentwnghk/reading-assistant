@@ -19,6 +19,7 @@ import {
   Languages,
   Route,
   ShieldCheck,
+  Sparkles,
   SpellCheck,
   UserCog,
   Users,
@@ -185,6 +186,14 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
                 tone="bg-cyan-500/10 text-cyan-500"
                 name={t("languageCheck.help.overview.topicReports.name")}
                 desc={t("languageCheck.help.overview.topicReports.desc")}
+              />
+            )}
+            {isStaff && (
+              <HelpRow
+                icon={Sparkles}
+                tone="bg-fuchsia-500/10 text-fuchsia-500"
+                name={t("languageCheck.help.overview.classReport.name")}
+                desc={t("languageCheck.help.overview.classReport.desc")}
               />
             )}
             <HelpTip
