@@ -515,17 +515,16 @@
       },
       "writing": {
         "eyebrow": "Writing Assessment",
-        "title": "From reading to writing.",
-        "lede": "Photograph a handwritten essay and Writing Assessment transcribes it verbatim — mistakes included. Run the check for inline corrections with clear explanations, score the writing on the HKDSE Content, Language and Organization rubrics in one press, generate two enhanced versions of your own essay (a light polish and an aspirational Level 5** rewrite) that you can load straight back into the reading workflow, then turn every mistake into a lesson, practice and quiz built from your own writing. Teachers watch the whole class learn from their mistakes in one dashboard — and press once more for an AI Class Assessment Report with differentiation groups, then a printable follow-up worksheet drilling the class's common mistakes.",
+        "title": "Handwriting in. A marked essay out.",
+        "lede": "Photograph your handwritten essay and watch it come back word for word — corrected line by line, then graded like an examiner on the task's own DSE, JS or TSA scheme. One more press rewrites it twice: a light polish that keeps your voice, and a Level 5** model answer built on your ideas, ready to load straight back into your reading journey. And every mistake you made? It becomes your next lesson, practice and quiz. Teachers see the whole class at a glance — and print tomorrow's fix-it worksheet in one tap.",
         "bullets": [
-          "Verbatim transcription you review beside the original scan",
-          "AI Writing Assessment — HKDSE Content, Language and Organization, each on a 0–7 band",
-          "Inline corrections with explanations — errors vs. suggestions",
-          "Enhanced Essays — a light polish and an aspirational Level 5** rewrite you can load as a reading text",
-          "Learn from your mistakes: lesson → practice → quiz",
-          "Saved sessions resume on any device, exportable to Word",
+          "Verbatim transcription — mistakes included, because that's what gets marked",
+          "Examiner-style grading on the task's own scheme — DSE, JS or TSA",
+          "Inline corrections with EN / 繁體中文 notes and one-click Word export",
+          "Enhanced Essays — your words lightly polished, or rebuilt at Level 5**",
+          "Every mistake becomes a lesson, practice and quiz — resumable on any device",
           "Student learning dashboards for every class",
-          "Class Assessment Report — an AI teaching report per topic, plus a printable fix-it follow-up worksheet"
+          "Class Assessment Report per topic — with a printable fix-it worksheet and answer key"
         ],
         "carousel": {
           "label": "Writing Assessment features",
