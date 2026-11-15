@@ -766,7 +766,7 @@ export default function useLanguageCheck() {
   }
 
   /**
-   * Staff: build the 10 follow-up questions (5 "Fix the error" + 5 "Fill in the
+   * Staff: build the 16 follow-up questions (8 "Fix the error" + 8 "Fill in the
    * blank") for a saved class report, drilling its "Common mistakes" patterns.
    */
   async function generateFollowUpExercises(
@@ -798,7 +798,7 @@ export default function useLanguageCheck() {
       const output = await generateWithFallback(
         languageCheckModel,
         learnSystemPrompt(),
-        followUpExercisesPrompt({ age, count: 12, patterns }),
+        followUpExercisesPrompt({ age, count: 20, patterns }),
         ac.signal,
       );
       const json = JSON.parse(stripJsonFences(output));
@@ -816,12 +816,12 @@ export default function useLanguageCheck() {
       }
       const fix = parsed.filter((p) => p.exercise.type === "error-correction");
       const fill = parsed.filter((p) => p.exercise.type === "fill-blank");
-      let picked = [...fix.slice(0, 5), ...fill.slice(0, 5)];
-      if (picked.length < 10) {
-        const rest = [...fix.slice(5), ...fill.slice(5)];
-        picked = [...picked, ...rest.slice(0, 10 - picked.length)];
+      let picked = [...fix.slice(0, 8), ...fill.slice(0, 8)];
+      if (picked.length < 16) {
+        const rest = [...fix.slice(8), ...fill.slice(8)];
+        picked = [...picked, ...rest.slice(0, 16 - picked.length)];
       }
-      if (picked.length < 6) throw new SyntaxError("too few valid exercises");
+      if (picked.length < 10) throw new SyntaxError("too few valid exercises");
       return picked;
     } catch (error) {
       if (isAbortError(error)) throw error;

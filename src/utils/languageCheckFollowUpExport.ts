@@ -30,7 +30,7 @@ export type { FollowUpItem };
 
 /**
  * Word export of the class "follow-up exercise" worksheet: a short error summary
- * (mistake categories, wrong vs right, tips) + 10 "Fix the error" / "Fill in the
+ * (mistake categories, wrong vs right, tips) + 16 "Fix the error" / "Fill in the
  * blank" questions on exactly those patterns + a compact teacher answer key.
  * Pure: builds a `Document`; `exportFollowUpDocx` saves it.
  */
@@ -323,8 +323,10 @@ function exerciseBlock(
     body.push(
       // Blank space above the sentence: students underline the mistake and
       // write the correction (or the added word) above the line, or cross
-      // the extra word out.
-      para([run("", { size: 22 })], { after: 0, line: 640 }),
+      // the extra word out. Half the former height (640 → 320) so the gap
+      // between the category label and the sentence is tighter while still
+      // leaving room to write above the line.
+      para([run("", { size: 22 })], { after: 0, line: 320 }),
       para([run(item.passage, { size: 25 })], { after: 0, line: 380 }),
     );
   }
