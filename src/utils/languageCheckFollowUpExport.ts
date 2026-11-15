@@ -30,7 +30,7 @@ export type { FollowUpItem };
 
 /**
  * Word export of the class "follow-up exercise" worksheet: a short error summary
- * (mistake categories, wrong vs right, tips) + 16 "Fix the error" / "Fill in the
+ * (mistake categories, wrong vs right, tips) + 20 "Fix the error" / "Fill in the
  * blank" questions on exactly those patterns + a compact teacher answer key.
  * Pure: builds a `Document`; `exportFollowUpDocx` saves it.
  */
@@ -140,7 +140,10 @@ function gap(height = 120): Paragraph {
   });
 }
 
-function box(children: Paragraph[], o: { fill?: string; border?: string; bar?: string } = {}): Table {
+function box(
+  children: Paragraph[],
+  o: { fill?: string; border?: string; bar?: string; padBottom?: number } = {},
+): Table {
   const b = o.border ? edge(o.border) : NONE;
   return new Table({
     width: { size: WIDTH, type: WidthType.DXA },
@@ -156,7 +159,7 @@ function box(children: Paragraph[], o: { fill?: string; border?: string; bar?: s
             width: { size: WIDTH, type: WidthType.DXA },
             shading: o.fill ? shade(o.fill) : undefined,
             borders: { top: b, bottom: b, right: b, left: o.bar ? edge(o.bar, 36) : b },
-            margins: { top: 130, bottom: 130, left: 200, right: 180 },
+            margins: { top: 130, bottom: o.padBottom ?? 130, left: 200, right: 180 },
           }),
         ],
       }),
@@ -323,14 +326,17 @@ function exerciseBlock(
     body.push(
       // Blank space above the sentence: students underline the mistake and
       // write the correction (or the added word) above the line, or cross
-      // the extra word out. Half the former height (640 → 320) so the gap
-      // between the category label and the sentence is tighter while still
-      // leaving room to write above the line.
-      para([run("", { size: 22 })], { after: 0, line: 320 }),
+      // the extra word out. Exactly 1 line high (240) so the gap between
+      // the category label and the sentence stays minimal.
+      para([run("", { size: 22 })], { after: 0, line: 240 }),
       para([run(item.passage, { size: 25 })], { after: 0, line: 380 }),
     );
   }
-  return [box(body, { border: C.line }), gap(110)];
+  // "Fix the error" cards get a tighter bottom margin: the sentence already
+  // ends with after: 0, so the default cell padding reads as a large empty
+  // band between the sentence and the box edge.
+  const padBottom = item.type === "error-correction" ? 60 : undefined;
+  return [box(body, { border: C.line, padBottom }), gap(110)];
 }
 
 // ─── Answer key ──────────────────────────────────────────────────────────────
