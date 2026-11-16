@@ -199,13 +199,19 @@ export default function TopicAiReport() {
           setReport(saved);
           // Hydrate the persisted worksheet cache (survives reload / other devices).
           const fu = body.followUp as { generatedAt?: unknown; items?: unknown } | null | undefined;
-          if (
-            fu &&
-            typeof fu.generatedAt === "number" &&
-            Array.isArray(fu.items) &&
-            fu.generatedAt === saved.generatedAt
-          ) {
-            cacheFollowUpWorksheet(topicId, fu.generatedAt, fu.items as FollowUpItem[]);
+          const serverGeneratedAt = typeof fu?.generatedAt === "number" ? fu.generatedAt : null;
+          const serverHasIt = serverGeneratedAt !== null && Array.isArray(fu?.items) && serverGeneratedAt === saved.generatedAt;
+          if (serverHasIt) {
+            cacheFollowUpWorksheet(topicId, serverGeneratedAt, fu!.items as FollowUpItem[]);
+          } else {
+            // Self-heal: this session's cache may hold a matching worksheet whose
+            // server save failed earlier — push it silently so it survives reload.
+            const local = useLanguageCheckStore.getState().followUpWorksheets[topicId];
+            if (!fu && local && local.generatedAt === saved.generatedAt) {
+              void persistFollowUpWorksheet(topicId, saved.generatedAt, local.items).catch((err) => {
+                console.warn("Failed to persist follow-up worksheet (self-heal):", err);
+              });
+            }
           }
         } else {
           void generate();

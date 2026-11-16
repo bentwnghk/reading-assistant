@@ -180,4 +180,19 @@ describe("TopicAiReport follow-up button persistence", () => {
     expect(container.querySelector(".lucide-chevron-down")).toBeNull();
     expect(useLanguageCheckStore.getState().followUpWorksheets["t1"]).toBeUndefined();
   });
+
+  it("self-heals: pushes the session's cached worksheet when the server has none", async () => {
+    vi.stubGlobal("fetch", mockFetch(null));
+    useLanguageCheckStore.setState({
+      followUpWorksheets: { t1: { generatedAt: GENERATED_AT, items: worksheetItems() } },
+    });
+    const { container } = render(<TopicAiReport />);
+
+    await screen.findByText("languageCheck.followUp.button");
+    // Store cache matches the snapshot → dropdown shows even before the heal.
+    expect(container.querySelector(".lucide-chevron-down")).not.toBeNull();
+    await vi.waitFor(() => {
+      expect(persistFollowUpWorksheet).toHaveBeenCalledWith("t1", GENERATED_AT, useLanguageCheckStore.getState().followUpWorksheets["t1"]!.items);
+    });
+  });
 });
