@@ -4783,7 +4783,7 @@
         },
         "staff": {
           "name": "Staff View",
-          "desc": "Switch between \"My work\" and \"My students\". Under \"My students\" the sections become \"Student essays\", \"Topic reports\" and \"Student learning\", sharing one class and student filter (Topic reports follows the class only) — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns."
+          "desc": "Switch between \"My work\" and \"My students\". Under \"My students\" the sections become \"Topic reports\" (the first and default tab), \"Student essays\" and \"Student learning\", sharing one class and student filter (Topic reports follows the class only) — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns."
         },
         "tip": {
           "title": "Tip:",

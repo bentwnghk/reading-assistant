@@ -22,21 +22,25 @@ import { cn } from "@/utils/style";
 type Scope = "mine" | "students";
 type Section = "essays" | "learning" | "topics" | "reports";
 
-const SECTIONS: Section[] = ["essays", "reports", "learning"];
+const SECTIONS: Section[] = ["reports", "essays", "learning"];
 // The Topic Library is personal (not a student-scope view), so it only
 // exists next to "My essays" / "My learning".
 const MINE_SECTIONS: Section[] = ["essays", "topics", "learning"];
+// What each scope lands on when no (valid) tab is in the URL. Under
+// "My students" that is Topic reports; the essays tab must then be explicit.
+const DEFAULT_SECTION: Record<Scope, Section> = { mine: "essays", students: "reports" };
 
 /**
  * Landing view of /writing-assessment.
  *
  *   Student   →  [ Essays | Learning ]
- *   Staff     →  [ My work | My students ]  +  [ Essays | Learning ]
+ *   Staff     →  [ My work | My students ]  +  [ Reports | Essays | Learning ]
  *                (+ one shared class/student filter on "My students")
  *
  * Both audiences get the same two sections ("the work" and "what was learned
  * from it"), so staff see the student view of the page mirrored for their
- * learners. The scope and section live in the URL (`?view=students&tab=learning`)
+ * learners. Under "My students" Topic reports is the first and default tab.
+ * The scope and section live in the URL (`?view=students&tab=learning`)
  * so a reload, a shared link or the browser's back button keeps the place.
  */
 export default function LanguageCheckHome({
@@ -57,14 +61,17 @@ export default function LanguageCheckHome({
 
   const scope: Scope = isStaff && params.get("view") === "students" ? "students" : "mine";
   const tab = params.get("tab");
+  // A `tab` value is honoured only where it is valid ("topics" is mine-only;
+  // "essays" must be explicit under "My students" because reports is the
+  // default there). Anything else falls back to the scope's default section.
   const section: Section =
     tab === "learning"
       ? "learning"
       : tab === "topics" && scope === "mine"
         ? "topics"
-        : tab === "reports" && scope === "students"
-          ? "reports"
-          : "essays";
+        : tab === "essays" && scope === "students"
+          ? "essays"
+          : DEFAULT_SECTION[scope];
 
   function navigate(next: { view?: Scope; tab?: Section }) {
     const q = new URLSearchParams(params.toString());
@@ -72,12 +79,10 @@ export default function LanguageCheckHome({
     const nextTab = next.tab ?? section;
     if (view === "students") q.set("view", "students");
     else q.delete("view");
-    if (
-      nextTab === "learning" ||
-      (nextTab === "topics" && view === "mine") ||
-      (nextTab === "reports" && view === "students")
-    )
-      q.set("tab", nextTab);
+    const valid: Section[] = view === "mine" ? MINE_SECTIONS : SECTIONS;
+    // The default section stays out of the URL; invalid carry-overs when
+    // flipping scope (e.g. Topic Library → My students) fall back to it.
+    if (nextTab !== DEFAULT_SECTION[view] && valid.includes(nextTab)) q.set("tab", nextTab);
     else q.delete("tab");
     const qs = q.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
