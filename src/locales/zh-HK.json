@@ -4995,6 +4995,7 @@
       "done": "跟進工作紙已下載",
       "downloadAgain": "再次下載工作紙",
       "regenerate": "重新生成練習題",
+      "persistFailed": "工作紙已下載，但儲存供下次使用時失敗：{{message}}",
       "noMistakes": "報告中沒有可供練習的常見錯誤。",
       "docLabel": "跟進練習",
       "docTitle": "改錯跟進練習",

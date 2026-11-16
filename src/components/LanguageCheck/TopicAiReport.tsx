@@ -255,9 +255,11 @@ export default function TopicAiReport() {
       if (topicId) {
         cacheFollowUpWorksheet(topicId, report.generatedAt, items);
         // Background save so the worksheet survives reload / sign-out / other
-        // devices; a failure keeps this session's local cache and only warns.
+        // devices. The download never waits on it, but a failure must be
+        // visible — a silent one reads as "the dropdown forgot my worksheet".
         void persistFollowUpWorksheet(topicId, report.generatedAt, items).catch((err) => {
           console.warn("Failed to persist follow-up worksheet:", err);
+          toast.warning(t("languageCheck.followUp.persistFailed", { message: parseError(err) }));
         });
       }
       await exportFollowUpDocx({ report, items, language, schoolName: await resolveSchoolName(), t, categoryLabel });

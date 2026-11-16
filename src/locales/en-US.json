@@ -5001,6 +5001,7 @@
       "done": "Follow-up worksheet downloaded",
       "downloadAgain": "Download worksheet again",
       "regenerate": "Regenerate exercise",
+      "persistFailed": "Worksheet downloaded, but saving it for next time failed: {{message}}",
       "noMistakes": "The report has no common mistakes to practise.",
       "docLabel": "Follow-up exercise",
       "docTitle": "Fix It! Follow-up Practice",
