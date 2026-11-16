@@ -24,22 +24,27 @@ type Section = "essays" | "learning" | "topics" | "reports";
 
 const SECTIONS: Section[] = ["reports", "essays", "learning"];
 // The Topic Library is personal (not a student-scope view), so it only
-// exists next to "My essays" / "My learning".
-const MINE_SECTIONS: Section[] = ["essays", "topics", "learning"];
-// What each scope lands on when no (valid) tab is in the URL. Under
-// "My students" that is Topic reports; the essays tab must then be explicit.
-const DEFAULT_SECTION: Record<Scope, Section> = { mine: "essays", students: "reports" };
+// exists next to "My essays" / "My learning". Every "mine" view leads with
+// it, mirroring how "My students" leads with Topic reports.
+const MINE_SECTIONS: Section[] = ["topics", "essays", "learning"];
+// What each scope lands on when no (valid) tab is in the URL: Topic Library
+// in "My work" (staff and students alike), Topic reports under "My students".
+// The non-default tabs must then be explicit in the URL.
+const DEFAULT_SECTION: Record<Scope, Section> = { mine: "topics", students: "reports" };
 
 /**
  * Landing view of /writing-assessment.
  *
- *   Student   →  [ Essays | Learning ]
- *   Staff     →  [ My work | My students ]  +  [ Reports | Essays | Learning ]
- *                (+ one shared class/student filter on "My students")
+ *   Student                →  [ Topics | Essays | Learning ]  (topics default)
+ *   Staff → [ My work | My students ]
+ *             My work:     [ Topics | Essays | Learning ]   (topics default)
+ *             My students: [ Reports | Essays | Learning ]  (reports default)
+ *                          + one shared class/student filter
  *
  * Both audiences get the same two sections ("the work" and "what was learned
  * from it"), so staff see the student view of the page mirrored for their
- * learners. Under "My students" Topic reports is the first and default tab.
+ * learners. Every view leads with its topic-centric tab and lands on it by
+ * default — Topic Library in "My work", Topic reports under "My students".
  * The scope and section live in the URL (`?view=students&tab=learning`)
  * so a reload, a shared link or the browser's back button keeps the place.
  */
@@ -61,17 +66,17 @@ export default function LanguageCheckHome({
 
   const scope: Scope = isStaff && params.get("view") === "students" ? "students" : "mine";
   const tab = params.get("tab");
-  // A `tab` value is honoured only where it is valid ("topics" is mine-only;
-  // "essays" must be explicit under "My students" because reports is the
-  // default there). Anything else falls back to the scope's default section.
+  // A `tab` value is honoured only where it is valid ("essays" and "learning"
+  // are valid in every scope; "topics"/"reports" are the defaults of their own
+  // scopes and fall through). Anything else falls back to the scope's default.
   const section: Section =
-    tab === "learning"
-      ? "learning"
-      : tab === "topics" && scope === "mine"
-        ? "topics"
-        : tab === "essays" && scope === "students"
-          ? "essays"
-          : DEFAULT_SECTION[scope];
+    tab === "essays"
+      ? "essays"
+      : tab === "learning"
+        ? "learning"
+        : DEFAULT_SECTION[scope];
+
+  const sections = scope === "mine" ? MINE_SECTIONS : SECTIONS;
 
   function navigate(next: { view?: Scope; tab?: Section }) {
     const q = new URLSearchParams(params.toString());
@@ -125,7 +130,7 @@ export default function LanguageCheckHome({
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-1 border-b">
-          {(scope === "mine" ? MINE_SECTIONS : SECTIONS).map((x) => (
+          {sections.map((x) => (
             <button
               key={x}
               type="button"
