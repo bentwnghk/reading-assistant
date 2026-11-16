@@ -93,6 +93,17 @@ describe("follow-up worksheet persistence", () => {
     expect(update.values[3]).toBe(111);
   });
 
+  it("PUT accepts the full 20-question worksheet the generator produces", async () => {
+    // Regression: the item cap once drifted below the generator's target
+    // (14 < 20), so every save 400'd and the dropdown never survived a reload.
+    const twenty = Array.from({ length: 20 }, (_, i) => ({
+      ...items[0],
+      exercise: { ...items[0].exercise, id: `fu${i + 1}` },
+    }));
+    const res = await PUT(makeRequest({ generatedAt: 111, items: twenty }), ctx);
+    expect(res.status).toBe(200);
+  });
+
   it("PUT → 409 when the report was regenerated since (stale snapshot)", async () => {
     updateRows = []; // UPDATE matched nothing…
     existsRows = [{ "?column?": 1 }]; // …but the row exists → stale

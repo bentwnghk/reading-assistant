@@ -12,7 +12,9 @@ const MAX_BODY_CHARS = 200_000
 /**
  * Exercises were validated by the client-side parser at generation time; here
  * we check the shell (type + id) and cap the payload, not the full exercise
- * payloads (they are opaque passthrough).
+ * payloads (they are opaque passthrough). The item cap is a payload guard,
+ * NOT the worksheet length — the generator (`generateFollowUpExercises`)
+ * currently targets 20 questions, so keep this comfortably above it.
  */
 const itemSchema = z.object({
   category: z.string().min(1).max(50),
@@ -21,7 +23,7 @@ const itemSchema = z.object({
 
 const bodySchema = z.object({
   generatedAt: z.number().int().positive(),
-  items: z.array(itemSchema).min(1).max(14),
+  items: z.array(itemSchema).min(1).max(60),
 })
 
 /**
