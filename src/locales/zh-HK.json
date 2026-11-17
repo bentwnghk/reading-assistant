@@ -24,7 +24,7 @@
     "activityHelpTitle": "取得完整勾號前請完成：",
     "activityHelpAria": "完成「{{label}}」所需的步驟",
     "activities": {
-      "upload": "上載圖片、PDF 或網址，並擷取文字",
+      "upload": "上載圖片或 PDF，並擷取文字",
       "preReadingScaffold": "產生閱讀前引導",
       "preReadingPrediction": "撰寫並提交自己的預測",
       "summary": "產生 AI 摘要",

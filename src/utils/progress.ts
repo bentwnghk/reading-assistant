@@ -5,6 +5,8 @@
  * `components/ReadingAssistant/WorkflowProgress.tsx` are completed, returning
  * `round(completed / 15 * 100)`. Imported by every place that displays
  * progress so the value can never drift between views:
+ *   - components/ReadingAssistant/WorkflowProgress.tsx (Learning Progress header)
+ *   - components/Internal/SectionNavSheet.tsx          (sidebar helper line)
  *   - components/Dashboard/SessionsTab.tsx        (Learning Journey dialog)
  *   - utils/dashboardMetrics.ts                    (Student Dashboard)
  *   - lib/assignments.ts -> calculateAssignmentProgress (assignment roster)

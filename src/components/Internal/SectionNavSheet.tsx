@@ -54,6 +54,7 @@ import {
   NAV_SIDEBAR_MIN_WIDTH,
   useGlobalStore,
 } from "@/store/global";
+import { calculateProgress } from "@/utils/progress";
 import { grammarGameBestScore } from "@/utils/sessionMetrics";
 import { cn } from "@/utils/style";
 
@@ -441,6 +442,10 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { data: session } = useSession();
   const role = session?.user?.role;
   const store = useReadingStore();
+  // Completion percentage for the current reading text — the same 15-step
+  // figure the main page's Learning Progress section shows ("53% complete"),
+  // from the documented single source of truth (utils/progress.ts).
+  const progressPercent = calculateProgress(store);
   // Whether the User Info item's inline age panel is expanded. Ephemeral UI —
   // component-local state is fine (the menu remounts on SPA navigation).
   const [userInfoOpen, setUserInfoOpen] = useState(false);
@@ -633,6 +638,12 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         );
       })}
+      {/* Helper line directly below the last section (Grammar): the current
+          reading text's completion percentage, styled as a sub-row aligned
+          with the section labels (pl-10 = px-3 + icon 16px + gap-3). */}
+      <div className="px-3 py-1.5 pl-10 text-xs text-muted-foreground">
+        {t("reading.workflow.progress", { percent: progressPercent })}
+      </div>
       <div className="my-1 border-t" />
       <button
         onClick={handleTutorClick}

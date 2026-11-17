@@ -9,7 +9,7 @@ import { cn } from "@/utils/style";
 
 function WorkflowProgress() {
   const { t } = useTranslation();
-  const { extractedText, summary, adaptedText, mindMap, visualizationImage, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, grammarQuizCompleted, grammarQuizScore, grammarScrambleHighScore, grammarWorkshopHighScore, grammarSurgeryHighScore, grammarRouletteHighScore, grammarDuelHighScore, preReading, studentPrediction, collocations } = useReadingStore();
+  const { extractedText, summary, adaptedText, mindMap, visualizationGeneratedAt, glossary, highlightedWords, analyzedSentences, spellingGameBestScore, vocabularyQuizScore, testCompleted, grammarQuizCompleted, grammarQuizScore, grammarScrambleHighScore, grammarWorkshopHighScore, grammarSurgeryHighScore, grammarRouletteHighScore, grammarDuelHighScore, preReading, studentPrediction, collocations } = useReadingStore();
 
   const hasExtractedText = !!extractedText;
 
@@ -18,7 +18,10 @@ function WorkflowProgress() {
     { key: "preReading", label: t("reading.workflow.preReading"), completed: !!preReading && studentPrediction.trim().length > 0, accessible: hasExtractedText, sectionId: "section-pre-reading" },
     { key: "summary", label: t("reading.workflow.summary"), completed: !!summary, accessible: hasExtractedText, sectionId: "section-summary" },
     { key: "mindmap", label: t("reading.workflow.mindmap"), completed: !!mindMap, accessible: hasExtractedText, sectionId: "section-mindmap" },
-    { key: "visualization", label: t("reading.workflow.visualization"), completed: !!visualizationImage, accessible: hasExtractedText, sectionId: "section-visualization" },
+    // Lightweight presence proxy (same predicate as calculateProgress):
+    // the base64 blob can be absent in a restored lightweight store, but
+    // the timestamp is always kept.
+    { key: "visualization", label: t("reading.workflow.visualization"), completed: visualizationGeneratedAt > 0, accessible: hasExtractedText, sectionId: "section-visualization" },
     { key: "adapt", label: t("reading.workflow.adapt"), completed: !!adaptedText, accessible: hasExtractedText, sectionId: "section-adapted" },
     { key: "analyze", label: t("reading.workflow.analyze"), completed: Object.keys(analyzedSentences).length > 0, accessible: hasExtractedText, sectionId: "section-adapted" },
     { key: "highlight", label: t("reading.workflow.highlight"), completed: highlightedWords.length > 0, accessible: hasExtractedText, sectionId: "section-adapted" },

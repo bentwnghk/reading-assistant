@@ -24,7 +24,7 @@
     "activityHelpTitle": "To earn a full tick, finish:",
     "activityHelpAria": "What is needed to complete {{label}}",
     "activities": {
-      "upload": "Upload images, a PDF or a URL and extract the text",
+      "upload": "Upload images or a PDF and extract the text",
       "preReadingScaffold": "Generate the pre-reading scaffolding",
       "preReadingPrediction": "Write and submit your own prediction",
       "summary": "Generate the AI summary",
