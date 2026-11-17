@@ -17,10 +17,12 @@ import {
   BookOpenCheck,
   Check,
   ChevronDown,
+  Circle,
   ClipboardCheck,
   ClipboardList,
   FileText,
   GraduationCap,
+  HelpCircle,
   ImageIcon,
   Layers,
   Library,
@@ -36,6 +38,11 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import AgeSlider from "@/components/Internal/AgeSlider";
 import { useReadingStore } from "@/store/reading";
 import { useVocabularyStore } from "@/store/vocabulary";
@@ -57,11 +64,20 @@ interface SectionNavSheetProps {
 
 type ReadingStoreState = ReturnType<typeof useReadingStore.getState>;
 
+interface SectionActivity {
+  // i18n key of the human instruction shown in the help popover.
+  labelKey: string;
+  done: (store: ReadingStoreState) => boolean;
+}
+
 interface SectionItem {
   id: string;
   icon: LucideIcon;
   labelKey: string;
-  checkCompleted: (store: ReadingStoreState) => boolean;
+  // Ordered steps a student must finish to earn the section's full tick. The
+  // tick itself is derived from this list, so the tick and the "what's left"
+  // help popover can never drift apart.
+  activities: SectionActivity[];
   // Optional "started but not finished" state — renders a half tick instead of
   // no mark at all.
   checkPartial?: (store: ReadingStoreState) => boolean;
@@ -86,17 +102,31 @@ const sections: SectionItem[] = [
     id: "section-upload",
     icon: Upload,
     labelKey: "toc.upload",
-    checkCompleted: (store: ReadingStoreState) => !!store.extractedText,
+    activities: [
+      {
+        labelKey: "toc.activities.upload",
+        done: (store: ReadingStoreState) => !!store.extractedText,
+      },
+    ],
     isAccessible: () => true,
   },
   {
     id: "section-pre-reading",
     icon: Sparkles,
     labelKey: "toc.preReading",
-    // Full completion mirrors WorkflowProgress: scaffolding generated AND the
-    // student submitted a prediction. Scaffolding alone is only "partial".
-    checkCompleted: (store: ReadingStoreState) =>
-      !!store.preReading && store.studentPrediction.trim().length > 0,
+    // Scaffolding generated, then the student submitted a prediction.
+    // Scaffolding alone is only "partial".
+    activities: [
+      {
+        labelKey: "toc.activities.preReadingScaffold",
+        done: (store: ReadingStoreState) => !!store.preReading,
+      },
+      {
+        labelKey: "toc.activities.preReadingPrediction",
+        done: (store: ReadingStoreState) =>
+          store.studentPrediction.trim().length > 0,
+      },
+    ],
     checkPartial: (store: ReadingStoreState) => !!store.preReading,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
@@ -104,34 +134,60 @@ const sections: SectionItem[] = [
     id: "section-summary",
     icon: FileText,
     labelKey: "toc.summary",
-    checkCompleted: (store: ReadingStoreState) => !!store.summary,
+    activities: [
+      {
+        labelKey: "toc.activities.summary",
+        done: (store: ReadingStoreState) => !!store.summary,
+      },
+    ],
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
   {
     id: "section-mindmap",
     icon: Waypoints,
     labelKey: "toc.mindmap",
-    checkCompleted: (store: ReadingStoreState) => !!store.mindMap,
+    activities: [
+      {
+        labelKey: "toc.activities.mindmap",
+        done: (store: ReadingStoreState) => !!store.mindMap,
+      },
+    ],
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
   {
     id: "section-visualization",
     icon: ImageIcon,
     labelKey: "toc.visualization",
-    checkCompleted: (store: ReadingStoreState) => !!store.visualizationImage,
+    activities: [
+      {
+        labelKey: "toc.activities.visualization",
+        done: (store: ReadingStoreState) => !!store.visualizationImage,
+      },
+    ],
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
   {
     id: "section-adapted",
     icon: BookOpen,
     labelKey: "toc.adapted",
-    // Full completion mirrors WorkflowProgress's steps for this section:
-    // adapted text AND sentence analysis AND word highlighting. Having the
-    // adapted text alone is only "partial".
-    checkCompleted: (store: ReadingStoreState) =>
-      !!store.adaptedText &&
-      Object.keys(store.analyzedSentences).length > 0 &&
-      store.highlightedWords.length > 0,
+    // Mirrors WorkflowProgress's steps for this section: adapted text AND
+    // sentence analysis AND word highlighting. Having the adapted text alone
+    // is only "partial".
+    activities: [
+      {
+        labelKey: "toc.activities.adaptText",
+        done: (store: ReadingStoreState) => !!store.adaptedText,
+      },
+      {
+        labelKey: "toc.activities.analyzeSentence",
+        done: (store: ReadingStoreState) =>
+          Object.keys(store.analyzedSentences).length > 0,
+      },
+      {
+        labelKey: "toc.activities.highlightWords",
+        done: (store: ReadingStoreState) => store.highlightedWords.length > 0,
+      },
+    ],
     checkPartial: (store: ReadingStoreState) => !!store.adaptedText,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
@@ -139,13 +195,23 @@ const sections: SectionItem[] = [
     id: "section-glossary",
     icon: BookMarked,
     labelKey: "toc.glossary",
-    // Full completion mirrors WorkflowProgress's steps for this section:
-    // glossary extracted AND spelling game played AND vocab quiz done.
-    // Extracting the glossary alone is only "partial".
-    checkCompleted: (store: ReadingStoreState) =>
-      store.glossary.length > 0 &&
-      store.spellingGameBestScore > 0 &&
-      store.vocabularyQuizScore > 0,
+    // Mirrors WorkflowProgress's steps for this section: glossary extracted
+    // AND spelling game played AND vocab quiz done. Extracting the glossary
+    // alone is only "partial".
+    activities: [
+      {
+        labelKey: "toc.activities.extractGlossary",
+        done: (store: ReadingStoreState) => store.glossary.length > 0,
+      },
+      {
+        labelKey: "toc.activities.playSpelling",
+        done: (store: ReadingStoreState) => store.spellingGameBestScore > 0,
+      },
+      {
+        labelKey: "toc.activities.vocabQuiz",
+        done: (store: ReadingStoreState) => store.vocabularyQuizScore > 0,
+      },
+    ],
     checkPartial: (store: ReadingStoreState) => store.glossary.length > 0,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
@@ -153,16 +219,30 @@ const sections: SectionItem[] = [
     id: "section-collocations",
     icon: Layers,
     labelKey: "toc.collocations",
-    checkCompleted: (store: ReadingStoreState) => store.collocations.length > 0,
+    activities: [
+      {
+        labelKey: "toc.activities.extractCollocations",
+        done: (store: ReadingStoreState) => store.collocations.length > 0,
+      },
+    ],
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
   {
     id: "section-test",
     icon: ClipboardCheck,
     labelKey: "toc.test",
-    // Full completion mirrors WorkflowProgress: testCompleted. Questions
-    // generated but not yet answered is only "partial".
-    checkCompleted: (store: ReadingStoreState) => store.testCompleted,
+    // Mirrors WorkflowProgress: generate the questions, then complete the
+    // test. Questions generated but not yet answered is only "partial".
+    activities: [
+      {
+        labelKey: "toc.activities.generateTest",
+        done: (store: ReadingStoreState) => store.readingTest.length > 0,
+      },
+      {
+        labelKey: "toc.activities.completeTest",
+        done: (store: ReadingStoreState) => store.testCompleted,
+      },
+    ],
     checkPartial: (store: ReadingStoreState) => store.readingTest.length > 0,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
@@ -170,19 +250,31 @@ const sections: SectionItem[] = [
     id: "section-grammar",
     icon: BookOpenCheck,
     labelKey: "toc.grammar",
-    // Full completion mirrors WorkflowProgress's two grammar steps: quiz done
-    // AND a grammar game played. Extracting topics alone is only "partial".
-    checkCompleted: (store: ReadingStoreState) =>
-      store.grammarTopics.length > 0 &&
-      store.grammarQuizCompleted &&
-      store.grammarQuizScore > 0 &&
-      grammarGameBestScore({
-        grammarScrambleHighScore: store.grammarScrambleHighScore,
-        grammarWorkshopHighScore: store.grammarWorkshopHighScore,
-        grammarSurgeryHighScore: store.grammarSurgeryHighScore,
-        grammarRouletteHighScore: store.grammarRouletteHighScore,
-        grammarDuelHighScore: store.grammarDuelHighScore,
-      }) > 0,
+    // Mirrors WorkflowProgress's two grammar steps: analyse the topics,
+    // complete the quiz AND play a grammar game. Extracting topics alone is
+    // only "partial".
+    activities: [
+      {
+        labelKey: "toc.activities.grammarTopics",
+        done: (store: ReadingStoreState) => store.grammarTopics.length > 0,
+      },
+      {
+        labelKey: "toc.activities.grammarQuiz",
+        done: (store: ReadingStoreState) =>
+          store.grammarQuizCompleted && store.grammarQuizScore > 0,
+      },
+      {
+        labelKey: "toc.activities.grammarGame",
+        done: (store: ReadingStoreState) =>
+          grammarGameBestScore({
+            grammarScrambleHighScore: store.grammarScrambleHighScore,
+            grammarWorkshopHighScore: store.grammarWorkshopHighScore,
+            grammarSurgeryHighScore: store.grammarSurgeryHighScore,
+            grammarRouletteHighScore: store.grammarRouletteHighScore,
+            grammarDuelHighScore: store.grammarDuelHighScore,
+          }) > 0,
+      },
+    ],
     checkPartial: (store: ReadingStoreState) => store.grammarTopics.length > 0,
     isAccessible: (store: ReadingStoreState) => !!store.extractedText,
   },
@@ -447,17 +539,37 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
       </div>
       {sections.map((section) => {
         const Icon = section.icon;
-        const isCompleted = section.checkCompleted(store);
+        // The full tick means every listed activity is done — the same list
+        // the help popover walks through, so the two can never drift apart.
+        const isCompleted = section.activities.every(
+          (activity) => activity.done(store)
+        );
         const isPartial =
           !isCompleted && !!section.checkPartial?.(store);
         const isAccessible = section.isAccessible(store);
+        // Sections with unfinished activities get a help icon explaining what
+        // is still missing for the full tick: immediately to the left of the
+        // half tick when one is shown, otherwise in the slot where a tick
+        // would be displayed.
+        const showHelp = !isCompleted;
         return (
-          <button
+          <div
             key={section.id}
+            role="button"
+            tabIndex={isAccessible ? 0 : -1}
+            aria-disabled={!isAccessible}
             onClick={() => handleSectionClick(section.id, isAccessible)}
-            disabled={!isAccessible}
+            onKeyDown={(event) => {
+              // Enter/Space on the row navigates — but not when the event
+              // comes from the help button inside it (that opens the popover).
+              if (event.target !== event.currentTarget) return;
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleSectionClick(section.id, isAccessible);
+              }
+            }}
             className={cn(
-              "w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-left transition-colors",
+              "w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-left transition-colors cursor-pointer",
               "hover:bg-accent hover:text-accent-foreground",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               !isAccessible && "opacity-50 cursor-not-allowed hover:bg-transparent hover:text-inherit"
@@ -465,12 +577,60 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
           >
             <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="flex-1">{t(section.labelKey)}</span>
-            {isCompleted ? (
-              <Check className="h-4 w-4 shrink-0 text-primary" />
-            ) : (
-              isPartial && <HalfCheck />
-            )}
-          </button>
+            <span className="flex items-center gap-1 shrink-0">
+              {showHelp && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={(event) => event.stopPropagation()}
+                      aria-label={t("toc.activityHelpAria", { label: t(section.labelKey) })}
+                      title={t("toc.activityHelpAria", { label: t(section.labelKey) })}
+                      className="rounded-sm text-amber-500 transition-colors hover:text-amber-600 dark:text-amber-400 dark:hover:text-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <HelpCircle className="h-4 w-4" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    side="right"
+                    align="start"
+                    sideOffset={8}
+                    collisionPadding={12}
+                    className="z-[60] w-60 p-3"
+                  >
+                    <p className="text-xs font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400">
+                      {t("toc.activityHelpTitle")}
+                    </p>
+                    <ul className="mt-2 space-y-1.5">
+                      {section.activities.map((activity) => {
+                        const done = activity.done(store);
+                        return (
+                          <li
+                            key={activity.labelKey}
+                            className="flex items-start gap-1.5 text-sm leading-snug"
+                          >
+                            {done ? (
+                              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green-500" />
+                            ) : (
+                              <Circle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            )}
+                            <span className={done ? "text-muted-foreground" : undefined}>
+                              {t(activity.labelKey)}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </PopoverContent>
+                </Popover>
+              )}
+              {isCompleted ? (
+                <Check className="h-4 w-4 shrink-0 text-primary" />
+              ) : (
+                isPartial && <HalfCheck />
+              )}
+            </span>
+          </div>
         );
       })}
       <div className="my-1 border-t" />

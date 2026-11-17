@@ -20,7 +20,29 @@
     "grammar": "Grammar",
     "hideSidebar": "Hide sidebar",
     "showSidebar": "Show sidebar",
-    "resizeSidebar": "Resize sidebar"
+    "resizeSidebar": "Resize sidebar",
+    "activityHelpTitle": "To earn a full tick, finish:",
+    "activityHelpAria": "What is needed to complete {{label}}",
+    "activities": {
+      "upload": "Upload images, a PDF or a URL and extract the text",
+      "preReadingScaffold": "Generate the pre-reading scaffolding",
+      "preReadingPrediction": "Write and submit your own prediction",
+      "summary": "Generate the AI summary",
+      "mindmap": "Generate the mind map",
+      "visualization": "Generate the visualization image",
+      "adaptText": "Generate the adapted text",
+      "analyzeSentence": "Analyse at least one sentence",
+      "highlightWords": "Highlight at least one word",
+      "extractGlossary": "Extract the vocabulary glossary",
+      "playSpelling": "Play the spelling game and score above 0",
+      "vocabQuiz": "Complete the vocabulary quiz with a score above 0",
+      "extractCollocations": "Extract the collocations",
+      "generateTest": "Generate the reading test questions",
+      "completeTest": "Answer every question and finish the test",
+      "grammarTopics": "Analyse the grammar topics",
+      "grammarQuiz": "Complete the grammar quiz with a score above 0",
+      "grammarGame": "Play a grammar game and score above 0"
+    }
   },
   "settingsBanner": {
     "message": "Please activate your personal/school subscription, or configure your API Key or Access Password in Settings to use this app.",
