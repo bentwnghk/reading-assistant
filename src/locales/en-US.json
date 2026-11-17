@@ -23,6 +23,7 @@
     "resizeSidebar": "Resize sidebar",
     "activityHelpTitle": "To earn a full tick, finish:",
     "activityHelpAria": "What is needed to complete {{label}}",
+    "currentTaskProgress": "Current reading task: {{percent}}% complete",
     "activities": {
       "upload": "Upload images or a PDF and extract the text",
       "preReadingScaffold": "Generate the pre-reading scaffolding",
@@ -2079,52 +2080,6 @@
       }
     }
   },
-    "workflow": {
-      "title": "Learning Progress",
-      "progress": "{{percent}}% complete",
-      "upload": "Select Text",
-      "preReading": "Before You Read",
-      "summary": "Summary",
-      "adapt": "Adapt Text",
-      "mindmap": "Mind Map",
-      "visualization": "Text Visualization",
-      "test": "Reading Test",
-      "grammar": "Grammar",
-      "grammarGame": "Grammar Game",
-      "grammarQuiz": "Grammar Quiz",
-      "analyze": "Analyze Sentence",
-      "highlight": "Highlight Word",
-      "glossary": "Vocabulary",
-      "collocations": "Collocations",
-      "spelling": "Spelling Game",
-      "vocabQuiz": "Vocab Quiz",
-      "help": {
-        "title": "Learning Progress Guide",
-        "intro": "See how far you've come. The tracker shows your progress across 15 reading activities.",
-        "items": {
-          "steps": {
-            "name": "Step Circles",
-            "desc": "Each circle is one activity. A checkmark means you have completed it."
-          },
-          "order": {
-            "name": "Any Order You Like",
-            "desc": "Do the activities in any order — there is no fixed path you must follow."
-          },
-          "navigation": {
-            "name": "Quick Navigation",
-            "desc": "Tap any step to jump straight to that section of the page."
-          }
-        },
-        "stepsTitle": "How to use it",
-        "steps": {
-          "s1": "Complete activities anywhere on the page.",
-          "s2": "Watch the progress bar and checkmarks fill up as you go.",
-          "s3": "Tap a step to scroll to its section."
-        },
-        "tipTitle": "Good to know",
-        "tipContent": "Steps 2–15 unlock as soon as text is extracted. You can revisit any section at any time."
-      }
-    },
     "tutor": {
       "title": "AI Tutor",
       "welcome": "Hi! I'm your reading tutor. Ask me anything about the text!",

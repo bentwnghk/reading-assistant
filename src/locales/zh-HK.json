@@ -23,6 +23,7 @@
     "resizeSidebar": "調整側邊欄寬度",
     "activityHelpTitle": "取得完整勾號前請完成：",
     "activityHelpAria": "完成「{{label}}」所需的步驟",
+    "currentTaskProgress": "當前閱讀任務：已完成 {{percent}}%",
     "activities": {
       "upload": "上載圖片或 PDF，並擷取文字",
       "preReadingScaffold": "產生閱讀前引導",
@@ -2076,52 +2077,6 @@
             "tipContent": "找不到代碼？如果老師發起了班級對戰，你會收到通知彈窗和鈴鐺紅點——點擊「加入對戰」即可直接前往房間。"
           }
         }
-      }
-    },
-    "workflow": {
-      "title": "學習進度",
-      "progress": "已完成 {{percent}}%",
-      "upload": "選擇文本",
-      "preReading": "閱讀前準備",
-      "summary": "摘要",
-      "adapt": "文本改寫",
-      "mindmap": "思維導圖",
-      "visualization": "文本視覺化",
-      "test": "閱讀測驗",
-      "grammar": "語法",
-      "grammarGame": "語法遊戲",
-      "grammarQuiz": "語法測驗",
-      "analyze": "分析句子",
-      "highlight": "標記生字",
-      "glossary": "詞彙",
-      "collocations": "搭配詞",
-      "spelling": "拼字遊戲",
-      "vocabQuiz": "詞彙測驗",
-      "help": {
-        "title": "學習進度指南",
-        "intro": "看看你完成了多少。進度追蹤器會顯示你在 15 個閱讀活動中的進度。",
-        "items": {
-          "steps": {
-            "name": "步驟圓圈",
-            "desc": "每個圓圈代表一個活動，打勾表示你已完成。"
-          },
-          "order": {
-            "name": "自由順序",
-            "desc": "你可以按任何順序完成活動——沒有硬性規定的路線。"
-          },
-          "navigation": {
-            "name": "快速導航",
-            "desc": "點擊任何步驟即可直接跳到該部分。"
-          }
-        },
-        "stepsTitle": "如何使用",
-        "steps": {
-          "s1": "在頁面任何地方完成活動。",
-          "s2": "看著進度條和勾號逐步填滿。",
-          "s3": "點擊步驟即可捲動到該部分。"
-        },
-        "tipTitle": "小貼士",
-        "tipContent": "提取文本後，第 2 至第 15 步即會解鎖。你隨時可以重訪任何部分。"
       }
     },
     "tutor": {

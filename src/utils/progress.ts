@@ -1,17 +1,23 @@
 /**
  * Single source of truth for the per-session "Learning Progress" percentage.
  *
- * Counts how many of the 15 workflow steps defined in
- * `components/ReadingAssistant/WorkflowProgress.tsx` are completed, returning
- * `round(completed / 15 * 100)`. Imported by every place that displays
- * progress so the value can never drift between views:
- *   - components/ReadingAssistant/WorkflowProgress.tsx (Learning Progress header)
- *   - components/Internal/SectionNavSheet.tsx          (sidebar helper line)
+ * Counts how many of the 15 reading-workflow steps (extract text, pre-reading
+ * scaffolding + prediction, summary, mind map, visualization, adapted text,
+ * sentence analysis, word highlighting, glossary, collocations, spelling
+ * game, vocabulary quiz, reading test, grammar game, grammar quiz) are
+ * completed, returning `round(completed / 15 * 100)`. Imported by every place
+ * that displays progress so the value can never drift between views:
+ *   - components/Internal/SectionNavSheet.tsx      (sidebar "Current reading
+ *                                                   task" box)
  *   - components/Dashboard/SessionsTab.tsx        (Learning Journey dialog)
  *   - utils/dashboardMetrics.ts                    (Student Dashboard)
  *   - lib/assignments.ts -> calculateAssignmentProgress (assignment roster)
  *   - lib/users.ts -> calculateProgress            (User Management / Student Data,
  *                                                   via a snake_case adapter)
+ *
+ * The sidebar's per-section tick/half-tick marks (SectionNavSheet
+ * `activities`) and these 15 steps deliberately use the same predicates —
+ * keep the two lists in sync when changing a step.
  *
  * Input is a normalized camelCase shape. `extractedText` is typed
  * `string | boolean` because the teacher-dashboard SQL queries alias it to a

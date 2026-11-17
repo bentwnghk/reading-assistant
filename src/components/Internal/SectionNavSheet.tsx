@@ -171,9 +171,9 @@ const sections: SectionItem[] = [
     id: "section-adapted",
     icon: BookOpen,
     labelKey: "toc.adapted",
-    // Mirrors WorkflowProgress's steps for this section: adapted text AND
-    // sentence analysis AND word highlighting. Having the adapted text alone
-    // is only "partial".
+    // Mirrors the 15-step checks in utils/progress.ts for this section:
+    // adapted text AND sentence analysis AND word highlighting. Having the
+    // adapted text alone is only "partial".
     activities: [
       {
         labelKey: "toc.activities.adaptText",
@@ -196,9 +196,9 @@ const sections: SectionItem[] = [
     id: "section-glossary",
     icon: BookMarked,
     labelKey: "toc.glossary",
-    // Mirrors WorkflowProgress's steps for this section: glossary extracted
-    // AND spelling game played AND vocab quiz done. Extracting the glossary
-    // alone is only "partial".
+    // Mirrors the 15-step checks in utils/progress.ts for this section:
+    // glossary extracted AND spelling game played AND vocab quiz done.
+    // Extracting the glossary alone is only "partial".
     activities: [
       {
         labelKey: "toc.activities.extractGlossary",
@@ -232,8 +232,9 @@ const sections: SectionItem[] = [
     id: "section-test",
     icon: ClipboardCheck,
     labelKey: "toc.test",
-    // Mirrors WorkflowProgress: generate the questions, then complete the
-    // test. Questions generated but not yet answered is only "partial".
+    // Mirrors the 15-step checks in utils/progress.ts: generate the
+    // questions, then complete the test. Questions generated but not yet
+    // answered is only "partial".
     activities: [
       {
         labelKey: "toc.activities.generateTest",
@@ -251,9 +252,9 @@ const sections: SectionItem[] = [
     id: "section-grammar",
     icon: BookOpenCheck,
     labelKey: "toc.grammar",
-    // Mirrors WorkflowProgress's two grammar steps: analyse the topics,
-    // complete the quiz AND play a grammar game. Extracting topics alone is
-    // only "partial".
+    // Mirrors the 15-step checks in utils/progress.ts for the two grammar
+    // steps: analyse the topics, complete the quiz AND play a grammar game.
+    // Extracting topics alone is only "partial".
     activities: [
       {
         labelKey: "toc.activities.grammarTopics",
@@ -443,7 +444,7 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
   const role = session?.user?.role;
   const store = useReadingStore();
   // Completion percentage for the current reading text — the same 15-step
-  // figure the main page's Learning Progress section shows ("53% complete"),
+  // figure shown in the box below the Grammar row and used by the dashboards,
   // from the documented single source of truth (utils/progress.ts).
   const progressPercent = calculateProgress(store);
   // Whether the User Info item's inline age panel is expanded. Ephemeral UI —
@@ -638,11 +639,12 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         );
       })}
-      {/* Helper line directly below the last section (Grammar): the current
-          reading text's completion percentage, styled as a sub-row aligned
-          with the section labels (pl-10 = px-3 + icon 16px + gap-3). */}
-      <div className="px-3 py-1.5 pl-10 text-xs text-muted-foreground">
-        {t("reading.workflow.progress", { percent: progressPercent })}
+      {/* Current-task box directly below the last section (Grammar): the
+          current reading text's completion percentage in a tight bordered
+          box. Incomplete sections above carry a help icon (click for the
+          checklist) — the box shows the overall figure. */}
+      <div className="mx-3 mt-0.5 mb-1.5 rounded-md border bg-muted/30 px-2.5 py-1 text-xs text-muted-foreground">
+        {t("toc.currentTaskProgress", { percent: progressPercent })}
       </div>
       <div className="my-1 border-t" />
       <button

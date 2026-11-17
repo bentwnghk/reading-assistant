@@ -10,7 +10,6 @@ export { default as ReadingTest } from "./ReadingTest";
 export { default as Glossary } from "./Glossary";
 export { default as Collocations } from "./Collocations";
 export { default as Grammar } from "./Grammar";
-export { default as WorkflowProgress } from "./WorkflowProgress";
 export { default as GrammarGames } from "./GrammarGames";
 export { default as GrammarWordScramble } from "./GrammarWordScramble";
 export { default as GrammarWorkshop } from "./GrammarWorkshop";

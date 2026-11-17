@@ -27,7 +27,6 @@ const loadHeader = () => import("@/components/Internal/Header");
 const loadSettingsBanner = () => import("@/components/Internal/SettingsBanner");
 const loadImageUpload = () => import("@/components/ReadingAssistant/ImageUpload");
 const loadPreReading = () => import("@/components/ReadingAssistant/PreReading");
-const loadWorkflowProgress = () => import("@/components/ReadingAssistant/WorkflowProgress");
 const loadSummary = () => import("@/components/ReadingAssistant/Summary");
 const loadAdaptedText = () => import("@/components/ReadingAssistant/AdaptedText");
 const loadMindMap = () => import("@/components/ReadingAssistant/MindMap");
@@ -46,7 +45,6 @@ const Header = dynamic(loadHeader);
 const SettingsBanner = dynamic(loadSettingsBanner);
 const ImageUpload = dynamic(loadImageUpload);
 const PreReading = dynamic(loadPreReading);
-const WorkflowProgress = dynamic(loadWorkflowProgress);
 const Summary = dynamic(loadSummary);
 const AdaptedText = dynamic(loadAdaptedText);
 const MindMap = dynamic(loadMindMap);
@@ -71,7 +69,6 @@ const SECTION_LOADERS = [
   loadSettingsBanner,
   loadImageUpload,
   loadPreReading,
-  loadWorkflowProgress,
   loadSummary,
   loadAdaptedText,
   loadMindMap,
@@ -346,7 +343,6 @@ export default function HomeShell() {
         <section id="section-upload" className="scroll-mt-20">
           <ImageUpload />
         </section>
-        <WorkflowProgress />
         <section id="section-pre-reading" className="scroll-mt-20">
           <PreReading />
         </section>
