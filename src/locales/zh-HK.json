@@ -4966,6 +4966,26 @@
       "retentionHint": "原始掃描圖片會在上傳 {{days}} 天後自動刪除。",
       "rowsPerPage": "每頁"
     },
+    "priorityHandout": {
+      "button": "學生講義",
+      "generating": "正在製作講義…",
+      "done": "學生講義已下載",
+      "tooltip": "為此教學重點生成 Word 講義，包含學習筆記、練習及答案",
+      "docLabel": "學生講義",
+      "focus": "重點 {{number}}",
+      "goal": "學習目標",
+      "notes": "學習筆記",
+      "bigIdea": "核心概念",
+      "whyMatters": "為何重要：",
+      "checklist": "自我檢查清單",
+      "tryIt": "試試看",
+      "exercises": "練習",
+      "exercisesHint": "共 {{count}} 題，由淺入深。請把答案寫在空位上。",
+      "answerKeyHint": "標準答案及背後的原因。",
+      "persistFailed": "講義已下載，但儲存供下次使用時失敗：{{message}}",
+      "downloadAgain": "再次下載講義",
+      "regenerate": "重新生成講義"
+    },
     "followUp": {
       "button": "生成跟進練習",
       "generating": "正在製作工作紙…",

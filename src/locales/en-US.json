@@ -4972,6 +4972,26 @@
       "retentionHint": "Original scans are automatically deleted {{days}} days after upload.",
       "rowsPerPage": "Per page"
     },
+    "priorityHandout": {
+      "button": "Student handout",
+      "generating": "Building handout…",
+      "done": "Student handout downloaded",
+      "tooltip": "Generate a Word handout with notes, exercises and answer key for this priority",
+      "docLabel": "Student handout",
+      "focus": "Focus {{number}}",
+      "goal": "Learning goal",
+      "notes": "Learning notes",
+      "bigIdea": "The big idea",
+      "whyMatters": "Why it matters:",
+      "checklist": "Self-check checklist",
+      "tryIt": "Try it",
+      "exercises": "Exercises",
+      "exercisesHint": "{{count}} questions, from easy to challenging. Write your answers in the spaces.",
+      "answerKeyHint": "Correct answers and the reason behind each one.",
+      "persistFailed": "Handout downloaded, but saving it for next time failed: {{message}}",
+      "downloadAgain": "Download handout again",
+      "regenerate": "Regenerate handout"
+    },
     "followUp": {
       "button": "Generate follow-up exercise",
       "generating": "Building worksheet…",

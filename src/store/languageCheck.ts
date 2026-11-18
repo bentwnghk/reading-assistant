@@ -4,6 +4,7 @@ import { LANGUAGE_CHECK_LEARN_DEFAULT_AGE } from "@/constants/languageCheck";
 import { useLanguageCheckLearnStore } from "@/store/languageCheckLearn";
 import { countWords } from "@/utils/languageCheck";
 import type { FollowUpItem } from "@/utils/languageCheckFollowUpExport";
+import type { PriorityHandout } from "@/utils/languageCheckLearn";
 
 /**
  * Writing Assessment store — fully independent of the reading/history stores.
@@ -55,6 +56,15 @@ interface LanguageCheckState {
    * `generatedAt` no longer matches the shown report are ignored.
    */
   followUpWorksheets: Record<string, { generatedAt: number; items: FollowUpItem[] }>;
+  /**
+   * Generated priority-card handouts, keyed by topic id and tied to the
+   * report's `generatedAt` snapshot; inside each entry, handouts are keyed by
+   * the priority's index on the report. Store-level (not persisted, §A) so
+   * the per-card dropdowns survive SPA navigation; entries whose `generatedAt`
+   * no longer match the shown report are ignored. The server keeps the
+   * authoritative copy (hydrated on mount by the report page).
+   */
+  priorityHandouts: Record<string, { generatedAt: number; handouts: Record<string, PriorityHandout> }>;
 }
 
 interface LanguageCheckActions {
@@ -68,6 +78,10 @@ interface LanguageCheckActions {
   cacheFollowUpWorksheet: (topicId: string, generatedAt: number, items: FollowUpItem[]) => void;
   /** Drop a cached worksheet (e.g. the report was regenerated). */
   clearFollowUpWorksheet: (topicId: string) => void;
+  /** Remember a generated priority handout so its card can re-download without a new AI run. */
+  cachePriorityHandout: (topicId: string, generatedAt: number, index: number, handout: PriorityHandout) => void;
+  /** Drop a topic's cached priority handouts (e.g. the report was regenerated). */
+  clearPriorityHandouts: (topicId: string) => void;
   loadList: (force?: boolean) => Promise<void>;
   loadTopics: (force?: boolean) => Promise<void>;
   selectTopic: (id: string | null) => void;
@@ -178,6 +192,7 @@ const initialData: Pick<
   | "generatingEssayId"
   | "progress"
   | "followUpWorksheets"
+  | "priorityHandouts"
 > = {
   essays: [],
   listLoaded: false,
@@ -192,6 +207,7 @@ const initialData: Pick<
   generatingEssayId: null,
   progress: null,
   followUpWorksheets: {},
+  priorityHandouts: {},
 };
 
 export const useLanguageCheckStore = create(
@@ -238,6 +254,31 @@ export const useLanguageCheckStore = create(
           const rest = { ...s.followUpWorksheets };
           delete rest[topicId];
           return { followUpWorksheets: rest };
+        }),
+
+      cachePriorityHandout: (topicId, generatedAt, index, handout) =>
+        set((s) => {
+          // Keep handouts generated from the same report snapshot; a mismatch
+          // (stale local entry) starts a fresh map for the new snapshot.
+          const prev = s.priorityHandouts[topicId];
+          const handouts =
+            prev && prev.generatedAt === generatedAt
+              ? { ...prev.handouts, [String(index)]: handout }
+              : { [String(index)]: handout };
+          // Re-insert last so the cap drops the least recently generated.
+          const rest = { ...s.priorityHandouts };
+          delete rest[topicId];
+          const keys = Object.keys(rest);
+          if (keys.length >= 8) delete rest[keys[0]];
+          return { priorityHandouts: { ...rest, [topicId]: { generatedAt, handouts } } };
+        }),
+
+      clearPriorityHandouts: (topicId) =>
+        set((s) => {
+          if (!s.priorityHandouts[topicId]) return {};
+          const rest = { ...s.priorityHandouts };
+          delete rest[topicId];
+          return { priorityHandouts: rest };
         }),
 
       loadList: async (force = false) => {

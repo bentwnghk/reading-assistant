@@ -1030,6 +1030,8 @@ CREATE TABLE IF NOT EXISTS language_check_topic_ai_reports (
   generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   follow_up    JSONB,
   follow_up_generated_at TIMESTAMP WITH TIME ZONE,
+  priority_handouts JSONB,
+  priority_handouts_generated_at TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (topic_id, user_id)
 );
 

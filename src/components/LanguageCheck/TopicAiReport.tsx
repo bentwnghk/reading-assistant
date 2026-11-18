@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Download,
   RefreshCw,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,8 @@ import { useLanguageCheckStore } from "@/store/languageCheck";
 import { LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE } from "@/constants/languageCheck";
 import { parseError } from "@/utils/error";
 import { exportFollowUpDocx, type FollowUpItem } from "@/utils/languageCheckFollowUpExport";
+import { exportPriorityHandoutDocx } from "@/utils/languageCheckPriorityHandoutExport";
+import type { PriorityHandout } from "@/utils/languageCheckLearn";
 import { cn } from "@/utils/style";
 import { percentOf, percentTone, SCORE_KEYS, type ScoreKey } from "@/utils/languageCheckTopicReport";
 import { groupStudents, newSubmissionsSince, type StudentInsight } from "@/utils/languageCheckAiReport";
@@ -138,7 +141,8 @@ export default function TopicAiReport() {
   const { data: session } = useSession();
   const topicId = params.get("topic");
   const isStaff = ["teacher", "admin", "super-admin"].includes(session?.user?.role ?? "");
-  const { generateTopicAiReport, generateFollowUpExercises, persistFollowUpWorksheet } = useLanguageCheck();
+  const { generateTopicAiReport, generateFollowUpExercises, persistFollowUpWorksheet, generatePriorityHandout, persistPriorityHandout } =
+    useLanguageCheck();
   const language = useLanguageCheckStore((s) => s.explanationLanguage);
   const setLanguage = useLanguageCheckStore((s) => s.setExplanationLanguage);
   // Worksheet cache lives in the store so the dropdown survives SPA navigation (§A).
@@ -147,6 +151,10 @@ export default function TopicAiReport() {
   );
   const cacheFollowUpWorksheet = useLanguageCheckStore((s) => s.cacheFollowUpWorksheet);
   const clearFollowUpWorksheet = useLanguageCheckStore((s) => s.clearFollowUpWorksheet);
+  // Priority-card handout cache lives in the store too (one per card, keyed by the card's index).
+  const cachedHandoutEntry = useLanguageCheckStore((s) => (topicId ? s.priorityHandouts[topicId] : undefined));
+  const cachePriorityHandout = useLanguageCheckStore((s) => s.cachePriorityHandout);
+  const clearPriorityHandouts = useLanguageCheckStore((s) => s.clearPriorityHandouts);
   const categoryLabel = useCategoryLabel();
 
   const [report, setReport] = useState<LanguageCheckAiReport | null>(null);
@@ -154,6 +162,7 @@ export default function TopicAiReport() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [followUpBusy, setFollowUpBusy] = useState(false);
+  const [handoutBusy, setHandoutBusy] = useState<number | null>(null);
   const [schoolName, setSchoolName] = useState<string | null | undefined>(undefined);
   const started = useRef(false);
 
@@ -167,8 +176,9 @@ export default function TopicAiReport() {
     try {
       const saved = await generateTopicAiReport(topicId, language);
       setReport(saved);
-      // New report snapshot: the previously generated worksheet no longer matches.
+      // New report snapshot: the previously generated worksheet and handouts no longer match.
       clearFollowUpWorksheet(topicId);
+      clearPriorityHandouts(topicId);
       setCurrentCount(saved.essayCount);
       toast.success(t("languageCheck.aiReport.done"));
     } catch (error) {
@@ -211,6 +221,29 @@ export default function TopicAiReport() {
               void persistFollowUpWorksheet(topicId, saved.generatedAt, local.items).catch((err) => {
                 console.warn("Failed to persist follow-up worksheet (self-heal):", err);
               });
+            }
+          }
+          // Same hydration + self-heal for the priority-card handouts.
+          const ph = body.priorityHandouts as { generatedAt?: unknown; handouts?: unknown } | null | undefined;
+          const phAt = typeof ph?.generatedAt === "number" ? ph.generatedAt : null;
+          const phHasIt =
+            phAt !== null &&
+            phAt === saved.generatedAt &&
+            !!ph!.handouts &&
+            typeof ph!.handouts === "object" &&
+            Object.keys(ph!.handouts as object).length > 0;
+          if (phHasIt) {
+            for (const [k, v] of Object.entries(ph!.handouts as Record<string, PriorityHandout>)) {
+              if (v && typeof v === "object") cachePriorityHandout(topicId, phAt!, Number(k), v);
+            }
+          } else {
+            const local = useLanguageCheckStore.getState().priorityHandouts[topicId];
+            if (!ph && local && local.generatedAt === saved.generatedAt) {
+              for (const [k, v] of Object.entries(local.handouts)) {
+                void persistPriorityHandout(topicId, saved.generatedAt, Number(k), v).catch((err) => {
+                  console.warn("Failed to persist priority handout (self-heal):", err);
+                });
+              }
             }
           }
         } else {
@@ -277,6 +310,44 @@ export default function TopicAiReport() {
     }
   }
 
+  async function downloadHandout(index: number, cached?: PriorityHandout) {
+    if (!report || handoutBusy !== null) return;
+    setHandoutBusy(index);
+    try {
+      const priority = report.insights.priorities[index];
+      let handout = cached;
+      if (!handout) {
+        handout = await generatePriorityHandout(report, priority, categoryLabel);
+        if (topicId) {
+          cachePriorityHandout(topicId, report.generatedAt, index, handout);
+          // Background save so the handout survives reload / sign-out / other
+          // devices. The download never waits on it, but a failure must be
+          // visible — a silent one reads as "the dropdown forgot my handout".
+          void persistPriorityHandout(topicId, report.generatedAt, index, handout).catch((err) => {
+            console.warn("Failed to persist priority handout:", err);
+            toast.warning(t("languageCheck.priorityHandout.persistFailed", { message: parseError(err) }));
+          });
+        }
+      }
+      await exportPriorityHandoutDocx({
+        report,
+        priority,
+        index: index + 1,
+        handout,
+        language,
+        age: useLanguageCheckStore.getState().learnAge,
+        schoolName: await resolveSchoolName(),
+        t,
+        categoryLabel,
+      });
+      toast.success(t("languageCheck.priorityHandout.done"));
+    } catch (error) {
+      toast.error(parseError(error));
+    } finally {
+      setHandoutBusy(null);
+    }
+  }
+
   if (loading || (!report && generating)) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 text-center">
@@ -322,6 +393,12 @@ export default function TopicAiReport() {
   // A cached worksheet only counts while it was built from the shown report snapshot.
   const followUpItems =
     cachedWorksheet && cachedWorksheet.generatedAt === report.generatedAt ? cachedWorksheet.items : null;
+  // Same for the per-card handout cache (keyed by the priority's index).
+  const handouts =
+    cachedHandoutEntry && cachedHandoutEntry.generatedAt === report.generatedAt
+      ? cachedHandoutEntry.handouts
+      : null;
+  const handoutFor = (index: number) => (handouts ? handouts[String(index)] : undefined);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-10 print:gap-5">
@@ -594,24 +671,78 @@ export default function TopicAiReport() {
       {insights.priorities.length > 0 && (
         <Section icon={Target} title={t("languageCheck.aiReport.priorities")} tone="text-orange-700 dark:text-orange-400">
           <ol className="flex flex-col gap-3">
-            {insights.priorities.map((p, i) => (
-              <li key={i} className="flex gap-4 rounded-2xl border bg-card p-4 break-inside-avoid">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-bold text-white">
-                  {i + 1}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="font-bold">{p.title}</h3>
-                    <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {t("languageCheck.aiReport.minutes", { count: p.minutes })}
-                    </span>
+            {insights.priorities.map((p, i) => {
+              const cachedHandout = handoutFor(i);
+              return (
+                <li key={i} className="flex gap-4 rounded-2xl border bg-card p-4 break-inside-avoid">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-500 text-lg font-bold text-white">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="font-bold">{p.title}</h3>
+                      <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {t("languageCheck.aiReport.minutes", { count: p.minutes })}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">{p.why}</p>
+                    <p className="mt-2 rounded-lg bg-orange-50 p-2 text-sm dark:bg-orange-950/30">{p.activity}</p>
+                    <div className="mt-3 print:hidden">
+                      {cachedHandout ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={handoutBusy !== null}
+                              title={t("languageCheck.priorityHandout.tooltip")}
+                            >
+                              {handoutBusy === i ? (
+                                <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
+                              ) : (
+                                <FileText className="mr-1.5 h-4 w-4 text-orange-600" />
+                              )}
+                              {handoutBusy === i
+                                ? t("languageCheck.priorityHandout.generating")
+                                : t("languageCheck.priorityHandout.button")}
+                              <ChevronDown className="ml-1 h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onSelect={() => void downloadHandout(i, cachedHandout)}>
+                              <Download className="mr-2 h-4 w-4" />
+                              {t("languageCheck.priorityHandout.downloadAgain")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => void downloadHandout(i)}>
+                              <RefreshCw className="mr-2 h-4 w-4" />
+                              {t("languageCheck.priorityHandout.regenerate")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={handoutBusy !== null}
+                          title={t("languageCheck.priorityHandout.tooltip")}
+                          onClick={() => void downloadHandout(i)}
+                        >
+                          {handoutBusy === i ? (
+                            <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
+                          ) : (
+                            <FileText className="mr-1.5 h-4 w-4 text-orange-600" />
+                          )}
+                          {handoutBusy === i
+                            ? t("languageCheck.priorityHandout.generating")
+                            : t("languageCheck.priorityHandout.button")}
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{p.why}</p>
-                  <p className="mt-2 rounded-lg bg-orange-50 p-2 text-sm dark:bg-orange-950/30">{p.activity}</p>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ol>
         </Section>
       )}

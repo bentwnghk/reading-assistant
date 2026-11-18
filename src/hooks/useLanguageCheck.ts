@@ -30,8 +30,15 @@ import {
   topicAiReportPrompt,
   learnSystemPrompt,
   followUpExercisesPrompt,
+  priorityHandoutPrompt,
 } from "@/constants/readingPrompts";
-import { parseExercises, type FollowUpItem, type LearnExercise } from "@/utils/languageCheckLearn";
+import {
+  parseExercises,
+  parseHandout,
+  type FollowUpItem,
+  type LearnExercise,
+  type PriorityHandout,
+} from "@/utils/languageCheckLearn";
 import {
   languageAssessmentSchema,
   jsLanguageAssessmentSchema,
@@ -833,6 +840,67 @@ export default function useLanguageCheck() {
   }
 
   /**
+   * Staff: build a student handout (notes + 10 exercises + answers) for one
+   * "Teaching priorities" card of a saved class report.
+   */
+  async function generatePriorityHandout(
+    report: LanguageCheckAiReport,
+    priority: LanguageCheckAiInsights["priorities"][number],
+    categoryLabel: (category: string) => string,
+    signal?: AbortSignal,
+  ): Promise<PriorityHandout> {
+    const { languageCheckModel } = useSettingStore.getState();
+    const age = useLanguageCheckStore.getState().learnAge;
+    const mistakes = report.insights.mistakes.map((m) => ({
+      category: m.category,
+      categoryLabel: categoryLabel(m.category),
+      title: m.title,
+      rule: m.rule,
+      tip: m.tip,
+      examples: (report.categories.find((c) => c.category === m.category)?.examples ?? [])
+        .slice(0, 2)
+        .map((e) => ({
+          original: `${e.before ?? ""}${e.original}${e.after ?? ""}`.trim(),
+          correction: e.correction,
+          explanation: e.explanation,
+        })),
+    }));
+    const criteria = report.insights.criteria.map((c) => ({ key: c.key, finding: c.finding, nextStep: c.nextStep }));
+    const ac = new AbortController();
+    signal?.addEventListener("abort", () => ac.abort());
+    try {
+      const output = await generateWithFallback(
+        languageCheckModel,
+        learnSystemPrompt(),
+        priorityHandoutPrompt({
+          age,
+          priority,
+          topicTitle: report.base.topic.title,
+          essayType: LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE[report.base.topic.essayType]?.label ?? report.base.topic.essayType,
+          mistakes,
+          criteria,
+        }),
+        ac.signal,
+      );
+      const json = JSON.parse(stripJsonFences(output));
+      const lesson = parseHandout(json);
+      const { items } = parseExercises(json?.exercises ?? [], {
+        idPrefix: "ph",
+        allowed: ["choice", "fill-blank", "reorder", "error-correction", "proofread", "rewrite"],
+        max: 10,
+      });
+      if (items.length < 5) throw new SyntaxError("too few valid exercises");
+      return { lesson, exercises: items };
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      if (error instanceof SyntaxError || (error as Error)?.name === "ZodError") {
+        throw new Error(i18next.t("languageCheck.check.parseError"));
+      }
+      throw new Error(describeGenerationError(error));
+    }
+  }
+
+  /**
    * Staff: persist a generated follow-up worksheet on its saved report row so
    * it survives reloads, sign-out and other devices ("download again").
    */
@@ -855,11 +923,38 @@ export default function useLanguageCheck() {
     if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
   }
 
+  /**
+   * Staff: persist ONE generated priority handout on the saved report row
+   * (keyed by the priority's index) so its card offers "download again" /
+   * "regenerate" across reloads, sign-out and other devices.
+   */
+  async function persistPriorityHandout(
+    topicId: string,
+    generatedAt: number,
+    index: number,
+    handout: PriorityHandout,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const res = await fetch(
+      `/api/writing-assessment/staff/topic-reports/${encodeURIComponent(topicId)}/ai-report/priority-handout`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ generatedAt, index, handout }),
+        signal,
+      },
+    );
+    const body = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+  }
+
   return {
     transcribe,
     generateTopicAiReport,
     generateFollowUpExercises,
     persistFollowUpWorksheet,
+    persistPriorityHandout,
+    generatePriorityHandout,
     runCheck,
     runStaffCheck,
     assessLanguage,

@@ -48,7 +48,7 @@ import type { LearnSessionWire, LearnUnitWire } from "@/utils/languageCheckLearn
  * a `Document`; `exportLearnDocx` below saves it.
  */
 
-type Translate = (key: string, options?: Record<string, unknown>) => string;
+export type Translate = (key: string, options?: Record<string, unknown>) => string;
 
 export interface LearnExportOptions {
   session: LearnSessionWire;
@@ -66,7 +66,7 @@ export interface LearnExportOptions {
 
 // ─── Palette (the Tailwind slate / red / green / amber / sky shades the screen uses) ─
 
-const C = {
+export const C = {
   ink: "0F172A",
   body: "1E293B",
   muted: "64748B",
@@ -89,10 +89,10 @@ const C = {
   skyLine: "7DD3FC",
 } as const;
 
-const PAGE_WIDTH = 11906;
-const MARGIN = 1134;
-const WIDTH = PAGE_WIDTH - MARGIN * 2;
-const FONT = { ascii: "Calibri", hAnsi: "Calibri", eastAsia: "Microsoft JhengHei" };
+export const PAGE_WIDTH = 11906;
+export const MARGIN = 1134;
+export const WIDTH = PAGE_WIDTH - MARGIN * 2;
+export const FONT = { ascii: "Calibri", hAnsi: "Calibri", eastAsia: "Microsoft JhengHei" };
 const MONO = { ascii: "Consolas", hAnsi: "Consolas", eastAsia: "Microsoft JhengHei" };
 const BLANK = "\u00A0".repeat(16);
 
@@ -102,7 +102,7 @@ const NONE = { style: BorderStyle.NONE, size: 0, color: C.white } as const;
 const line = (color: string, size = 6) => ({ style: BorderStyle.SINGLE, size, color }) as const;
 const shade = (fill: string) => ({ type: ShadingType.CLEAR, fill, color: "auto" }) as const;
 
-function run(
+export function run(
   text: string,
   o: {
     bold?: boolean;
@@ -134,7 +134,7 @@ function run(
   });
 }
 
-function para(
+export function para(
   children: ParagraphChild[],
   o: {
     after?: number;
@@ -163,7 +163,7 @@ function para(
 }
 
 /** A thin unshaded paragraph: separates tables (Word merges adjacent ones) and shaded blocks. */
-function gap(height = 140): Paragraph {
+export function gap(height = 140): Paragraph {
   return new Paragraph({
     children: [new TextRun({ text: "", size: 2 })],
     spacing: { before: 0, after: 0, line: height, lineRule: LineRuleType.EXACT },
@@ -202,7 +202,7 @@ function boxCell(children: Paragraph[], o: BoxOptions, width = WIDTH): TableCell
 }
 
 /** A card: one bordered, optionally tinted cell with an optional coloured left bar. */
-function box(children: Paragraph[], o: BoxOptions = {}): Table {
+export function box(children: Paragraph[], o: BoxOptions = {}): Table {
   return new Table({
     width: { size: WIDTH, type: WidthType.DXA },
     columnWidths: [WIDTH],
@@ -220,7 +220,7 @@ function box(children: Paragraph[], o: BoxOptions = {}): Table {
 }
 
 /** Stacked rows that read as one card (wrong / right / why). */
-function stack(
+export function stack(
   rows: { children: Paragraph[]; fill?: string }[],
   border: string,
 ): Table {
@@ -259,7 +259,7 @@ function stack(
   });
 }
 
-function sectionTitle(text: string, tone: string): Paragraph {
+export function sectionTitle(text: string, tone: string): Paragraph {
   return para(
     [
       run("■ ", { color: tone, size: 18 }),
@@ -273,7 +273,7 @@ function sectionTitle(text: string, tone: string): Paragraph {
  * Writing lines: a tab with an underscore leader runs to the right edge. (Bottom
  * borders on neighbouring paragraphs would be merged by Word into one line.)
  */
-function ruledLines(count: number): Paragraph[] {
+export function ruledLines(count: number): Paragraph[] {
   return Array.from(
     { length: count },
     () =>
@@ -288,7 +288,7 @@ function ruledLines(count: number): Paragraph[] {
 }
 
 /** Small rounded-looking label: "1 of 6", "Fill in the blank". */
-function chips(...labels: { text: string; strong?: boolean }[]): ParagraphChild[] {
+export function chips(...labels: { text: string; strong?: boolean }[]): ParagraphChild[] {
   return labels.flatMap((l, i) => [
     ...(i > 0 ? [run("  ", { size: 18 })] : []),
     l.strong
@@ -604,7 +604,7 @@ function alsoAccepted(options: string[], ctx: Ctx): Paragraph[] {
   ];
 }
 
-function prompt(item: LearnExercise, ctx: Ctx): Paragraph[] {
+export function prompt(item: LearnExercise, ctx: Ctx): Paragraph[] {
   const { t } = ctx;
   const out: Paragraph[] = [];
   const key = exerciseInstructionKey(item);
@@ -648,7 +648,7 @@ function prompt(item: LearnExercise, ctx: Ctx): Paragraph[] {
   return out;
 }
 
-function answerArea(item: LearnExercise, ctx: Ctx): Paragraph[] {
+export function answerArea(item: LearnExercise, ctx: Ctx): Paragraph[] {
   const { t, withAnswers } = ctx;
   switch (item.type) {
     case "choice":
@@ -805,7 +805,7 @@ function answerArea(item: LearnExercise, ctx: Ctx): Paragraph[] {
 }
 
 /** Model solution + rule behind it, as shown after answering on screen. */
-function solutionNotes(item: LearnExercise, ctx: Ctx): Paragraph[] {
+export function solutionNotes(item: LearnExercise, ctx: Ctx): Paragraph[] {
   const { t } = ctx;
   const out: Paragraph[] = [];
   const explanation = pickLang(item.explanation, item.explanationZh, ctx.language);
@@ -964,7 +964,7 @@ function studentWorkBlock(
 
 // ─── Stages, cover, document ─────────────────────────────────────────────────
 
-interface Ctx {
+export interface Ctx {
   t: Translate;
   language: "en" | "zh";
   withAnswers: boolean;

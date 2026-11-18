@@ -20,13 +20,14 @@ vi.mock("@/lib/db", () => ({
       queries.push({ sql: sql.replace(/\s+/g, " ").trim(), values: values ?? [] });
       if (/^UPDATE/i.test(sql.trim())) return { rows: updateRows };
       if (sql.includes("SELECT 1 FROM language_check_topic_ai_reports")) return { rows: existsRows };
-      if (sql.includes("follow_up FROM language_check_topic_ai_reports")) {
+      if (sql.includes("report, generated_at, follow_up, priority_handouts FROM language_check_topic_ai_reports")) {
         return {
           rows: [
             {
               report: { version: 1, generatedAt: 111 },
               generated_at: new Date(0),
               follow_up: { generatedAt: 111, items: [{ category: "c", exercise: { type: "fill-blank", id: "fu1" } }] },
+              priority_handouts: null,
             },
           ],
         };
@@ -151,6 +152,7 @@ describe("follow-up worksheet persistence", () => {
     });
     const upsert = queries.find((q) => q.sql.startsWith("INSERT INTO language_check_topic_ai_reports"))!;
     expect(upsert.sql).toContain("follow_up = NULL");
+    expect(upsert.sql).toContain("priority_handouts = NULL");
   });
 
   it("ai-report GET returns the worksheet as followUp", async () => {

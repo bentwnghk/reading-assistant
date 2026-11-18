@@ -130,6 +130,28 @@ export function parseLesson(json: unknown): LearnLesson {
   return lessonSchema.parse(json);
 }
 
+/** Student handout for one class-report teaching priority: a lesson + try-it task (exercises are parsed separately). */
+export const handoutSchema = lessonSchema.extend({
+  goal: text(),
+  goalZh: text(),
+  tryIt: z
+    .object({ instruction: text(), instructionZh: text() })
+    .nullish()
+    .transform((v) => (v && (v.instruction || v.instructionZh) ? v : null)),
+});
+
+export type HandoutLesson = z.output<typeof handoutSchema>;
+
+export function parseHandout(json: unknown): HandoutLesson {
+  return handoutSchema.parse(json);
+}
+
+/** A parsed priority handout: notes + exercises (answers live inside each exercise). */
+export interface PriorityHandout {
+  lesson: HandoutLesson;
+  exercises: LearnExercise[];
+}
+
 // ─── Exercises ───────────────────────────────────────────────────────────────
 
 const feedbackFields = {

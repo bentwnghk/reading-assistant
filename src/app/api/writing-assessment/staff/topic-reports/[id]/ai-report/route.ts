@@ -23,11 +23,12 @@ const bodySchema = z.object({
 
 /**
  * Saved AI assessment report for a topic (staff only).
- *  GET            → { saved, currentCount, followUp } (currentCount = checked essay rows now;
- *                   followUp = the persisted worksheet cache, when one exists for this snapshot)
+ *  GET            → { saved, currentCount, followUp, priorityHandouts } (currentCount =
+ *                   checked essay rows now; followUp / priorityHandouts = the persisted
+ *                   caches, when they exist for this snapshot)
  *  GET ?evidence=1 → { evidence } anonymous class evidence for generation
  *  PUT            → saves the generated report (one per topic per staff member;
- *                   regenerating clears the stored follow-up worksheet)
+ *                   regenerating clears the stored follow-up worksheet and handouts)
  */
 async function viewerOf(userId: string) {
   const session = await auth()
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest, context: Ctx) {
       saved: saved?.report ?? null,
       currentCount: current.checkedCount,
       followUp: saved?.followUp ?? null,
+      priorityHandouts: saved?.priorityHandouts ?? null,
     })
   } catch (error) {
     console.error("Error fetching topic AI report:", error)

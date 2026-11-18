@@ -1889,6 +1889,108 @@ Quality checklist - verify before answering:
 3. error-correction: "wrong" is copied exactly from the passage.`;
 }
 
+/** Student handout for ONE "Teaching priority" card of the class report: notes + exercises + answer key. */
+export function priorityHandoutPrompt(args: {
+  age: number;
+  priority: { title: string; why: string; activity: string; minutes: number };
+  topicTitle: string;
+  essayType: string;
+  mistakes: {
+    category: string;
+    categoryLabel: string;
+    title: string;
+    rule: string;
+    tip: string;
+    examples: { original: string; correction: string; explanation: string }[];
+  }[];
+  criteria: { key: string; finding: string; nextStep: string }[];
+}): string {
+  const { age, priority, topicTitle, essayType, mistakes, criteria } = args;
+  const profile = learnerProfile(age);
+  const mistakeBlocks = mistakes
+    .map(
+      (m, i) =>
+        `${i + 1}. ${m.title} [${m.categoryLabel}]\n   Rule: ${m.rule}\n   Tip: ${m.tip}\n${
+          m.examples.length
+            ? m.examples
+                .map((e) => `   Class mistake: "${e.original}" -> "${e.correction || "(delete)"}"${e.explanation ? ` (${e.explanation})` : ""}`)
+                .join("\n")
+            : "   (no recorded examples)"
+        }`,
+    )
+    .join("\n");
+  const criteriaBlock = criteria.map((c) => `- ${c.key}: ${c.finding} Next step: ${c.nextStep}`).join("\n");
+  const types = (["choice", "fill-blank", "reorder", "error-correction", "proofread", "rewrite"] as const)
+    .filter((t) => !(age <= 9 && t === "proofread"))
+    .map((t) => `- ${t}: ${EXERCISE_SPECS[t]}`)
+    .join("\n");
+  return `Create a STUDENT HANDOUT (a clear, visual one-to-two page lesson plus a worksheet) for ONE teaching priority from a class writing report. The teacher will print it for the whole class.
+
+<teaching-priority>
+Title: ${priority.title}
+Why it matters for this class: ${priority.why}
+Suggested classroom activity (${priority.minutes} min): ${priority.activity}
+</teaching-priority>
+
+<writing-task>
+Topic: ${topicTitle}
+Essay type: ${essayType}
+</writing-task>
+
+<class-evidence>
+Common mistakes the class made (use the ones related to the priority; ignore unrelated ones):
+${mistakeBlocks || "(none)"}
+
+Criterion findings:
+${criteriaBlock || "(none)"}
+</class-evidence>
+
+<learner>
+Level: ${profile.label} - target CEFR ${profile.cefr}
+Explanation style: ${profile.style}
+Sentences: at most ${profile.maxWords} words (passages: at most ${profile.maxWords * 4} words), topics such as ${profile.contexts}.
+</learner>
+
+Write TO THE STUDENT (second person, "you"), never to the teacher. Explanations must be short, concrete and easy to understand. If the priority is about content, organisation or style rather than grammar, teach it with models, checklists and "weak -> stronger" contrasts using sentences or short paragraphs.
+
+Return ONE JSON object with exactly this shape:
+
+{
+  "title": "Short, friendly handout title in English",
+  "titleZh": "繁體中文標題",
+  "goal": "One 'I can ...' sentence: what the student will be able to do",
+  "goalZh": "繁體中文",
+  "summary": "ONE sentence: the single most important idea",
+  "summaryZh": "繁體中文",
+  "whyItMatters": "1-2 sentences: how this changes the reader's/examiner's impression of the student's writing",
+  "whyItMattersZh": "繁體中文",
+  "rules": [
+    { "heading": "Short name of point 1", "headingZh": "繁體中文", "explanation": "The idea and the reason (2-3 short sentences)", "explanationZh": "繁體中文", "pattern": "A compact formula or memory aid, e.g. 'Topic sentence -> Reason -> Example'; '' if none fits", "examples": ["Correct/model example 1", "Correct/model example 2"] }
+  ],
+  "contrasts": [
+    { "wrong": "Weak or wrong version (realistic, based on the class evidence)", "right": "Corrected or stronger version", "why": "One short sentence", "whyZh": "繁體中文" }
+  ],
+  "chineseTransfer": { "explanation": "Why Cantonese/Chinese speakers often do this and what English does differently; '' if there is no real transfer cause", "explanationZh": "繁體中文" },
+  "tips": [ { "tip": "A practical self-check the student can use while writing", "tipZh": "繁體中文" } ],
+  "tryIt": { "instruction": "A short pair/group task for the student, adapted from the suggested classroom activity so students can do it on paper in about ${Math.min(priority.minutes, 10)} minutes", "instructionZh": "繁體中文" },
+  "exercises": [ ... ]
+}
+
+Requirements:
+- "rules": ${age <= 9 ? "1-2" : "2-4"} points, most important first. "contrasts": 3-4 pairs (each "wrong" has exactly one weakness; "right" fixes only that). "tips": 3-4 items.
+- "exercises": a JSON ARRAY of exactly 10 exercise objects ordered from easiest to hardest, mixing at least 4 different types, never more than 3 of one type. Use ONLY these types:
+${types}
+- Every exercise has a "hint" that nudges without giving the answer, and every exercise has an "explanation" and "explanationZh" (the rule behind the answer; error-correction/proofread put per-error explanations in "errors"). Use NEW sentences, never copy class mistakes word for word.
+- Include at most one "rewrite" item, placed last, and make sure its "answers" list every fully correct rewrite.
+
+Quality checklist - verify before answering:
+1. Every example, option, answer, "right" and model sentence is correct standard English (British spelling).
+2. In choice items "answer" is word-for-word one of the options and no distractor is also acceptable.
+3. In fill-blank items the number of arrays in "answers" equals the number of ___ gaps and lists every acceptable fill.
+4. In error-correction/proofread items each "wrong" is copied exactly from the passage and the passage has no unlisted errors.
+5. Chinese ("Zh" fields) is Traditional Chinese. Do not mention that you are an AI or include any student names.`;
+}
+
 export function learnEvaluatePrompt(args: {
   type: "rewrite" | "compose";
   age: number;

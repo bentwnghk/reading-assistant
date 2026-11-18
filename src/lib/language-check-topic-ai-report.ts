@@ -4,10 +4,13 @@ import type { TopicViewer } from "./language-check-topics"
 import { getTopicReport } from "./language-check-topic-report"
 import { isExpressionCategory } from "@/constants/languageCheck"
 import { contextAround } from "@/utils/languageCheck"
-import type { FollowUpItem } from "@/utils/languageCheckLearn"
+import type { FollowUpItem, PriorityHandout } from "@/utils/languageCheckLearn"
 
 /** Saved follow-up worksheet: items + the report snapshot (ms) they were built from. */
 export type SavedFollowUp = { generatedAt: number; items: FollowUpItem[] }
+
+/** Saved priority handouts, keyed by the priority's index on the report. */
+export type SavedPriorityHandouts = { generatedAt: number; handouts: Record<string, PriorityHandout> }
 
 const MAX_EXAMPLES = 4
 const MAX_NOTES = 25
@@ -125,9 +128,14 @@ export async function getTopicAiEvidence(
 export async function getSavedAiReport(
   topicId: string,
   userId: string,
-): Promise<{ report: LanguageCheckAiReport; generatedAt: number; followUp: SavedFollowUp | null } | null> {
+): Promise<{
+  report: LanguageCheckAiReport
+  generatedAt: number
+  followUp: SavedFollowUp | null
+  priorityHandouts: SavedPriorityHandouts | null
+} | null> {
   const { rows } = await getPool().query(
-    `SELECT report, generated_at, follow_up FROM language_check_topic_ai_reports
+    `SELECT report, generated_at, follow_up, priority_handouts FROM language_check_topic_ai_reports
      WHERE topic_id = $1 AND user_id = $2`,
     [topicId, userId],
   )
@@ -137,7 +145,12 @@ export async function getSavedAiReport(
     fu && typeof fu.generatedAt === "number" && Array.isArray(fu.items)
       ? { generatedAt: fu.generatedAt, items: fu.items as FollowUpItem[] }
       : null
-  return { report: rows[0].report as LanguageCheckAiReport, generatedAt: toMs(rows[0].generated_at), followUp }
+  const ph = rows[0].priority_handouts as { generatedAt?: unknown; handouts?: unknown } | null
+  const priorityHandouts =
+    ph && typeof ph.generatedAt === "number" && ph.handouts && typeof ph.handouts === "object"
+      ? { generatedAt: ph.generatedAt, handouts: ph.handouts as Record<string, PriorityHandout> }
+      : null
+  return { report: rows[0].report as LanguageCheckAiReport, generatedAt: toMs(rows[0].generated_at), followUp, priorityHandouts }
 }
 
 /**
@@ -166,6 +179,39 @@ export async function saveFollowUpWorksheet(
   return existing.length === 0 ? "no-report" : "stale"
 }
 
+/**
+ * Persist ONE generated priority handout on the saved report's row (merged
+ * into the priority_handouts map under its priority index). The update is
+ * guarded by the report snapshot it was generated from, so a report
+ * regenerated in the meantime is never paired with a stale handout.
+ */
+export async function savePriorityHandout(
+  topicId: string,
+  userId: string,
+  generatedAt: number,
+  index: number,
+  handout: PriorityHandout,
+): Promise<"saved" | "no-report" | "stale"> {
+  const { rows } = await getPool().query(
+    `UPDATE language_check_topic_ai_reports
+     SET priority_handouts =
+           jsonb_set(
+             COALESCE(priority_handouts, jsonb_build_object('generatedAt', $3::bigint, 'handouts', '{}'::jsonb)),
+             ARRAY[$4::text], $5::jsonb, true
+           ) || jsonb_build_object('generatedAt', $3::bigint),
+         priority_handouts_generated_at = now()
+     WHERE topic_id = $1 AND user_id = $2 AND (report->>'generatedAt')::bigint = $3
+     RETURNING topic_id`,
+    [topicId, userId, generatedAt, String(index), JSON.stringify(handout)],
+  )
+  if (rows.length > 0) return "saved"
+  const { rows: existing } = await getPool().query(
+    `SELECT 1 FROM language_check_topic_ai_reports WHERE topic_id = $1 AND user_id = $2`,
+    [topicId, userId],
+  )
+  return existing.length === 0 ? "no-report" : "stale"
+}
+
 export async function saveAiReport(
   topicId: string,
   userId: string,
@@ -177,7 +223,8 @@ export async function saveAiReport(
      ON CONFLICT (topic_id, user_id) DO UPDATE
        SET report = EXCLUDED.report, essay_count = EXCLUDED.essay_count,
            model = EXCLUDED.model, generated_at = now(),
-           follow_up = NULL, follow_up_generated_at = NULL`,
+           follow_up = NULL, follow_up_generated_at = NULL,
+           priority_handouts = NULL, priority_handouts_generated_at = NULL`,
     [topicId, userId, JSON.stringify(report), report.essayCount, report.model],
   )
 }
