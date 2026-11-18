@@ -223,27 +223,28 @@ export default function TopicAiReport() {
               });
             }
           }
-          // Same hydration + self-heal for the priority-card handouts.
+          // Same hydration + self-heal for the priority-card handouts. The map
+          // is keyed by the priority's index, so healing is per-index: local
+          // entries the server lacks (an earlier background save failed, or a
+          // pre-fix row stored them outside `handouts`) are re-pushed silently.
           const ph = body.priorityHandouts as { generatedAt?: unknown; handouts?: unknown } | null | undefined;
           const phAt = typeof ph?.generatedAt === "number" ? ph.generatedAt : null;
-          const phHasIt =
-            phAt !== null &&
-            phAt === saved.generatedAt &&
-            !!ph!.handouts &&
-            typeof ph!.handouts === "object" &&
-            Object.keys(ph!.handouts as object).length > 0;
-          if (phHasIt) {
-            for (const [k, v] of Object.entries(ph!.handouts as Record<string, PriorityHandout>)) {
+          const serverHandouts =
+            phAt !== null && phAt === saved.generatedAt && !!ph!.handouts && typeof ph!.handouts === "object"
+              ? (ph!.handouts as Record<string, PriorityHandout>)
+              : null;
+          if (serverHandouts) {
+            for (const [k, v] of Object.entries(serverHandouts)) {
               if (v && typeof v === "object") cachePriorityHandout(topicId, phAt!, Number(k), v);
             }
-          } else {
-            const local = useLanguageCheckStore.getState().priorityHandouts[topicId];
-            if (!ph && local && local.generatedAt === saved.generatedAt) {
-              for (const [k, v] of Object.entries(local.handouts)) {
-                void persistPriorityHandout(topicId, saved.generatedAt, Number(k), v).catch((err) => {
-                  console.warn("Failed to persist priority handout (self-heal):", err);
-                });
-              }
+          }
+          const localHandouts = useLanguageCheckStore.getState().priorityHandouts[topicId];
+          if (localHandouts && localHandouts.generatedAt === saved.generatedAt) {
+            for (const [k, v] of Object.entries(localHandouts.handouts)) {
+              if (serverHandouts && k in serverHandouts) continue;
+              void persistPriorityHandout(topicId, saved.generatedAt, Number(k), v).catch((err) => {
+                console.warn("Failed to persist priority handout (self-heal):", err);
+              });
             }
           }
         } else {

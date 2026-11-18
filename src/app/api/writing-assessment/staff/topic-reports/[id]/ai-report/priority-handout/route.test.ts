@@ -88,6 +88,11 @@ describe("priority handout persistence", () => {
 
     const update = queries.find((q) => q.sql.startsWith("UPDATE"))!;
     expect(update.sql).toContain("SET priority_handouts");
+    // Regression (v7.89-pattern): the path MUST be nested inside `handouts`.
+    // A top-level path (`ARRAY[$4]`) stored the handout as a SIBLING of the
+    // `handouts` object, so the read-side map stayed empty and the card's
+    // dropdown never came back after a reload / sign-in / device switch.
+    expect(update.sql).toContain("ARRAY['handouts', $4::text]");
     expect(update.sql).toContain("(report->>'generatedAt')::bigint = $3");
     // [topic, user, snapshot, index, handout jsonb]
     expect(update.values[0]).toBe("t1");
@@ -131,6 +136,15 @@ describe("priority handout persistence", () => {
 
   it("getSavedAiReport maps the stored handout map back out", async () => {
     savedPriorityHandouts = { generatedAt: 111, handouts: { 0: handout } };
+    const saved = await getSavedAiReport("t1", "teacher-1");
+    expect(saved?.priorityHandouts).toEqual({ generatedAt: 111, handouts: { 0: handout } });
+  });
+
+  it("getSavedAiReport heals rows written with a top-level handout key", async () => {
+    // Shape produced by the pre-fix save SQL: the handout sits NEXT to the
+    // `handouts` object instead of inside it. The read must merge it back in,
+    // otherwise existing users' dropdowns stay broken until they regenerate.
+    savedPriorityHandouts = { generatedAt: 111, handouts: {}, 0: handout };
     const saved = await getSavedAiReport("t1", "teacher-1");
     expect(saved?.priorityHandouts).toEqual({ generatedAt: 111, handouts: { 0: handout } });
   });

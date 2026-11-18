@@ -145,12 +145,35 @@ export async function getSavedAiReport(
     fu && typeof fu.generatedAt === "number" && Array.isArray(fu.items)
       ? { generatedAt: fu.generatedAt, items: fu.items as FollowUpItem[] }
       : null
-  const ph = rows[0].priority_handouts as { generatedAt?: unknown; handouts?: unknown } | null
-  const priorityHandouts =
-    ph && typeof ph.generatedAt === "number" && ph.handouts && typeof ph.handouts === "object"
-      ? { generatedAt: ph.generatedAt, handouts: ph.handouts as Record<string, PriorityHandout> }
-      : null
-  return { report: rows[0].report as LanguageCheckAiReport, generatedAt: toMs(rows[0].generated_at), followUp, priorityHandouts }
+  const ph = rows[0].priority_handouts as unknown
+  return { report: rows[0].report as LanguageCheckAiReport, generatedAt: toMs(rows[0].generated_at), followUp, priorityHandouts: parseSavedHandouts(ph) }
+}
+
+/**
+ * Parse the stored priority_handouts wrapper. Tolerates rows written before
+ * the nested-path fix, where a handout landed as a TOP-LEVEL numeric key
+ * (`{"generatedAt":N,"handouts":{},"0":{…}}`) instead of inside `handouts` —
+ * such entries are merged back into the map so those rows heal on read
+ * instead of silently showing plain buttons forever. Null when the wrapper
+ * holds no usable handout for this snapshot.
+ */
+function parseSavedHandouts(raw: unknown): SavedPriorityHandouts | null {
+  if (!raw || typeof raw !== "object") return null
+  const generatedAt = (raw as { generatedAt?: unknown }).generatedAt
+  if (typeof generatedAt !== "number") return null
+  const handouts: Record<string, PriorityHandout> = {}
+  const nested = (raw as { handouts?: unknown }).handouts
+  if (nested && typeof nested === "object") {
+    for (const [k, v] of Object.entries(nested as Record<string, unknown>)) {
+      if (v && typeof v === "object") handouts[k] = v as PriorityHandout
+    }
+  }
+  for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (k !== "generatedAt" && k !== "handouts" && v && typeof v === "object" && !(k in handouts)) {
+      handouts[k] = v as PriorityHandout
+    }
+  }
+  return Object.keys(handouts).length > 0 ? { generatedAt, handouts } : null
 }
 
 /**
@@ -197,7 +220,7 @@ export async function savePriorityHandout(
      SET priority_handouts =
            jsonb_set(
              COALESCE(priority_handouts, jsonb_build_object('generatedAt', $3::bigint, 'handouts', '{}'::jsonb)),
-             ARRAY[$4::text], $5::jsonb, true
+             ARRAY['handouts', $4::text], $5::jsonb, true
            ) || jsonb_build_object('generatedAt', $3::bigint),
          priority_handouts_generated_at = now()
      WHERE topic_id = $1 AND user_id = $2 AND (report->>'generatedAt')::bigint = $3
