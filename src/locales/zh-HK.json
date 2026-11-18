@@ -5012,7 +5012,7 @@
       "noData": "此題目暫時沒有已批改的作文。",
       "stale": "自報告生成後，新增了 {{count}} 份已批改作文。請重新生成以包含最新資料。",
       "overview": "總覽",
-      "errorsPerEssay": "平均每篇評語數",
+      "errorsPerEssay": "平均每篇批註數",
       "criteria": "各評分範疇表現",
       "level": { "strength": "強項", "developing": "發展中", "priority": "優先改善" },
       "strengths": "全班做得好的地方",
