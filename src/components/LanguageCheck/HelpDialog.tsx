@@ -196,6 +196,14 @@ export default function HelpDialog({ open, onOpenChange, isStaff }: HelpDialogPr
                 desc={t("languageCheck.help.overview.classReport.desc")}
               />
             )}
+            {isStaff && (
+              <HelpRow
+                icon={FileText}
+                tone="bg-orange-500/10 text-orange-500"
+                name={t("languageCheck.help.overview.handouts.name")}
+                desc={t("languageCheck.help.overview.handouts.desc")}
+              />
+            )}
             <HelpTip
               title={t("languageCheck.help.overview.tip.title")}
               desc={t("languageCheck.help.overview.tip.desc")}

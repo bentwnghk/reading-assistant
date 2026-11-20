@@ -312,7 +312,7 @@
         },
         "classReport": {
           "title": "Writing: Class Assessment Report",
-          "desc": "For teachers: from any Topic report, AI reads the whole class's checked essays and writes a printable teaching report — criterion findings, common mistakes with real examples, teaching priorities and differentiation groups. One more press turns those mistakes into a follow-up fix-it worksheet with a teacher answer key."
+          "desc": "For teachers: from any Topic report, AI reads the whole class's checked essays and writes a printable teaching report — criterion findings, common mistakes with real examples, teaching priorities and differentiation groups. One more press turns those mistakes into a follow-up fix-it worksheet with a teacher answer key, and each teaching priority becomes a printable student handout — notes, a try-it task, exercises and an answer key in one Word file."
         },
         "assignments": {
           "title": "Assignments",
@@ -418,7 +418,7 @@
         },
         "q14": {
           "q": "As a teacher, can I see how the whole class did on a writing task — and get follow-up practice for their common mistakes?",
-          "a": "<p>Yes! Under <strong>My students → Topic reports</strong>, every writing topic is a card with its class, checked-essay count and class average. Open one for the class statistics, then press <strong>Generate AI assessment report</strong>: the AI reads every student's latest checked essay (anonymised) and writes a printable <strong>Class Assessment Report</strong> — criterion findings and next steps, common mistakes quoting the class's own sentences, teaching priorities, <strong>differentiation groups</strong> (&lt;40% / 40–69% / 70%+) and quick tips.</p><p>One more press — <strong>Generate follow-up exercise</strong> — turns those mistakes into a Word worksheet that downloads automatically: a rule recap with wrong/correct pairs, ten <strong>fix-the-error</strong> and <strong>fill-in-the-blank</strong> questions, and a teacher answer key on a separate page, ready to hand out.</p>"
+          "a": "<p>Yes! Under <strong>My students → Topic reports</strong>, every writing topic is a card with its class, checked-essay count and class average. Open one for the class statistics, then press <strong>Generate AI assessment report</strong>: the AI reads every student's latest checked essay (anonymised) and writes a printable <strong>Class Assessment Report</strong> — criterion findings and next steps, common mistakes quoting the class's own sentences, teaching priorities, <strong>differentiation groups</strong> (&lt;40% / 40–69% / 70%+) and quick tips.</p><p>One more press — <strong>Generate follow-up exercise</strong> — turns those mistakes into a Word worksheet that downloads automatically: a rule recap with wrong/correct pairs, ten <strong>fix-the-error</strong> and <strong>fill-in-the-blank</strong> questions, and a teacher answer key on a separate page, ready to hand out.</p><p>And each numbered <strong>teaching priority</strong> has its own <strong>Student handout</strong> button: AI turns that one focus into a printable Word handout for the class — learning notes (the key idea, rules with examples, wrong → right pairs, a Cantonese/Chinese-transfer note and a self-check checklist), a short Try-it task, ten exercises from easy to challenging with hints, and an answer key on its own page. Like the worksheet, handouts are saved with the report, so you can download or regenerate them any time.</p>"
         }
       }
     }
@@ -547,7 +547,7 @@
           "Enhanced Essays — your words lightly polished, or rebuilt at Level 5**",
           "Every mistake becomes a lesson, practice and quiz — resumable on any device",
           "Student learning dashboards for every class",
-          "Class Assessment Report per topic — with a printable fix-it worksheet and answer key"
+          "Class Assessment Report per topic — printable fix-it worksheet, answer key and per-priority student handouts"
         ],
         "carousel": {
           "label": "Writing Assessment features",
@@ -561,6 +561,8 @@
           "quiz": "Learn · quiz",
           "staffOverview": "Student learning overview",
           "classReport": "Class Assessment Report",
+        "followUp": "Printable follow-up exercise",
+        "handout": "Student handout for a priority",
           "prev": "Previous slide",
           "next": "Next slide",
           "goTo": "Go to slide {{n}} of {{count}}: {{label}}",
@@ -4749,6 +4751,10 @@
         "uploadForStudent": {
           "name": "Checking for a Student",
           "desc": "Teachers can pick a student above the upload zone and scan that student's handwritten essay for them. The checked essay lands in the student's \"My essays\" list exactly as if they had uploaded it, ready for them to learn from the corrections."
+        },
+        "handouts": {
+          "name": "Student handouts",
+          "desc": "Each numbered teaching priority on the Class Assessment Report has a Student handout button. One press builds a printable Word handout for that focus, written to the student: learning notes (the big idea, why it matters, rules with examples, wrong → right pairs, a Cantonese/Chinese-transfer note and a self-check checklist), a short Try it task, ten exercises from easy to challenging with hints, and an answer key on its own page. Like the follow-up worksheet it is saved with the report — download it again or regenerate it from the card's menu."
         },
         "topicReports": {
           "name": "Topic Reports",

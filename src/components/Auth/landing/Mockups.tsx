@@ -5223,6 +5223,8 @@ export function UnderstandDifficultyMockup() {
      5. PracticePlayer.tsx + ExerciseCard.tsx (practice mode)
      6. QuizPlayer.tsx + ExerciseCard.tsx (quiz mode)
      7. LanguageCheckHome.tsx + StaffLearning.tsx + LearnDashboardView.tsx
+     8. Follow-up worksheet — printable "Fix It!" Word file (buildFollowUpDocx)
+     9. Priority handout — printable student handout (buildPriorityHandoutDocx)
    ════════════════════════════════════════════════════════════════ */
 
 /* Category styles for the corrections shown — faithful subset of
@@ -7078,6 +7080,10 @@ export function LanguageCheckClassReportMockup() {
                   </div>
                   <p className="mt-0.5 text-[7.5px] text-muted-foreground">{p.why}</p>
                   <p className="mt-1 rounded-md bg-orange-50 p-1 text-[8px] leading-snug text-[var(--lp-ink)] dark:bg-orange-950/30">{p.activity}</p>
+                  <span className="mt-1 inline-flex w-fit items-center gap-0.5 rounded-md border px-1.5 py-0.5 text-[7px] font-medium text-[var(--lp-ink)]">
+                    <FileText className="h-2 w-2 text-orange-600" />
+                    Student handout
+                  </span>
                 </div>
               </li>
             ))}
@@ -7134,6 +7140,308 @@ export function LanguageCheckClassReportMockup() {
         <p className="text-center text-[7px] text-muted-foreground">
           AI-generated from the students&apos; checked essays (gpt-6.1-sol). Review before sharing.
         </p>
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────
+   CHAPTER 06 — PRINTABLES (Word exports, shown as print previews)
+
+   The two Word files the Class Assessment Report produces, drawn as
+   white "paper" sheets (they stay light in dark mode, like a print
+   preview) and mirroring the docx builders' real layout:
+      8. languageCheckFollowUpExport.ts  — Fix It! Follow-up Practice
+      9. languageCheckPriorityHandoutExport.ts — Student handout
+   ══════════════════════════════════════════════════════════════ */
+
+/* Shared paper sheet + pieces used by the two print-preview slides. */
+const SHEET = "mx-auto w-full max-w-[460px] rounded-md border border-slate-200 bg-white p-3.5 text-slate-700 shadow-sm";
+
+function SheetRuledNameRow() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[8px] text-slate-500">
+      {["Name", "Class", "Date"].map((k) => (
+        <span key={k} className="inline-flex items-baseline gap-1">
+          {k}:
+          <span className="inline-block w-20 border-b border-slate-400">&nbsp;</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function SheetSectionTitle({ tone, children }: { tone: string; children: React.ReactNode }) {
+  return (
+    <p className={`flex items-center gap-1 text-[8px] font-bold uppercase tracking-[0.14em] ${tone}`}>
+      <span className="text-[7px]">■</span>
+      {children}
+    </p>
+  );
+}
+
+function SheetPageBreak() {
+  return (
+    <div className="my-1 flex items-center gap-1.5" aria-hidden>
+      <span className="h-px flex-1 border-t border-dashed border-slate-300" />
+      <span className="text-[6.5px] uppercase tracking-[0.18em] text-slate-400">page break</span>
+      <span className="h-px flex-1 border-t border-dashed border-slate-300" />
+    </div>
+  );
+}
+
+function SheetFooter() {
+  return (
+    <p className="mt-1 text-center text-[6.5px] text-slate-400">
+      Generated 14 November 2026 · Mr.🆖 ProReader
+    </p>
+  );
+}
+
+/* ── 06 · 10. FOLLOW-UP EXERCISE — printable Word worksheet (faithful, static) ──
+   Mirrors languageCheckFollowUpExport.ts: school header, Fix It! title,
+   name/class/date row, Part 1 rule recap with wrong/correct pairs, Part 2
+   fix-the-error + fill-in-the-blank questions, and the answer key banner. */
+export function LanguageCheckFollowUpMockup() {
+  return (
+    <MockupFrame label="FOLLOW-UP EXERCISE · WORD">
+      <div className={SHEET}>
+        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500">Bauhinia College</p>
+        <h3 className="mt-0.5 text-[15px] font-extrabold tracking-tight text-slate-900">Fix It! Follow-up Practice</h3>
+        <p className="text-[8.5px] text-slate-500">Letter to the editor — the plastic levy &nbsp;·&nbsp; 4A</p>
+        <div className="mt-2">
+          <SheetRuledNameRow />
+        </div>
+
+        {/* Part 1 — our common mistakes */}
+        <div className="mt-2.5">
+          <p className="text-[10px] font-bold text-slate-900">Part 1 · Our common mistakes</p>
+          <p className="text-[7.5px] text-slate-500">Read each rule and compare the wrong and correct sentences before you start.</p>
+        </div>
+        <div className="mt-1.5 rounded-md border border-slate-200 border-l-4 border-l-red-500 p-2">
+          <p className="text-[9.5px] font-bold text-slate-900">
+            <span className="text-red-600">1.</span> Third-person singular -s
+            <span className="ml-1.5 text-[7px] font-normal text-slate-400">Subject-verb agreement</span>
+          </p>
+          <p className="mt-0.5 text-[8px] leading-snug text-slate-700">
+            In the simple present, he / she / it verbs take -s: <em>everyone knows</em>, <em>the government plans</em>.
+          </p>
+          <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+            <div className="rounded-sm border-l-4 border-l-red-500 bg-red-50 p-1.5">
+              <p className="text-[6.5px] font-bold uppercase tracking-widest text-red-700">✗ Wrong</p>
+              <p className="mt-0.5 text-[8px] leading-snug text-slate-600">
+                Everyone <span className="font-bold text-red-600 line-through">know</span> that plastic takes hundreds of years.
+              </p>
+            </div>
+            <div className="rounded-sm border-l-4 border-l-green-600 bg-green-50 p-1.5">
+              <p className="text-[6.5px] font-bold uppercase tracking-widest text-green-700">✓ Correct</p>
+              <p className="mt-0.5 text-[8px] leading-snug text-slate-700">
+                Everyone <span className="font-bold text-green-700">knows</span> that plastic takes hundreds of years.
+              </p>
+            </div>
+          </div>
+          <p className="mt-1.5 rounded-sm bg-amber-50 p-1 text-[7.5px] leading-snug text-amber-900">
+            <span className="font-bold">Tip:</span> after he / she / it or a singular noun, listen for the -s.
+          </p>
+        </div>
+
+        <SheetPageBreak />
+
+        {/* Part 2 — practice */}
+        <p className="text-[10px] font-bold text-slate-900">Part 2 · Practice</p>
+        <p className="text-[7.5px] text-slate-500">10 questions on the mistakes above. Write your answers in the spaces.</p>
+
+        <p className="mt-1.5 text-[9px] font-bold text-slate-900">A. Fix the error</p>
+        {[
+          { n: 1, cat: "Subject-verb agreement", sentence: <>Everyone know that plastic takes hundreds of years to break down.</> },
+          { n: 2, cat: "Plurals & countability", sentence: <>Every year, million of plastic bottles are thrown away.</> },
+        ].map((q) => (
+          <div key={q.n} className="mt-1 rounded-md border border-slate-200 p-2">
+            <p className="text-[8px]">
+              <span className="mr-1.5 inline-block bg-slate-900 px-1.5 py-px text-[7.5px] font-bold text-white">{q.n}</span>
+              <span className="text-slate-400">{q.cat}</span>
+            </p>
+            <div className="mt-1 border-b border-dashed border-slate-300" />
+            <p className="text-[9px] leading-relaxed text-slate-800">{q.sentence}</p>
+          </div>
+        ))}
+
+        <p className="mt-1.5 text-[9px] font-bold text-slate-900">B. Fill in the blank</p>
+        <div className="mt-1 rounded-md border border-slate-200 p-2">
+          <p className="text-[8px]">
+            <span className="mr-1.5 inline-block bg-slate-900 px-1.5 py-px text-[7.5px] font-bold text-white">3</span>
+            <span className="text-slate-400">Verb forms</span>
+          </p>
+          <p className="mt-1 text-[9px] leading-relaxed text-slate-800">
+            Many citizens <span className="mx-0.5 inline-block w-14 border-b border-slate-500">&nbsp;</span> recycling is too
+            troublesome to bother with.
+          </p>
+          <p className="mt-1 text-[7.5px] text-amber-900">
+            <span className="font-bold">Hint:</span> (think)
+          </p>
+        </div>
+
+        {/* Answer key — its own page */}
+        <SheetPageBreak />
+        <div className="rounded-md border border-green-200 border-l-4 border-l-green-600 bg-green-50 p-2">
+          <p className="text-[10px] font-bold text-green-800">Teacher answer key</p>
+          <p className="text-[7.5px] text-slate-500">Accepted answers and the rule behind each one.</p>
+          <div className="mt-1 grid grid-cols-[1.4rem_1fr_1.6fr] gap-x-1.5 text-[7.5px]">
+            <span className="font-bold text-slate-700">#</span>
+            <span className="font-bold text-slate-700">Answer</span>
+            <span className="font-bold text-slate-700">Rule</span>
+            {[
+              { n: "1", a: "knows", r: "everyone = he / she / it + verb-s" },
+              { n: "2", a: "millions", r: "millions of + plural noun" },
+              { n: "3", a: "think", r: "citizens is a plural subject" },
+            ].map((row) => (
+              <div key={row.n} className="col-span-3 grid grid-cols-[1.4rem_1fr_1.6fr] gap-x-1.5 border-t border-slate-200 py-0.5">
+                <span className="font-semibold text-slate-700">{row.n}</span>
+                <span className="font-bold text-green-700">{row.a}</span>
+                <span className="text-slate-500">{row.r}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <SheetFooter />
+      </div>
+    </MockupFrame>
+  );
+}
+
+/* ── 06 · 11. PRIORITY STUDENT HANDOUT — printable Word handout (faithful, static) ──
+   Mirrors languageCheckPriorityHandoutExport.ts: the FOCUS banner with the
+   learning goal, learning notes (big idea, rule card, wrong/right pair,
+   self-check checklist), the Try-it task, an exercise card and the answer key. */
+export function LanguageCheckPriorityHandoutMockup() {
+  return (
+    <MockupFrame label="STUDENT HANDOUT · WORD">
+      <div className={SHEET}>
+        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500">Bauhinia College · Student handout</p>
+
+        {/* Banner — focus chip, topic, title, learning goal */}
+        <div className="mt-1.5 rounded-md border border-orange-200 border-l-4 border-l-orange-600 bg-orange-50 p-2">
+          <p className="flex flex-wrap items-center gap-1.5">
+            <span className="rounded-sm bg-orange-600 px-1.5 py-px text-[7px] font-bold uppercase tracking-widest text-white">Focus 1</span>
+            <span className="text-[7.5px] text-slate-500">Letter to the editor — the plastic levy · 4A</span>
+          </p>
+          <h3 className="mt-1 text-[15px] font-extrabold tracking-tight text-slate-900">Keep Your Tenses Consistent</h3>
+          <p className="mt-1 text-[9px] leading-snug text-slate-800">
+            <span className="font-bold text-orange-700">🎯 Learning goal:</span>{" "}
+            <span className="font-semibold">I can keep every verb in the same time frame.</span>
+          </p>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 text-[8px] text-slate-500">
+          <SheetRuledNameRow />
+        </div>
+        <p className="mt-1 text-[6.5px] text-slate-400">Secondary 4 · 14 November 2026</p>
+
+        {/* Learning notes */}
+        <div className="mt-2.5">
+          <SheetSectionTitle tone="text-orange-600">Learning notes</SheetSectionTitle>
+        </div>
+
+        {/* Big idea */}
+        <div className="mt-1 rounded-md border border-slate-200 border-l-4 border-l-amber-500 p-2">
+          <p className="text-[6.5px] font-bold uppercase tracking-[0.16em] text-slate-400">💡 The big idea</p>
+          <p className="mt-0.5 text-[10px] font-bold leading-snug text-slate-900">
+            One piece of writing, one time frame — check every verb against the first one you wrote.
+          </p>
+          <p className="mt-1 rounded-sm bg-amber-50 p-1 text-[7.5px] leading-snug text-amber-900">
+            <span className="font-bold">Why it matters:</span> examiners read tense slips as carelessness, and they cap the
+            Language band.
+          </p>
+        </div>
+
+        {/* Rule card */}
+        <div className="mt-1.5 rounded-md border border-slate-200 p-2">
+          <p className="text-[9px]">
+            <span className="mr-1.5 inline-block bg-orange-600 px-1.5 py-px text-[7.5px] font-bold text-white">1</span>
+            <span className="font-bold text-slate-900">One time frame per sentence</span>
+          </p>
+          <p className="mt-0.5 text-[8px] leading-snug text-slate-700">
+            Pick your time frame, then make every verb agree with it. A clause starting with <em>when</em> sets the past —
+            the main clause stays in the past too.
+          </p>
+          <p className="mt-1 text-[8px]">
+            <span className="mr-1">🧩</span>
+            <span className="rounded-sm bg-slate-100 px-1.5 py-px font-mono text-[7.5px] text-slate-800">when + past → past</span>
+          </p>
+          <p className="mt-1 rounded-sm border-l-4 border-l-green-500 bg-green-50 p-1 text-[8px] text-slate-700">
+            <span className="font-bold text-green-700">✓</span> When I arrived home, my brother{" "}
+            <span className="font-semibold">took</span> the levy money.
+          </p>
+        </div>
+
+        {/* Wrong → right pair */}
+        <div className="mt-1.5 overflow-hidden rounded-md border border-slate-200">
+          <p className="border-l-4 border-slate-400 bg-red-50 px-2 py-1 text-[8px] text-slate-600">
+            <span className="font-bold uppercase tracking-widest text-red-700">✗ Wrong</span>
+            {"    "}When I arrived home, my brother <span className="font-bold text-red-600 line-through">takes</span> the levy
+            money.
+          </p>
+          <p className="border-l-4 border-slate-400 bg-green-50 px-2 py-1 text-[8px] text-slate-800">
+            <span className="font-bold uppercase tracking-widest text-green-700">✓ Right</span>
+            {"    "}When I arrived home, my brother <span className="font-bold">took</span> the levy money.
+          </p>
+          <p className="border-l-4 border-slate-400 bg-white px-2 py-1 text-[7.5px] text-slate-500">
+            The when-clause fixes the past, so <em>takes</em> → <em>took</em>.
+          </p>
+        </div>
+
+        {/* Self-check checklist */}
+        <div className="mt-1.5 rounded-md border border-amber-200 bg-amber-50 p-2">
+          <p className="text-[8.5px] font-bold text-slate-900">✅ Self-check checklist</p>
+          <p className="mt-0.5 text-[8px] leading-snug text-slate-700">☐ Circle every verb, then ask: when did it happen?</p>
+          <p className="mt-0.5 text-[8px] leading-snug text-slate-700">
+            ☐ Check verbs after <em>when / after / while</em> — keep the same frame.
+          </p>
+        </div>
+
+        {/* Try it */}
+        <div className="mt-1.5 rounded-md border border-sky-200 border-l-4 border-l-sky-500 bg-sky-50 p-2">
+          <p className="text-[8.5px] font-bold text-orange-700">
+            ✏️ Try it <span className="ml-1 font-normal text-slate-400">· ~10 min</span>
+          </p>
+          <p className="mt-0.5 text-[8px] leading-snug text-slate-700">
+            Swap your opening paragraph with a partner and circle any verb that jumps time frames; rewrite two together.
+          </p>
+        </div>
+
+        <SheetPageBreak />
+
+        {/* Exercises */}
+        <SheetSectionTitle tone="text-orange-600">Exercises</SheetSectionTitle>
+        <p className="mt-0.5 text-[7.5px] text-slate-500">10 questions, from easy to challenging. Write your answers in the spaces.</p>
+        <div className="mt-1 rounded-md border border-slate-200 p-2">
+          <p className="text-[7.5px]">
+            <span className="mr-1 rounded-sm bg-slate-100 px-1.5 py-px font-semibold text-slate-700">1 of 10</span>
+            <span className="rounded-sm border border-slate-300 px-1.5 py-px text-slate-500">Multiple choice</span>
+          </p>
+          <p className="mt-1 text-[9.5px] font-bold leading-relaxed text-slate-900">
+            Every year, the government{" "}
+            <span className="mx-0.5 inline-block w-14 border-b border-slate-500">&nbsp;</span> a levy on plastic bags.
+          </p>
+          {["charge", "charges"].map((o, i) => (
+            <p key={o} className="mt-0.5 text-[8.5px] text-slate-700">
+              <span className="mr-1.5 inline-flex h-4 w-4 items-center justify-center rounded-sm border border-slate-300 text-[7px] font-bold text-slate-600">
+                {String.fromCharCode(65 + i)}
+              </span>
+              {o}
+            </p>
+          ))}
+          <p className="mt-1 rounded-sm bg-amber-50 p-1 text-[7.5px] text-amber-900">
+            <span className="font-bold">💡 Hint:</span> Who is doing the action every year?
+          </p>
+        </div>
+
+        {/* Answer key — its own page */}
+        <SheetPageBreak />
+        <div className="rounded-md border border-green-200 border-l-4 border-l-green-600 bg-green-50 p-2">
+          <p className="text-[10px] font-bold text-green-800">Teacher answer key</p>
+          <p className="text-[7.5px] text-slate-500">Correct answers and the reason behind each one — printed on its own page.</p>
+        </div>
+        <SheetFooter />
       </div>
     </MockupFrame>
   );
