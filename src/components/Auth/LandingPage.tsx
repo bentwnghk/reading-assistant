@@ -1144,7 +1144,7 @@ export function LandingPage() {
             variants={fadeUp}
             className="mb-6 font-mono text-xs uppercase tracking-[0.22em] text-[var(--lp-accent)]"
           >
-            {t("header.about.tagline")}
+            {t("landing.hero.eyebrow")}
           </motion.p>
           <motion.h1
             variants={fadeUp}
@@ -1155,7 +1155,7 @@ export function LandingPage() {
             <span className="lp-marker lp-marker--draw whitespace-nowrap font-semibold">{t("landing.hero.titleHighlight")}</span>
           </motion.h1>
           <motion.p variants={fadeUp} className="mt-6 max-w-md text-lg leading-relaxed text-[var(--lp-ink-soft)]">
-            {t("header.about.description")}
+            {t("landing.hero.description")}
           </motion.p>
           <motion.div variants={fadeUp} className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
             <button

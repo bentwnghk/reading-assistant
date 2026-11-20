@@ -201,7 +201,7 @@ ol.steps>li::before{content:counter(s);position:absolute;left:0;top:7px;width:30
 .cover .logo{font-size:1em;line-height:1;margin-right:.12em;vertical-align:baseline}
 .cover h1{color:#fff;font-size:3.4rem;margin:0 0 8px;white-space:nowrap}
 .cover .sub{font-size:1.3rem;opacity:.92;margin-bottom:6px}
-.cover .zh{font-size:1.05rem;opacity:.85;margin-bottom:40px}
+.cover .zh{font-size:1.05rem;opacity:.85;margin-bottom:12px}
 .cover .meta{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:18px 30px;font-size:14px;backdrop-filter:blur(4px)}
 .cover .meta div{margin:5px 0}
 .cover .pillrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:34px}
@@ -445,7 +445,8 @@ body.toc-noscroll{overflow:hidden}
 <div class="cover no-print">
   <h1><span class="logo">Mr.🆖</span> ProReader</h1>
   <div class="sub">User Manual</div>
-  <div class="zh">A Complete Guide for Teachers &amp; Students</div>
+  <div class="zh">Read Anything. Write Better.</div>
+  <div style="max-width:680px;margin:0 auto 40px;font-size:.95rem;line-height:1.65;opacity:.85">One classroom companion, two AI workspaces. The reading workspace turns any page, PDF, repository text or generated article into a complete, age-calibrated lesson — from pre-reading to mastery. The Writing Assessment turns a photo of a handwritten essay into verbatim transcription, examiner-style corrections, HKDSE band scores, enhanced model answers and lessons built from your own mistakes.</div>
   <div class="meta">
     <div><strong>Version</strong> 7.00</div>
     <div><strong>Audience</strong> Students · Teachers · Administrators</div>
@@ -453,6 +454,7 @@ body.toc-noscroll{overflow:hidden}
   </div>
   <div class="pillrow">
     <span class="p">📖 Reading Assistant</span>
+    <span class="p">✍️ Writing Assessment</span>
     <span class="p">🧠 Vocabulary &amp; SRS</span>
     <span class="p">🎮 Multiplayer Spelling Battle</span>
     <span class="p">📐 Grammar Analysis</span>
@@ -477,7 +479,8 @@ body.toc-noscroll{overflow:hidden}
       <li><a href="#ch8">8. AI Tutor</a></li>
       <li><a href="#ch9">9. My Vocabulary Page</a></li>
       <li><a href="#ch10">10. Dashboards, Sharing &amp; Assignments</a></li>
-      <li><a href="#ch11">11. Leaderboard &amp; Account</a></li>
+      <li><a href="#ch11">11. Writing Assessment</a></li>
+      <li><a href="#ch12">12. Leaderboard &amp; Account</a></li>
       <li><a href="#appendix">Appendices</a></li>
     </ol>
     <h3>Legend</h3>
@@ -496,9 +499,9 @@ body.toc-noscroll{overflow:hidden}
       </div>
 
       <h3>Welcome to Mr.🆖 ProReader</h3>
-      <p>Mr.🆖 ProReader is an AI-powered English reading assistant designed for classrooms and self-study. Feed it a photo of a page, a PDF, a text picked from your school's text repository, an enhanced essay brought back from your Writing Assessment — or, if you have nothing to hand, let the <b>AI Text Generator</b> write one for you. From that single source the platform produces a complete, age-calibrated lesson in minutes.</p>
+      <p>Mr.🆖 ProReader is an AI-powered English learning companion for classrooms and self-study, built around two workspaces. The <b>reading workspace</b> turns any text into a complete, age-calibrated lesson in minutes. The <b>Writing Assessment</b> is a dedicated essay-marking workspace that transcribes handwritten essays verbatim, marks them like an examiner, and turns every mistake into a personalised lesson.</p>
 
-      <p>Every reading session is a full learning unit, organised into six stages:</p>
+      <p>In the reading workspace, you feed it a photo of a page, a PDF, a text picked from your school's text repository — or an enhanced essay brought back from your Writing Assessment; if you have nothing to hand, let the <b>AI Text Generator</b> write one for you. From that single source it builds a full learning unit, organised into six stages:</p>
       <ul>
         <li><strong>Before You Read</strong> — a <b>pre-reading</b> panel that activates prior knowledge, sets a purpose, pre-teaches key vocabulary, supplies background, and invites a <b>prediction</b>.</li>
         <li><strong>Understand</strong> — an AI <b>summary</b>; <b>Original / Adapted / Simplified</b> text with <b>Read Along</b>; a <b>mind map</b> and <b>image visualization</b>; <b>readability scores</b> and <b>CEFR highlighting</b>; a <b>vocabulary glossary</b>; and a <b>Phrases &amp; Collocations</b> panel.</li>
@@ -507,7 +510,8 @@ body.toc-noscroll{overflow:hidden}
         <li><strong>Master</strong> — a cross-session <b>skill profile</b> with adaptive <b>targeted practice</b>; <b>leaderboards</b> and <b>achievements</b>; and the <b>My Vocabulary</b> hub with spaced-repetition review.</li>
         <li><strong>For classrooms</strong> — a shared <b>text repository</b>, <b>session sharing &amp; assignments</b>, vocabulary and review-list sharing, one-click <b>Excel exports</b>, and live <b>class dashboards</b>.</li>
       </ul>
-      <div class="callout tip"><strong>One source, one lesson</strong> Whatever you feed in, every output above is generated from the same source text and calibrated to the reader's age — so a 9-year-old's summary, glossary and games all land simpler than a 16-year-old's.</div>
+      <p>The <b>Writing Assessment</b> (Chapter 11) gives writing a complete cycle of its own, fully separate from reading sessions. Pick a reusable task from the <b>Topic Library</b>, upload or photograph a handwritten essay (up to 10 pages), and follow its <b>Scan &rarr; Review transcript &rarr; Assessment</b> flow: a dedicated OCR model transcribes the handwriting <i>verbatim</i> — mistakes kept, because they are what gets checked — then the AI marks the essay inline, separating genuine <b>errors</b> from optional <b>expression suggestions</b> (unclear phrasing, Chinglish, wordiness, stronger word choice), and scores it against the <b>HKDSE marking scheme</b> — Content, Language and Organization, each 0&ndash;7, for an overall 0&ndash;21. On demand it also writes <b>Enhanced Essays</b>, a light polish of your own draft and a heavy, aspirational model answer, and either version loads straight back into the reading workspace as a new reading text. <b>Learn from mistakes</b> then turns the corrections into lesson &rarr; practice &rarr; quiz study sessions built from your own sentences. Teachers see the class dimension too: an essay activity log, per-topic <b>Topic reports</b>, and an AI-written <b>Class Assessment Report</b> with common mistakes, teaching priorities, differentiation groups, and printable follow-up worksheets and student handouts.</p>
+      <div class="callout tip"><strong>One source, one lesson</strong> In the reading workspace, every output above is generated from the same source text and calibrated to the reader's age — so a 9-year-old's summary, glossary and games all land simpler than a 16-year-old's.</div>
 
       <p>It works in the browser and can be <strong>installed as a mobile / desktop app</strong> (a Progressive Web App, PWA). Sign-in uses a Google account. Under the hood, every AI feature can be powered by your personal or school subscription, your own API key, or free access — automatic if your school's Google email domain is whitelisted, otherwise via an access password from Mr.🆖.</p>
 
@@ -783,7 +787,7 @@ body.toc-noscroll{overflow:hidden}
         </div>
       </div>
 
-      <div class="callout teacher"><strong><span class="tag-teacher"></span>School Subscription</strong> If your school has an active bulk (school) subscription arranged by an admin, the personal subscription panel is disabled — you're already covered. Admins see seat-management controls instead of pricing cards (see Chapter 11).</div>
+      <div class="callout teacher"><strong><span class="tag-teacher"></span>School Subscription</strong> If your school has an active bulk (school) subscription arranged by an admin, the personal subscription panel is disabled — you're already covered. Admins see seat-management controls instead of pricing cards (see Chapter 12).</div>
 
       <h4>Mode B — Meter (your own API key)</h4>
       <p>Choose this if you have a key from an AI provider. In the current app the provider is <b>Mr.🆖 AI Hub</b> (an OpenAI-compatible endpoint at <code>https://api.mr5ai.com</code>); you obtain your key there.</p>
@@ -1172,7 +1176,7 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>Upload</b></td><td>Drop images (PNG/JPG) or PDFs. Each page is read by vision-AI OCR and combined into text. Thumbnails show per-file actions (maximize, delete). A document title is auto-generated.</td></tr>
         <tr><td><b>Repository</b></td><td>Choose a pre-shared text from your school/class/public repository (texts your teacher added).</td></tr>
         <tr><td><b>AI Generate</b></td><td>Have AI write a fresh text: pick a Topic, Text Type, Word Count, and CEFR level (auto-suggested from your age). Marked as "AI Generated".</td></tr>
-        <tr><td><b>From Writing</b></td><td>Not a tab — in the Writing Assessment (§10.8), open your essay's <b>Enhanced Essays</b> tab and press <b>Use as reading text</b>. The light or heavy enhanced version loads here as a new reading text, marked with an amber <b>From Writing</b> badge, and every reading activity (mind map, adapted text, reading test, games…) works on it like any other text.</td></tr>
+        <tr><td><b>From Writing</b></td><td>Not a tab — in the Writing Assessment (§11.1), open your essay's <b>Enhanced Essays</b> tab and press <b>Use as reading text</b>. The light or heavy enhanced version loads here as a new reading text, marked with an amber <b>From Writing</b> badge, and every reading activity (mind map, adapted text, reading test, games…) works on it like any other text.</td></tr>
       </table>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-upload"/></svg> Select Text — Upload tab</div><span class="btn sm outline"><svg class="ic sm"><use href="#i-plus"/></svg> New Text</span></div>
@@ -2609,8 +2613,17 @@ body.toc-noscroll{overflow:hidden}
       <p>The <b>roster table</b> has eight sortable columns — student, progress, reading test, vocab quiz, spelling (accuracy), grammar quiz, grammar game (accuracy), and last-viewed time. Click any header to sort and quickly find who needs help. <b>Export to Excel</b> downloads the full roster with scores and progress as an <code>.xlsx</code> for grading or records.</p>
       <p>From the assignments list, each card offers <svg class="ic sm"><use href="#i-pencil"/></svg> <b>Edit</b> (title, subject, due date, instructions), <b>Archive</b> / <b>Unarchive</b> (hide from students without deleting work), and <svg class="ic sm"><use href="#i-trash-2"/></svg> <b>Delete</b> (permanent — student work is lost).</p>
 
-      <h3>10.8 Writing Assessment <span style="font-weight:400;font-size:.8em">(<code>/writing-assessment</code>)</span></h3>
-      <p>Open <b>Writing Assessment</b> from the navigation menu — the <b>sidebar</b> on desktop, or the <svg class="ic sm"><use href="#i-menu"/></svg> ☰ menu on mobile. It is separate from your reading sessions: essays are saved in their own list and never touch the reading workspace. The page has three sections: <b>Topic Library</b> (reusable writing tasks &mdash; see step 1 below; this is also the landing tab), <b>My essays</b> (upload and manage your essays) and <b>My learning</b> (saved learning sessions, a progress dashboard and an activity log &mdash; see 10.9). Teachers, admins and super-admins also get a <b>My work / My students</b> switch; under <b>My students</b> the sections become <b>Topic reports</b> (the landing tab), <b>Student essays</b> and <b>Student learning</b>, sharing one class and student filter (Topic reports follows the class only). Your scope and section are kept in the URL, so reloading the page or sharing the link reopens the same view. Original scans are kept for 30 days only. Once that passes, the scan images are deleted automatically; for essays that were already checked, the record (transcript and corrections) stays so you can keep reviewing it &mdash; for expired essays the <b>Review transcript</b> step and the <b>Original scan</b> / <b>Check again</b> actions are disabled. Expired essays that were never checked are removed entirely.</p>
+      </section>
+    <!-- ============ CHAPTER 11: WRITING ASSESSMENT ============ -->
+    <section class="chapter" id="ch11">
+      <div class="chapter-head">
+        <span class="chapter-num">CHAPTER 11</span>
+        <h2 class="section-title">11. Writing Assessment</h2>
+        <p class="small">Essay OCR transcription, AI error correction &amp; HKDSE assessment, enhanced essays, class assessment reports, and learning from your mistakes.</p>
+      </div>
+
+      <h3>11.1 Writing Assessment <span style="font-weight:400;font-size:.8em">(<code>/writing-assessment</code>)</span></h3>
+      <p>Open <b>Writing Assessment</b> from the navigation menu — the <b>sidebar</b> on desktop, or the <svg class="ic sm"><use href="#i-menu"/></svg> ☰ menu on mobile. It is separate from your reading sessions: essays are saved in their own list and never touch the reading workspace. The page has three sections: <b>Topic Library</b> (reusable writing tasks &mdash; see step 1 below; this is also the landing tab), <b>My essays</b> (upload and manage your essays) and <b>My learning</b> (saved learning sessions, a progress dashboard and an activity log &mdash; see 11.2). Teachers, admins and super-admins also get a <b>My work / My students</b> switch; under <b>My students</b> the sections become <b>Topic reports</b> (the landing tab), <b>Student essays</b> and <b>Student learning</b>, sharing one class and student filter (Topic reports follows the class only). Your scope and section are kept in the URL, so reloading the page or sharing the link reopens the same view. Original scans are kept for 30 days only. Once that passes, the scan images are deleted automatically; for essays that were already checked, the record (transcript and corrections) stays so you can keep reviewing it &mdash; for expired essays the <b>Review transcript</b> step and the <b>Original scan</b> / <b>Check again</b> actions are disabled. Expired essays that were never checked are removed entirely.</p>
       <p>Teachers, admins and super-admins see their learners' work under <b>My students</b>. <b>Student essays</b> is the <b>Essay activity log</b>: uploads and corrections across their classes, their school or all users, with four summary cards &mdash; <b>Topics</b>, <b>Essays</b>, <b>Students</b> and <b>Average score</b> (the mean assessed overall out of 21, shown as &ldquo;&mdash;&rdquo; while nothing in the filtered set has been assessed) &mdash; and a list you can narrow by status and by <b>writing topic</b> (a searchable dropdown replacing the old title search; changing the class or student resets it, and its options follow the class filter). One shared class + student filter sits above the staff sections, so you can pick a student once and flip between their essays and their learning progress; open any essay for a read-only view of its transcript, corrections and <b>AI Writing Assessment</b> (you can run or re-run the assessment there — students get one assessment per essay), regenerate a student's <b>Enhanced Essays</b> the same way, <b>export the essay to Word</b> from the same dialog, and sort the table by <b>Student</b>, <b>Title</b>, <b>Overall</b> or <b>Updated</b> &mdash; click a column header to sort by it (essays without an assessed overall always stay last under Overall), click again to flip the direction. Staff never see the original scans.</p>
       <p><b>Topic reports</b> (the middle tab) puts the writing topics themselves centre stage: one card per topic showing its class and essay type, how many students have a checked essay out of the class size (with a progress bar) and the average overall score. Search the cards and sort them by recency, completion, average score or title. Clicking a card opens the class report &mdash; average <b>Content / Language / Organization / Features</b> scores as progress rings (plus average overall, highest &amp; lowest, average word count), a score-distribution chart, the most common error categories, and one card per student with their name, email, word count and sub-scores. Clicking a student opens their essay in the same read-only dialog as <b>Student essays</b>; class members who have not finished yet are listed underneath as chips so nothing is missed.</p>
       <p>From any topic report, <b>Generate AI assessment report</b> (disabled until at least one essay is checked; it becomes <b>Show AI assessment report</b> once one exists) opens the <b>Class Assessment Report</b>: the <b>Writing Assessment Model</b> reads the class's evidence &mdash; every student's <i>latest</i> checked essay, anonymously aggregated into error categories with real examples plus the marker notes from the individual assessments &mdash; and writes a teaching report, usually in under a minute. It covers an <b>overview</b> with a headline, a plain-language summary, class statistics and a criteria radar; <b>performance by criterion</b>, each tagged <i>Strength</i>, <i>Developing</i> or <i>Priority</i> with a finding and a concrete next step; <b>what the class does well</b>; <b>how widespread the mistakes are</b> (the share of students per category, suggestions included); <b>common mistakes &amp; the rules behind them</b>, quoting real wrong &rarr; corrected sentences from the class's own essays with a teaching tip each; numbered <b>teaching priorities</b> with a suggested activity and rough minutes; <b>differentiation</b> groups &mdash; <i>Needs support</i> below 40%, <i>Developing</i> 40&ndash;69%, <i>Secure</i> 70%+ &mdash; tagging each student's weakest criterion; and <b>quick teaching tips</b>. The report follows the <b>English / 繁體中文</b> switch, prints cleanly with <b>Print / PDF</b>, and is saved for the topic so it reopens instantly &mdash; one copy per staff member, covering only the essays in their scope. A banner warns when new checked essays have arrived since it was generated, and <b>Regenerate</b> rewrites it; the footer notes the model and reminds you to review an AI-generated report before sharing it.</p>
@@ -2625,11 +2638,11 @@ body.toc-noscroll{overflow:hidden}
         <li>The legend has an <b>Errors</b> row and a <b>Suggestions</b> row, each with its own hide/show button. Click a <b>category chip</b> above the essay to hide or show that error type (highlights and cards together); <b>Hide all / Show all</b> toggles every category. Numbers stay the same while you filter, and the filter is only a view &mdash; it is reset when you open another essay, and the Word export always includes everything. Suggestions are optional: the clean &ldquo;Corrected essay&rdquo; only applies errors, and a separate <b>Polished essay</b> section applies the suggestions too.</li>
         <li>The <b>AI Writing Assessment</b> tab scores the writing against the HKDSE marking scheme, and it now fills in <b>automatically right after the check</b>: the AI &mdash; taking the role of an HKDSE English Language Paper 2 marker &mdash; reads the detected error counts as evidence and awards a <b>0&ndash;7 band for each criterion</b> &mdash; <b>Content (C)</b>, <b>Language (L)</b> and <b>Organization (O)</b> &mdash; plus an <b>overall 0&ndash;21</b> band, the sum of the three criterion scores. Running <b>Check again</b> re-runs it the same way. Each criterion also gets <b>sub-scores</b> drawn as colour-coded bars (Language: <b>Grammar</b>, <b>Sentence Structure</b>, <b>Vocabulary</b>, <b>Spelling &amp; Punctuation</b>, <b>Register, Tone &amp; Style</b>; Content: <b>Content Requirements</b>, <b>Relevancy</b>, <b>Development of Ideas</b>, <b>Creativity and Originality</b>, <b>Reader Engagement</b>; Organization: <b>Effective Organization</b>, <b>Relevant Supporting Details</b>, <b>Cohesiveness</b>, <b>Coherence</b>) and bilingual <b>Strengths</b> / <b>Areas to improve</b> bullets that quote your own sentences. If the automatic pass could not run &mdash; essays checked before this feature, or a failed second call &mdash; a <b>Get AI assessment</b> button runs it by hand. The result is saved with the essay together with its date, and the overall also shows in the My essays list. Students get <b>one assessment per essay</b>: once saved, the panel becomes read-only (the scores and feedback stay viewable); only staff can re-assess with <b>Re-assess</b>, from the <b>Student essays</b> view or after another check. Assessments made before Content and Organization were added cover Language only and are flagged with a note &mdash; re-assess to get all three criteria. The panel stays expanded with the headline score always visible in its header, and its wording follows the <b>English / 繁體中文</b> switch. It is scored by the same <b>Writing Assessment Model</b> as the corrections.</li>
         <li>The <b>Enhanced Essays</b> tab produces <b>two improved versions of your own essay</b> &mdash; nothing is generated until you press <b>Generate enhanced essays</b>, and the result is saved with the essay. Switch between them with the panel&rsquo;s <b>Light / Heavy</b> switcher: <b>Light Enhancement</b> is a polish &mdash; it fixes grammar slips, typos, awkward phrasing and punctuation while strictly keeping your own voice, sentence structures and ideas, showing how your draft reads once cleaned up. <b>Heavy Enhancement</b> is an aspirational model answer &mdash; it rewrites sentences with advanced vocabulary, varied structures (inversions, complex clauses) and stronger transitions, lifting the register toward top-tier <b>HKDSE Level 5**</b> while preserving your core arguments and task points, so you can see higher-level alternatives built on your own ideas. Students get <b>one generation per essay</b>: once saved, the panel becomes read-only and only staff can regenerate. <b>Re-generating is a staff action</b> (from the <b>Student essays</b> view); a fresh <b>transcription</b> or <b>check</b> resets the panel so it can be generated again against the new text. The wording follows the <b>English / 繁體中文</b> switch, and it is generated by the same <b>Writing Assessment Model</b> as the corrections and assessment. Press <b>Use as reading text</b> to load the selected version into the main page's <b>Select Text</b> section as a new reading text, marked <b>From Writing</b> — the lesson continues with the mind map, adapted text and every other reading activity (§4.3).</li>
-        <li>Use the <b>English / 繁體中文</b> switch to change the language of the grammar notes instantly. <b>Export to Word</b> produces a marked essay, a clean corrected copy, numbered notes and the AI Writing Assessment; <b>Original scan</b> and <b>Check again</b> live in the &ldquo;More actions&rdquo; menu. The <b>Learn from mistakes</b> button in the same toolbar turns the corrections into lessons &mdash; see 10.9.</li>
+        <li>Use the <b>English / 繁體中文</b> switch to change the language of the grammar notes instantly. <b>Export to Word</b> produces a marked essay, a clean corrected copy, numbered notes and the AI Writing Assessment; <b>Original scan</b> and <b>Check again</b> live in the &ldquo;More actions&rdquo; menu. The <b>Learn from mistakes</b> button in the same toolbar turns the corrections into lessons &mdash; see 11.2.</li>
       </ol>
       <div class="callout"><strong>Choosing the model</strong> Pick the <b>Writing Assessment Model</b> in Settings &rarr; Models (<code>gpt-6.1-sol</code> by default; <code>gpt-6.1-terra</code>, <code>deepseek-flash</code> and <code>gemini-3.8-flash</code> are also available to every user. <code>claude-sonnet-5-5</code> is a preview model — offered only to admins/super-admins and Meter users). Corrections follow HKDSE Writing &ldquo;Language&rdquo; expectations and favour minimal edits that keep the student's own meaning and voice.</div>
 
-      <h3>10.9 Learn from Your Mistakes</h3>
+      <h3>11.2 Learn from Your Mistakes</h3>
       <p>On a checked essay's results page, press <b>Learn from mistakes</b> to turn the corrections into a study plan built from your own writing. Pick up to <b>6 categories</b> from the essay's corrections (errors and suggestions are listed separately; <b>Top 3</b> selects the most frequent for you) and set your level on the age slider &mdash; lessons and exercises are written for that level. Each category becomes a topic whose three stages unlock in order:</p>
       <ul>
         <li><b>Lesson</b> starts from the mistakes you actually made in the essay, then explains the rule with examples, wrong/right contrasts, a note on why Chinese speakers often make this mistake, and self-check tips.</li>
@@ -2648,15 +2661,15 @@ body.toc-noscroll{overflow:hidden}
       <div class="callout teacher"><strong><span class="tag-teacher"></span>Teacher / admin / super-admin only</strong> Under <b>My students &rarr; Student learning</b>, the same history appears for your learners, scoped like the essay log (teacher &rarr; their classes, admin &rarr; their school, super-admin &rarr; everyone) and narrowed by the shared class/student filter. <b>Overview</b> shows class-level cards plus per-student and per-topic tables with improvement; <b>Sessions</b> lists every learner's session with a read-only detail view (lessons, practice attempts and every quiz round with the learner's answers); <b>Activity</b> is the same event feed for the selected class or student. Every session there can be exported to Word as well &mdash; worksheet or answer key &mdash; whether or not the learner has finished it.</div>
 
       </section>
-    <!-- ============ CHAPTER 11: LEADERBOARD, ACHIEVEMENTS, ADMIN, ACCOUNT ============ -->
-    <section class="chapter" id="ch11">
+    <!-- ============ CHAPTER 12: LEADERBOARD, ACHIEVEMENTS, ADMIN, ACCOUNT ============ -->
+    <section class="chapter" id="ch12">
       <div class="chapter-head">
-        <span class="chapter-num">CHAPTER 11</span>
-        <h2 class="section-title">11. Leaderboard, Achievements, Admin &amp; Account</h2>
+        <span class="chapter-num">CHAPTER 12</span>
+        <h2 class="section-title">12. Leaderboard, Achievements, Admin &amp; Account</h2>
         <p class="small">Rankings, medals, history management, user administration, and session security.</p>
       </div>
 
-      <h3>11.1 Leaderboard <span style="font-weight:400;font-size:.8em">(<code>/leaderboard</code>)</span></h3>
+      <h3>12.1 Leaderboard <span style="font-weight:400;font-size:.8em">(<code>/leaderboard</code>)</span></h3>
       <p>Open from the header trophy icon. Three tabs: <b>Achievements</b>, <b>My Stats</b>, <b>Leaderboard</b>. On the Leaderboard tab a <b>Weekly / All-Time</b> toggle switches between the current week's rankings and lifetime rankings. In <b>Weekly</b> mode (Monday–Sunday) the week picker browses past weeks; in <b>All-Time</b> mode the picker is hidden since totals span all time. Scope: <b>Class / School / Global</b> (global lists students only).</p>
       <div class="mock">
         <div class="mock-bar"><div class="sec-h"><svg class="ic"><use href="#i-trophy"/></svg> Achievements &amp; Leaderboard</div><span class="small">This Week</span></div>
@@ -2679,10 +2692,10 @@ body.toc-noscroll{overflow:hidden}
       <p><b>All-Time</b> mode: 10 sortable columns emphasizing cumulative effort — all-time score, <i>longest</i> streak, total sessions, the same averages, total vocabulary, and flashcard reviews. There are no rank-trend arrows (no week-over-week movement), and vocabulary counts the deduplicated words in your <i>My Vocabulary</i> bank rather than per-session glossary entries.</p>
       <div class="callout"><strong>All-time score formula</strong> Same weighting as weekly but with <b>longest streak</b> in place of the current-week streak and <b>no improvement bonus</b>: longest streak×10 + avg test + avg quiz + avg spelling×0.5 + avg grammar quiz + avg grammar game×0.5 + lifetime flashcard reviews×5 + total vocab.</div>
 
-      <h3>11.2 My Stats</h3>
+      <h3>12.2 My Stats</h3>
       <p>Rank chips (class/school/global), a 9-card current-week grid (score delta, reading streak, averages, flashcards, vocab), and an all-time row (total sessions, longest streak via gap-and-islands, lifetime averages).</p>
 
-      <h3>11.3 Achievements</h3>
+      <h3>12.3 Achievements</h3>
       <p>18 achievement types, each with 7 doubling milestones. Most start at 5 → 5, 10, 20, 40, 80, 160, 320; <b>Vocabulary Collected</b> and <b>Flashcard Reviews</b> start at 50 → 50, 100, 200, 400, 800, 1600, 3200; <b>Battle Champion</b>, <b>On Fire</b>, and <b>Grammar on Fire</b> start at 1 → 1, 2, 4, 8, 16, 32, 64. Each medal shows a progress ring toward the next milestone and unlocks with a celebration dialog.</p>
       <div style="display:flex;flex-wrap:wrap;gap:12px;margin:14px 0">
         <div style="text-align:center;width:84px">
@@ -2716,10 +2729,10 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>Curious Learner</td><td><svg class="ic sm"><use href="#i-sparkles"/></svg> Sparkles</td><td>AI Tutor questions</td></tr>
       </table>
 
-      <h3>11.4 History management</h3>
+      <h3>12.4 History management</h3>
       <p>Reachable from the Dashboard's Sessions tab. Browse, <b>search</b> (fuzzy), <b>import</b> (.json, multi-select, validated), <b>load</b>, <b>download</b>, or <b>delete</b> any past session. Loading while an AI generation runs triggers a safety confirm.</p>
 
-      <h3>11.5 User Management <span class="tag-teacher"></span></h3>
+      <h3>12.5 User Management <span class="tag-teacher"></span></h3>
       <div class="callout teacher"><strong><span class="tag-teacher"></span>Teacher / admin / super-admin only</strong> Hidden from students. Role-gated tabs manage the whole deployment.</div>
       <table class="ref">
         <tr><th>Tab</th><th>Visible to</th><th>Purpose</th></tr>
@@ -2751,7 +2764,7 @@ body.toc-noscroll{overflow:hidden}
       <p>A parallel table of <b>teachers' own reading sessions</b>, visible to admins and super-admins only. It mirrors the Student Data table — same columns, sorting, date-range filter, search (by teacher name, email, or reading text title), pagination, and all seven click-to-view detail dialogs — but filters by <b>teacher</b> instead of class: pick a school <span class="role super">super-admin</span>, then a single teacher or All Teachers. Excel export produces a "Teacher Data" report with the selected school/teacher named in the summary sheet.</p>
       <div class="callout tip"><strong>Why it exists</strong> Teachers are readers too — their own practice sessions, glossaries, and quiz attempts appear here so school leads can support staff learning the same way they follow students.</div>
 
-      <h3>11.6 Account &amp; session security</h3>
+      <h3>12.6 Account &amp; session security</h3>
       <p>Three layers protect your account — you don't configure these, but it helps to know they exist:</p>
       <table class="ref">
         <tr><th>Layer</th><th>Default</th><th>Effect</th></tr>
@@ -2866,7 +2879,8 @@ body.toc-noscroll{overflow:hidden}
       <li><a href="#ch8">8. AI Tutor</a></li>
       <li><a href="#ch9">9. My Vocabulary Page</a></li>
       <li><a href="#ch10">10. Dashboards, Sharing &amp; Assignments</a></li>
-      <li><a href="#ch11">11. Leaderboard &amp; Account</a></li>
+      <li><a href="#ch11">11. Writing Assessment</a></li>
+      <li><a href="#ch12">12. Leaderboard &amp; Account</a></li>
       <li><a href="#appendix">Appendices</a></li>
     </ol>
     <h4>Legend</h4>

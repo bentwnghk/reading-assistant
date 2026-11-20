@@ -157,8 +157,8 @@
     },
     "about": {
       "title": "About Mr.🆖 ProReader",
-      "tagline": "Snap. Learn. Master.",
-      "description": "Transform any English reading material into an interactive learning experience! 🚀 With AI-powered tools, personalized content, and gamified learning, mastering English reading has never been this exciting!",
+      "tagline": "Read. Write. Master.",
+      "description": "Turn any English text into an interactive, age-calibrated lesson — and every handwritten essay into examiner-style marking, band scores and enhanced model answers! 🚀 With AI-powered tools, personalized feedback, and gamified practice, mastering English reading and writing has never been this exciting!",
       "whyLove": {
         "title": "Learning Reimagined",
         "personalized": {
@@ -425,10 +425,12 @@
   },
   "landing": {
     "hero": {
-      "title": "Turn any English text into a lesson you'll actually",
-      "titleHighlight": "remember.",
+      "eyebrow": "Read. Write. Master.",
+      "title": "Every page a lesson. Every essay a",
+      "titleHighlight": "masterpiece.",
+      "description": "Any English text becomes a full, age-calibrated reading lesson. Any handwritten essay becomes examiner-style marking, band scores and lessons built from your own mistakes. One AI classroom for reading and writing.",
       "seeItWork": "See how it works",
-      "finalTitle": "Your next reading lesson is one sign-in away."
+      "finalTitle": "One sign-in away from your next lesson — and your next masterpiece."
     },
     "chapters": {
       "encounter": {
