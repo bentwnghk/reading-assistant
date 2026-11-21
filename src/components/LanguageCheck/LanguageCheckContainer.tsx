@@ -124,6 +124,16 @@ export default function LanguageCheckContainer() {
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [students, setStudents] = useState<LanguageCheckStaffUser[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
+  // Sticky, scope-wide "does this staff member have ANY students at all" —
+  // deliberately NOT the class-narrowed options. A narrowed list can come
+  // back empty for reasons that have nothing to do with scope (an empty
+  // class, or members whose school drifted outside the caller's scope), and
+  // gating the pick on it would silently re-open the "Myself" default the
+  // explicit pick exists to prevent. Once ANY response shows a student, the
+  // pick stays required for the lifetime of the upload view; it clears only
+  // if the scope offers nobody (failed fetch, truly empty scope), so
+  // uploads never hard-block.
+  const [hasScopeStudents, setHasScopeStudents] = useState(false);
 
   // Classes the caller teaches — drives the "My Classes" option, which is
   // also the DEFAULT: admins/super-admins otherwise land on every class in
@@ -174,7 +184,10 @@ export default function LanguageCheckContainer() {
         );
         if (!res.ok) return;
         const body = (await res.json()) as { users: LanguageCheckStaffUser[] };
-        if (!superseded) setStudents(body.users);
+        if (!superseded) {
+          setStudents(body.users);
+          setHasScopeStudents((prev) => prev || body.users.length > 0);
+        }
       } catch {
         // Aborted or offline — keep the previous options.
       } finally {
@@ -189,17 +202,39 @@ export default function LanguageCheckContainer() {
     };
   }, [isStaff, forClassId]);
 
+  // Scope-wide existence check (fire once): does this staff member have any
+  // students at all? Deterministic seed for `hasScopeStudents` — independent
+  // of which class the (possibly later-adopted) default filter narrows to.
+  useEffect(() => {
+    if (!isStaff) return;
+    const ac = new AbortController();
+    void (async () => {
+      try {
+        const res = await fetch("/api/writing-assessment/staff/students?all=1", {
+          signal: ac.signal,
+        });
+        if (!res.ok) return;
+        const body = (await res.json()) as { users: LanguageCheckStaffUser[] };
+        if (body.users.length > 0) setHasScopeStudents(true);
+      } catch {
+        // Offline — the sticky flag still fills in from any later response.
+      }
+    })();
+    return () => ac.abort();
+    // Fire once per sign-in identity; `isStaff` flips are the only re-runs.
+  }, [isStaff]);
+
   const forStudent = students.find((s) => s.id === forStudentId) ?? null;
 
   // Staff must state WHO the essay is for before anything can be staged or
   // transcribed: teachers (and admins) are overwhelmingly scanning for a
   // STUDENT, so a silent "Myself" default files the essay under the wrong
   // account and the student never sees it. The blocker lifts only when the
-  // scope offers nobody (no students in the class list, or the fetch
-  // failed) — then "Myself" remains the only sensible implicit target and
-  // uploads must not hard-block.
+  // SCOPE has shown nobody at all (failed fetch, genuinely empty scope) —
+  // never merely because the selected class narrowed to an empty list — so
+  // switching classes can't silently re-enable the "Myself" default.
   const needsStudentPick =
-    isStaff && forStudentId === null && students.length > 0;
+    isStaff && forStudentId === null && hasScopeStudents;
 
   // Pages are staged (and optionally cropped) before anything is uploaded, so
   // a multi-page essay can be built from several camera shots. Ephemeral UI
