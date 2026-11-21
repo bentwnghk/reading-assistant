@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useInView } from "motion/react";
+import { Kalam } from "next/font/google";
 import {
   Upload,
   Brain,
@@ -106,6 +107,25 @@ import {
   Wand2,
 } from "lucide-react";
 
+/* Handwriting face for the essay beats (capture + marking). Declared here
+   rather than in layout.tsx so only the landing route downloads it. */
+const handwriting = Kalam({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-handwriting",
+  display: "swap",
+});
+
+/* Hero mockup loop: photograph the reading text → see it live in-app →
+   photograph a handwritten essay → see it marked like an examiner → repeat. */
+type HeroPhase = "capture-reading" | "result-reading" | "capture-writing" | "result-writing";
+const HERO_FLOW: Record<HeroPhase, { next: HeroPhase; after: number }> = {
+  "capture-reading": { next: "result-reading", after: 2600 },
+  "result-reading": { next: "capture-writing", after: 4600 },
+  "capture-writing": { next: "result-writing", after: 2600 },
+  "result-writing": { next: "capture-reading", after: 5200 },
+};
+
 /* ───────────────────────────────────────────────────────────────
    Shared window chrome — gives each mockup a consistent "app" frame
    sitting on the editorial paper.
@@ -171,31 +191,28 @@ function RepoVisBadge({
   );
 }
 
-/* ── 1b. HERO — capture any text: photograph a paper → live tappable passage ── */
+/* ── 1b. HERO — capture any text: photograph a printed page or a handwritten
+   essay → live passage with glossary, or examiner marking + HKDSE scores ── */
 export function CaptureComprehendMockup() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref);
-  const [phase, setPhase] = useState<"capture" | "result">("capture");
+  const [phase, setPhase] = useState<HeroPhase>("capture-reading");
   const [flashKey, setFlashKey] = useState(0);
 
-  // Auto-cycle: capture → shutter flash → result → capture …
-  // Paused when the mockup is scrolled out of view.
+  // The shutter flash replays on every capture → result transition.
   useEffect(() => {
     if (!inView) return;
-    if (phase === "capture") {
-      const id = setTimeout(() => {
-        setFlashKey((k) => k + 1);
-        setPhase("result");
-      }, 2600);
-      return () => clearTimeout(id);
-    }
-    const id = setTimeout(() => setPhase("capture"), 4400);
+    const { next, after } = HERO_FLOW[phase];
+    const id = setTimeout(() => {
+      if (next.startsWith("result")) setFlashKey((k) => k + 1);
+      setPhase(next);
+    }, after);
     return () => clearTimeout(id);
   }, [phase, inView]);
 
   return (
     <MockupFrame label="CAPTURE · Mr.🆖 ProReader" frameRef={ref}>
-      <div className="relative min-h-[18rem] sm:min-h-[20rem]">
+      <div className={`relative min-h-[18rem] sm:min-h-[20rem] ${handwriting.variable}`}>
         {/* shutter flash — replays on each capture → result transition */}
         {flashKey > 0 && (
           <motion.div
@@ -209,20 +226,21 @@ export function CaptureComprehendMockup() {
         )}
 
         <AnimatePresence initial={false}>
-          {phase === "capture" ? (
+          {phase === "capture-reading" && (
             <motion.div
-              key="capture"
+              key="capture-reading"
               className="absolute inset-0 flex flex-col justify-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <CaptureBeat />
+              <CaptureBeat variant="reading" />
             </motion.div>
-          ) : (
+          )}
+          {phase === "result-reading" && (
             <motion.div
-              key="result"
+              key="result-reading"
               className="absolute inset-0 flex flex-col justify-center"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -232,15 +250,40 @@ export function CaptureComprehendMockup() {
               <ResultBeat />
             </motion.div>
           )}
+          {phase === "capture-writing" && (
+            <motion.div
+              key="capture-writing"
+              className="absolute inset-0 flex flex-col justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <CaptureBeat variant="writing" />
+            </motion.div>
+          )}
+          {phase === "result-writing" && (
+            <motion.div
+              key="result-writing"
+              className="absolute inset-0 flex flex-col justify-center"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <MarkingBeat />
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </MockupFrame>
   );
 }
 
-/* Camera viewfinder beat — a printed exam paper framed by focus brackets
-   while an OCR scan line sweeps across it. */
-function CaptureBeat() {
+/* Camera viewfinder beat — an exam paper framed by focus brackets while an
+   OCR scan line sweeps across it. Two variants: the printed Paper 1 reading
+   passage, and a handwritten Paper 2 essay (handwriting font + ruled lines). */
+function CaptureBeat({ variant }: { variant: "reading" | "writing" }) {
   return (
     <div className="w-full">
       <div className="mb-2.5 flex items-center justify-between">
@@ -264,19 +307,46 @@ function CaptureBeat() {
         <span className="pointer-events-none absolute bottom-3 left-3 h-5 w-5 rounded-bl border-b-2 border-l-2 border-[var(--lp-accent)]" />
         <span className="pointer-events-none absolute bottom-3 right-3 h-5 w-5 rounded-br border-b-2 border-r-2 border-[var(--lp-accent)]" />
 
-        {/* the printed exam paper */}
-        <div
-          className="relative mx-auto max-w-[260px] rounded-[3px] bg-[var(--lp-surface)] px-4 py-3 shadow-[0_8px_24px_-12px_rgba(23,22,26,0.25)]"
-          style={{ transform: "rotate(-1.5deg)" }}
-        >
-          <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--lp-ink-soft)]">
-            HKDSE · English Language · Paper 1
-          </p>
-          <div className="my-1.5 h-px bg-[var(--lp-rule)]" />
-          <p className="font-display text-[12px] leading-snug text-[var(--lp-ink-soft)]">
-            Deep beneath the surface, currents stir the cold darkness. Here, luminous creatures drift past one another — their soft glow the only light for miles around.
-          </p>
-        </div>
+        {/* the exam paper — printed (reading) or handwritten (writing) */}
+        {variant === "reading" ? (
+          <div
+            className="relative mx-auto max-w-[260px] rounded-[3px] bg-[var(--lp-surface)] px-4 py-3 shadow-[0_8px_24px_-12px_rgba(23,22,26,0.25)]"
+            style={{ transform: "rotate(-1.5deg)" }}
+          >
+            <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--lp-ink-soft)]">
+              HKDSE · English Language · Paper 1
+            </p>
+            <div className="my-1.5 h-px bg-[var(--lp-rule)]" />
+            <p className="font-display text-[12px] leading-snug text-[var(--lp-ink-soft)]">
+              Deep beneath the surface, currents stir the cold darkness. Here, luminous creatures drift past one another — their soft glow the only light for miles around.
+            </p>
+          </div>
+        ) : (
+          <div
+            className="relative mx-auto max-w-[260px] rounded-[3px] bg-[var(--lp-surface)] px-4 py-3 shadow-[0_8px_24px_-12px_rgba(23,22,26,0.25)]"
+            style={{ transform: "rotate(1deg)" }}
+          >
+            <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--lp-ink-soft)]">
+              HKDSE · English Language · Paper 2
+            </p>
+            <div className="my-1.5 h-px bg-[var(--lp-rule)]" />
+            {/* handwritten answer on ruled lines — the same words the marking beat scores */}
+            <div
+              className="rounded-sm"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(to bottom, transparent 0px, transparent 18px, var(--lp-rule) 18px, var(--lp-rule) 19px)",
+              }}
+            >
+              <p
+                className="text-[12px] leading-[19px] text-[var(--lp-ink)]"
+                style={{ fontFamily: "var(--font-handwriting)" }}
+              >
+                Last Saturday I have joined a beach clean-up. The weather was very bad, but we still pick up three bags of rubbish.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* OCR scan line — one sweep per capture beat. CSS (not motion) so it
             runs on the very first mount despite AnimatePresence initial={false}. */}
@@ -361,6 +431,127 @@ function ResultBeat() {
         </div>
         <div className="mt-2 border-t border-[var(--lp-rule)] pt-2 text-[10px] italic text-[var(--lp-ink-soft)]">
           “The luminous jellyfish pulsed gently in the dark water.”
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* Marking beat — the handwritten essay from the capture beat, now transcribed
+   verbatim and marked like an examiner: red-strikethrough errors, a dotted
+   suggestion, then the AI Writing Assessment panel (Content / Language /
+   Organization 0–7, overall 0–21), mirroring AssessmentPanel.tsx and the
+   Chapter 06 carousel's tone palette. */
+function MarkingBeat() {
+  const [showScore, setShowScore] = useState(false);
+
+  // Reveal the score panel once the marking has been read. Under reduced
+  // motion the reveal is instant (same convention as ResultBeat's popover).
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setShowScore(true);
+      return;
+    }
+    const id = setTimeout(() => setShowScore(true), 1800);
+    return () => clearTimeout(id);
+  }, []);
+
+  /* Same tone() as LanguageCheckAssessmentMockup (≥6 emerald · ≥4 sky · ≥3 amber · else rose). */
+  const tone = (score: number) =>
+    score >= 6 ? "bg-emerald-500" : score >= 4 ? "bg-sky-500" : score >= 3 ? "bg-amber-500" : "bg-rose-500";
+  const criteria = [
+    { label: "Content", score: 6 },
+    { label: "Language", score: 4 },
+    { label: "Organization", score: 3 },
+  ];
+
+  return (
+    <div className="w-full">
+      {/* provenance row — ties the marking back to the captured essay */}
+      <div className="mb-3 flex items-center gap-1.5 text-[10px] text-[var(--lp-ink-soft)]">
+        <span className="inline-flex items-center gap-1 rounded-full border border-[var(--lp-rule)] bg-[var(--lp-paper-2)] px-2 py-0.5 font-medium text-[var(--lp-ink)]">
+          <Check className="h-3 w-3 text-[var(--lp-accent)]" /> Transcribed word for word
+        </span>
+        <span className="ml-auto inline-flex items-center gap-1 font-mono">
+          <PenLine className="h-3 w-3" /> examiner marking
+        </span>
+      </div>
+
+      {/* the marked essay — same words as the capture beat, now corrected inline */}
+      <p
+        className="text-[13px] leading-[1.9] text-[var(--lp-ink)]"
+        style={{ fontFamily: "var(--font-handwriting)" }}
+      >
+        Last Saturday I{" "}
+        <span className="rounded bg-red-100 px-1 py-0.5 font-bold text-red-700 line-through decoration-red-700/70 dark:bg-red-950 dark:text-red-300">
+          have
+        </span>{" "}
+        joined a beach clean-up. The weather was{" "}
+        <span className="underline decoration-dotted decoration-2 decoration-amber-500 underline-offset-4">
+          very bad
+        </span>
+        , but we still{" "}
+        <span className="rounded bg-red-100 px-1 py-0.5 font-bold text-red-700 line-through decoration-red-700/70 dark:bg-red-950 dark:text-red-300">
+          pick
+        </span>{" "}
+        <span className="font-bold text-emerald-700 dark:text-emerald-400">picked</span> up three bags of rubbish.
+      </p>
+
+      {/* colour legend — error / suggestion / correction */}
+      <div className="mt-1.5 flex items-center gap-3 text-[9px] text-[var(--lp-ink-soft)]">
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-red-100 dark:bg-red-950" /> error
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block w-4 border-t-2 border-dotted border-amber-500" /> suggestion
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="font-bold text-emerald-700 dark:text-emerald-400">picked</span> correction
+        </span>
+      </div>
+
+      {/* AI Writing Assessment panel — mirrors AssessmentPanel.tsx: the overall
+          0–21 band plus the three HKDSE criterion scores. Always rendered to
+          reserve its space; revealed once the marking has been read. */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: showScore ? 1 : 0, y: showScore ? 0 : 8 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="relative mx-auto mt-4 w-[calc(100%-1rem)] max-w-[300px] rounded-lg border border-[var(--lp-rule)] bg-gradient-to-br from-violet-50 to-sky-50 p-3 shadow-lg dark:from-violet-950/40 dark:to-sky-950/40"
+      >
+        {/* panel arrow pointing up */}
+        <div className="absolute -top-1.5 left-10 h-3 w-3 rotate-45 border-l border-t border-[var(--lp-rule)] bg-[var(--lp-surface)]" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <Award className="h-3.5 w-3.5 shrink-0 text-violet-600 dark:text-violet-400" />
+            <span className="text-[11px] font-semibold text-[var(--lp-ink)]">AI Writing Assessment</span>
+          </div>
+          <span className="shrink-0 rounded bg-[var(--lp-paper-2)] px-1.5 py-0.5 text-[9px] text-[var(--lp-ink-soft)]">
+            HKDSE · Paper 2
+          </span>
+        </div>
+        <div className="mt-2 flex items-stretch gap-1.5">
+          <div className="flex w-[3.4rem] shrink-0 flex-col items-center justify-center rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] py-1">
+            <span className="text-[8px] font-medium uppercase tracking-wider text-[var(--lp-ink-soft)]">Overall</span>
+            <span className="text-base font-bold tabular-nums text-[var(--lp-ink)]">
+              13<span className="text-[9px] font-normal text-[var(--lp-ink-soft)]"> / 21</span>
+            </span>
+          </div>
+          <div className="grid min-w-0 flex-1 grid-cols-3 gap-1.5">
+            {criteria.map((c) => (
+              <div
+                key={c.label}
+                className="flex flex-col items-center justify-center rounded-md border border-[var(--lp-rule)] bg-[var(--lp-surface)] py-1"
+              >
+                <span className="text-[8px] font-medium text-[var(--lp-ink-soft)]">{c.label}</span>
+                <span className="text-sm font-bold tabular-nums text-[var(--lp-ink)]">
+                  {c.score}
+                  <span className="text-[8px] font-normal text-[var(--lp-ink-soft)]"> / 7</span>
+                </span>
+                <span className={`mt-0.5 h-1 w-7 rounded-full ${tone(c.score)}`} />
+              </div>
+            ))}
+          </div>
         </div>
       </motion.div>
     </div>
