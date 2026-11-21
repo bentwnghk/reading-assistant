@@ -212,7 +212,7 @@ export function CaptureComprehendMockup() {
 
   return (
     <MockupFrame label="CAPTURE · Mr.🆖 ProReader" frameRef={ref}>
-      <div className={`relative min-h-[18rem] sm:min-h-[20rem] ${handwriting.variable}`}>
+      <div className={`relative min-h-[18rem] sm:min-h-[23rem] ${handwriting.variable}`}>
         {/* shutter flash — replays on each capture → result transition */}
         {flashKey > 0 && (
           <motion.div
@@ -438,10 +438,11 @@ function ResultBeat() {
 }
 
 /* Marking beat — the handwritten essay from the capture beat, now transcribed
-   verbatim and marked like an examiner: red-strikethrough errors, a dotted
-   suggestion, then the AI Writing Assessment panel (Content / Language /
-   Organization 0–7, overall 0–21), mirroring AssessmentPanel.tsx and the
-   Chapter 06 carousel's tone palette. */
+   verbatim and marked like an examiner. Mirrors slide 06·2
+   (LanguageCheckResultsMockup): ErrorSpan chips with superscript numbers, an
+   open popover (category · correction · explanation), then the AI Writing
+   Assessment panel (Content / Language / Organization 0–7, overall 0–21) with
+   AssessmentPanel.tsx's tone palette. */
 function MarkingBeat() {
   const [showScore, setShowScore] = useState(false);
 
@@ -477,37 +478,51 @@ function MarkingBeat() {
         </span>
       </div>
 
-      {/* the marked essay — same words as the capture beat, now corrected inline */}
-      <p
-        className="text-[13px] leading-[1.9] text-[var(--lp-ink)]"
-        style={{ fontFamily: "var(--font-handwriting)" }}
-      >
-        Last Saturday I{" "}
-        <span className="rounded bg-red-100 px-1 py-0.5 font-bold text-red-700 line-through decoration-red-700/70 dark:bg-red-950 dark:text-red-300">
-          have
-        </span>{" "}
-        joined a beach clean-up. The weather was{" "}
-        <span className="underline decoration-dotted decoration-2 decoration-amber-500 underline-offset-4">
-          very bad
-        </span>
-        , but we still{" "}
-        <span className="rounded bg-red-100 px-1 py-0.5 font-bold text-red-700 line-through decoration-red-700/70 dark:bg-red-950 dark:text-red-300">
-          pick
-        </span>{" "}
-        <span className="font-bold text-emerald-700 dark:text-emerald-400">picked</span> up three bags of rubbish.
-      </p>
+      {/* the marked essay — same words as the capture beat, chips mirror ErrorSpan.
+          The open popover needs ~5.5rem of headroom, so it only appears from `sm`
+          up (below that the chips + legend + score panel tell the story). */}
+      <div className="relative pt-0 sm:pt-[5.5rem]">
+        {/* open ErrorSpan popover — side="top", arrow pointing at mistake ① */}
+        <div className="absolute inset-x-2 top-0 z-20 hidden rounded-xl border bg-popover p-2.5 text-popover-foreground shadow-xl sm:block">
+          <p className="text-[9px] font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
+            Tense / time frame <span className="font-semibold text-indigo-400">(1)</span>
+          </p>
+          <div className="mt-1.5 rounded-lg bg-muted px-2 py-1 text-[10px]">
+            <span className="font-medium text-muted-foreground">Correction:</span>{" "}
+            <span className="font-semibold text-green-700 dark:text-green-400">joined</span>
+          </div>
+          <p className="mt-1.5 text-[10px] leading-snug">
+            &ldquo;Last Saturday&rdquo; is a finished past time, so the verb takes the simple past: I
+            joined. Chinese marks time with separate words, so &ldquo;have/has + verb&rdquo; is easy
+            to overuse.
+          </p>
+          <span className="absolute bottom-[-4px] left-6 h-2 w-2 rotate-45 border-b border-r border-border bg-popover" />
+        </div>
 
-      {/* colour legend — error / suggestion / correction */}
+        <p
+          className="text-[13px] leading-[1.9] text-[var(--lp-ink)]"
+          style={{ fontFamily: "var(--font-handwriting)" }}
+        >
+          Last Saturday I <LcSpan cat="tense" n={1}>have</LcSpan> joined a beach clean-up. The
+          weather was{" "}
+          <span className="underline decoration-dotted decoration-2 decoration-amber-500 underline-offset-4">
+            very bad
+            <sup className="ml-0.5 text-[0.6em] font-semibold opacity-80">(2)</sup>
+          </span>
+          , but we still <LcSpan cat="tense" n={3}>pick</LcSpan> up three bags of rubbish.
+        </p>
+      </div>
+
+      {/* colour legend — errors (chip) · suggestions (dotted) — plus the tap hint */}
       <div className="mt-1.5 flex items-center gap-3 text-[9px] text-[var(--lp-ink-soft)]">
         <span className="inline-flex items-center gap-1">
-          <span className="inline-block h-2.5 w-3.5 rounded-sm bg-red-100 dark:bg-red-950" /> error
+          <span className="inline-block h-3 w-4 rounded-md border border-black/10 bg-orange-200 dark:border-white/10 dark:bg-orange-900/70" />
+          error
         </span>
         <span className="inline-flex items-center gap-1">
           <span className="inline-block w-4 border-t-2 border-dotted border-amber-500" /> suggestion
         </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="font-bold text-emerald-700 dark:text-emerald-400">picked</span> correction
-        </span>
+        <span className="ml-auto inline-flex items-center gap-1 font-mono">tap a mistake</span>
       </div>
 
       {/* AI Writing Assessment panel — mirrors AssessmentPanel.tsx: the overall
