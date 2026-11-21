@@ -312,7 +312,7 @@
         },
         "classReport": {
           "title": "Writing: Class Assessment Report",
-          "desc": "For teachers: from any Topic report, AI reads the whole class's checked essays and writes a printable teaching report — criterion findings, common mistakes with real examples, teaching priorities and differentiation groups. One more press turns those mistakes into a follow-up fix-it worksheet with a teacher answer key, and each teaching priority becomes a printable student handout — notes, a try-it task, exercises and an answer key in one Word file."
+          "desc": "For teachers: from any Topic report, AI reads the whole class's marked essays and writes a printable teaching report — criterion findings, common mistakes with real examples, teaching priorities and differentiation groups. One more press turns those mistakes into a follow-up fix-it worksheet with a teacher answer key, and each teaching priority becomes a printable student handout — notes, a try-it task, exercises and an answer key in one Word file."
         },
         "assignments": {
           "title": "Assignments",
@@ -414,11 +414,11 @@
         },
         "q13": {
           "q": "Can Mr.🆖 ProReader mark my handwritten English essays?",
-          "a": "<p>Yes! <strong>Writing Assessment</strong> is a dedicated essay-marking workspace, separate from your reading sessions.</p><p><strong>The flow:</strong> pick a <strong>writing topic</strong> from the Topic Library (DSE Part A/B, JS Writing or TSA Writing) → photograph or scan your handwritten essay (up to 10 pages) → review the <strong>verbatim transcript</strong> beside the original scan — mistakes are kept, because they are what gets checked → run the check.</p><p>You get <strong>inline corrections</strong> colour-coded by category — <strong>errors</strong> with a hover/tap card and a short grammar note, plus optional <strong>suggestions</strong> under a dotted underline (awkward phrasing, Chinglish, wordiness, stronger word choice) with other ways to say it — and an <strong>AI Writing Assessment</strong> that scores the writing like an examiner on the topic's marking scheme, with sub-scores and bilingual strengths / areas to improve.</p><p>Then <strong>Enhanced Essays</strong> rewrites your own essay two ways — a light polish that keeps your voice and a Level 5** rewrite you can load straight back into the reading workflow — and <strong>Learn from your mistakes</strong> turns the corrections into lessons, practice and quizzes built from your own writing. Export everything to Word; notes switch between English and 繁體中文.</p>"
+          "a": "<p>Yes! <strong>Writing Assessment</strong> is a dedicated essay-marking workspace, separate from your reading sessions.</p><p><strong>The flow:</strong> pick a <strong>writing topic</strong> from the Topic Library (DSE Part A/B, JS Writing or TSA Writing) → photograph or scan your handwritten essay (up to 10 pages) → review the <strong>verbatim transcript</strong> beside the original scan — mistakes are kept, because they are what gets marked → mark the writing.</p><p>You get <strong>inline corrections</strong> colour-coded by category — <strong>errors</strong> with a hover/tap card and a short grammar note, plus optional <strong>suggestions</strong> under a dotted underline (awkward phrasing, Chinglish, wordiness, stronger word choice) with other ways to say it — and an <strong>AI Writing Assessment</strong> that scores the writing like an examiner on the topic's marking scheme, with sub-scores and bilingual strengths / areas to improve.</p><p>Then <strong>Enhanced Essays</strong> rewrites your own essay two ways — a light polish that keeps your voice and a Level 5** rewrite you can load straight back into the reading workflow — and <strong>Learn from your mistakes</strong> turns the corrections into lessons, practice and quizzes built from your own writing. Export everything to Word; notes switch between English and 繁體中文.</p>"
         },
         "q14": {
           "q": "As a teacher, can I see how the whole class did on a writing task — and get follow-up practice for their common mistakes?",
-          "a": "<p>Yes! Under <strong>My students → Topic reports</strong>, every writing topic is a card with its class, checked-essay count and class average. Open one for the class statistics, then press <strong>Generate AI assessment report</strong>: the AI reads every student's latest checked essay (anonymised) and writes a printable <strong>Class Assessment Report</strong> — criterion findings and next steps, common mistakes quoting the class's own sentences, teaching priorities, <strong>differentiation groups</strong> (&lt;40% / 40–69% / 70%+) and quick tips.</p><p>One more press — <strong>Generate follow-up exercise</strong> — turns those mistakes into a Word worksheet that downloads automatically: a rule recap with wrong/correct pairs, ten <strong>fix-the-error</strong> and <strong>fill-in-the-blank</strong> questions, and a teacher answer key on a separate page, ready to hand out.</p><p>And each numbered <strong>teaching priority</strong> has its own <strong>Student handout</strong> button: AI turns that one focus into a printable Word handout for the class — learning notes (the key idea, rules with examples, wrong → right pairs, a Cantonese/Chinese-transfer note and a self-check checklist), a short Try-it task, ten exercises from easy to challenging with hints, and an answer key on its own page. Like the worksheet, handouts are saved with the report, so you can download or regenerate them any time.</p>"
+          "a": "<p>Yes! Under <strong>My students → Topic reports</strong>, every writing topic is a card with its class, marked-essay count and class average. Open one for the class statistics, then press <strong>Generate AI assessment report</strong>: the AI reads every student's latest marked essay (anonymised) and writes a printable <strong>Class Assessment Report</strong> — criterion findings and next steps, common mistakes quoting the class's own sentences, teaching priorities, <strong>differentiation groups</strong> (&lt;40% / 40–69% / 70%+) and quick tips.</p><p>One more press — <strong>Generate follow-up exercise</strong> — turns those mistakes into a Word worksheet that downloads automatically: a rule recap with wrong/correct pairs, ten <strong>fix-the-error</strong> and <strong>fill-in-the-blank</strong> questions, and a teacher answer key on a separate page, ready to hand out.</p><p>And each numbered <strong>teaching priority</strong> has its own <strong>Student handout</strong> button: AI turns that one focus into a printable Word handout for the class — learning notes (the key idea, rules with examples, wrong → right pairs, a Cantonese/Chinese-transfer note and a self-check checklist), a short Try-it task, ten exercises from easy to challenging with hints, and an answer key on its own page. Like the worksheet, handouts are saved with the report, so you can download or regenerate them any time.</p>"
         }
       }
     }
@@ -4704,7 +4704,7 @@
   "languageCheck": {
     "navTitle": "Writing Assessment",
     "title": "Writing Assessment",
-    "subtitle": "Choose a writing topic and upload a handwritten essay: one check gives inline corrections, an automatic AI Writing Assessment on the task's marking scheme and Enhanced Essays of your own writing — then turns your mistakes into lessons, practice and quizzes. Teachers also get class assessment reports and follow-up worksheets.",
+    "subtitle": "Choose a writing topic and upload a handwritten essay: a single marking gives inline corrections, an automatic AI Writing Assessment on the task's marking scheme and Enhanced Essays of your own writing — then turns your mistakes into lessons, practice and quizzes. Teachers also get class assessment reports and follow-up worksheets.",
     "back": "Back",
     "cancel": "Cancel",
     "stop": "Stop",
@@ -4725,14 +4725,14 @@
         "learning": "Learning"
       },
       "overview": {
-        "intro": "Pick a topic, upload a handwritten or scanned essay and review the verbatim transcript — then one check returns inline corrections with explanations and automatically scores the writing with the AI Writing Assessment. The marking scheme follows the topic's essay type: HKDSE Content, Language and Organization (DSE Part A/B), the school-based Junior Secondary scheme (JS Writing) or the Education Bureau TSA Secondary 3 scheme (TSA Writing).",
+        "intro": "Pick a topic, upload a handwritten or scanned essay and review the verbatim transcript — then one marking pass returns inline corrections with explanations and automatically scores the writing with the AI Writing Assessment. The marking scheme follows the topic's essay type: HKDSE Content, Language and Organization (DSE Part A/B), the school-based Junior Secondary scheme (JS Writing) or the Education Bureau TSA Secondary 3 scheme (TSA Writing).",
         "sections": {
           "name": "Three Sections",
           "desc": "\"Topic Library\" (the first and default tab) holds reusable writing tasks; \"My essays\" holds the upload area and your saved essays; \"My learning\" holds saved learning sessions, a progress dashboard and an activity log."
         },
         "topic": {
           "name": "Pick a Topic First",
-          "desc": "Every essay answers a writing task. Choose a topic from your Topic Library above the upload area — a title, the full prompt, an optional question image and the essay type (DSE Part A, DSE Part B, JS Writing or TSA Writing). Its title becomes the essay's default title, and the task guides both the check and the assessment. The picker splits into \"My topics\" and \"Class topics\": a topic created for a class you are in (or teach) shows its class name and creator, so you can answer the task your teacher set."
+          "desc": "Every essay answers a writing task. Choose a topic from your Topic Library above the upload area — a title, the full prompt, an optional question image and the essay type (DSE Part A, DSE Part B, JS Writing or TSA Writing). Its title becomes the essay's default title, and the task guides both the marking and the assessment. The picker splits into \"My topics\" and \"Class topics\": a topic created for a class you are in (or teach) shows its class name and creator, so you can answer the task your teacher set."
         },
         "upload": {
           "name": "Uploading",
@@ -4740,19 +4740,19 @@
         },
         "statuses": {
           "name": "Essay Statuses",
-          "desc": "Each essay moves through Draft (uploaded) → Transcribed (digitised) → Checked (marked). The list shows pages, word count, error count, the assessment overall and the last update."
+          "desc": "Each essay moves through Draft (uploaded) → Transcribed (digitised) → Marked. The list shows pages, word count, error count, the assessment overall and the last update."
         },
         "assessment": {
           "name": "AI Writing Assessment",
-          "desc": "Every check ends with an automatic AI Writing Assessment, marked with the scheme for the topic's essay type: DSE topics get a 0–7 band for each HKDSE criterion (Content, Language, Organization, total 21); JS Writing topics use the Junior Secondary scheme — Content 7 + Language 7 + Organisation 4 + Features 3 = 21; TSA Writing topics use the Education Bureau TSA Secondary 3 scheme — Content 4 + Language 4 + Organisation 2 + Features 2 = 12. Bilingual strengths and weaknesses are included. Details in the Results tab."
+          "desc": "Every marking ends with an automatic AI Writing Assessment, marked with the scheme for the topic's essay type: DSE topics get a 0–7 band for each HKDSE criterion (Content, Language, Organization, total 21); JS Writing topics use the Junior Secondary scheme — Content 7 + Language 7 + Organisation 4 + Features 3 = 21; TSA Writing topics use the Education Bureau TSA Secondary 3 scheme — Content 4 + Language 4 + Organisation 2 + Features 2 = 12. Bilingual strengths and weaknesses are included. Details in the Results tab."
         },
         "retention": {
           "name": "Storage & Privacy",
-          "desc": "Original scans are removed {{days}} days after upload. Checked essays keep their transcript and corrections so you can review them anytime."
+          "desc": "Original scans are removed {{days}} days after upload. Marked essays keep their transcript and corrections so you can review them anytime."
         },
         "uploadForStudent": {
-          "name": "Checking for a Student",
-          "desc": "Teachers can pick a student above the upload zone and scan that student's handwritten essay for them. The checked essay lands in the student's \"My essays\" list exactly as if they had uploaded it, ready for them to learn from the corrections."
+          "name": "Marking for a Student",
+          "desc": "Teachers can pick a student above the upload zone and scan that student's handwritten essay for them. The marked essay lands in the student's \"My essays\" list exactly as if they had uploaded it, ready for them to learn from the corrections."
         },
         "handouts": {
           "name": "Student handouts",
@@ -4760,11 +4760,11 @@
         },
         "topicReports": {
           "name": "Topic Reports",
-          "desc": "Under \"My students\" → \"Topic reports\", every topic your students have written on is a card showing its class, its checked-essay count and how many of the class are done (with the class average). The Topics and Checked essays cards count over the same essays as the Student essays tab, so the two tabs always tally. Open one for per-criterion class averages, the score distribution, common errors and one card per student — clicking a student opens their essay, exactly like View in Student essays."
+          "desc": "Under \"My students\" → \"Topic reports\", every topic your students have written on is a card showing its class, its marked-essay count and how many of the class are done (with the class average). The Topics and Marked essays cards count over the same essays as the Student essays tab, so the two tabs always tally. Open one for per-criterion class averages, the score distribution, common errors and one card per student — clicking a student opens their essay, exactly like View in Student essays."
         },
         "classReport": {
           "name": "Class Assessment Report",
-          "desc": "From any topic report, press \"Generate AI assessment report\" (needs at least one checked essay): the AI reads the whole class's checked essays and writes a printable report — criterion findings with next steps, common mistakes with real examples from their essays, teaching priorities, differentiation groups and quick tips. It is saved with the topic and warns you when new checked essays arrive. \"Generate follow-up exercise\" then turns those mistakes into a Word worksheet that downloads automatically — rule recap, fix-the-error and fill-in-the-blank practice, and a teacher answer key."
+          "desc": "From any topic report, press \"Generate AI assessment report\" (needs at least one marked essay): the AI reads the whole class's marked essays and writes a printable report — criterion findings with next steps, common mistakes with real examples from their essays, teaching priorities, differentiation groups and quick tips. It is saved with the topic and warns you when new marked essays arrive. \"Generate follow-up exercise\" then turns those mistakes into a Word worksheet that downloads automatically — rule recap, fix-the-error and fill-in-the-blank practice, and a teacher answer key."
         },
         "staff": {
           "name": "Staff View",
@@ -4776,7 +4776,7 @@
         }
       },
       "transcript": {
-        "intro": "The AI transcribes your handwriting verbatim — including mistakes — so nothing is silently fixed before marking. Always review the transcript before running the check.",
+        "intro": "The AI transcribes your handwriting verbatim — including mistakes — so nothing is silently fixed before marking. Always review the transcript before marking begins.",
         "review": {
           "name": "Review Stage",
           "desc": "The scan and the transcript sit side by side. Fix any misread words, or type or paste the essay yourself; separate paragraphs with a blank line."
@@ -4791,18 +4791,18 @@
         },
         "tip": {
           "title": "Important:",
-          "desc": "Corrections always refer to the checked snapshot — if you edit the transcript afterwards, run the check again to update them."
+          "desc": "Corrections always refer to the marked snapshot — if you edit the transcript afterwards, mark it again to update them."
         }
       },
       "results": {
-        "intro": "Results open on the AI Writing Assessment tab — filled in automatically by the check, scoring the writing with the marking scheme of the topic's essay type (HKDSE or Junior Secondary). The \"Corrections & Explanations\" tab holds the inline highlights, each numbered and paired with an explanation card. The \"Enhanced Essays\" tab generates a light polish and an aspirational heavy rewrite of your own essay on request.",
+        "intro": "Results open on the AI Writing Assessment tab — filled in automatically by the marking, scoring the writing with the marking scheme of the topic's essay type (HKDSE or Junior Secondary). The \"Corrections & Explanations\" tab holds the inline highlights, each numbered and paired with an explanation card. The \"Enhanced Essays\" tab generates a light polish and an aspirational heavy rewrite of your own essay on request.",
         "tiers": {
           "name": "Errors vs. Suggestions",
           "desc": "Errors (grammar and mechanics) get a solid underline; expression suggestions (phrasing, concision, stronger words) are optional polish with alternative ways to say it."
         },
         "assessment": {
           "name": "AI Writing Assessment",
-          "desc": "The first results tab, filled in automatically right after the check — the assessment reads the detected error counts as evidence. DSE topics are scored on HKDSE Content (C), Language (L) and Organization (O): a 0–7 band for each plus an overall, sub-scores for each criterion and bilingual strengths & areas to improve. JS Writing topics use the school-based Junior Secondary scheme: Content (0–7), Language (0–7), Organisation (0–4) and Features (0–3, the conventions of the text type such as letter format or speech in narration), totalling 21, each with sub-scores (Content and Language 5, Organisation and Features 3), bilingual feedback and an S1–S3 standard. TSA Writing topics use the Education Bureau TSA Secondary 3 marking scheme: Content (0–4), Language (0–4), Organisation (0–2) and Features (0–2), totalling 12 (Organisation and Features have no level 3–4 descriptors), with sub-scores (Content 4, Language 5, Organisation and Features 3 — scored on each criterion's own scale), bilingual feedback and an S3 standard."
+          "desc": "The first results tab, filled in automatically right after the marking — the assessment reads the detected error counts as evidence. DSE topics are scored on HKDSE Content (C), Language (L) and Organization (O): a 0–7 band for each plus an overall, sub-scores for each criterion and bilingual strengths & areas to improve. JS Writing topics use the school-based Junior Secondary scheme: Content (0–7), Language (0–7), Organisation (0–4) and Features (0–3, the conventions of the text type such as letter format or speech in narration), totalling 21, each with sub-scores (Content and Language 5, Organisation and Features 3), bilingual feedback and an S1–S3 standard. TSA Writing topics use the Education Bureau TSA Secondary 3 marking scheme: Content (0–4), Language (0–4), Organisation (0–2) and Features (0–2), totalling 12 (Organisation and Features have no level 3–4 descriptors), with sub-scores (Content 4, Language 5, Organisation and Features 3 — scored on each criterion's own scale), bilingual feedback and an S3 standard."
         },
         "enhanced": {
           "name": "Enhanced Essays",
@@ -4826,7 +4826,7 @@
         }
       },
       "learning": {
-        "intro": "\"Learn from your mistakes\" turns a checked essay into a study plan: each kind of mistake you pick gets a lesson, practice exercises and a quiz — all built from your own writing.",
+        "intro": "\"Learn from your mistakes\" turns a marked essay into a study plan: each kind of mistake you pick gets a lesson, practice exercises and a quiz — all built from your own writing.",
         "topics": {
           "name": "Choose Your Topics",
           "desc": "In the results view, press \"Learn from mistakes\", pick up to {{max}} categories from your corrections and set your level — the lesson starts from the mistakes you actually made."
@@ -4861,7 +4861,7 @@
       "preparing": "Preparing your pages…",
       "unsupported": "Please upload an image or a PDF file.",
       "tooManyPages": "Too many pages. Please upload at most {{max}} pages per essay.",
-      "checkFor": "Check an essay for",
+      "checkFor": "Mark an essay for",
       "forMyself": "Myself",
       "dropFor": "Drop {{name}}'s handwritten essay here, or paste a photo",
       "forStudentHint": "It will be saved to {{name}}'s essays, where they can review the corrections and learn from them.",
@@ -4869,7 +4869,7 @@
       "forSelfHint": "It will be saved to YOUR essays — no student will see it.",
       "pickStudentRequired": "Choose who this essay is for first — pick a student above, or \"Myself\".",
       "topicClassMismatchTitle": "Student is not in the topic's class",
-      "topicClassMismatch": "{{name}} is not in {{className}}, the class this topic was created for. The essay will still be checked against this topic and saved to their essays.",
+      "topicClassMismatch": "{{name}} is not in {{className}}, the class this topic was created for. The essay will still be marked against this topic and saved to their essays.",
       "uploadAnyway": "Upload anyway"
     },
     "topics": {
@@ -4883,7 +4883,7 @@
       "intro": "Your saved writing tasks, ready to reuse — press \"Use for upload\" to scan the next essay against one. Topics created for your classes are listed here too, with their class and creator.",
       "empty": "No topics yet. Create one to get started.",
       "deleteTitle": "Delete topic?",
-      "deleteDesc": "\"{{title}}\" will be removed from your library. Essays already checked with it keep their own copy of the task.",
+      "deleteDesc": "\"{{title}}\" will be removed from your library. Essays already marked with it keep their own copy of the task.",
       "by": "By {{name}}",
       "classTopicTitle": "Created for this class — it appears in the topic lists of the class's students and its teacher.",
       "allClasses": "All classes",
@@ -4901,7 +4901,7 @@
       "form": {
         "newTitle": "New writing topic",
         "editTitle": "Edit writing topic",
-        "desc": "The title becomes the default essay title. The topic, question image and essay type guide how the essay is checked and assessed.",
+        "desc": "The title becomes the default essay title. The topic, question image and essay type guide how the essay is marked and assessed.",
         "title": "Title",
         "titlePlaceholder": "e.g. 2026-27 S6 Writing 1",
         "class": "Class",
@@ -4983,7 +4983,7 @@
       "status": {
         "draft": "Draft",
         "transcribed": "Transcribed",
-        "checked": "Checked"
+        "checked": "Marked"
       },
       "delete": "Delete",
       "deleteTitle": "Delete this essay?",
@@ -5048,10 +5048,10 @@
     "aiReport": {
       "button": "Generate AI assessment report",
       "viewButton": "Show AI assessment report",
-      "needChecked": "Needs at least one checked essay",
+      "needChecked": "Needs at least one marked essay",
       "title": "Class Assessment Report",
       "backToTopic": "Back to topic report",
-      "analysed": "{{count}} checked essays analysed",
+      "analysed": "{{count}} marked essays analysed",
       "generatedOn": "Generated {{date}}",
       "regenerate": "Regenerate",
       "generate": "Generate report",
@@ -5059,8 +5059,8 @@
       "generating": "Analysing the class's essays…",
       "generatingHint": "Reading error patterns, scores and marker notes. This usually takes under a minute.",
       "done": "Report generated",
-      "noData": "There are no checked essays on this topic yet.",
-      "stale": "{{count}} new checked essay(ies) since this report was generated. Regenerate to include the latest data.",
+      "noData": "There are no marked essays on this topic yet.",
+      "stale": "{{count}} new marked essay(ies) since this report was generated. Regenerate to include the latest data.",
       "overview": "Overview",
       "errorsPerEssay": "Avg. comments / essay",
       "criteria": "Performance by criterion",
@@ -5083,13 +5083,13 @@
         "secure": "70%+ — extend and stretch"
       },
       "quickTips": "Quick teaching tips",
-      "disclaimer": "AI-generated from the students' checked essays ({{model}}). Review before sharing."
+      "disclaimer": "AI-generated from the students' marked essays ({{model}}). Review before sharing."
     },
     "reports": {
       "intro": "One card per writing topic — how far your students have got and the average score. Open a card for the full report.",
       "statTopics": "Topics",
-      "statChecked": "Checked essays",
-      "statComplete": "Fully checked",
+      "statChecked": "Marked essays",
+      "statComplete": "Fully marked",
       "statCompleteHint": "Every class student done",
       "search": "Search topics or classes…",
       "sortLabel": "Sort",
@@ -5102,7 +5102,7 @@
       "empty": "No topic essays yet — a card appears as soon as a student in scope writes on a topic from your Topic Library.",
       "emptySearch": "Nothing matches your search.",
       "noClass": "No class",
-      "checkedLabel": "Checked essays",
+      "checkedLabel": "Marked essays",
       "percentDone": "{{percent}}% done",
       "rosterDone": "{{done}}/{{total}} done",
       "noRoster": "No class assigned",
@@ -5115,7 +5115,7 @@
       "avgOutOf": "Average / {{max}}",
       "notScored": "Not scored in this scheme",
       "avgOverall": "Average overall",
-      "submitted": "Checked essays",
+      "submitted": "Marked essays",
       "highLow": "Highest / lowest",
       "highLowHint": "Overall score",
       "avgWords": "Avg. word count",
@@ -5137,9 +5137,9 @@
         "name": "Name (A–Z)",
         "words": "Word count"
       },
-      "noStudents": "No checked essays on this topic yet.",
-      "notAssessed": "Checked, but no AI assessment saved yet.",
-      "pending": "Not yet checked ({{count}})",
+      "noStudents": "No marked essays on this topic yet.",
+      "notAssessed": "Marked, but no AI assessment saved yet.",
+      "pending": "Not yet marked ({{count}})",
       "pendingStatus": {
         "none": "no essay",
         "draft": "draft",
@@ -5148,7 +5148,7 @@
     },
     "staff": {
       "title": "Essay activity log",
-      "intro": "Essays your students have scanned — filter by topic or status, then open one to review the transcript and corrections, check it again, or change its topic.",
+      "intro": "Essays your students have scanned — filter by topic or status, then open one to review the transcript and corrections, mark it again, or change its topic.",
       "scopeTeacher": "Students in your classes",
       "scopeSchool": "Your school",
       "scopeAll": "All users",
@@ -5190,17 +5190,17 @@
       "emptyFilter": "No essays match these filters.",
       "page": "Page {{page}} of {{total}}",
       "detailTranscript": "Transcript",
-      "detailNoCorrections": "This essay has not been checked yet."
+      "detailNoCorrections": "This essay has not been marked yet."
     },
     "ocr": {
       "verify": "Double-check transcription",
       "verifyHint": "Runs a second pass per page that restores any spelling or grammar mistakes the AI silently corrected. Slower and uses twice the vision-model calls.",
       "verifying": "Double-checking page {{current}} of {{total}} for silently corrected mistakes…",
-      "doneVerified_one": "Transcription ready. The double-check restored {{count}} word the AI had changed. Please review it before running the check.",
-      "doneVerified_other": "Transcription ready. The double-check restored {{count}} words the AI had changed. Please review it before running the check.",
+      "doneVerified_one": "Transcription ready. The double-check restored {{count}} word the AI had changed. Please review it before marking.",
+      "doneVerified_other": "Transcription ready. The double-check restored {{count}} words the AI had changed. Please review it before marking.",
       "working": "Reading your handwriting…",
       "progress": "Reading page {{current}} of {{total}}",
-      "done": "Transcription ready. Please review it before running the check.",
+      "done": "Transcription ready. Please review it before marking.",
       "empty": "No text could be read from page {{page}}. Try a clearer photo or type the text in manually.",
       "retry": "Re-transcribe",
       "retryConfirm": "Re-transcribing will replace the current transcript, including your edits. Continue?"
@@ -5213,9 +5213,9 @@
       "wordCount_other": "{{count}} words",
       "placeholder": "The transcript will appear here. You can also type or paste the essay.",
       "paragraphHint": "Separate paragraphs with a blank line.",
-      "runCheck": "Run writing check",
+      "runCheck": "Mark writing",
       "backToResults": "Back to results",
-      "changedSince": "The transcript was edited after the last check. Run the check again to update the corrections.",
+      "changedSince": "The transcript was edited after the last marking. Mark it again to update the corrections.",
       "page": "Page {{current}} / {{total}}",
       "prevPage": "Previous page",
       "nextPage": "Next page",
@@ -5225,9 +5225,9 @@
       "pageAlt": "Scanned page {{page}}"
     },
     "check": {
-      "working": "Checking…",
+      "working": "Marking…",
       "waitHint": "It may take up to 1-2 minutes.",
-      "noText": "There is no text to check.",
+      "noText": "There is no text to mark.",
       "parseError": "The AI returned an unreadable result. Please try again.",
       "noErrors": "No language errors found.",
       "done": "Found {{errors}} errors and {{suggestions}} suggestions.",
@@ -5333,7 +5333,7 @@
       "noExplanation": "No explanation provided.",
       "viewScan": "Original scan",
       "editTranscript": "Edit transcript",
-      "recheck": "Check again",
+      "recheck": "Mark again",
       "expiredDisabled": "Scans are removed after the retention period",
       "expiredNotice": "This essay is past its {{days}}-day retention period: the original scan was removed to save storage. The transcript and corrections are kept for review.",
       "export": "Export to Word",
@@ -5369,7 +5369,7 @@
       "orderHint": "Tick to include · use the arrows to arrange",
       "moveUp": "Move up",
       "moveDown": "Move down",
-      "unavailablePolished": "Available once the check finds expression suggestions.",
+      "unavailablePolished": "Available once the marking finds expression suggestions.",
       "unavailableEnhanced": "Generate them first on the Enhanced Essays tab.",
       "noneSelected": "Select at least one section.",
       "confirm": "Export"
@@ -5588,7 +5588,7 @@
         "days_one": "{{count}} day",
         "days_other": "{{count}} days"
       },
-      "noSessions": "Nothing saved yet. Open a checked essay and choose \"Learn from mistakes\" — your lessons, practice and quiz results are saved here and are available on any device.",
+      "noSessions": "Nothing saved yet. Open a marked essay and choose \"Learn from mistakes\" — your lessons, practice and quiz results are saved here and are available on any device.",
       "noSessionsStaff": "No learning sessions for this selection yet.",
       "noData": "No learning activity in this period yet.",
       "noActivity": "No activity in this period.",
