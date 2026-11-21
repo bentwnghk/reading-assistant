@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "react-i18next";
 import {
@@ -30,6 +30,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -107,8 +108,17 @@ export default function LanguageCheckContainer() {
   const open = useLanguageCheckStore((s) => s.open);
   const create = useLanguageCheckStore((s) => s.create);
   const selectedTopicId = useLanguageCheckStore((s) => s.selectedTopicId);
+  const topics = useLanguageCheckStore((s) => s.topics);
   const [preparing, setPreparing] = useState(false);
   const [staged, setStaged] = useState<StagedPage[]>([]);
+  // Cross-class confirmation (see handleStart): when set, a class-targeted
+  // topic is about to be paired with a student outside that class and the
+  // upload is paused until the teacher confirms. Component-local — it only
+  // matters while staging here (same as the pickers above).
+  const [mismatchConfirm, setMismatchConfirm] = useState<{
+    studentName: string;
+    className: string;
+  } | null>(null);
 
   // Teacher upload: which learner this scan is for. null = NOT PICKED YET
   // (upload is blocked); ESSAY_FOR_SELF = explicitly "my own essay".
@@ -238,6 +248,30 @@ export default function LanguageCheckContainer() {
     setForClassId(topic.classId);
   }
 
+  // Rosters fetched for the topic-class mismatch confirmation (see
+  // handleStart), cached per class for the lifetime of the upload view. The
+  // PROMISE is cached so concurrent/repeated starts share one request; a
+  // failed lookup resolves null and the confirmation is simply skipped
+  // (fail-open).
+  const classMembersRef = useRef(new Map<string, Promise<Set<string> | null>>());
+  function classMemberIds(classId: string): Promise<Set<string> | null> {
+    let p = classMembersRef.current.get(classId);
+    if (!p) {
+      p = (async () => {
+        try {
+          const res = await fetch(`/api/classes/${classId}/members`);
+          if (!res.ok) return null;
+          const members = (await res.json()) as ClassMember[];
+          return new Set(members.map((m) => m.studentId));
+        } catch {
+          return null;
+        }
+      })();
+      classMembersRef.current.set(classId, p);
+    }
+    return p;
+  }
+
   // Staff must state WHO the essay is for before anything can be staged or
   // transcribed: teachers (and admins) are overwhelmingly scanning for a
   // STUDENT, so a silent "Myself" default files the essay under the wrong
@@ -314,18 +348,48 @@ export default function LanguageCheckContainer() {
       toast.error(t("languageCheck.upload.pickStudentRequired"));
       return;
     }
+    const studentId =
+      forStudentId && forStudentId !== ESSAY_FOR_SELF ? forStudentId : undefined;
+    // Cross-class guard: a class-targeted topic implies who the scan is
+    // for, and the picker auto-scopes to it — but a manual class-dropdown
+    // override can still pair the topic with a student from another class.
+    // That gets paused behind a confirmation rather than blocked outright:
+    // reusing a strong task across classes is legitimate. When the class
+    // filter still matches the topic's class, the listed students were
+    // fetched FOR it, so no check is needed; if membership can't be
+    // verified, upload without asking.
+    const topic = topics.find((x) => x.id === selectedTopicId);
+    if (
+      topic?.classId &&
+      studentId &&
+      forStudent &&
+      forClassId !== topic.classId
+    ) {
+      const members = await classMemberIds(topic.classId);
+      if (members && !members.has(studentId)) {
+        // The upload must not begin until the teacher confirms.
+        setMismatchConfirm({
+          studentName: forStudent.name,
+          className: topic.className ?? "",
+        });
+        return;
+      }
+    }
+    await beginUpload(studentId, selectedTopicId);
+  }
+
+  /** The actual upload: prepare the staged pages, create the essay, then
+   *  stream OCR. Runs only once the cross-class confirmation (if any) has
+   *  been accepted — or when no confirmation was needed. */
+  async function beginUpload(studentId: string | undefined, topicId: string) {
     setPreparing(true);
     try {
       const pages: string[] = [];
       for (const page of staged) pages.push(await preparePage(page.src));
-      const studentId =
-        forStudentId && forStudentId !== ESSAY_FOR_SELF
-          ? forStudentId
-          : undefined;
       const essay = await create(
         pages,
         useSettingStore.getState().ocrModel,
-        selectedTopicId,
+        topicId,
         studentId,
       );
       setStaged([]);
@@ -417,32 +481,74 @@ export default function LanguageCheckContainer() {
     ) : undefined;
 
     return (
-      <LanguageCheckHome
-        onTopicUsed={handleTopicSelected}
-        essayListProps={{
-          preparing,
-          onFiles: handleFiles,
-          onOpen: handleOpen,
-          studentPicker,
-          topicPicker: <TopicPicker onSelect={handleTopicSelected} />,
-          uploadDisabled: !selectedTopicId || needsStudentPick,
-          uploadDisabledMessage: !selectedTopicId
-            ? t("languageCheck.topics.picker.required")
-            : t("languageCheck.upload.pickStudentRequired"),
-          forStudentName: forStudent?.name ?? null,
-          staging:
-            staged.length > 0 ? (
-              <PageStaging
-                pages={staged}
-                max={LANGUAGE_CHECK_MAX_PAGES}
-                busy={preparing}
-                onPagesChange={setStaged}
-                onFiles={handleFiles}
-                onStart={handleStart}
-              />
-            ) : undefined,
-        }}
-      />
+      <>
+        <LanguageCheckHome
+          onTopicUsed={handleTopicSelected}
+          essayListProps={{
+            preparing,
+            onFiles: handleFiles,
+            onOpen: handleOpen,
+            studentPicker,
+            topicPicker: <TopicPicker onSelect={handleTopicSelected} />,
+            uploadDisabled: !selectedTopicId || needsStudentPick,
+            uploadDisabledMessage: !selectedTopicId
+              ? t("languageCheck.topics.picker.required")
+              : t("languageCheck.upload.pickStudentRequired"),
+            forStudentName: forStudent?.name ?? null,
+            staging:
+              staged.length > 0 ? (
+                <PageStaging
+                  pages={staged}
+                  max={LANGUAGE_CHECK_MAX_PAGES}
+                  busy={preparing}
+                  onPagesChange={setStaged}
+                  onFiles={handleFiles}
+                  onStart={handleStart}
+                />
+              ) : undefined,
+          }}
+        />
+        {/* Cross-class confirmation: a class-targeted topic paired (via a
+            manual class-dropdown override) with a student outside that
+            class. The upload waits here; cancelling returns to the staged
+            tray so the class/student pick can be corrected. */}
+        <Dialog
+          open={!!mismatchConfirm}
+          onOpenChange={(o) => !o && setMismatchConfirm(null)}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {t("languageCheck.upload.topicClassMismatchTitle")}
+              </DialogTitle>
+              <DialogDescription>
+                {t("languageCheck.upload.topicClassMismatch", {
+                  name: mismatchConfirm?.studentName,
+                  className: mismatchConfirm?.className,
+                })}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setMismatchConfirm(null)}>
+                {t("languageCheck.cancel")}
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!selectedTopicId) return;
+                  const studentId =
+                    forStudentId && forStudentId !== ESSAY_FOR_SELF
+                      ? forStudentId
+                      : undefined;
+                  setMismatchConfirm(null);
+                  void beginUpload(studentId, selectedTopicId);
+                }}
+              >
+                {t("languageCheck.upload.uploadAnyway")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 

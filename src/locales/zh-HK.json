@@ -4864,7 +4864,10 @@
       "forStudentHint": "檢查結果會儲存至 {{name}} 的「我的作文」，他可自行查看批改並從中學習。",
       "studentPlaceholder": "選擇學生…",
       "forSelfHint": "檢查結果會儲存至你自己的「我的作文」，學生不會看到。",
-      "pickStudentRequired": "請先選擇這篇作文的所屬對象——在上方揀選學生，或選「我自己」。"
+      "pickStudentRequired": "請先選擇這篇作文的所屬對象——在上方揀選學生，或選「我自己」。",
+      "topicClassMismatchTitle": "學生不屬於此題目的班別",
+      "topicClassMismatch": "{{name}} 不屬於此題目所屬的 {{className}}。作文仍會以此題目檢查，並儲存至他的「我的作文」。",
+      "uploadAnyway": "仍要上載"
     },
     "topics": {
       "tab": "題目庫",

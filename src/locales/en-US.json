@@ -4867,7 +4867,10 @@
       "forStudentHint": "It will be saved to {{name}}'s essays, where they can review the corrections and learn from them.",
       "studentPlaceholder": "Select student…",
       "forSelfHint": "It will be saved to YOUR essays — no student will see it.",
-      "pickStudentRequired": "Choose who this essay is for first — pick a student above, or \"Myself\"."
+      "pickStudentRequired": "Choose who this essay is for first — pick a student above, or \"Myself\".",
+      "topicClassMismatchTitle": "Student is not in the topic's class",
+      "topicClassMismatch": "{{name}} is not in {{className}}, the class this topic was created for. The essay will still be checked against this topic and saved to their essays.",
+      "uploadAnyway": "Upload anyway"
     },
     "topics": {
       "tab": "Topic Library",

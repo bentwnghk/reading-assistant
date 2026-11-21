@@ -43,11 +43,21 @@ vi.mock("sonner", () => ({
 // browser globals (DOMMatrix) jsdom lacks, and this suite never parses PDFs.
 vi.mock("@/utils/parser/pdfParser", () => ({ processPdfFile: vi.fn() }));
 
+// Staging pages runs the image pipeline (canvas) which jsdom lacks — stub it
+// with tiny data URLs so files reach the staging tray unchanged.
+vi.mock("@/utils/image", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  downscaleImage: vi.fn(async () => "data:image/jpeg;base64,tiny"),
+  readFileAsDataURL: vi.fn(async () => "data:image/png;base64,tiny"),
+}));
+
 const CLASSES: ClassInfo[] = [
   { id: "c-mine", name: "My Class", teacherId: "admin-1", createdAt: 0 },
   // In the same school (so it lists for the admin) but not taught by them,
   // and its student fetch comes back empty — the reported scenario.
   { id: "c-empty", name: "Empty Class", teacherId: "someone-else", createdAt: 0 },
+  // The class-targeted topic's class, for the mismatch-warning tests.
+  { id: "c-topic", name: "Topic Class", teacherId: "admin-1", createdAt: 0 },
 ];
 
 const AMY: LanguageCheckStaffUser = {
@@ -70,8 +80,15 @@ const CLASS_TOPIC: LanguageCheckTopicSummary = {
   updatedAt: 0,
 };
 
-const fetchMock = vi.fn(async (url: string) => {
+// Members of the topic's class (c-topic); each mismatch test sets who it
+// contains. Default: some other student, so Amy is NOT a member.
+const topicClassMembers = { current: [{ studentId: "someone-else" }] };
+
+const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
   const u = String(url);
+  if (u.includes("/api/classes/c-topic/members")) {
+    return { ok: true, json: async () => topicClassMembers.current } as Response;
+  }
   if (u.includes("/api/classes")) {
     return { ok: true, json: async () => CLASSES } as Response;
   }
@@ -86,6 +103,9 @@ const fetchMock = vi.fn(async (url: string) => {
 
 // jsdom shims for the comboboxes / pointer probing
 beforeEach(() => {
+  // Toast spies persist across tests; the mismatch tests assert negative
+  // cases, so stale calls from earlier tests must not leak in.
+  vi.clearAllMocks();
   if (!("ResizeObserver" in globalThis)) {
     (globalThis as Record<string, unknown>).ResizeObserver = class {
       observe() {}
@@ -110,6 +130,14 @@ beforeEach(() => {
   vi.stubGlobal("fetch", fetchMock);
   fetchMock.mockClear();
   searchParams.current = new URLSearchParams("tab=essays");
+  topicClassMembers.current = [{ studentId: "someone-else" }];
+  // handleFiles tags staged pages with crypto.randomUUID; provide it when
+  // the jsdom build lacks it.
+  if (!globalThis.crypto.randomUUID) {
+    Object.defineProperty(globalThis.crypto, "randomUUID", {
+      value: () => "uuid-1",
+    });
+  }
   useLanguageCheckStore.setState({
     essays: [],
     listLoading: false,
@@ -224,5 +252,142 @@ describe("LanguageCheckContainer topic class auto-scoping", () => {
         studentFetches.every(([u]) => !String(u).includes("classId=")),
       ).toBe(true);
     });
+  });
+});
+
+// Regression tests for the topic-class mismatch confirmation: a
+// class-targeted topic + a picked student from ANOTHER class (possible only
+// via a manual class-dropdown override) must pause behind a confirmation —
+// the upload may not begin until the teacher confirms the pairing.
+describe("LanguageCheckContainer topic-class mismatch confirmation", () => {
+  const MISMATCH_TOPIC: LanguageCheckTopicSummary = {
+    ...CLASS_TOPIC,
+    id: "topic-c",
+    classId: "c-topic",
+    className: "Topic Class",
+  };
+
+  const postAttempted = () =>
+    fetchMock.mock.calls.some(
+      ([u, init]) =>
+        String(u) === "/api/writing-assessment" &&
+        (init as RequestInit | undefined)?.method === "POST",
+    );
+
+  const triggerText = (el: HTMLElement) => el.textContent ?? "";
+
+  /** Clicks a combobox row until the pick registers on the trigger. The
+   *  staff pickers re-render while their scoped student fetches resolve,
+   *  and a click landing between two commits hits a detached row and is
+   *  silently swallowed — waitFor's retries make it deterministic. */
+  async function pickRow(trigger: HTMLElement, optionLabel: string, appliedLabel: string) {
+    await waitFor(async () => {
+      if (triggerText(trigger).includes(appliedLabel)) return;
+      fireEvent.click((await screen.findAllByText(optionLabel))[0]);
+      if (!triggerText(trigger).includes(appliedLabel)) {
+        throw new Error("pick not applied yet");
+      }
+    });
+  }
+
+  /** Reaches handleStart: picks Amy (lifting the explicit-pick gate), stages
+   *  one page through the file input and presses the tray's start button. */
+  async function pickAmyAndStart() {
+    const studentTrigger = comboboxByLabel("languageCheck.upload.studentPlaceholder");
+    fireEvent.click(studentTrigger); // open once; only the row click retries
+    await pickRow(studentTrigger, "Amy Wong", "Amy Wong");
+    await waitFor(() => expect(chooseFiles().disabled).toBe(false));
+    const input = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    fireEvent.change(input, {
+      target: { files: [new File(["x"], "page.png", { type: "image/png" })] },
+    });
+    fireEvent.click(
+      await screen.findByRole("button", { name: "languageCheck.staging.start" }),
+    );
+  }
+
+  it("pauses the upload behind a confirmation when the student is outside the topic's class", async () => {
+    useLanguageCheckStore.setState({
+      topics: [MISMATCH_TOPIC],
+      topicsLoaded: true,
+      selectedTopicId: "topic-c",
+    });
+    render(<LanguageCheckContainer />);
+
+    // The class filter ("My Classes") no longer matches the topic's class,
+    // and the fetched roster does not contain Amy → confirmation, no upload.
+    await pickAmyAndStart();
+    expect(postAttempted()).toBe(false);
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+    expect(
+      screen.getByText("languageCheck.upload.topicClassMismatch:Amy Wong"),
+    ).toBeTruthy();
+    // Confirming proceeds with the upload.
+    fireEvent.click(
+      screen.getByRole("button", { name: "languageCheck.upload.uploadAnyway" }),
+    );
+    await waitFor(() => expect(postAttempted()).toBe(true));
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("does not upload when the confirmation is cancelled", async () => {
+    useLanguageCheckStore.setState({
+      topics: [MISMATCH_TOPIC],
+      topicsLoaded: true,
+      selectedTopicId: "topic-c",
+    });
+    render(<LanguageCheckContainer />);
+
+    await pickAmyAndStart();
+    await screen.findByRole("dialog");
+    fireEvent.click(screen.getByRole("button", { name: "languageCheck.cancel" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(postAttempted()).toBe(false);
+    // The staged tray survives so the teacher can fix the pick and restart.
+    expect(
+      screen.getByRole("button", { name: "languageCheck.staging.start" }),
+    ).toBeTruthy();
+  });
+
+  it("uploads straight away when the picked student is in the topic's class", async () => {
+    topicClassMembers.current = [{ studentId: "s1" }]; // Amy IS a member
+    useLanguageCheckStore.setState({
+      topics: [MISMATCH_TOPIC],
+      topicsLoaded: true,
+      selectedTopicId: "topic-c",
+    });
+    render(<LanguageCheckContainer />);
+
+    await pickAmyAndStart();
+    await waitFor(() => expect(postAttempted()).toBe(true));
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("skips the roster fetch when the class filter matches the topic's class", async () => {
+    useLanguageCheckStore.setState({
+      topics: [MISMATCH_TOPIC],
+      topicsLoaded: true,
+      selectedTopicId: "topic-c",
+    });
+    render(<LanguageCheckContainer />);
+
+    // Align the class filter with the topic's class: the student list was
+    // then fetched FOR that class, so membership is already guaranteed.
+    // Wait for the "My Classes" default adoption first — until the classes
+    // fetch lands, the trigger still reads "All Classes".
+    await waitFor(() => expect(comboboxByLabel("classCombobox.mine")).toBeTruthy());
+    const classTrigger = comboboxByLabel("classCombobox.mine");
+    fireEvent.click(classTrigger); // open once; only the row click retries
+    await pickRow(classTrigger, "Topic Class", "Topic Class");
+    await pickAmyAndStart();
+    await waitFor(() => expect(postAttempted()).toBe(true));
+    expect(
+      fetchMock.mock.calls.some(([u]) =>
+        String(u).includes("/api/classes/c-topic/members"),
+      ),
+    ).toBe(false);
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });
