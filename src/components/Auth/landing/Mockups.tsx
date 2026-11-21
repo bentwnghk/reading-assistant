@@ -212,7 +212,7 @@ export function CaptureComprehendMockup() {
 
   return (
     <MockupFrame label="CAPTURE · Mr.🆖 ProReader" frameRef={ref}>
-      <div className={`relative min-h-[18rem] sm:min-h-[23rem] ${handwriting.variable}`}>
+      <div className={`relative min-h-[26rem] sm:min-h-[24rem] ${handwriting.variable}`}>
         {/* shutter flash — replays on each capture → result transition */}
         {flashKey > 0 && (
           <motion.div
@@ -479,13 +479,11 @@ function MarkingBeat() {
       </div>
 
       {/* the marked essay — same words as the capture beat, chips mirror ErrorSpan.
-          The open popover is anchored above mistake ① with ~6.75rem of headroom
-          (like slide 06·2) so it never covers the first line; it only appears
-          from `sm` up (below that the chips + legend + score panel tell the
-          story). */}
-      <div className="relative pt-0 sm:pt-[6.75rem]">
+          The open popover is anchored above mistake ① with ~7.25rem of headroom
+          (like slide 06·2) so it never covers the first line, at any width. */}
+      <div className="relative pt-[7.25rem]">
         {/* open ErrorSpan popover — side="top", arrow pointing at mistake ① */}
-        <div className="absolute inset-x-2 top-0 z-20 hidden rounded-xl border bg-popover p-2.5 text-popover-foreground shadow-xl sm:block">
+        <div className="absolute inset-x-2 top-0 z-20 rounded-xl border bg-popover p-2.5 text-popover-foreground shadow-xl">
           <p className="text-[9px] font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
             Tense / time frame <span className="font-semibold text-indigo-400">(1)</span>
           </p>
@@ -494,9 +492,8 @@ function MarkingBeat() {
             <span className="font-semibold text-green-700 dark:text-green-400">joined</span>
           </div>
           <p className="mt-1.5 text-[10px] leading-snug">
-            &ldquo;Last Saturday&rdquo; is a finished past time, so the verb takes the simple past: I
-            joined. Chinese marks time with separate words, so &ldquo;have/has + verb&rdquo; is easy
-            to overuse.
+            &ldquo;Last Saturday&rdquo; is a finished past time, so the verb takes the simple past:
+            I joined. Chinese never changes the verb form.
           </p>
           {/* arrow — "Last Saturday I " is ~96px wide in the 13px handwriting
               face, so 5.75rem (minus the popover's 8px inset) lands the tip on
