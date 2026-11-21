@@ -4880,6 +4880,10 @@
       "deleteDesc": "\"{{title}}\" will be removed from your library. Essays already checked with it keep their own copy of the task.",
       "by": "By {{name}}",
       "classTopicTitle": "Created for this class — it appears in the topic lists of the class's students and its teacher.",
+      "allClasses": "All classes",
+      "noneClass": "No class (personal)",
+      "search": "Search topics or classes…",
+      "emptyFilter": "No topics match these filters.",
       "picker": {
         "label": "Writing topic",
         "placeholder": "Choose a saved topic",
