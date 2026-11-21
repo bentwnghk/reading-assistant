@@ -4874,7 +4874,7 @@
       "edit": "Edit topic",
       "delete": "Delete",
       "hasImage": "Question image",
-      "intro": "Save each writing task once — title, full instructions, an optional question image and the essay type — then reuse it for every essay you scan on that topic. The AI refers to the topic, question image and essay type when checking and assessing. Topics created for your classes also appear here.",
+      "intro": "Your saved writing tasks, ready to reuse — press \"Use for upload\" to scan the next essay against one. Topics created for your classes are listed here too, with their class and creator.",
       "empty": "No topics yet. Create one to get started.",
       "deleteTitle": "Delete topic?",
       "deleteDesc": "\"{{title}}\" will be removed from your library. Essays already checked with it keep their own copy of the task.",
@@ -4963,6 +4963,7 @@
     },
     "list": {
       "title": "Your essays",
+      "intro": "Choose a writing topic, then drop in a photo or PDF of the handwritten essay. It is listed below — open one to review the transcript, corrections and assessment.",
       "empty": "No essays yet. Upload your first one above.",
       "untitled": "Untitled essay",
       "for": "For {{name}}",
@@ -5074,6 +5075,7 @@
       "disclaimer": "AI-generated from the students' checked essays ({{model}}). Review before sharing."
     },
     "reports": {
+      "intro": "One card per writing topic — how far your students have got and the average score. Open a card for the full report.",
       "statTopics": "Topics",
       "statChecked": "Checked essays",
       "statComplete": "Fully checked",
@@ -5135,6 +5137,7 @@
     },
     "staff": {
       "title": "Essay activity log",
+      "intro": "Essays your students have scanned — filter by topic or status, then open one to review the transcript and corrections, check it again, or change its topic.",
       "scopeTeacher": "Students in your classes",
       "scopeSchool": "Your school",
       "scopeAll": "All users",
@@ -5556,6 +5559,8 @@
     "learnData": {
       "title": "My learning",
       "staffTitle": "Learning progress",
+      "staffIntro": "Your students' \"Learn from mistakes\" sessions and progress — see class and per-student dashboards in the Overview, and open any session read-only.",
+      "intro": "Every \"Learn from mistakes\" session is saved here — resume or review one, and follow your progress in the Dashboard and Activity tabs.",
       "tabs": {
         "sessions": "Sessions",
         "dashboard": "Dashboard",

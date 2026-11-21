@@ -166,6 +166,15 @@ export default function LanguageCheckHome({
           )
         ) : (
           <>
+            {/* Tab intro sits above the shared class/student filter bar — it
+                describes the tab, the bar narrows what the tab shows. */}
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              {section === "essays"
+                ? t("languageCheck.staff.intro")
+                : section === "reports"
+                  ? t("languageCheck.reports.intro")
+                  : t("languageCheck.learnData.staffIntro")}
+            </p>
             <StaffFilterBar
               role={role}
               value={selection}

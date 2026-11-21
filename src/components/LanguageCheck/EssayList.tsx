@@ -129,6 +129,9 @@ export default function EssayList({
 
   return (
     <div className="flex flex-col gap-6">
+      <p className="max-w-2xl text-sm text-muted-foreground">
+        {t("languageCheck.list.intro")}
+      </p>
       <div
         onDragOver={(e) => {
           e.preventDefault();

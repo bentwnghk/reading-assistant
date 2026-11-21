@@ -59,6 +59,9 @@ export default function MyLearning() {
 
   return (
     <section className="flex flex-col gap-3">
+      <p className="max-w-2xl text-sm text-muted-foreground">
+        {t("languageCheck.learnData.intro")}
+      </p>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <SegmentedTabs
           value={tab}
