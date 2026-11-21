@@ -5583,7 +5583,7 @@ export function LanguageCheckTranscribeMockup() {
             </span>
             <span className="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground">
               <SpellCheck className="mr-1 h-3 w-3" />
-              Run writing check
+              Mark writing
             </span>
           </div>
         </div>
@@ -7037,7 +7037,7 @@ export function LanguageCheckClassReportMockup() {
             <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[8px] text-muted-foreground">
               <span className="font-semibold text-primary">4A</span>
               <span>· DSE Part A</span>
-              <span>· 23 checked essays analysed</span>
+              <span>· 23 marked essays analysed</span>
               <span>· Generated 14/11/2026, 09:32</span>
             </p>
           </div>
@@ -7348,7 +7348,7 @@ export function LanguageCheckClassReportMockup() {
         </div>
 
         <p className="text-center text-[7px] text-muted-foreground">
-          AI-generated from the students&apos; checked essays (gpt-6.1-sol). Review before sharing.
+          AI-generated from the students&apos; marked essays (gpt-6.1-sol). Review before sharing.
         </p>
       </div>
     </MockupFrame>
