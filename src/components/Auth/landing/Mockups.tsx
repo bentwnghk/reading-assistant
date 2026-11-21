@@ -519,17 +519,17 @@ function MarkingBeat() {
         </p>
       </div>
 
-      {/* colour legend — errors (chips: tense · plural) · suggestions (dotted) */}
-      <div className="mt-1.5 flex items-center gap-3 text-[9px] text-[var(--lp-ink-soft)]">
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block h-3 w-4 rounded-md border border-black/10 bg-orange-200 dark:border-white/10 dark:bg-orange-900/70" />
-          <span className="inline-block h-3 w-4 rounded-md border border-black/10 bg-yellow-200 dark:border-white/10 dark:bg-yellow-800/70" />
-          error
+      {/* colour legend — category chips with counts, mirroring the ResultsView
+          legend (slide 06·2); "very bad" (2) is a Stronger-word-choice
+          suggestion, drawn dotted */}
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[9px]">
+        <LcLegendChip cat="tense" count={2} />
+        <LcLegendChip cat="plural" count={1} />
+        <span className="inline-flex items-center gap-1 rounded-full border bg-card px-2 py-0.5 text-[9px] text-[var(--lp-ink)]">
+          <span className="inline-block w-3 border-t-2 border-dotted border-amber-500" />
+          <span>Stronger word choice</span>
+          <span className="font-semibold tabular-nums text-muted-foreground">1</span>
         </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="inline-block w-4 border-t-2 border-dotted border-amber-500" /> suggestion
-        </span>
-        <span className="ml-auto inline-flex items-center gap-1 font-mono">tap a mistake</span>
       </div>
 
       {/* AI Writing Assessment panel — mirrors AssessmentPanel.tsx: the overall
