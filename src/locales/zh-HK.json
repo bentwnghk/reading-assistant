@@ -4861,7 +4861,10 @@
       "checkFor": "替誰檢查",
       "forMyself": "我自己",
       "dropFor": "將 {{name}} 的手寫作文拖放至此，或貼上相片",
-      "forStudentHint": "檢查結果會儲存至 {{name}} 的「我的作文」，他可自行查看批改並從中學習。"
+      "forStudentHint": "檢查結果會儲存至 {{name}} 的「我的作文」，他可自行查看批改並從中學習。",
+      "studentPlaceholder": "選擇學生…",
+      "forSelfHint": "檢查結果會儲存至你自己的「我的作文」，學生不會看到。",
+      "pickStudentRequired": "請先選擇這篇作文的所屬對象——在上方揀選學生，或選「我自己」。"
     },
     "topics": {
       "tab": "題目庫",
@@ -4976,6 +4979,11 @@
       "delete": "刪除",
       "deleteTitle": "刪除這篇作文？",
       "deleteDesc": "「{{title}}」及其掃描圖片和更正內容將被永久刪除。",
+      "move": "移交給學生",
+      "moveTitle": "將這篇作文移交給學生",
+      "moveDesc": "「{{title}}」將轉移至所選學生的「我的作文」。轉錄、批改、評估及掃描圖片會原樣保留，而你仍可在清單中查看這篇作文。",
+      "moveConfirm": "移交作文",
+      "moved": "作文已移交給 {{name}}。",
       "retentionHint": "原始掃描圖片會在上傳 {{days}} 天後自動刪除。",
       "rowsPerPage": "每頁"
     },

@@ -106,6 +106,16 @@ export const staffRenameSchema = z.object({
 })
 
 /**
+ * Staff ownership transfer (PATCH /api/writing-assessment/[id]/owner): move
+ * a mis-attributed essay to a student in scope (e.g. the "Check an essay
+ * for" picker was left on "Myself"). studentId only — nothing else about the
+ * essay can change through this route.
+ */
+export const moveOwnerSchema = z.object({
+  studentId: z.string().min(1).max(64),
+})
+
+/**
  * Staff re-link (PUT /api/writing-assessment/staff/[id]/topic). topicId =
  * an existing Topic Library entry visible to the CALLER (own / class topics
  * — the same resolution as an upload), whose task, essay type and question

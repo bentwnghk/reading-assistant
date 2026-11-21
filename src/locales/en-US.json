@@ -4864,7 +4864,10 @@
       "checkFor": "Check an essay for",
       "forMyself": "Myself",
       "dropFor": "Drop {{name}}'s handwritten essay here, or paste a photo",
-      "forStudentHint": "It will be saved to {{name}}'s essays, where they can review the corrections and learn from them."
+      "forStudentHint": "It will be saved to {{name}}'s essays, where they can review the corrections and learn from them.",
+      "studentPlaceholder": "Select student…",
+      "forSelfHint": "It will be saved to YOUR essays — no student will see it.",
+      "pickStudentRequired": "Choose who this essay is for first — pick a student above, or \"Myself\"."
     },
     "topics": {
       "tab": "Topic Library",
@@ -4982,6 +4985,11 @@
       "delete": "Delete",
       "deleteTitle": "Delete this essay?",
       "deleteDesc": "\"{{title}}\" and its scans and corrections will be permanently deleted.",
+      "move": "Move to a student",
+      "moveTitle": "Move this essay to a student",
+      "moveDesc": "\"{{title}}\" will be transferred to the chosen student's essays. The transcript, corrections, assessment and scans stay exactly as they are, and the essay stays in your list under their name.",
+      "moveConfirm": "Move essay",
+      "moved": "Essay moved to {{name}}.",
       "retentionHint": "Original scans are automatically deleted {{days}} days after upload.",
       "rowsPerPage": "Per page"
     },

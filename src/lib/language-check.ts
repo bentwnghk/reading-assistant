@@ -347,6 +347,51 @@ export async function deleteEssay(
   return (result.rowCount ?? 0) > 0
 }
 
+export type MoveEssayResult =
+  | { ownerId: string; ownerName: string }
+  | "not-found"
+  | "same-owner"
+  | "not-a-student"
+
+/**
+ * Transfer an essay to a student (staff remediation for a mis-attributed
+ * upload — e.g. "Check an essay for" was left on "Myself" or on the wrong
+ * learner). The caller must currently own the essay OR have uploaded it; the
+ * target must be a current, non-banned STUDENT in the caller's scope (the
+ * same rule as an upload). The caller becomes the recorded uploader, so the
+ * essay keeps staff-visible attribution ("For <name>" chip) and stays in
+ * their list; nothing else about the essay changes — transcript,
+ * corrections, assessment and scan all stay. `updated_at` is bumped by the
+ * table trigger, which also re-sorts the essay to the top of both lists.
+ */
+export async function moveEssayOwnership(
+  callerId: string,
+  scope: LanguageCheckStaffScope,
+  id: string,
+  studentId: string,
+): Promise<MoveEssayResult> {
+  if (!(await canUploadForStudent(scope, studentId))) return "not-a-student"
+  const current = await getPool().query(
+    `SELECT user_id FROM language_check_essays
+     WHERE id = $1 AND (user_id = $2 OR uploaded_by = $2)`,
+    [id, callerId],
+  )
+  if (!current.rows[0]) return "not-found"
+  if (current.rows[0].user_id === studentId) return "same-owner"
+  const { rows } = await getPool().query(
+    `UPDATE language_check_essays
+     SET user_id = $3, uploaded_by = $2
+     WHERE id = $1 AND (user_id = $2 OR uploaded_by = $2)
+     RETURNING user_id AS owner_id,
+               (SELECT u.name FROM users u WHERE u.id = user_id) AS owner_name`,
+    [id, callerId, studentId],
+  )
+  return {
+    ownerId: rows[0].owner_id,
+    ownerName: rows[0].owner_name ?? "",
+  }
+}
+
 // ─── Staff essay log (teachers / admins / super-admins) ─────────────────────
 
 export type LanguageCheckStaffScope =

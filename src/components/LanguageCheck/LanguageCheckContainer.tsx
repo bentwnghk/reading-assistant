@@ -70,6 +70,15 @@ import { parseError } from "@/utils/error";
 type View = "auto" | "review" | "results";
 
 /**
+ * Sentinel value of the staff student picker for "my own essay". Unlike the
+ * filter bars (where null means "mine"), the upload picker must know the
+ * difference between "deliberately mine" and "never picked" — a forgotten
+ * pick must not silently file a student's essay under the teacher's account
+ * (see `needsStudentPick` below).
+ */
+const ESSAY_FOR_SELF = "__self__";
+
+/**
  * Downscale a page; retry smaller if it is still above the server cap. The
  * first rung keeps JPEG quality high: compression artefacts blur thin pen
  * strokes, and a model that cannot read a letter "reads" the word it expects.
@@ -101,7 +110,8 @@ export default function LanguageCheckContainer() {
   const [preparing, setPreparing] = useState(false);
   const [staged, setStaged] = useState<StagedPage[]>([]);
 
-  // Teacher upload: which learner this scan is for (null = my own essay).
+  // Teacher upload: which learner this scan is for. null = NOT PICKED YET
+  // (upload is blocked); ESSAY_FOR_SELF = explicitly "my own essay".
   // Component-local is fine — it only matters while staging pages here.
   // Class + student dropdowns, laid out like the Teacher Dashboard filters:
   // class narrows the student options (and resets the pick). Class value is
@@ -181,6 +191,16 @@ export default function LanguageCheckContainer() {
 
   const forStudent = students.find((s) => s.id === forStudentId) ?? null;
 
+  // Staff must state WHO the essay is for before anything can be staged or
+  // transcribed: teachers (and admins) are overwhelmingly scanning for a
+  // STUDENT, so a silent "Myself" default files the essay under the wrong
+  // account and the student never sees it. The blocker lifts only when the
+  // scope offers nobody (no students in the class list, or the fetch
+  // failed) — then "Myself" remains the only sensible implicit target and
+  // uploads must not hard-block.
+  const needsStudentPick =
+    isStaff && forStudentId === null && students.length > 0;
+
   // Pages are staged (and optionally cropped) before anything is uploaded, so
   // a multi-page essay can be built from several camera shots. Ephemeral UI
   // state: nothing is persisted or sent until the user starts the transcription.
@@ -241,11 +261,20 @@ export default function LanguageCheckContainer() {
       toast.error(t("languageCheck.topics.picker.required"));
       return;
     }
+    // Defense in depth: the tray's start button can already be on screen
+    // while the student list is still loading and the pick becomes required.
+    if (needsStudentPick) {
+      toast.error(t("languageCheck.upload.pickStudentRequired"));
+      return;
+    }
     setPreparing(true);
     try {
       const pages: string[] = [];
       for (const page of staged) pages.push(await preparePage(page.src));
-      const studentId = forStudentId ?? undefined;
+      const studentId =
+        forStudentId && forStudentId !== ESSAY_FOR_SELF
+          ? forStudentId
+          : undefined;
       const essay = await create(
         pages,
         useSettingStore.getState().ocrModel,
@@ -253,8 +282,9 @@ export default function LanguageCheckContainer() {
         studentId,
       );
       setStaged([]);
-      // Back to "Myself" so the teacher's next own upload can never be
-      // silently attributed to the previous student.
+      // Back to UNPICKED: the next upload must state its target again, so it
+      // can never be silently filed under the previous student — or under
+      // "Myself".
       setForStudentId(null);
       // Fire and forget: progress/state live in the store, so it survives navigation.
       void transcribe(essay.id);
@@ -312,17 +342,29 @@ export default function LanguageCheckContainer() {
             value={forStudentId}
             onChange={setForStudentId}
             allowMine
+            // "Myself" is an explicit opt-in pinned BELOW the students, and
+            // nothing is pre-selected — a teacher who forgets the picker is
+            // stopped, not defaulted into the wrong account.
+            mineValue={ESSAY_FOR_SELF}
+            minePosition="bottom"
             mineLabel={t("languageCheck.upload.forMyself")}
+            placeholder={t("languageCheck.upload.studentPlaceholder")}
             emptyLabel={t("languageCheck.staff.noStudents")}
             searchPlaceholder={t("languageCheck.staff.searchStudents")}
             loading={studentsLoading}
             loadingLabel={t("languageCheck.staff.loadingStudents")}
           />
         </div>
-        {forStudent && (
+        {forStudentId === ESSAY_FOR_SELF ? (
           <p className="w-full text-xs text-muted-foreground sm:w-auto sm:flex-1">
-            {t("languageCheck.upload.forStudentHint", { name: forStudent.name })}
+            {t("languageCheck.upload.forSelfHint")}
           </p>
+        ) : (
+          forStudent && (
+            <p className="w-full text-xs text-muted-foreground sm:w-auto sm:flex-1">
+              {t("languageCheck.upload.forStudentHint", { name: forStudent.name })}
+            </p>
+          )
         )}
       </div>
     ) : undefined;
@@ -335,7 +377,10 @@ export default function LanguageCheckContainer() {
           onOpen: handleOpen,
           studentPicker,
           topicPicker: <TopicPicker />,
-          uploadDisabled: !selectedTopicId,
+          uploadDisabled: !selectedTopicId || needsStudentPick,
+          uploadDisabledMessage: !selectedTopicId
+            ? t("languageCheck.topics.picker.required")
+            : t("languageCheck.upload.pickStudentRequired"),
           forStudentName: forStudent?.name ?? null,
           staging:
             staged.length > 0 ? (

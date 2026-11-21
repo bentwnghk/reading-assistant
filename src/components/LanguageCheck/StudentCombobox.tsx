@@ -30,11 +30,21 @@ interface StudentComboboxProps {
   /** While true a spinner row replaces the options. */
   loading?: boolean;
   loadingLabel?: string;
-  /** Pinned "my own" option at the top that emits null (e.g. "My vocabulary"
-   *  on /vocabulary); the trigger shows `mineLabel` when value is null.
-   *  Pass at most one of allowMine / allLabel — both emit null. */
+  /** Pinned "my own" option (e.g. "My vocabulary" on /vocabulary); the
+   *  trigger shows `mineLabel` when value is null. Pass at most one of
+   *  allowMine / allLabel — both emit null (unless `mineValue` is set). */
   allowMine?: boolean;
   mineLabel?: string;
+  /**
+   * Explicit-mine mode: the pinned option emits this sentinel instead of
+   * null, and the trigger shows `mineLabel` only when it is selected — so
+   * null can mean "nothing picked yet" (placeholder shows) rather than
+   * silently meaning "mine". Use it where a forgotten pick would file data
+   * under the wrong account (the "Check an essay for" upload picker).
+   */
+  mineValue?: string;
+  /** Where the pinned "my own" option renders (default: pinned at the top). */
+  minePosition?: "top" | "bottom";
   /** Trigger label for a `value` that is not in `users` (e.g. a student kept
    *  open while the filters exclude them), so it need not be listed. */
   customLabel?: string;
@@ -59,6 +69,8 @@ export default function StudentCombobox({
   loadingLabel,
   allowMine = false,
   mineLabel,
+  mineValue,
+  minePosition = "top",
   customLabel,
   disabled = false,
   className,
@@ -72,6 +84,21 @@ export default function StudentCombobox({
     [users],
   );
   const selected = options.find((u) => u.id === value);
+  // Without `mineValue`, null IS the mine state (legacy filter-bar mode);
+  // with it, mine is an explicit value and null stays "nothing picked".
+  const mineActive = mineValue !== undefined ? value === mineValue : value == null;
+  // The pinned option emits the sentinel in explicit mode, null otherwise.
+  const emitMine = () => {
+    onChange(mineValue !== undefined ? mineValue : null);
+    setOpen(false);
+  };
+  const mineOption = (
+    <CommandItem value={mineLabel ?? ""} onSelect={emitMine}>
+      <GraduationCap className="h-4 w-4 shrink-0 opacity-60" />
+      <span className="flex-1">{mineLabel}</span>
+      {mineActive && <Layers className="h-4 w-4 text-primary" />}
+    </CommandItem>
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -85,7 +112,7 @@ export default function StudentCombobox({
             "w-full justify-between font-normal",
             !selected &&
               !(value != null && customLabel) &&
-              !(allowMine && value == null) &&
+              !(allowMine && mineActive) &&
               "text-muted-foreground",
             className,
           )}
@@ -95,7 +122,7 @@ export default function StudentCombobox({
               ? selected.name
               : value != null && customLabel
                 ? customLabel
-                : allowMine && value == null
+                : allowMine && mineActive
                   ? mineLabel
                   : placeholder ?? ""}
           </span>
@@ -112,20 +139,8 @@ export default function StudentCombobox({
       >
         <Command filter={commandFilter}>
           <CommandInput placeholder={searchPlaceholder} />
-          {allowMine && (
-            <div className="border-b">
-              <CommandItem
-                value={mineLabel ?? ""}
-                onSelect={() => {
-                  onChange(null);
-                  setOpen(false);
-                }}
-              >
-                <GraduationCap className="h-4 w-4 shrink-0 opacity-60" />
-                <span className="flex-1">{mineLabel}</span>
-                {value == null && <Layers className="h-4 w-4 text-primary" />}
-              </CommandItem>
-            </div>
+          {allowMine && minePosition === "top" && (
+            <div className="border-b">{mineOption}</div>
           )}
           <CommandList className="max-h-72">
             {loading ? (
@@ -162,6 +177,9 @@ export default function StudentCombobox({
               </>
             )}
           </CommandList>
+          {allowMine && minePosition === "bottom" && (
+            <div className="border-t p-1">{mineOption}</div>
+          )}
           {allLabel && (
             <div className="border-t p-1">
               <CommandItem

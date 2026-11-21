@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   Trash2,
   UserCog,
+  ArrowRightLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import { formatDateTime } from "@/utils/formatDate";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { parseError } from "@/utils/error";
 import { STATUS_TONE } from "@/components/LanguageCheck/shared";
+import MoveEssayDialog from "@/components/LanguageCheck/MoveEssayDialog";
 import PageSourceButtons, {
   filterSupportedFiles,
 } from "@/components/LanguageCheck/PageSourceButtons";
@@ -49,6 +51,13 @@ interface EssayListProps {
   topicPicker?: ReactNode;
   /** No topic chosen yet: uploading is blocked until one is. */
   uploadDisabled?: boolean;
+  /**
+   * Why uploading is blocked (already translated) — shown as a toast when a
+   * blocked drop/paste/button is attempted. Falls back to the topic-required
+   * message. Set together with `uploadDisabled` by the container, which knows
+   * whether the blocker is the topic or the missing "Check an essay for" pick.
+   */
+  uploadDisabledMessage?: string;
   /** Student display name when a staff upload is targeted; null = my own. */
   forStudentName?: string | null;
 }
@@ -62,6 +71,7 @@ export default function EssayList({
   studentPicker,
   topicPicker,
   uploadDisabled,
+  uploadDisabledMessage,
   forStudentName,
 }: EssayListProps) {
   const { t } = useTranslation();
@@ -72,9 +82,13 @@ export default function EssayList({
   const remove = useLanguageCheckStore((s) => s.remove);
   const [dragging, setDragging] = useState(false);
   const [toDelete, setToDelete] = useState<LanguageCheckEssaySummary | null>(null);
+  const [toMove, setToMove] = useState<LanguageCheckEssaySummary | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const role = session?.user?.role;
+  const isStaff = role === "teacher" || role === "admin" || role === "super-admin";
 
   // safePage clamps automatically when the list shrinks (deletion, retention
   // sweep on reload) so the controls never point past the last page.
@@ -88,7 +102,7 @@ export default function EssayList({
   function accept(list: FileList | File[] | null) {
     if (!list || preparing) return;
     if (uploadDisabled) {
-      toast.error(t("languageCheck.topics.picker.required"));
+      toast.error(uploadDisabledMessage ?? t("languageCheck.topics.picker.required"));
       return;
     }
     const files = filterSupportedFiles(list);
@@ -262,6 +276,17 @@ export default function EssayList({
                     {t(`languageCheck.list.status.${essay.status}`)}
                   </span>
                 </button>
+                {isStaff && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-auto w-10 shrink-0 text-muted-foreground hover:text-primary"
+                    title={t("languageCheck.list.move")}
+                    onClick={() => setToMove(essay)}
+                  >
+                    <ArrowRightLeft className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -359,6 +384,16 @@ export default function EssayList({
           </>
         )}
       </div>
+
+      {isStaff && (
+        <MoveEssayDialog
+          essay={toMove}
+          open={!!toMove}
+          onOpenChange={(o) => {
+            if (!o) setToMove(null);
+          }}
+        />
+      )}
 
       <Dialog open={!!toDelete} onOpenChange={(o) => !o && !deleting && setToDelete(null)}>
         <DialogContent>

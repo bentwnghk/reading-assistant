@@ -111,6 +111,12 @@ interface LanguageCheckActions {
   ) => Promise<LanguageCheckEssay>;
   open: (id: string) => Promise<void>;
   close: () => void;
+  /**
+   * Staff remediation: transfer an essay the caller owns or uploaded to a
+   * student in scope (PATCH /[id]/owner). Mirrors the new owner name into
+   * the list summary and the open essay.
+   */
+  moveEssay: (id: string, studentId: string) => Promise<void>;
   /** In-memory edit of the open essay (no network). */
   updateLocal: (id: string, patch: Partial<LanguageCheckEssay>) => void;
   /** PATCH to the server and mirror into the open essay + list summary. */
@@ -374,6 +380,27 @@ export const useLanguageCheckStore = create(
       close: () => {
         openToken++;
         set({ active: null, activeLoading: false });
+      },
+
+      moveEssay: async (id, studentId) => {
+        const res = await fetch(`${BASE}/${id}/owner`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentId }),
+        });
+        if (!res.ok) throw new Error(await readError(res));
+        const owner = (await res.json()) as { ownerId: string; ownerName: string };
+        set((s) => ({
+          essays: s.essays.map((e) =>
+            e.id === id
+              ? { ...e, ownerId: owner.ownerId, ownerName: owner.ownerName }
+              : e,
+          ),
+          active:
+            s.active?.id === id
+              ? { ...s.active, ownerId: owner.ownerId, ownerName: owner.ownerName }
+              : s.active,
+        }));
       },
 
       updateLocal: (id, patch) =>

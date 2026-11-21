@@ -24,12 +24,19 @@ beforeAll(() => {
 // Teacher upload UI: the staff picker slot renders inside the upload card,
 // the drop prompt switches to the student's name, and essays uploaded for a
 // student carry a "For <name>" attribution chip — while the owner's own rows
-// (and the whole student experience) stay unchanged.
+// (and the whole student experience) stay unchanged. Staff rows also offer
+// "Move to a student" (mis-attribution remediation); student viewers must
+// not see it.
+
+// Mutable so tests can flip the viewer between staff and student roles.
+const mockSession = vi.hoisted(() => ({
+  user: { id: "teacher-1", role: "teacher" as string | undefined },
+}));
 
 vi.mock("next-auth/react", () => ({
   useSession: () => ({
     status: "authenticated",
-    data: { user: { id: "teacher-1", role: "teacher" } },
+    data: { user: mockSession.user },
   }),
 }));
 
@@ -71,6 +78,8 @@ const ESSAYS: LanguageCheckEssaySummary[] = [
 ];
 
 beforeEach(() => {
+  mockSession.user.id = "teacher-1";
+  mockSession.user.role = "teacher";
   useLanguageCheckStore.setState({
     essays: ESSAYS,
     listLoading: false,
@@ -127,5 +136,23 @@ describe("EssayList teacher-upload affordances", () => {
     expect(ownRow?.textContent).toContain("languageCheck.list.words");
     // wordCount 0 (no transcript yet) shows no words segment.
     expect(amyRow?.textContent).not.toContain("languageCheck.list.words");
+  });
+
+  it("offers staff a 'move to a student' action on every row", () => {
+    render(
+      <EssayList preparing={false} onFiles={() => {}} onOpen={() => {}} />,
+    );
+    // Both mis-attribution shapes need it: the teacher's own essay (a
+    // forgotten "Check an essay for" pick) and an essay already aimed at a
+    // (possibly wrong) student.
+    expect(screen.getAllByTitle("languageCheck.list.move")).toHaveLength(2);
+  });
+
+  it("hides the move action from student viewers", () => {
+    mockSession.user.role = "student";
+    render(
+      <EssayList preparing={false} onFiles={() => {}} onOpen={() => {}} />,
+    );
+    expect(screen.queryByTitle("languageCheck.list.move")).toBeNull();
   });
 });
