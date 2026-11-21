@@ -26,7 +26,14 @@ import { parseError } from "@/utils/error";
  * the classes they are in / teach / supervise (e.g. a teacher's task for
  * their class), so students can answer them.
  */
-export default function TopicPicker() {
+export default function TopicPicker({
+  onSelect,
+}: {
+  /** Fired with the topic whenever one is chosen (dropdown pick or inline
+   *  create), alongside `selectTopic` — the container uses it to auto-scope
+   *  the "Check an essay for" class dropdown to the topic's class. */
+  onSelect?: (topic: LanguageCheckTopicSummary) => void;
+}) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const topics = useLanguageCheckStore((s) => s.topics);
@@ -67,7 +74,11 @@ export default function TopicPicker() {
         <div className="w-full sm:w-72">
           <Select
             value={selected?.id ?? ""}
-            onValueChange={(v) => select(v)}
+            onValueChange={(v) => {
+              select(v);
+              const topic = topics.find((x) => x.id === v);
+              if (topic) onSelect?.(topic);
+            }}
             disabled={topics.length === 0}
           >
             <SelectTrigger aria-label={t("languageCheck.topics.picker.label")}>
@@ -134,7 +145,10 @@ export default function TopicPicker() {
       <TopicFormDialog
         open={creating}
         onOpenChange={setCreating}
-        onSaved={(topic) => select(topic.id)}
+        onSaved={(topic) => {
+          select(topic.id);
+          onSelect?.(topic);
+        }}
       />
     </div>
   );

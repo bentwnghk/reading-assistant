@@ -10,11 +10,15 @@ import { useLanguageCheckStore } from "@/store/languageCheck";
 // (no members, or members outside the admin's school scope) used to
 // silently re-open the "Myself" default the gate exists to prevent.
 
+// Mutable so individual tests can land on a different tab (e.g. the Topic
+// Library, to exercise "Use for upload").
+const searchParams = { current: new URLSearchParams("tab=essays") };
+
 vi.mock("next/navigation", () => ({
   usePathname: () => "/writing-assessment",
   useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
   // Land on the essays tab so the upload card (and its pickers) render.
-  useSearchParams: () => new URLSearchParams("tab=essays"),
+  useSearchParams: () => searchParams.current,
 }));
 
 vi.mock("next-auth/react", () => ({
@@ -50,6 +54,20 @@ const AMY: LanguageCheckStaffUser = {
   id: "s1",
   name: "Amy Wong",
   email: "amy@example.com",
+};
+
+const CLASS_TOPIC: LanguageCheckTopicSummary = {
+  id: "topic-class",
+  title: "Class task",
+  topic: "Write about your weekend",
+  essayType: "dse-part-a",
+  hasQuestionImage: false,
+  userId: "admin-1",
+  classId: "c-mine",
+  className: "My Class",
+  creatorName: null,
+  createdAt: 0,
+  updatedAt: 0,
 };
 
 const fetchMock = vi.fn(async (url: string) => {
@@ -91,6 +109,7 @@ beforeEach(() => {
   });
   vi.stubGlobal("fetch", fetchMock);
   fetchMock.mockClear();
+  searchParams.current = new URLSearchParams("tab=essays");
   useLanguageCheckStore.setState({
     essays: [],
     listLoading: false,
@@ -154,5 +173,56 @@ describe("LanguageCheckContainer explicit-pick gate", () => {
     fireEvent.click(comboboxByLabel("languageCheck.upload.studentPlaceholder"));
     fireEvent.click(await screen.findByText("languageCheck.upload.forMyself"));
     expect(chooseFiles().disabled).toBe(false);
+  });
+});
+
+// Regression tests for the topic-driven class scoping: choosing a topic with
+// a class target (Topic Picker, or "Use for upload" in the Topic Library)
+// must adopt that class in the "Check an essay for" dropdown, so the student
+// picker is already narrowed to the topic's class. Both paths funnel through
+// the same container handler; these tests drive the Library route (a plain
+// button in jsdom, unlike the Topic Picker's Radix Select).
+describe("LanguageCheckContainer topic class auto-scoping", () => {
+  it("Use for upload scopes the student picker to the topic's class", async () => {
+    searchParams.current = new URLSearchParams("tab=topics");
+    useLanguageCheckStore.setState({
+      topics: [CLASS_TOPIC],
+      topicsLoaded: true,
+      selectedTopicId: null,
+    });
+    render(<LanguageCheckContainer />);
+
+    // The class dropdown adopts the topic's class → the student fetch
+    // narrows to it.
+    fireEvent.click(screen.getAllByText("languageCheck.topics.use")[0]);
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("classId=c-mine"),
+        expect.anything(),
+      ),
+    );
+  });
+
+  it("a personal topic does not narrow the student picker to a class", async () => {
+    searchParams.current = new URLSearchParams("tab=topics");
+    useLanguageCheckStore.setState({
+      topics: [
+        { ...CLASS_TOPIC, id: "topic-personal", classId: null, className: null },
+      ],
+      topicsLoaded: true,
+      selectedTopicId: null,
+    });
+    render(<LanguageCheckContainer />);
+
+    fireEvent.click(screen.getAllByText("languageCheck.topics.use")[0]);
+    await waitFor(() => {
+      const studentFetches = fetchMock.mock.calls.filter(([u]) =>
+        String(u).includes("staff/students"),
+      );
+      expect(studentFetches.length).toBeGreaterThan(0);
+      expect(
+        studentFetches.every(([u]) => !String(u).includes("classId=")),
+      ).toBe(true);
+    });
   });
 });

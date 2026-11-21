@@ -226,6 +226,18 @@ export default function LanguageCheckContainer() {
 
   const forStudent = students.find((s) => s.id === forStudentId) ?? null;
 
+  // A topic with a class target implies which class the scan is for: adopt
+  // it in the "Check an essay for" dropdown so the student picker is already
+  // scoped to that class. Both selection paths funnel here — the Topic
+  // Picker above the drop zone and the Topic Library's "Use for upload".
+  function handleTopicSelected(topic: LanguageCheckTopicSummary) {
+    if (!isStaff || !topic.classId) return;
+    // Same rule as changing the class dropdown by hand: a student picked
+    // under another class may not belong to the topic's class.
+    if (forClassId !== topic.classId) setForStudentId(null);
+    setForClassId(topic.classId);
+  }
+
   // Staff must state WHO the essay is for before anything can be staged or
   // transcribed: teachers (and admins) are overwhelmingly scanning for a
   // STUDENT, so a silent "Myself" default files the essay under the wrong
@@ -406,12 +418,13 @@ export default function LanguageCheckContainer() {
 
     return (
       <LanguageCheckHome
+        onTopicUsed={handleTopicSelected}
         essayListProps={{
           preparing,
           onFiles: handleFiles,
           onOpen: handleOpen,
           studentPicker,
-          topicPicker: <TopicPicker />,
+          topicPicker: <TopicPicker onSelect={handleTopicSelected} />,
           uploadDisabled: !selectedTopicId || needsStudentPick,
           uploadDisabledMessage: !selectedTopicId
             ? t("languageCheck.topics.picker.required")

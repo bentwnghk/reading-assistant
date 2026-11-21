@@ -221,4 +221,13 @@ describe("TopicLibrary filters", () => {
     expect(screen.getByText("Speech task")).toBeTruthy();
     expect(screen.getByText("Personal task")).toBeTruthy();
   });
+
+  it("Use for upload hands the chosen topic to onUseTopic", () => {
+    const onUseTopic = vi.fn();
+    render(<TopicLibrary onUseTopic={onUseTopic} />);
+    // One "Use for upload" per topic; the first row is TOPICS[0].
+    fireEvent.click(screen.getAllByText("languageCheck.topics.use")[0]);
+    expect(onUseTopic).toHaveBeenCalledTimes(1);
+    expect(onUseTopic).toHaveBeenCalledWith(TOPICS[0]);
+  });
 });

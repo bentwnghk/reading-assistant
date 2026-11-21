@@ -41,8 +41,9 @@ import { parseError } from "@/utils/error";
 export default function TopicLibrary({
   onUseTopic,
 }: {
-  /** Called after a topic is chosen for upload (navigates to the upload view). */
-  onUseTopic: () => void;
+  /** Called with the chosen topic after "Use for upload" (navigates to the
+   *  upload view; the container auto-scopes the class dropdown to it). */
+  onUseTopic: (topic: LanguageCheckTopicSummary) => void;
 }) {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -226,7 +227,7 @@ export default function TopicLibrary({
                         size="sm"
                         onClick={() => {
                           select(topic.id);
-                          onUseTopic();
+                          onUseTopic(topic);
                         }}
                       >
                         <Upload className="mr-1.5 h-4 w-4" />

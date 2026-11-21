@@ -50,8 +50,12 @@ const DEFAULT_SECTION: Record<Scope, Section> = { mine: "topics", students: "rep
  */
 export default function LanguageCheckHome({
   essayListProps,
+  onTopicUsed,
 }: {
   essayListProps: ComponentProps<typeof EssayList>;
+  /** "Use for upload" in the Topic Library: fired with the chosen topic
+   *  before navigating to the upload view (class auto-scoping). */
+  onTopicUsed?: (topic: LanguageCheckTopicSummary) => void;
 }) {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -160,7 +164,12 @@ export default function LanguageCheckHome({
           section === "essays" ? (
             <EssayList {...essayListProps} />
           ) : section === "topics" ? (
-            <TopicLibrary onUseTopic={() => navigate({ tab: "essays" })} />
+            <TopicLibrary
+              onUseTopic={(topic) => {
+                onTopicUsed?.(topic);
+                navigate({ tab: "essays" });
+              }}
+            />
           ) : (
             <MyLearning />
           )
