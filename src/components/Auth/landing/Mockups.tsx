@@ -342,7 +342,7 @@ function CaptureBeat({ variant }: { variant: "reading" | "writing" }) {
                 className="text-[12px] leading-[19px] text-[var(--lp-ink)]"
                 style={{ fontFamily: "var(--font-handwriting)" }}
               >
-                Last Saturday I have joined a beach clean-up. The weather was very bad, but we still pick up three bags of rubbish.
+                Last Saturday I have joined a beach clean-up. The weather was very bad, but we still pick up three bag of rubbish.
               </p>
             </div>
           </div>
@@ -479,9 +479,11 @@ function MarkingBeat() {
       </div>
 
       {/* the marked essay — same words as the capture beat, chips mirror ErrorSpan.
-          The open popover needs ~5.5rem of headroom, so it only appears from `sm`
-          up (below that the chips + legend + score panel tell the story). */}
-      <div className="relative pt-0 sm:pt-[5.5rem]">
+          The open popover is anchored above mistake ① with ~6.75rem of headroom
+          (like slide 06·2) so it never covers the first line; it only appears
+          from `sm` up (below that the chips + legend + score panel tell the
+          story). */}
+      <div className="relative pt-0 sm:pt-[6.75rem]">
         {/* open ErrorSpan popover — side="top", arrow pointing at mistake ① */}
         <div className="absolute inset-x-2 top-0 z-20 hidden rounded-xl border bg-popover p-2.5 text-popover-foreground shadow-xl sm:block">
           <p className="text-[9px] font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">
@@ -496,7 +498,10 @@ function MarkingBeat() {
             joined. Chinese marks time with separate words, so &ldquo;have/has + verb&rdquo; is easy
             to overuse.
           </p>
-          <span className="absolute bottom-[-4px] left-6 h-2 w-2 rotate-45 border-b border-r border-border bg-popover" />
+          {/* arrow — "Last Saturday I " is ~96px wide in the 13px handwriting
+              face, so 5.75rem (minus the popover's 8px inset) lands the tip on
+              the "have" chip ① */}
+          <span className="absolute bottom-[-4px] left-[5.75rem] h-2 w-2 rotate-45 border-b border-r border-border bg-popover" />
         </div>
 
         <p
@@ -509,14 +514,16 @@ function MarkingBeat() {
             very bad
             <sup className="ml-0.5 text-[0.6em] font-semibold opacity-80">(2)</sup>
           </span>
-          , but we still <LcSpan cat="tense" n={3}>pick</LcSpan> up three bags of rubbish.
+          , but we still <LcSpan cat="tense" n={3}>pick</LcSpan> up three{" "}
+          <LcSpan cat="plural" n={4}>bag</LcSpan> of rubbish.
         </p>
       </div>
 
-      {/* colour legend — errors (chip) · suggestions (dotted) — plus the tap hint */}
+      {/* colour legend — errors (chips: tense · plural) · suggestions (dotted) */}
       <div className="mt-1.5 flex items-center gap-3 text-[9px] text-[var(--lp-ink-soft)]">
         <span className="inline-flex items-center gap-1">
           <span className="inline-block h-3 w-4 rounded-md border border-black/10 bg-orange-200 dark:border-white/10 dark:bg-orange-900/70" />
+          <span className="inline-block h-3 w-4 rounded-md border border-black/10 bg-yellow-200 dark:border-white/10 dark:bg-yellow-800/70" />
           error
         </span>
         <span className="inline-flex items-center gap-1">
