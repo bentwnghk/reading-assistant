@@ -20,6 +20,9 @@ describe("markDailyWordLearned", () => {
     expect(query).toHaveBeenCalledTimes(1);
     // UPDATE path: the pinned word is kept, not overwritten.
     expect(query.mock.calls[0][0]).toMatch(/^UPDATE daily_word_progress/);
+    // Regression: an unused $3 (word) made PostgreSQL fail with
+    // "could not determine data type of parameter $3".
+    expect(query.mock.calls[0][1]).toEqual(["u1", "2026-11-22", expect.any(Number), true]);
   });
 
   it("reports newlyLearned when the day is inserted (learn before pin)", async () => {

@@ -119,13 +119,15 @@ export async function markDailyWordLearned(
   const now = Date.now();
   const pool = getPool();
 
-  // 1) Pinned row not yet learned → mark it. The pinned word stays.
+  // 1) Pinned row not yet learned → mark it. The pinned word stays (the
+  //    word param is NOT part of this statement — an unused parameter would
+  //    make PostgreSQL fail with "could not determine data type").
   let r = await pool.query(
     `UPDATE daily_word_progress
-        SET learned_at = $4, on_time = $5, updated_at = $4
+        SET learned_at = $3, on_time = $4, updated_at = $3
       WHERE user_id = $1 AND day_key = $2 AND learned_at IS NULL
       RETURNING word, learned_at, on_time, note`,
-    [userId, dayKey, word, now, onTime]
+    [userId, dayKey, now, onTime]
   );
   let newlyLearned = (r.rowCount ?? 0) > 0;
 
