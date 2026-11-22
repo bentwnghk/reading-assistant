@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -10,6 +11,7 @@ import {
   ChevronRight,
   Flame,
   Loader2,
+  Printer,
   RefreshCw,
   Sparkles,
   Volume2,
@@ -298,6 +300,210 @@ function DailyWordDialog({
     setOffset(Math.max(-MAX_BACK, Math.min(MAX_AHEAD, next)));
   };
 
+  const renderSpread = (print: boolean) => {
+    if (!entry) return null;
+    return (
+      <div className="rounded-xl border border-amber-300/60 dark:border-amber-800 bg-[#fbf5e4] dark:bg-stone-800 shadow-lg grid md:grid-cols-2 overflow-hidden">
+        {/* Front page */}
+        <div className="p-4 sm:p-6 md:border-r border-amber-300/60 dark:border-amber-800 text-emerald-950 dark:text-emerald-100">
+          <div className="flex items-baseline justify-between text-sm font-serif">
+            <span>{date.getFullYear()}</span>
+            <span className="font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">{month}</span>
+            <span>{weekday}</span>
+          </div>
+          <div className="relative flex items-end justify-center gap-3 mt-1">
+            <div className="text-8xl sm:text-9xl font-black leading-none text-emerald-900 dark:text-emerald-400">
+              {date.getDate()}
+            </div>
+            <IllustrationSlot
+              src={images[imageStoreKey(entry.word, "mascot")]}
+              status={imageStatus[imageStoreKey(entry.word, "mascot")]}
+              fallback={content?.mascot ?? "📖"}
+              className="h-24 w-24 sm:h-32 sm:w-32 shrink-0"
+              emojiClassName="text-5xl sm:text-6xl"
+            />
+          </div>
+
+          <div className="mt-2 rounded-lg border-2 border-emerald-900/70 dark:border-emerald-500/60 p-3 text-center">
+            <div className="flex items-center justify-center gap-2">
+              <h2 className="text-4xl font-bold font-serif break-words">{entry.word}</h2>
+              <button
+                type="button"
+                onClick={() => speak(entry.word)}
+                aria-label={t("vocabulary.dailyWord.listen")}
+                className="rounded-full p-1.5 hover:bg-emerald-900/10"
+              >
+                <Volume2 className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="text-sm italic mt-0.5">
+              {entry.syllabification && <span className="mr-2 not-italic opacity-70">{entry.syllabification}</span>}
+              <b>{content?.partOfSpeech || entry.partOfSpeech}</b>{" "}
+              {content?.meaningZh || entry.chineseDefinition}
+            </div>
+            {entry.englishDefinition && (
+              <div className="text-xs opacity-80 mt-1">{entry.englishDefinition}</div>
+            )}
+            {content && (
+              <div className="mt-2 pt-2 border-t border-emerald-900/20 text-sm text-left">
+                <button type="button" className="text-left" onClick={() => speak(content.example)}>
+                  {content.example}
+                </button>
+                <div className="opacity-80">{content.exampleZh}</div>
+              </div>
+            )}
+          </div>
+
+          {content && content.collocations.length > 0 && (
+            <PageBox title={t("vocabulary.dailyWord.expand")}>
+              <ul className="text-sm divide-y divide-emerald-900/15">
+                {content.collocations.map((c) => (
+                  <li key={c.phrase} className="flex justify-between gap-2 py-0.5">
+                    <span>• {c.phrase}</span>
+                    <span className="opacity-80 text-right">{c.zh}</span>
+                  </li>
+                ))}
+              </ul>
+            </PageBox>
+          )}
+        </div>
+
+        {/* Back page */}
+        <div className="p-4 sm:p-6 space-y-3 text-emerald-950 dark:text-emerald-100 border-t md:border-t-0 border-amber-300/60 dark:border-amber-800">
+          {content ? (
+            <>
+              <div className="rounded-lg border-2 border-emerald-900/70 dark:border-emerald-500/60 p-3">
+                <div className="text-sm">{content.quoteZh}</div>
+                <div className="text-sm italic font-serif mt-1 border-t border-emerald-900/20 pt-1">
+                  {content.quote}
+                </div>
+                <div className="mt-2 text-center">
+                  <IllustrationSlot
+                    src={images[imageStoreKey(entry.word, "scene")]}
+                    status={imageStatus[imageStoreKey(entry.word, "scene")]}
+                    fallback={content.scene.join(" ")}
+                    className="w-full aspect-video"
+                    emojiClassName="text-3xl tracking-widest"
+                    onRetry={() => {
+                      useDailyWordStore.setState((st) => {
+                        const imageStatus = { ...st.imageStatus };
+                        delete imageStatus[imageStoreKey(entry.word, "scene")];
+                        return { imageStatus };
+                      });
+                      void ensureImage(entry.word, "scene");
+                    }}
+                  />
+                  {content.sceneCaption && (
+                    <div className="text-xs opacity-70 mt-1">{content.sceneCaption}</div>
+                  )}
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {content.decode.length > 0 && (
+                  <PageBox title={t("vocabulary.dailyWord.decode")}>
+                    <ul className="text-xs space-y-1">
+                      {content.decode.map((d) => (
+                        <li key={d}>• {d}</li>
+                      ))}
+                    </ul>
+                  </PageBox>
+                )}
+                <div className="space-y-3">
+                  {content.family.length > 0 && (
+                    <PageBox title={t("vocabulary.dailyWord.family")}>
+                      <RelatedList items={content.family} onSpeak={speak} />
+                    </PageBox>
+                  )}
+                  {content.associations.length > 0 && (
+                    <PageBox title={t("vocabulary.dailyWord.associations")}>
+                      <RelatedList items={content.associations} onSpeak={speak} />
+                    </PageBox>
+                  )}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              {loading ? (
+                <>
+                  <Loader2 className="h-6 w-6 mx-auto mb-2 animate-spin" />
+                  {t("vocabulary.dailyWord.preparing")}
+                </>
+              ) : (
+                <>
+                  <p className="mb-3">{error ?? t("vocabulary.dailyWord.failed")}</p>
+                  <Button variant="outline" size="sm" onClick={() => setRetry((n) => n + 1)}>
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    {t("vocabulary.dailyWord.retry")}
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+          <PageBox title={t("vocabulary.dailyWord.writeTitle")}>
+            {print ? (
+              <div className="min-h-[3.5rem] whitespace-pre-wrap break-words text-sm">
+                {days[dayKey]?.note ?? ""}
+              </div>
+            ) : (
+            <Textarea
+              {...NO_ASSIST}
+              {...({ writingsuggestions: "false" } as object)}
+              value={days[dayKey]?.note ?? ""}
+              onChange={(e) => setNote(dayKey, entry.word, e.target.value.slice(0, 500))}
+              placeholder={t("vocabulary.dailyWord.writePlaceholder", { word: entry.word })}
+              rows={2}
+              className="bg-transparent text-sm"
+            />
+            )}
+          </PageBox>
+        </div>
+      </div>
+    );
+  };
+
+  const printRootRef = useRef<HTMLDivElement | null>(null);
+  const [printReady, setPrintReady] = useState(false);
+  useEffect(() => setPrintReady(true), []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const wasDark = { current: false };
+    const fit = () => {
+      const el = printRootRef.current;
+      if (!el) return;
+      const sheet = el.firstElementChild as HTMLElement | null;
+      if (!sheet) return;
+      sheet.style.zoom = "1";
+      const mm = 96 / 25.4;
+      const maxW = (297 - 16) * mm;
+      const maxH = (210 - 16) * mm;
+      const scale = Math.min(1, maxH / sheet.offsetHeight, maxW / sheet.offsetWidth);
+      sheet.style.zoom = String(scale);
+    };
+    const before = () => {
+      wasDark.current = root.classList.contains("dark");
+      root.classList.remove("dark");
+      fit();
+    };
+    const after = () => {
+      root.classList.remove("printing-daily-word");
+      if (wasDark.current) root.classList.add("dark");
+    };
+    window.addEventListener("beforeprint", before);
+    window.addEventListener("afterprint", after);
+    return () => {
+      window.removeEventListener("beforeprint", before);
+      window.removeEventListener("afterprint", after);
+    };
+  }, []);
+
+  const handlePrint = () => {
+    stopSpeaking();
+    document.documentElement.classList.add("printing-daily-word");
+    window.print();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -386,156 +592,7 @@ function DailyWordDialog({
 
         {!entry ? null : (
           <div className="px-3 pb-5 sm:px-6">
-            <div className="rounded-xl border border-amber-300/60 dark:border-amber-800 bg-[#fbf5e4] dark:bg-stone-800 shadow-lg grid md:grid-cols-2 overflow-hidden">
-              {/* Front page */}
-              <div className="p-4 sm:p-6 md:border-r border-amber-300/60 dark:border-amber-800 text-emerald-950 dark:text-emerald-100">
-                <div className="flex items-baseline justify-between text-sm font-serif">
-                  <span>{date.getFullYear()}</span>
-                  <span className="font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">{month}</span>
-                  <span>{weekday}</span>
-                </div>
-                <div className="relative flex items-end justify-center gap-3 mt-1">
-                  <div className="text-8xl sm:text-9xl font-black leading-none text-emerald-900 dark:text-emerald-400">
-                    {date.getDate()}
-                  </div>
-                  <IllustrationSlot
-                    src={images[imageStoreKey(entry.word, "mascot")]}
-                    status={imageStatus[imageStoreKey(entry.word, "mascot")]}
-                    fallback={content?.mascot ?? "📖"}
-                    className="h-24 w-24 sm:h-32 sm:w-32 shrink-0"
-                    emojiClassName="text-5xl sm:text-6xl"
-                  />
-                </div>
-
-                <div className="mt-2 rounded-lg border-2 border-emerald-900/70 dark:border-emerald-500/60 p-3 text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <h2 className="text-4xl font-bold font-serif break-words">{entry.word}</h2>
-                    <button
-                      type="button"
-                      onClick={() => speak(entry.word)}
-                      aria-label={t("vocabulary.dailyWord.listen")}
-                      className="rounded-full p-1.5 hover:bg-emerald-900/10"
-                    >
-                      <Volume2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                  <div className="text-sm italic mt-0.5">
-                    {entry.syllabification && <span className="mr-2 not-italic opacity-70">{entry.syllabification}</span>}
-                    <b>{content?.partOfSpeech || entry.partOfSpeech}</b>{" "}
-                    {content?.meaningZh || entry.chineseDefinition}
-                  </div>
-                  {entry.englishDefinition && (
-                    <div className="text-xs opacity-80 mt-1">{entry.englishDefinition}</div>
-                  )}
-                  {content && (
-                    <div className="mt-2 pt-2 border-t border-emerald-900/20 text-sm text-left">
-                      <button type="button" className="text-left" onClick={() => speak(content.example)}>
-                        {content.example}
-                      </button>
-                      <div className="opacity-80">{content.exampleZh}</div>
-                    </div>
-                  )}
-                </div>
-
-                {content && content.collocations.length > 0 && (
-                  <PageBox title={t("vocabulary.dailyWord.expand")}>
-                    <ul className="text-sm divide-y divide-emerald-900/15">
-                      {content.collocations.map((c) => (
-                        <li key={c.phrase} className="flex justify-between gap-2 py-0.5">
-                          <span>• {c.phrase}</span>
-                          <span className="opacity-80 text-right">{c.zh}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </PageBox>
-                )}
-              </div>
-
-              {/* Back page */}
-              <div className="p-4 sm:p-6 space-y-3 text-emerald-950 dark:text-emerald-100 border-t md:border-t-0 border-amber-300/60 dark:border-amber-800">
-                {content ? (
-                  <>
-                    <div className="rounded-lg border-2 border-emerald-900/70 dark:border-emerald-500/60 p-3">
-                      <div className="text-sm">{content.quoteZh}</div>
-                      <div className="text-sm italic font-serif mt-1 border-t border-emerald-900/20 pt-1">
-                        {content.quote}
-                      </div>
-                      <div className="mt-2 text-center">
-                        <IllustrationSlot
-                          src={images[imageStoreKey(entry.word, "scene")]}
-                          status={imageStatus[imageStoreKey(entry.word, "scene")]}
-                          fallback={content.scene.join(" ")}
-                          className="w-full aspect-video"
-                          emojiClassName="text-3xl tracking-widest"
-                          onRetry={() => {
-                            useDailyWordStore.setState((st) => {
-                              const imageStatus = { ...st.imageStatus };
-                              delete imageStatus[imageStoreKey(entry.word, "scene")];
-                              return { imageStatus };
-                            });
-                            void ensureImage(entry.word, "scene");
-                          }}
-                        />
-                        {content.sceneCaption && (
-                          <div className="text-xs opacity-70 mt-1">{content.sceneCaption}</div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      {content.decode.length > 0 && (
-                        <PageBox title={t("vocabulary.dailyWord.decode")}>
-                          <ul className="text-xs space-y-1">
-                            {content.decode.map((d) => (
-                              <li key={d}>• {d}</li>
-                            ))}
-                          </ul>
-                        </PageBox>
-                      )}
-                      <div className="space-y-3">
-                        {content.family.length > 0 && (
-                          <PageBox title={t("vocabulary.dailyWord.family")}>
-                            <RelatedList items={content.family} onSpeak={speak} />
-                          </PageBox>
-                        )}
-                        {content.associations.length > 0 && (
-                          <PageBox title={t("vocabulary.dailyWord.associations")}>
-                            <RelatedList items={content.associations} onSpeak={speak} />
-                          </PageBox>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="py-16 text-center text-sm text-muted-foreground">
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-6 w-6 mx-auto mb-2 animate-spin" />
-                        {t("vocabulary.dailyWord.preparing")}
-                      </>
-                    ) : (
-                      <>
-                        <p className="mb-3">{error ?? t("vocabulary.dailyWord.failed")}</p>
-                        <Button variant="outline" size="sm" onClick={() => setRetry((n) => n + 1)}>
-                          <RefreshCw className="h-4 w-4 mr-1" />
-                          {t("vocabulary.dailyWord.retry")}
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                )}
-                <PageBox title={t("vocabulary.dailyWord.writeTitle")}>
-                  <Textarea
-                    {...NO_ASSIST}
-                    {...({ writingsuggestions: "false" } as object)}
-                    value={days[dayKey]?.note ?? ""}
-                    onChange={(e) => setNote(dayKey, entry.word, e.target.value.slice(0, 500))}
-                    placeholder={t("vocabulary.dailyWord.writePlaceholder", { word: entry.word })}
-                    rows={2}
-                    className="bg-transparent text-sm"
-                  />
-                </PageBox>
-              </div>
-            </div>
+            {renderSpread(false)}
 
             <div className="mt-4 flex flex-col items-center gap-1">
               {learned ? (
@@ -561,10 +618,28 @@ function DailyWordDialog({
               <p className="text-xs text-muted-foreground text-center">
                 {t(`vocabulary.dailyWord.hint.${kind}`)}
               </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                disabled={!content}
+                className="mt-2"
+              >
+                <Printer className="h-4 w-4 mr-1.5" />
+                {t("vocabulary.dailyWord.print")}
+              </Button>
             </div>
           </div>
         )}
       </DialogContent>
+      {printReady &&
+        entry &&
+        createPortal(
+          <div ref={printRootRef} className="daily-word-print-root" aria-hidden>
+            <div className="daily-word-print-sheet">{renderSpread(true)}</div>
+          </div>,
+          document.body
+        )}
     </Dialog>
   );
 }

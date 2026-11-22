@@ -526,3 +526,44 @@ html.nav-sidebar-resizing body {
 }
 
 
+
+/* Daily Word calendar spread: one A4 landscape sheet, two columns = two pages.
+ * The print copy lives in a body-level portal, off-screen until printing. */
+.daily-word-print-root {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: calc(297mm - 16mm);
+  page: daily-word;
+}
+@page daily-word {
+  size: A4 landscape;
+  margin: 8mm;
+}
+@media print {
+  html.printing-daily-word body > *:not(.daily-word-print-root) {
+    display: none !important;
+  }
+  html.printing-daily-word,
+  html.printing-daily-word body {
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+  }
+  html.printing-daily-word .daily-word-print-root {
+    position: static;
+    width: 100%;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    break-inside: avoid;
+  }
+  html.printing-daily-word .daily-word-print-sheet {
+    width: calc(297mm - 16mm);
+    background: #f6efdc;
+  }
+  html.printing-daily-word .daily-word-print-sheet > div {
+    box-shadow: none;
+  }
+}
