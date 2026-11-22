@@ -204,6 +204,9 @@ GOOGLE_GENERATIVE_AI_API_KEY=
 VISUALIZATION_DAILY_LIMIT_SUBSCRIPTION=2
 # Daily visualization generation limit for free-tier students (default: 1)
 VISUALIZATION_DAILY_LIMIT_FREE=1
+# Word of the Day illustrations (mascot + scene) a non-admin, non-meter user may
+# generate per day. Pictures are cached per word in the DB, so repeats are free.
+DAILY_WORD_IMAGE_DAILY_LIMIT=12
 
 # (Optional) Injected script code can be used for statistics or error tracking.
 HEAD_SCRIPTS=

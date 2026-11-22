@@ -657,6 +657,18 @@ Activity types added: `assignment_create`, `assignment_start`, `assignment_submi
 
 ---
 
+### Word of the Day (`/vocabulary`)
+
+A fifth stats card (`DailyWordCard.tsx`, hidden in the staff student view) shows one Words-bank entry per calendar day and opens a calendar-page dialog (front: date, mascot picture, word, example, collocations; back: quote, scene picture, decoder, word family, associations, note box). Users can step back/forward (`MAX_BACK`/`MAX_AHEAD`).
+
+- **Pure logic**: `src/utils/dailyWord.ts` (+ tests) — local-day keys, deterministic pick (hash order, no repeats until the bank is exhausted), streaks. **Only on-time learning (same day) extends the streak**; catching up / studying ahead is bonus.
+- **State is in the DB** (`scripts/add-daily-word.sql` + `init-db.sql`): `daily_word_progress` (day → pinned word, learned_at, on_time, note; first writer wins so devices agree), `daily_word_content` (AI page JSON per user+word), `daily_word_images` (mascot/scene WebP data URLs, separate table so content reads stay light). Data access `src/lib/daily-word.ts`; API `/api/vocabulary/daily-word` (GET, POST `pin|learn|note`), `/content` (GET, PUT), `/image` (POST). The server validates the word is in the caller's bank, the day is in range, and downgrades `on_time` unless the day is within ±1 day of UTC today (anti-backdating).
+- **Client store** `src/store/dailyWord.ts` is non-persisted (optimistic + rolled back on failure; notes debounced; module-scope in-flight maps per §A; reset in `AuthProvider` on sign-out/account switch).
+- **Images**: the AI page includes `mascotPrompt`/`scenePrompt`; `/image` reads them from the STORED content (never from the client), generates once through `generateImageWithProviders` (`src/lib/image-generation.ts`, shared with `/api/ai/visualization`), compresses with sharp and caches. Capped by `DAILY_WORD_IMAGE_DAILY_LIMIT` per user per day (admins/meter-billing exempt). The emoji stays as fallback while loading/failed.
+- Strings: `vocabulary.dailyWord.*` in both locales.
+
+---
+
 ## Vocabulary Analytics (staff, `/vocabulary?view=analytics`)
 
 Teachers/admins/super-admins get a **Student analytics** view next to their own vocabulary (`VocabularyHome.tsx` is the `/vocabulary` entry; students see `VocabularyContainer` unchanged). Modelled on the Writing Assessment "Student learning" tab and reuses its pieces: `StaffFilterBar` (class + student, `studentsEndpoint` prop, `allowMine` — "My Classes" offered + default exactly like the Writing Assessment staff tabs, `"__mine__"` travels as `mine=1`), `SegmentedTabs`, `LearnRangeTabs`, `Stat`/`Delta`/`PercentBadge`, `requireStaff` (scope: teacher → classes, admin → school, super-admin → all).

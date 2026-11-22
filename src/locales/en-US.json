@@ -2160,6 +2160,46 @@
     }
   },
   "vocabulary": {
+    "dailyWord": {
+      "drawing": "Drawing your picture…",
+      "drawRetry": "Redraw picture",
+      "title": "Word of the Day",
+      "cardHint": "Open today's word calendar page",
+      "tapToLearn": "Tap to learn today's word",
+      "doneToday": "Learned today!",
+      "prevDay": "Previous day",
+      "nextDay": "Next day",
+      "backToToday": "Today",
+      "streak": "{{count}}-day streak",
+      "best": "Best: {{count}}",
+      "total": "{{count}} days learned",
+      "listen": "Listen",
+      "expand": "Expand",
+      "decode": "Word decoder",
+      "family": "Word family",
+      "associations": "Think of",
+      "writeTitle": "Use today's word, write about your day",
+      "writePlaceholder": "Write a sentence with \"{{word}}\"…",
+      "preparing": "Preparing your page…",
+      "failed": "Couldn't prepare this page.",
+      "retry": "Try again",
+      "learnedDone": "Learned!",
+      "bonus": "bonus day",
+      "learnBtn": {
+        "today": "I learned it today!",
+        "past": "Catch up on this word",
+        "future": "Learn it early!"
+      },
+      "hint": {
+        "today": "Learn one word a day to build your streak 🔥",
+        "past": "Catching up is great, but only same-day learning grows your streak.",
+        "future": "Peeking ahead? Go beyond the basics!"
+      },
+      "milestone": "🏆 {{count}}-day streak! You're on fire!",
+      "streakToast": "Nice! {{count}}-day streak 🔥",
+      "aheadToast": "Bonus! You learned a word early 🚀",
+      "catchUpToast": "Caught up! 💪"
+    },
     "title": "My Vocabulary",
     "dueBadgeHint": "{{count}} words due for review",
     "close": "Back to app",

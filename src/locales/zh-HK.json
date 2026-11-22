@@ -2159,6 +2159,46 @@
     }
   },
   "vocabulary": {
+    "dailyWord": {
+      "drawing": "正在繪製插圖……",
+      "drawRetry": "重新繪製插圖",
+      "title": "每日一詞",
+      "cardHint": "打開今日詞彙日曆頁",
+      "tapToLearn": "點擊學習今日單詞",
+      "doneToday": "今天已學會！",
+      "prevDay": "前一天",
+      "nextDay": "後一天",
+      "backToToday": "今天",
+      "streak": "連續 {{count}} 天",
+      "best": "最佳：{{count}}",
+      "total": "已學 {{count}} 天",
+      "listen": "發音",
+      "expand": "拓展",
+      "decode": "詞彙解碼",
+      "family": "同族串記",
+      "associations": "聯想記",
+      "writeTitle": "用今天的詞，寫今天的你",
+      "writePlaceholder": "用「{{word}}」造一個句子……",
+      "preparing": "正在準備日曆頁……",
+      "failed": "無法準備此頁。",
+      "retry": "重試",
+      "learnedDone": "已學會！",
+      "bonus": "額外獎勵日",
+      "learnBtn": {
+        "today": "我今天學會了！",
+        "past": "補學這個單詞",
+        "future": "提前學習！"
+      },
+      "hint": {
+        "today": "每天學一個詞，累積連續天數 🔥",
+        "past": "補學很棒，但只有當天學習才會增加連續天數。",
+        "future": "提前預覽？超越基礎吧！"
+      },
+      "milestone": "🏆 連續 {{count}} 天！太厲害了！",
+      "streakToast": "很好！連續 {{count}} 天 🔥",
+      "aheadToast": "額外獎勵！你提前學了一個詞 🚀",
+      "catchUpToast": "補上了！💪"
+    },
     "title": "我的詞彙",
     "dueBadgeHint": "{{count}} 個詞彙待複習",
     "close": "返回應用程式",

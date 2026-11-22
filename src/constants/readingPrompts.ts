@@ -2444,3 +2444,53 @@ Rules:
 - "strengths": 2-4 items. "mistakes": 3-5 items for the most widespread ERROR categories (include an expression-tier category only if no more than 1 of them). "priorities": 3 items, most important first. "quickTips": 3-4 items.
 - "category" in mistakes must be copied exactly from the evidence list.`;
 }
+
+export function dailyWordSystemPrompt(): string {
+  return `You write a "word-a-day calendar page" for a Hong Kong student (first language Cantonese) learning English. The page teaches ONE word and links it to many others, in a warm, fun, encouraging tone.
+
+Return ONLY a JSON object (no markdown fences) with exactly these keys:
+- "mascot": one emoji that suits the word's meaning (fallback while the picture loads).
+- "mascotPrompt": an English description (max 30 words) of a cute chubby capybara mascot acting out the word's meaning, with a few small props. Describe visuals only.
+- "partOfSpeech": short, e.g. "adj.", "vt.", "n.".
+- "meaningZh": concise Traditional Chinese meaning(s) of the word in that part of speech.
+- "example": one fun, memorable, natural English sentence using the exact word (or its inflection). Playful, relatable to a teenager.
+- "exampleZh": Traditional Chinese translation of the example.
+- "quote": one short positive / healing / motivating English sentence that naturally uses the word or its theme.
+- "quoteZh": Traditional Chinese translation of the quote.
+- "scene": array of 3-5 emojis that tell a tiny visual story of the quote (healing illustration substitute).
+- "sceneCaption": a short English caption (max 8 words) for the scene.
+- "scenePrompt": an English description (max 50 words) of a gentle, healing, hand-drawn illustration that visualises the quote: a simple round-headed character, a pet or two, soft nature or cosy objects. Describe visuals only, never any text or lettering.
+- "decode": array of 2-3 short memory aids in Traditional Chinese (word-building: prefix/root/suffix breakdown, a mnemonic, or a polysemy note). Write English terms inline.
+- "family": 2-4 words from the same word family (derivatives) as {word, pos, zh}.
+- "associations": 3-4 related words (synonyms or thematically linked) as {word, pos, zh}.
+- "collocations": 4-5 {phrase, zh} common collocations or expansions containing the word.
+
+Rules: Every English item must be correct, natural and in British spelling. Never invent words. Chinese must be Traditional Chinese (Hong Kong). Keep every string short. Do not include the studied word itself in "family" or "associations".`;
+}
+
+export function dailyWordPrompt(
+  word: string,
+  partOfSpeech: string,
+  englishDefinition: string,
+  chineseDefinition: string,
+  example: string
+): string {
+  return `Today's word: "${word}"
+Part of speech from the learner's bank: ${partOfSpeech || "(unknown)"}
+English definition from the bank: ${englishDefinition || "(none)"}
+Chinese definition from the bank: ${chineseDefinition || "(none)"}
+${example ? `Example the learner already saw: ${example}\n` : ""}Create today's page. Keep the sense the learner already saved, and write a NEW example sentence (not the one above).`;
+}
+
+export function dailyWordImagePrompt(
+  kind: "mascot" | "scene",
+  word: string,
+  content: { mascotPrompt: string; scenePrompt: string; quote: string; meaningZh: string }
+): string {
+  const common =
+    "Warm hand-drawn children's-book illustration, soft rounded shapes, gentle colours of forest green, honey orange and cream, flat colour with light texture, on a plain solid warm cream background (#fbf5e4). Absolutely no text, letters, numbers, captions or watermarks anywhere in the image.";
+  if (kind === "mascot") {
+    return `A single cute chubby capybara mascot wearing a small green leaf on its head, expressing the English word "${word}" (${content.meaningZh}). ${content.mascotPrompt || ""} Centered, full body, square composition, generous empty margin around it. ${common}`;
+  }
+  return `A wide healing illustration that visualises this idea: "${content.quote}". ${content.scenePrompt || ""} Wide 16:9 composition with a calm, uplifting mood. ${common}`;
+}

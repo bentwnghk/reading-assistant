@@ -22,6 +22,7 @@ import { useSharingStore, setShareCheckComplete } from "@/store/sharing"
 import { useVocabularyStore, setStudyPlanDialogChecked } from "@/store/vocabulary"
 import { useIdleTimer } from "@/hooks/useIdleTimer"
 import { useLanguageCheckStore } from "@/store/languageCheck"
+import { useDailyWordStore } from "@/store/dailyWord"
 
 function AuthStateManager() {
   const { data: session, status } = useSession()
@@ -50,6 +51,7 @@ function AuthStateManager() {
       // Writing Assessment essays are per-account server data cached in this
       // store; never let them linger after sign-out.
       useLanguageCheckStore.getState().reset()
+      useDailyWordStore.getState().reset()
       setRestoreComplete(false)
       setShareCheckComplete(false)
       setWelcomeDialogChecked(false)
@@ -188,6 +190,7 @@ function AuthStateManager() {
       useReadingStore.persist.clearStorage()
       // Drop essays cached for the previous account (they refetch per user).
       useLanguageCheckStore.getState().reset()
+      useDailyWordStore.getState().reset()
     }
 
     // Hold the first-run UI gate (onboarding dialog, settings banner) closed

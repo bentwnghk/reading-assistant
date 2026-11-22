@@ -38,6 +38,7 @@ import DeleteWordsDialog from "./DeleteWordsDialog";
 import ReviewListsTab from "./ReviewListsTab";
 import StudyPlanDialog from "./StudyPlanDialog";
 import StudentViewFilters from "./StudentViewFilters";
+import DailyWordCard from "./DailyWordCard";
 
 type TabType = "table" | "flashcard" | "quiz" | "spelling" | "lists" | "history" | "phrases";
 
@@ -492,7 +493,7 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
         )
       ) : (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
             <div className={cn(
               "bg-card border rounded-lg p-3 transition-all",
               filterMastery === "all" && filterSource === "all" && "ring-2 ring-primary/40"
@@ -616,6 +617,7 @@ function VocabularyContainer({ headerSlot }: VocabularyContainerProps) {
                 {displayStats.newWords}
               </div>
             </button>
+            {!isStudentView && <DailyWordCard />}
           </div>
 
           {(activeTab === "table" || activeTab === "phrases") && (
