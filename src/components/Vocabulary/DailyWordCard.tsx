@@ -507,7 +507,7 @@ function DailyWordDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-4xl max-h-[92vh] overflow-y-auto p-0 border-amber-200 dark:border-amber-900 bg-[#f6efdc] dark:bg-stone-900"
+        className="max-w-4xl max-h-[92vh] overflow-y-auto scrollbar-hide p-0 border-amber-200 dark:border-amber-900 bg-[#f6efdc] dark:bg-stone-900"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogTitle className="sr-only">{t("vocabulary.dailyWord.title")}</DialogTitle>
