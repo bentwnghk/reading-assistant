@@ -6,8 +6,8 @@ import {
   getDailyWordContent,
   getDailyWordImage,
   saveDailyWordImage,
-  type DailyWordImageKind,
 } from "@/lib/daily-word";
+import type { DailyWordImageKind } from "@/constants/dailyWord";
 import {
   dailyWordContentSchema,
   dailyWordImagePostSchema,

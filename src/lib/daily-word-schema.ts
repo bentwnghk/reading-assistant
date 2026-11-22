@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DAILY_WORD_IMAGE_KINDS, DAILY_WORD_MAX_NOTE } from "./daily-word";
+import { DAILY_WORD_IMAGE_KINDS, DAILY_WORD_MAX_NOTE } from "@/constants/dailyWord";
 
 const dayKey = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const word = z.string().trim().min(1).max(100);

@@ -1,10 +1,10 @@
 import { getPool } from "./db";
+import {
+  DAILY_WORD_MAX_AHEAD_DAYS,
+  DAILY_WORD_MAX_NOTE,
+  type DailyWordImageKind,
+} from "@/constants/dailyWord";
 
-export const DAILY_WORD_IMAGE_KINDS = ["mascot", "scene"] as const;
-export type DailyWordImageKind = (typeof DAILY_WORD_IMAGE_KINDS)[number];
-
-export const DAILY_WORD_MAX_NOTE = 500;
-export const DAILY_WORD_MAX_AHEAD_DAYS = 30;
 const DAY_MS = 86_400_000;
 
 export interface DailyWordDay {
