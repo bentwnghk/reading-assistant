@@ -310,7 +310,9 @@ function DailyWordDialog({
         </DialogDescription>
 
         <div className="px-4 pt-5 pb-2 sm:px-6">
-          <div className="flex items-center justify-between gap-2">
+          {/* pr reserves the corner for DialogContent's built-in close button
+              (absolute right-4 top-4) so the "next day" arrow clears it. */}
+          <div className="flex items-center justify-between gap-2 pr-8">
             <Button
               variant="outline"
               size="icon"
