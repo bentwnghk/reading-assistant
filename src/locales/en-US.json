@@ -306,6 +306,10 @@
           "title": "My Vocabulary Hub",
           "desc": "A dedicated page for all your words! Spaced repetition scheduling, mastery tracking, smart auto-selection, review lists, flashcard/spelling/quiz modes, review history, vocabulary sharing, and export as Word/PDF/image. Share review lists with your classmates and teachers — teachers and admins can share school-wide!"
         },
+        "dailyWord": {
+          "title": "Word of the Day",
+          "desc": "One word from your own vocabulary every day, on a charming calendar page with AI-written examples, quotes and word-family links, plus AI-drawn illustrations. Build a daily streak, catch up or peek ahead — every completed day levels the word up and counts toward achievements and the leaderboard streak."
+        },
         "languageCheck": {
           "title": "Writing Assessment",
           "desc": "Pick a real writing task — DSE Part A/B, JS or TSA Writing — then snap the handwritten essay: AI transcribes it word for word, marks every error with examiner-style notes (plus polish suggestions), and scores it on the task's own marking scheme. Enhanced Essays lift your own words toward Level 5**, Learn from your mistakes turns errors into lessons, practice and quizzes, and any version loads straight back into your reading journey."
@@ -517,6 +521,7 @@
           "Adaptive targeted practice from your skill profile",
           "Leaderboards & achievements",
           "My Vocabulary hub with mastery tracking",
+          "Word of the Day with daily streaks & rewards",
           "Learning Journey dashboard with progress charts"
         ],
         "carousel": {
@@ -2623,6 +2628,10 @@
           "new": {
             "name": "New Words",
             "desc": "Words you haven't reviewed yet. Start reviewing to track your progress!"
+          },
+          "dailyWord": {
+            "name": "Word of the Day",
+            "desc": "One word from your bank each day — tap the card to open its calendar page, learn the word, and grow your 🔥 streak. Milestones at 3/7/14/30/60/100 days earn extra celebration."
           }
         },
         "table": {
@@ -2720,6 +2729,10 @@
         "history": {
           "name": "Review History",
           "desc": "See past review sessions with per-word results. Flashcard sessions show Again/Hard/Good/Easy counts; Quiz and Spelling sessions show accuracy."
+        },
+        "dailyWord": {
+          "name": "Daily word reviews",
+          "desc": "Completing the Word of the Day counts as one correct review: the word moves up one mastery level and the session is recorded in History as \"Word of the Day\". It also feeds the leaderboard streak and the Word-a-Day Habit achievement — synced across your devices."
         },
         "deleteWords": {
           "name": "Delete Words",
@@ -2893,7 +2906,7 @@
           },
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing your daily learning activities across 17 types including reading, pre-reading summaries, mind maps, text visualizations, glossary, collocations, flashcard reviews, tests, quizzes, spelling and grammar games, and AI Tutor questions. Use the time range buttons to adjust the window."
+            "desc": "A stacked bar chart showing your daily learning activities across 18 types including reading, pre-reading summaries, mind maps, text visualizations, glossary, collocations, flashcard reviews, tests, quizzes, spelling and grammar games, AI Tutor questions, and the Word of the Day (one completed day = one). Use the time range buttons to adjust the window."
           },
           "readingActivity": {
             "name": "Reading Activity",
@@ -3071,7 +3084,7 @@
         "items": {
           "dailyActivity": {
             "name": "Daily Learning Activity",
-            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 17 activity types."
+            "desc": "A stacked bar chart showing each student's learning activities for a specific date. Navigate between dates to see daily breakdowns across 18 activity types — including the Word of the Day, where each student's completed day counts as one."
           },
           "readingTexts": {
             "name": "Reading Texts",

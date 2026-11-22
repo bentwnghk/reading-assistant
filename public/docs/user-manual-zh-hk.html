@@ -2291,11 +2291,12 @@ body.toc-noscroll{overflow:hidden}
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#f97316"><use href="#i-clock"/></svg> 待複習</div><b style="font-size:1.2rem;color:#f97316">42</b></div>
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#22c55e"><use href="#i-check-circle-2"/></svg> 已掌握</div><b style="font-size:1.2rem;color:#22c55e">95</b></div>
             <div class="card-mini" style="flex:1;margin:0;text-align:center"><div class="small"><svg class="ic sm" style="color:#3b82f6"><use href="#i-brain"/></svg> 新詞</div><b style="font-size:1.2rem;color:#3b82f6">31</b></div>
+            <div class="card-mini" style="flex:1;margin:0;text-align:center;background:#fbf5e4;border-color:#d97706"><div class="small">📅 每日一詞 <b style="color:#ea580c">🔥3</b></div><b style="font-size:1.2rem;color:#047857">gather</b><div class="small" style="color:#b45309">✨ 點擊學習今日單詞</div></div>
           </div>
           <div class="faketab"><span class="active"><svg class="ic sm"><use href="#i-table"/></svg> 詞彙</span><span><svg class="ic sm"><use href="#i-languages"/></svg> 詞組</span><span><svg class="ic sm"><use href="#i-layers"/></svg> 生字卡</span><span><svg class="ic sm"><use href="#i-spell-check"/></svg> 拼字</span><span><svg class="ic sm"><use href="#i-clipboard-list"/></svg> 測驗</span><span><svg class="ic sm"><use href="#i-list-plus"/></svg> 複習列表</span><span><svg class="ic sm"><use href="#i-history"/></svg> 歷史</span></div>
         </div>
       </div>
-      <p>四張統計卡同時兼作篩選器——點擊即篩選表格。統計卡與表格具備<b>情境感知</b>：在<b>詞彙</b>分頁統計並列出單字；在<b>詞組</b>分頁則切換為統計並列出多詞詞塊。七個分頁：<b>詞彙</b>、<b>詞組</b>、<b>生字卡</b>、<b>拼字</b>、<b>測驗</b>、<b>複習列表</b>、<b>歷史</b>。複習分頁（生字卡／拼字／測驗）須先選詞彙或詞組（或載入清單）；<b>拼字</b>另需至少選擇 <b>10</b> 個詞彙或詞組才能開始。</p>
+      <p>頁面頂部有五張統計卡，其中四張兼作篩選器——點擊即篩選表格；第五張是<b>每日一詞</b>（§9.11），不作篩選——點擊會打開當天的單詞日曆頁。統計卡與表格具備<b>情境感知</b>：在<b>詞彙</b>分頁統計並列出單字；在<b>詞組</b>分頁則切換為統計並列出多詞詞塊。七個分頁：<b>詞彙</b>、<b>詞組</b>、<b>生字卡</b>、<b>拼字</b>、<b>測驗</b>、<b>複習列表</b>、<b>歷史</b>。複習分頁（生字卡／拼字／測驗）須先選詞彙或詞組（或載入清單）；<b>拼字</b>另需至少選擇 <b>10</b> 個詞彙或詞組才能開始。</p>
 
       <h3>9.2 學習計劃對話框 <span style="font-weight:400;font-size:.8em">（進入時）</span></h3>
       <p>開啟我的詞彙頁面時，會彈出一次性的<b>學習計劃</b>視窗，助你即時開始練習——無須手動選字。它在詞彙載入後出現，每次載入頁面僅顯示一次，重新整理或重新登入前不會再彈。選一個預設、或自訂計劃，再選複習模式，兩步即可開始複習。</p>
@@ -2437,6 +2438,19 @@ body.toc-noscroll{overflow:hidden}
       <p><b>時間範圍</b>——7日／30日／90日／全部時間選擇器限定所有按複習計算的數字；詞庫數字永遠顯示目前狀況。準確率為範圍內所有複習中答對的比例。</p>
       <div class="callout"><strong>私隱保障</strong> 「我的分析」只顯示你自己的數據——絕不包含其他同學。老師可在自己的「學生分析」查看你的進度。</div>
       <div class="callout teacher"><strong><span class="tag-teacher"></span>學生分析（老師／管理員／超級管理員）</strong> 班別＋學生篩選列會同時收窄所有內容：上述概覽、<b>學生</b>表格（詞庫、已掌握、待複習、次數、準確率、比較時間範圍後半與前半的趨勢箭嘴、最近活躍），每行附<b>詞彙</b>按鈕以唯讀模式開啟該學生的詞庫（§9.1 橫額）、附逐詞結果唯讀對話框的<b>複習記錄</b>分頁，以及記錄已完成複習與新增字詞的<b>活動</b>記錄。</div>
+
+      
+      <h3>9.11 每日一詞 <span style="font-weight:400;font-size:.8em">（每天學一個詞）</span></h3>
+      <p>第一張統計卡就是<b>每日一詞</b>：每個曆日從你的<b>詞彙</b>庫中選出一個詞（不包括詞組；當你查看學生的詞彙時，此卡會隱藏 <span class="tag-teacher"></span>）。卡片顯示當天單詞與 🔥 <b>連續天數</b>徽章，在學會當天單詞前會持續發亮——這是讓整個詞庫持續進步的小習慣。</p>
+      <p>點擊卡片可打開當天的<b>雙頁日曆</b>：</p>
+      <table class="ref">
+        <tr><th>正面</th><td>大字日期、扮演單詞含義的 <b>AI 吉祥物插圖</b>、帶 🔊 發音按鈕的單詞、詞性、中文釋義、有趣的例句（點擊可朗讀），以及常用搭配的<b>拓展</b>框。</td></tr>
+        <tr><th>背面</th><td>中英對照的<b>正向語錄</b>與治癒系 AI 場景插圖、<b>詞彙解碼</b>（詞根／記憶法）、<b>同族串記</b>與<b>聯想記</b>列表（點擊任何詞可發音），以及會同步到帳戶的「用今天的詞，寫今天的你」筆記框。</td></tr>
+      </table>
+      <p><b>時間旅行</b>——箭頭與週曆條（已學日期帶 ✓ 標記）讓你回看最多 <b>1 年</b>、預覽 <b>30 天</b>。補學過去的日子或提前學習都可以並會被記錄；<b>今天</b>按鈕可立即跳回。</p>
+      <p><b>連續天數與獎勵</b>——點擊<b>「我今天學會了！」</b>會撒出彩帶。只有<b>當天</b>學習才會延長連續天數（補學與預習屬「額外獎勵」——計入歷史與總數，但不計入連續天數）。連續 <b>3、7、14、30、60、100 天</b>的里程碑會有更大的慶祝效果。</p>
+      <p><b>真的算數</b>——完成一天即等於一次<b>正確的間隔重複複習</b>：單詞提升一個掌握等級（L0–L5）並排定下次複習時間，同時在<b>複習歷史</b>（§9.8）中記錄一條<b>「每日一詞」</b>。當天還會計入<b>排行榜連續天數</b>、儀表板的每日活動圖表，以及<b>「每日一詞習慣」</b>成就（7、14、28、56… 天）。進度、筆記與插圖在所有裝置同步。</p>
+      <div class="callout"><strong>插圖</strong>吉祥物與場景插圖每個詞只生成一次，之後到處複用（也供老師的分析使用）——圖片繪製期間以 emoji 代替。新圖片有每日上限；管理員與按量計費用戶不受限制。</div>
 
       </section>
     <!-- ============ CHAPTER 10: DASHBOARDS & SHARING ============ -->

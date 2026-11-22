@@ -113,6 +113,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   grammarGame: "#84cc16",
   tutorQuestion: "#a855f7",
   flashcardReview: "#f59e0b",
+  dailyWord: "#92400e",
 };
 
 export const READING_TEXT_PERIODS = [
@@ -195,7 +196,6 @@ export const AI_USAGE_COLORS: Record<string, string> = {
   collocations: "#10b981",
   grammar: "#d946ef",
   tutorQuestion: "#a855f7",
-  dailyWord: "#92400e",
 };
 
 function toDateString(timestamp: number): string {

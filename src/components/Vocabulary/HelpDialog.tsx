@@ -5,6 +5,7 @@ import {
   BarChart3,
   BookMarked,
   BookOpen,
+  CalendarDays,
   Brain,
   CheckCircle2,
   ClipboardList,
@@ -157,6 +158,12 @@ export default function HelpDialog({
               desc={t("vocabulary.help.overview.stats.new.desc")}
             />
             <HelpRow
+              icon={CalendarDays}
+              tone="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+              name={t("vocabulary.help.overview.stats.dailyWord.name")}
+              desc={t("vocabulary.help.overview.stats.dailyWord.desc")}
+            />
+            <HelpRow
               icon={Table}
               tone="bg-primary/10 text-primary"
               name={t("vocabulary.help.overview.table.title")}
@@ -305,6 +312,12 @@ export default function HelpDialog({
               tone="bg-slate-500/10 text-slate-500"
               name={t("vocabulary.help.extras.history.name")}
               desc={t("vocabulary.help.extras.history.desc")}
+            />
+            <HelpRow
+              icon={CalendarDays}
+              tone="bg-emerald-500/10 text-emerald-500"
+              name={t("vocabulary.help.extras.dailyWord.name")}
+              desc={t("vocabulary.help.extras.dailyWord.desc")}
             />
             <HelpRow
               icon={Trash2}

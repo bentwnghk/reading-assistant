@@ -30,6 +30,7 @@ export const ABOUT_FEATURES = [
   { key: "grammar", emoji: "📐" },
   { key: "grammarGames", emoji: "🎮" },
   { key: "vocabularyPage", emoji: "📚" },
+  { key: "dailyWord", emoji: "📅" },
   { key: "assignments", emoji: "📋" },
   { key: "languageCheck", emoji: "🔍" },
   { key: "classReport", emoji: "📊" },
