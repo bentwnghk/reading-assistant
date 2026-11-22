@@ -38,6 +38,7 @@ import {
   shiftDayKey,
 } from "@/utils/dailyWord";
 import { speakWord, unlockAudio, stopSpeaking } from "@/utils/tts";
+import { parseError } from "@/utils/error";
 import { cn } from "@/utils/style";
 
 const MAX_AHEAD = 30;
@@ -48,6 +49,25 @@ const NO_ASSIST = {
   autoCapitalize: "off",
   spellCheck: false,
 } as const;
+
+/**
+ * True when the browser honours `@page { size: A4 landscape }` — Chromium
+ * since 15, Firefox since 95. Safari 18.2+ applies the paper size but still
+ * ignores the landscape/portrait keywords (WebKit bug 63575), and every iOS
+ * browser is WebKit, so those get the jsPDF fallback instead. There is no JS
+ * API for the print dialog; `@page` is the only way to pre-select orientation.
+ */
+function browserAutoSetsOrientation(): boolean {
+  const uaData = (navigator as { userAgentData?: { brands?: { brand: string }[] } })
+    .userAgentData;
+  if (uaData?.brands?.some((b) => /Chromium|Google Chrome|Microsoft Edge|Opera/i.test(b.brand))) {
+    return true;
+  }
+  const ua = navigator.userAgent;
+  // Desktop Chromium UAs carry "Chrome/" (also covers Samsung/Brave/Edge);
+  // iOS Chrome/Firefox use CriOS/FxiOS and correctly fall through to false.
+  return /Chrom(e|ium)\//.test(ua) || /Firefox\//.test(ua);
+}
 
 function useTodayKey(): string {
   const [key, setKey] = useState(() => dayKeyOf(new Date()));
@@ -498,8 +518,58 @@ function DailyWordDialog({
     };
   }, []);
 
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+  const exportPdf = async () => {
+    // Exact A4-landscape PDF for browsers that can't auto-set landscape
+    // (Safari + every iOS browser): geometry is guaranteed by jsPDF, which
+    // also fits the spread onto the single sheet, same as the print path.
+    const sheet = printRootRef.current?.firstElementChild as HTMLElement | null;
+    const spread = sheet?.firstElementChild as HTMLElement | null;
+    if (!spread) return;
+    setIsExportingPdf(true);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+      const canvas = await html2canvas(spread, {
+        scale: 2,
+        backgroundColor: "#f6efdc",
+        onclone: (doc) => doc.documentElement.classList.remove("dark"),
+      });
+      const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 8; // mm — mirrors the @page margin of the print path
+      const fit = Math.min(
+        (pageW - margin * 2) / canvas.width,
+        (pageH - margin * 2) / canvas.height
+      );
+      const imgW = canvas.width * fit;
+      const imgH = canvas.height * fit;
+      pdf.addImage(
+        canvas.toDataURL("image/jpeg", 0.92),
+        "JPEG",
+        (pageW - imgW) / 2,
+        (pageH - imgH) / 2,
+        imgW,
+        imgH
+      );
+      pdf.save(`daily-word-${dayKey}.pdf`);
+    } catch (e) {
+      toast.error(parseError(e));
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   const handlePrint = () => {
     stopSpeaking();
+    if (!browserAutoSetsOrientation()) {
+      void exportPdf();
+      return;
+    }
     document.documentElement.classList.add("printing-daily-word");
     window.print();
   };
@@ -622,10 +692,14 @@ function DailyWordDialog({
                 variant="outline"
                 size="sm"
                 onClick={handlePrint}
-                disabled={!content}
+                disabled={!content || isExportingPdf}
                 className="mt-2"
               >
-                <Printer className="h-4 w-4 mr-1.5" />
+                {isExportingPdf ? (
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                ) : (
+                  <Printer className="h-4 w-4 mr-1.5" />
+                )}
                 {t("vocabulary.dailyWord.print")}
               </Button>
             </div>
