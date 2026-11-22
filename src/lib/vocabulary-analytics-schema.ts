@@ -38,7 +38,7 @@ export const analyticsActivityQuerySchema = z.object({
 
 export const analyticsSessionsQuerySchema = z.object({
   range: range.default(0),
-  mode: z.enum(["flashcard", "quiz", "spelling"]).optional(),
+  mode: z.enum(["flashcard", "quiz", "spelling", "daily-word"]).optional(),
   ...filters,
   ...paging,
 });

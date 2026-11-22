@@ -5,6 +5,8 @@ import { generateSignature } from "@/utils/signature";
 import type { z } from "zod";
 import type { dailyWordContentSchema } from "@/lib/daily-word-schema";
 import { parseError } from "@/utils/error";
+import { showUnlockedAchievements } from "@/store/achievements";
+import { useVocabularyStore } from "@/store/vocabulary";
 
 export type DailyWordContent = z.infer<typeof dailyWordContentSchema>;
 export type DailyWordImageKind = "mascot" | "scene";
@@ -29,7 +31,14 @@ interface DailyWordState {
   imageStatus: Record<string, "loading" | "failed">;
   load: () => Promise<void>;
   pin: (dayKey: string, word: string) => void;
-  learn: (dayKey: string, word: string, onTime: boolean) => Promise<void>;
+  learn: (
+    dayKey: string,
+    word: string,
+    onTime: boolean
+  ) => Promise<{
+    newlyUnlocked: unknown[];
+    srs?: { newMastery: number; nextReviewAt: number } | null;
+  }>;
   setNote: (dayKey: string, word: string, note: string) => void;
   flushNotes: () => Promise<void>;
   setContent: (word: string, content: DailyWordContent) => void;
@@ -108,7 +117,7 @@ export const useDailyWordStore = create<DailyWordState>()((set, get) => ({
   },
 
   learn: async (dayKey, word, onTime) => {
-    if (get().days[dayKey]?.learnedAt) return;
+    if (get().days[dayKey]?.learnedAt) return { newlyUnlocked: [], srs: null };
     const prev = get().days[dayKey];
     set((s) => ({
       days: {
@@ -123,8 +132,32 @@ export const useDailyWordStore = create<DailyWordState>()((set, get) => ({
         body: JSON.stringify({ action: "learn", dayKey, word, onTime }),
       });
       if (mine === epoch) set((s) => ({ days: { ...s.days, [dayKey]: r.day } }));
+      // The activity is logged server-side; the achievement unlocks ride the
+      // response back — surface them through the same global dialog.
+      showUnlockedAchievements(r.newlyUnlocked ?? []);
+      // The server already advanced the word's SRS level — mirror it into the
+      // vocabulary store so the Words table/labels update without a refetch.
+      // (Never PATCH again from the client; that would double-advance.)
+      if (r.srs && !useVocabularyStore.getState().viewingUserId) {
+        const lower = word.toLowerCase();
+        useVocabularyStore.setState((vs) => ({
+          words: vs.words.map((w) =>
+            w.word.toLowerCase() === lower
+              ? {
+                  ...w,
+                  masteryLevel: r.srs.newMastery as VocabularyWord["masteryLevel"],
+                  nextReviewAt: r.srs.nextReviewAt,
+                  reviewCount: w.reviewCount + 1,
+                  correctCount: w.correctCount + 1,
+                  lastReviewedAt: Date.now(),
+                }
+              : w
+          ),
+        }));
+      }
+      return { newlyUnlocked: r.newlyUnlocked ?? [], srs: r.srs ?? null };
     } catch (e) {
-      if (mine !== epoch) return;
+      if (mine !== epoch) return { newlyUnlocked: [], srs: null };
       // Roll back so the user can retry instead of believing it was saved.
       set((s) => {
         const days = { ...s.days };

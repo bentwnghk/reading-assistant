@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
   Search, FileCheck, Target, PenTool, Brain, Sparkles, Lock, CheckCircle2,
-  BookOpenCheck, GraduationCap, Gamepad2, Swords, Flame, Zap,
+  BookOpenCheck, GraduationCap, Gamepad2, Swords, Flame, Zap, CalendarDays,
 } from "lucide-react";
 import { cn } from "@/utils/style";
 import type { AchievementState } from "@/store/achievements";
@@ -13,7 +13,7 @@ import type { AchievementState } from "@/store/achievements";
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen, BookText, Layers, Network, FileEdit, FileMinus,
   Search, FileCheck, Target, PenTool, Brain, Sparkles,
-  BookOpenCheck, GraduationCap, Gamepad2, Swords, Flame, Zap,
+  BookOpenCheck, GraduationCap, Gamepad2, Swords, Flame, Zap, CalendarDays,
 };
 
 // ─── Color maps ───────────────────────────────────────────────────────────────
@@ -77,6 +77,7 @@ const COLOR_RING: Record<string, string> = {
   emerald: "stroke-emerald-500",
   lime:    "stroke-lime-500",
   slate:   "stroke-slate-500",
+  stone:   "stroke-stone-500",
   yellow:  "stroke-yellow-500",
 };
 

@@ -103,37 +103,61 @@ export async function pinDailyWord(
   };
 }
 
-/** Idempotent: a day already learned keeps its original timestamp/on_time. */
+/**
+ * Idempotent: a day already learned keeps its original timestamp/on_time.
+ * `newlyLearned` is true only when this call transitioned the day from
+ * unlearned to learned — exactly the moment the client should log the
+ * `daily_word_complete` activity (replays / a second device return false).
+ */
 export async function markDailyWordLearned(
   userId: string,
   dayKey: string,
   word: string,
   claimedOnTime: boolean
-): Promise<DailyWordDay> {
+): Promise<{ day: DailyWordDay; newlyLearned: boolean }> {
   const onTime = claimedOnTime && isPlausibleToday(dayKey);
   const now = Date.now();
   const pool = getPool();
-  await pool.query(
-    `INSERT INTO daily_word_progress (user_id, day_key, word, learned_at, on_time, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $4)
-     ON CONFLICT (user_id, day_key) DO UPDATE
-        SET learned_at = COALESCE(daily_word_progress.learned_at, EXCLUDED.learned_at),
-            on_time    = CASE WHEN daily_word_progress.learned_at IS NULL
-                              THEN EXCLUDED.on_time ELSE daily_word_progress.on_time END,
-            updated_at = EXCLUDED.updated_at`,
+
+  // 1) Pinned row not yet learned → mark it. The pinned word stays.
+  let r = await pool.query(
+    `UPDATE daily_word_progress
+        SET learned_at = $4, on_time = $5, updated_at = $4
+      WHERE user_id = $1 AND day_key = $2 AND learned_at IS NULL
+      RETURNING word, learned_at, on_time, note`,
     [userId, dayKey, word, now, onTime]
   );
-  const r = await pool.query(
-    `SELECT word, learned_at, on_time, note FROM daily_word_progress
-      WHERE user_id = $1 AND day_key = $2`,
-    [userId, dayKey]
-  );
+  let newlyLearned = (r.rowCount ?? 0) > 0;
+
+  // 2) No row at all (learn before pin) → insert; a conflict means another
+  //    request already learned it, so DO NOTHING decides the flag.
+  if (!newlyLearned) {
+    r = await pool.query(
+      `INSERT INTO daily_word_progress (user_id, day_key, word, learned_at, on_time, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $4)
+       ON CONFLICT (user_id, day_key) DO NOTHING
+       RETURNING word, learned_at, on_time, note`,
+      [userId, dayKey, word, now, onTime]
+    );
+    newlyLearned = (r.rowCount ?? 0) > 0;
+  }
+
+  if ((r.rowCount ?? 0) === 0) {
+    r = await pool.query(
+      `SELECT word, learned_at, on_time, note FROM daily_word_progress
+       WHERE user_id = $1 AND day_key = $2`,
+      [userId, dayKey]
+    );
+  }
   const row = r.rows[0];
   return {
-    word: row.word,
-    learnedAt: Number(row.learned_at),
-    onTime: row.on_time,
-    note: row.note,
+    day: {
+      word: row.word,
+      learnedAt: row.learned_at === null ? null : Number(row.learned_at),
+      onTime: row.on_time,
+      note: row.note,
+    },
+    newlyLearned,
   };
 }
 
@@ -241,4 +265,26 @@ export async function countDailyWordImagesToday(userId: string): Promise<number>
     [userId, start.getTime()]
   );
   return r.rows[0]?.cnt ?? 0;
+}
+
+export interface DailyWordLearnedDay {
+  userId: string;
+  /** The user's local calendar day (YYYY-MM-DD) whose word was learned. */
+  dayKey: string;
+}
+
+/** Learned Word-of-the-Day days for a set of users (one row per completed
+ *  day) — feeds the daily activity charts on both dashboards. */
+export async function getDailyWordLearnedDays(
+  userIds: string[]
+): Promise<DailyWordLearnedDay[]> {
+  if (userIds.length === 0) return [];
+  const r = await getPool().query(
+    `SELECT user_id, day_key
+       FROM daily_word_progress
+      WHERE user_id = ANY($1::text[])
+        AND learned_at IS NOT NULL`,
+    [userIds]
+  );
+  return r.rows.map((row) => ({ userId: row.user_id, dayKey: row.day_key }));
 }

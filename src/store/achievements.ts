@@ -82,25 +82,29 @@ export const useAchievementsStore = create<AchievementsStoreState>((set, get) =>
 // Wire up the activity logger callback so unlock dialogs fire automatically
 // when any logActivity() call returns newly-unlocked achievements from the API.
 export function initAchievementCallbacks() {
-  setAchievementUnlockCallback((unlocked: NewlyUnlockedAchievement[]) => {
-    if (!unlocked || unlocked.length === 0) return;
+  setAchievementUnlockCallback(showUnlockedAchievements);
+}
 
-    const store = useAchievementsStore.getState();
-    const allPending = [...store.pendingUnlocks, ...unlocked];
+/**
+ * Queue unlocked achievements for the global "Achievement Unlocked!" dialog.
+ * Used by the activity-logger callback AND by server-logged flows that carry
+ * `newlyUnlocked` back in their own API response (Word of the Day).
+ */
+export function showUnlockedAchievements(unlocked: NewlyUnlockedAchievement[]) {
+  if (!unlocked || unlocked.length === 0) return;
 
-    if (!store.showUnlockDialog) {
-      // Nothing showing right now — show first one immediately
-      useAchievementsStore.setState({
-        pendingUnlocks: allPending,
-        newlyUnlocked: [allPending[0]],
-        showUnlockDialog: true,
-      });
-    } else {
-      // Queue them behind what's currently showing
-      useAchievementsStore.setState({ pendingUnlocks: allPending });
-    }
+  const store = useAchievementsStore.getState();
+  const allPending = [...store.pendingUnlocks, ...unlocked];
 
-    // Refresh achievements data in background
-    store.fetchAchievements();
-  });
+  if (!store.showUnlockDialog) {
+    // Nothing showing right now — show first one immediately
+    useAchievementsStore.setState({
+      pendingUnlocks: allPending,
+      newlyUnlocked: [allPending[0]],
+      showUnlockDialog: true,
+    });
+  } else {
+    // Queue them behind what's currently showing
+    useAchievementsStore.setState({ pendingUnlocks: allPending });
+  }
 }

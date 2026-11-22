@@ -55,7 +55,7 @@ export async function logVocabularyActivity(input: LogInput): Promise<void> {
 // ─── Staff analytics ─────────────────────────────────────────────────────────
 
 type Row = Record<string, unknown>;
-type Mode = "flashcard" | "quiz" | "spelling";
+type Mode = "flashcard" | "quiz" | "spelling" | "daily-word";
 
 export interface AnalyticsFilters {
   /** Days back from now; 0 = all time. */
@@ -387,7 +387,7 @@ export async function getVocabularyAnalytics(
           }),
     ]);
 
-  const modeOrder: Mode[] = ["flashcard", "quiz", "spelling"];
+  const modeOrder: Mode[] = ["flashcard", "quiz", "spelling", "daily-word"];
   const modes: VocabularyModeStat[] = modeOrder.map((mode) => {
     const r = modesR.rows.find((x: Row) => x.mode === mode);
     return {

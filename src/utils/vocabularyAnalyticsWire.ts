@@ -28,7 +28,7 @@ export interface VocabularySnapshot {
 }
 
 export interface VocabularyModeStat {
-  mode: "flashcard" | "quiz" | "spelling";
+  mode: "flashcard" | "quiz" | "spelling" | "daily-word";
   sessions: number;
   wordsReviewed: number;
   accuracy: number | null;
@@ -64,7 +64,7 @@ export interface VocabularyHardWord {
 
 export interface VocabularySessionPoint {
   at: number;
-  mode: "flashcard" | "quiz" | "spelling";
+  mode: "flashcard" | "quiz" | "spelling" | "daily-word";
   accuracy: number;
   total: number;
 }
@@ -121,7 +121,7 @@ export interface VocabularyStaffSessionRow {
   userId: string;
   userName: string;
   userEmail: string;
-  mode: "flashcard" | "quiz" | "spelling";
+  mode: "flashcard" | "quiz" | "spelling" | "daily-word";
   entryType: "word" | "phrase";
   totalWords: number;
   correctCount: number;

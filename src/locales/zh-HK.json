@@ -2261,7 +2261,8 @@
       "mode": {
         "flashcard": "字卡",
         "quiz": "測驗",
-        "spelling": "拼字"
+        "spelling": "拼字",
+        "daily-word": "每日一詞"
       },
       "entry": {
         "word": "單字",
@@ -2570,6 +2571,7 @@
       "flashcard": "字卡複習",
       "quiz": "詞彙測驗",
       "spelling": "拼寫練習",
+      "dailyWord": "每日一詞",
       "filter": {
         "all": "全部",
         "word": "單詞",
@@ -2844,7 +2846,8 @@
       "grammarQuiz": "語法測驗",
       "grammarGame": "語法遊戲",
       "tutorQuestion": "AI 導師",
-      "flashcardReview": "字卡複習"
+      "flashcardReview": "字卡複習",
+      "dailyWord": "每日一詞"
     },
     "activity": {
       "total": "合計"
@@ -4268,6 +4271,10 @@
           "ai_tutor_questions": {
             "name": "好奇學習者",
             "desc": "有地方不明白？問 AI 導師吧！你問的每個問題都算數——這裡沒有笨問題！"
+          },
+          "daily_words_learned": {
+            "name": "每日一詞習慣",
+            "desc": "在「我的詞彙」頁面打開每日一詞卡，學會當天的單詞。補學或提前學習也計算——每完成一天，就向前一步！"
           }
         },
         "tip": {
@@ -4383,6 +4390,11 @@
         "name": "好奇學習者",
         "description": "向 AI 導師提問 {{count}} 個問題",
         "hint": "向 AI 導師提問有關閱讀材料的問題"
+      },
+      "daily_words_learned": {
+        "name": "每日一詞習慣",
+        "description": "學會 {{count}} 個每日一詞",
+        "hint": "在「我的詞彙」頁面學習每日一詞"
       }
     }
   },

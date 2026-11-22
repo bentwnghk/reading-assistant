@@ -24,6 +24,7 @@ import {
   ListPlus,
   Plus,
   SpellCheck,
+  CalendarDays,
   Target,
   Trophy,
   ClipboardList,
@@ -52,10 +53,14 @@ const COLORS = {
 
 const LEVEL_COLORS = ["#9ca3af", "#ef4444", "#f97316", "#eab308", "#3b82f6", "#22c55e"];
 
-export const MODE_ICON: Record<"flashcard" | "quiz" | "spelling", LucideIcon> = {
+export const MODE_ICON: Record<
+  "flashcard" | "quiz" | "spelling" | "daily-word",
+  LucideIcon
+> = {
   flashcard: Layers,
   quiz: ClipboardList,
   spelling: SpellCheck,
+  "daily-word": CalendarDays,
 };
 
 const shortDate = (bucket: string) => bucket.slice(5);

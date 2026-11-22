@@ -2262,7 +2262,8 @@
       "mode": {
         "flashcard": "Flashcards",
         "quiz": "Quiz",
-        "spelling": "Spelling"
+        "spelling": "Spelling",
+        "daily-word": "Word of the Day"
       },
       "entry": {
         "word": "Words",
@@ -2573,6 +2574,7 @@
       "flashcard": "Flashcard Review",
       "quiz": "Vocabulary Quiz",
       "spelling": "Spelling Practice",
+      "dailyWord": "Word of the Day",
       "filter": {
         "all": "All",
         "word": "Words",
@@ -2847,7 +2849,8 @@
       "grammarQuiz": "Grammar Quiz",
       "grammarGame": "Grammar Game",
       "tutorQuestion": "AI Tutor",
-      "flashcardReview": "Flashcard Review"
+      "flashcardReview": "Flashcard Review",
+      "dailyWord": "Word of the Day"
     },
     "activity": {
       "total": "Total"
@@ -4271,6 +4274,10 @@
           "ai_tutor_questions": {
             "name": "Curious Learner",
             "desc": "Stuck on something? Ask the AI Tutor! Every question you ask counts—there are no silly questions here!"
+          },
+          "daily_words_learned": {
+            "name": "Word-a-Day Habit",
+            "desc": "Open the Word of the Day card on My Vocabulary and learn the day's word. Catching up or learning ahead counts too — one completed day, one step closer!"
           }
         },
         "tip": {
@@ -4386,6 +4393,11 @@
         "name": "Curious Learner",
         "description": "Ask AI Tutor {{count}} questions",
         "hint": "Ask the AI Tutor questions about your reading materials"
+      },
+      "daily_words_learned": {
+        "name": "Word-a-Day Habit",
+        "description": "Learn {{count}} Words of the Day",
+        "hint": "Learn the Word of the Day on the My Vocabulary page"
       }
     }
   },

@@ -5,6 +5,7 @@ import {
   History,
   Layers,
   SpellCheck,
+  CalendarDays,
   ClipboardList,
   ChevronDown,
   ChevronUp,
@@ -123,6 +124,8 @@ function ReviewHistory({ fixedEntryType, userId }: ReviewHistoryProps) {
         return <ClipboardList className="h-4 w-4" />;
       case "spelling":
         return <SpellCheck className="h-4 w-4" />;
+      case "daily-word":
+        return <CalendarDays className="h-4 w-4" />;
       default:
         return <History className="h-4 w-4" />;
     }
@@ -136,6 +139,8 @@ function ReviewHistory({ fixedEntryType, userId }: ReviewHistoryProps) {
         return t("vocabulary.reviewHistory.quiz");
       case "spelling":
         return t("vocabulary.reviewHistory.spelling");
+      case "daily-word":
+        return t("vocabulary.reviewHistory.dailyWord");
       default:
         return mode;
     }

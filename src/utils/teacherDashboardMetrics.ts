@@ -52,6 +52,7 @@ export interface DailyStudentActivity {
   grammarQuiz: number;
   grammarGame: number;
   tutorQuestion: number;
+  dailyWord: number;
 }
 
 export interface TeacherDashboardMetrics {
@@ -91,6 +92,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "grammarQuiz",
   "grammarGame",
   "tutorQuestion",
+  "dailyWord",
 ] as const;
 
 export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
@@ -193,6 +195,7 @@ export const AI_USAGE_COLORS: Record<string, string> = {
   collocations: "#10b981",
   grammar: "#d946ef",
   tutorQuestion: "#a855f7",
+  dailyWord: "#92400e",
 };
 
 function toDateString(timestamp: number): string {
@@ -220,6 +223,7 @@ function emptyDailyActivity(date: string): DailyStudentActivity {
     grammarQuiz: 0,
     grammarGame: 0,
     tutorQuestion: 0,
+    dailyWord: 0,
   };
 }
 
@@ -227,6 +231,8 @@ function computeStudentMetrics(
   sessions: TeacherSessionData[],
   reviewSessions: ReviewSessionRecord[] = [],
   vocabCount?: number,
+  /** Word-of-the-Day days this student completed (local YYYY-MM-DD keys). */
+  dailyWordDays: string[] = [],
 ): StudentMetrics {
   if (sessions.length === 0 && reviewSessions.length === 0) {
     return {
@@ -397,6 +403,12 @@ function computeStudentMetrics(
     }
   }
 
+  // Word of the Day — each completed day counts as exactly one activity on
+  // that day (learning ahead or catching up lands on the day's own column).
+  for (const dayKey of dailyWordDays) {
+    getDay(dayKey).dailyWord += 1;
+  }
+
   // Review sessions from the My Vocabulary page — add to daily activities
   for (const r of reviewSessions) {
     const dateKey = toDateString(r.completedAt);
@@ -434,6 +446,7 @@ export function computeTeacherDashboardMetrics(
   sessions: TeacherSessionData[],
   reviewSessions: ReviewSessionRecord[] = [],
   vocabCounts: Record<string, number> = {},
+  dailyWordDays: Array<{ userId: string; dayKey: string }> = [],
 ): TeacherDashboardMetrics {
   if (sessions.length === 0 && reviewSessions.length === 0) {
     return {
@@ -468,12 +481,23 @@ export function computeTeacherDashboardMetrics(
     reviewByUser.get(r.userId)!.push(r);
   }
 
+  const dailyWordByUser = new Map<string, string[]>();
+  for (const d of dailyWordDays) {
+    if (!dailyWordByUser.has(d.userId)) dailyWordByUser.set(d.userId, []);
+    dailyWordByUser.get(d.userId)!.push(d.dayKey);
+  }
+
   const studentUserIds = [...new Set([...grouped.keys(), ...reviewByUser.keys()])];
   const students = studentUserIds.map((uid) => {
     const userSessions = grouped.get(uid) ?? [];
     const userReviews = reviewByUser.get(uid) ?? [];
     const userVocabCount = vocabCounts[uid];
-    return computeStudentMetrics(userSessions, userReviews, userVocabCount);
+    return computeStudentMetrics(
+      userSessions,
+      userReviews,
+      userVocabCount,
+      dailyWordByUser.get(uid) ?? []
+    );
   });
   students.sort((a, b) => a.userName.localeCompare(b.userName));
 
@@ -580,6 +604,7 @@ export function getDailyActivityForDate(
       grammarQuiz: activity?.grammarQuiz || 0,
       grammarGame: activity?.grammarGame || 0,
       tutorQuestion: activity?.tutorQuestion || 0,
+      dailyWord: activity?.dailyWord || 0,
     };
   });
 }

@@ -17,6 +17,7 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
   const [rawSessions, setRawSessions] = useState<TeacherSessionData[]>([]);
   const [reviewSessions, setReviewSessions] = useState<ReviewSessionRecord[]>([]);
   const [vocabCounts, setVocabCounts] = useState<Record<string, number>>({});
+  const [dailyWordDays, setDailyWordDays] = useState<Array<{ userId: string; dayKey: string }>>([]);
   const [skillAverages, setSkillAverages] = useState<ClassSkillAverage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,11 +49,13 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
         setReviewSessions([]);
         setVocabCounts({});
         setSkillAverages([]);
+        setDailyWordDays([]);
       } else {
         setRawSessions(data.sessions ?? []);
         setReviewSessions(data.reviewSessions ?? []);
         setVocabCounts(data.vocabCounts ?? {});
         setSkillAverages(data.skillAverages ?? []);
+        setDailyWordDays(data.dailyWordDays ?? []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch");
@@ -66,8 +69,8 @@ export function useTeacherDashboard(classId: string | "all", schoolId?: string |
   }, [fetchData]);
 
   const metrics = useMemo(() => {
-    return computeTeacherDashboardMetrics(rawSessions, reviewSessions, vocabCounts);
-  }, [rawSessions, reviewSessions, vocabCounts]);
+    return computeTeacherDashboardMetrics(rawSessions, reviewSessions, vocabCounts, dailyWordDays);
+  }, [rawSessions, reviewSessions, vocabCounts, dailyWordDays]);
 
   return { metrics, skillAverages, loading, error, refetch: fetchData };
 }

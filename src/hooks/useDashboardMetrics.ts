@@ -7,6 +7,7 @@ export function useDashboardMetrics(): DashboardMetrics {
   const history = useHistoryStore((s) => s.history);
   const [reviewSessions, setReviewSessions] = useState<VocabularyReviewSession[]>([]);
   const [vocabularyWordCount, setVocabularyWordCount] = useState<number | undefined>(undefined);
+  const [dailyWordDays, setDailyWordDays] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/vocabulary/review-sessions?limit=100")
@@ -16,6 +17,22 @@ export function useDashboardMetrics(): DashboardMetrics {
       })
       .catch(() => {
         setReviewSessions([]);
+      });
+
+    fetch("/api/vocabulary/daily-word")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        const days = data?.days;
+        if (days && typeof days === "object") {
+          setDailyWordDays(
+            Object.entries(days)
+              .filter(([, v]) => (v as { learnedAt?: number | null })?.learnedAt)
+              .map(([k]) => k)
+          );
+        }
+      })
+      .catch(() => {
+        setDailyWordDays([]);
       });
 
     fetch("/api/vocabulary?type=stats")
@@ -29,7 +46,13 @@ export function useDashboardMetrics(): DashboardMetrics {
   }, []);
 
   return useMemo(
-    () => computeDashboardMetrics(history as ReadingHistory[], reviewSessions, vocabularyWordCount),
-    [history, reviewSessions, vocabularyWordCount],
+    () =>
+      computeDashboardMetrics(
+        history as ReadingHistory[],
+        reviewSessions,
+        vocabularyWordCount,
+        dailyWordDays
+      ),
+    [history, reviewSessions, vocabularyWordCount, dailyWordDays],
   );
 }

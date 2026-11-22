@@ -36,6 +36,7 @@ export const ACTIVITY_TYPES = [
   "assignment_create",
   "assignment_start",
   "assignment_submit",
+  "daily_word_complete",
 ] as const
 
 export type ActivityType = (typeof ACTIVITY_TYPES)[number]
@@ -55,6 +56,8 @@ export interface ActivityDetails {
   rank?: number
   /** Grammar-game enrichment: which game emitted the event. */
   game?: string
+  /** Word-of-the-Day enrichment: the learned word. */
+  word?: string
 }
 
 export interface ActivityLog {

@@ -25,6 +25,7 @@ type ActivityType =
   | "reading_text_generate"
   | "pre_reading_generate"
   | "collocations_generate"
+  | "daily_word_complete"
 
 interface ActivityDetails {
   cardsReviewed?: number
@@ -38,6 +39,8 @@ interface ActivityDetails {
   rank?: number
   /** Grammar-game enrichment: which game emitted the event. */
   game?: string
+  /** Word-of-the-Day enrichment: the learned word. */
+  word?: string
 }
 
 interface LogActivityOptions {

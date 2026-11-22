@@ -860,7 +860,8 @@ type LeaderboardActivityType =
   | "targeted_practice_complete"
   | "glossary_add"
   | "pre_reading_generate"
-  | "collocations_generate";
+  | "collocations_generate"
+  | "daily_word_complete";
 
 interface ActivityLogEntry {
   id: string;
@@ -1010,7 +1011,7 @@ interface VocabularyStats {
   unrated: number;
 }
 
-type VocabularyReviewMode = "flashcard" | "quiz" | "spelling";
+type VocabularyReviewMode = "flashcard" | "quiz" | "spelling" | "daily-word";
 
 type SRSAction = "again" | "hard" | "good" | "easy";
 

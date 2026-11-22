@@ -10,7 +10,7 @@ import { canViewStudentVocabulary } from "@/lib/users";
 import { z } from "zod";
 
 const createSchema = z.object({
-  mode: z.enum(["flashcard", "quiz", "spelling"]),
+  mode: z.enum(["flashcard", "quiz", "spelling", "daily-word"]),
   results: z.array(
     z.object({
       word: z.string().min(1),

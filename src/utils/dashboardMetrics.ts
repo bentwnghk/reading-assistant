@@ -46,6 +46,7 @@ export interface DailyActivity {
   grammarGame: number;
   tutorQuestion: number;
   flashcardReview: number;
+  dailyWord: number;
 }
 
 export interface DashboardMetrics {
@@ -97,6 +98,7 @@ export const DAILY_ACTIVITY_KEYS = [
   "grammarQuiz",
   "grammarGame",
   "tutorQuestion",
+  "dailyWord",
 ] as const;
 
 export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
@@ -117,6 +119,7 @@ export const DAILY_ACTIVITY_COLORS: Record<string, string> = {
   grammarGame: "#84cc16",
   tutorQuestion: "#a855f7",
   flashcardReview: "#f59e0b",
+  dailyWord: "#92400e",
 };
 
 function getSessionTitle(item: ReadingHistory): string {
@@ -160,6 +163,7 @@ function emptyDailyActivity(date: string): DailyActivity {
     grammarGame: 0,
     tutorQuestion: 0,
     flashcardReview: 0,
+    dailyWord: 0,
   };
 }
 
@@ -167,6 +171,8 @@ export function computeDashboardMetrics(
   history: ReadingHistory[],
   reviewSessions: VocabularyReviewSession[] = [],
   vocabularyWordCount?: number,
+  /** Word-of-the-Day days the user completed (local YYYY-MM-DD keys). */
+  dailyWordDays: string[] = [],
 ): DashboardMetrics {
   if (history.length === 0 && reviewSessions.length === 0) {
     return {
@@ -430,6 +436,12 @@ export function computeDashboardMetrics(
       getDay(dailyMap, toDateString(msg.timestamp || item.createdAt)).tutorQuestion += 1;
     }
 
+  }
+
+  // Word of the Day — each completed day counts as exactly one activity on
+  // that day (learning ahead or catching up lands on the day's own column).
+  for (const key of dailyWordDays) {
+    getDay(dailyMap, key).dailyWord += 1;
   }
 
   // Review sessions from the My Vocabulary page — add to daily activities

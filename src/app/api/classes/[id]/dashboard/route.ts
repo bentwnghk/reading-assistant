@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { getTeacherDashboardData, getTeacherDashboardDataForClasses, getTeacherDashboardDataForSchool, getTeacherDashboardDataAllSchools, canAccessClass, getClassesForTeacher, getSchoolForUser } from "@/lib/users"
 import { getReviewSessionsForUsers, getVocabularyCountsForUsers } from "@/lib/vocabulary"
+import { getDailyWordLearnedDays } from "@/lib/daily-word"
 import { getSkillAveragesForUsers } from "@/lib/skill-profile"
 
 export async function GET(
@@ -65,13 +66,14 @@ export async function GET(
     }
 
     const userIds = [...new Set(sessions.map((s) => s.userId))]
-    const [reviewSessions, vocabCounts, skillAverages] = await Promise.all([
+    const [reviewSessions, vocabCounts, skillAverages, dailyWordDays] = await Promise.all([
       getReviewSessionsForUsers(userIds),
       getVocabularyCountsForUsers(userIds),
       getSkillAveragesForUsers(userIds),
+      getDailyWordLearnedDays(userIds),
     ])
 
-    return NextResponse.json({ sessions, reviewSessions, vocabCounts: Object.fromEntries(vocabCounts), skillAverages })
+    return NextResponse.json({ sessions, reviewSessions, vocabCounts: Object.fromEntries(vocabCounts), skillAverages, dailyWordDays })
   } catch (error) {
     console.error("Failed to get teacher dashboard data:", error)
     return NextResponse.json({ error: "Failed to get dashboard data" }, { status: 500 })

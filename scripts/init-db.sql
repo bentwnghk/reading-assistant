@@ -343,7 +343,8 @@ CREATE TABLE activity_logs (
       'collocations_generate',
       'assignment_create',
       'assignment_start',
-      'assignment_submit'
+      'assignment_submit',
+      'daily_word_complete'
     )),
   session_id    TEXT REFERENCES reading_sessions(id) ON DELETE SET NULL,
   score         INTEGER,          -- raw score/percentage (0-100 for tests; raw points for spelling)
@@ -478,7 +479,8 @@ CREATE TABLE user_achievements (
       'grammar_analysis',
       'grammar_quizzes',
       'grammar_games',
-      'grammar_hot_streak'
+      'grammar_hot_streak',
+      'daily_words_learned'
     )),
   milestone        INTEGER     NOT NULL,   -- the target that was reached (e.g. 5, 10, 20 …)
   unlocked_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -739,7 +741,7 @@ CREATE INDEX idx_user_vocabulary_shared_by ON user_vocabulary(user_id, shared_by
 CREATE TABLE vocabulary_review_sessions (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  mode TEXT NOT NULL CHECK (mode IN ('flashcard', 'quiz', 'spelling')),
+  mode TEXT NOT NULL CHECK (mode IN ('flashcard', 'quiz', 'spelling', 'daily-word')),
   total_words INTEGER NOT NULL DEFAULT 0,
   correct_count INTEGER NOT NULL DEFAULT 0,
   accuracy INTEGER NOT NULL DEFAULT 0,

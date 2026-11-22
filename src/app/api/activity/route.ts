@@ -22,6 +22,7 @@ const ActivitySchema = z.object({
     opponentCount: z.number().int().min(0).optional(),
     rank:          z.number().int().min(0).optional(),
     game:          z.string().optional(),
+    word:          z.string().max(100).optional(),
   }).optional(),
 })
 

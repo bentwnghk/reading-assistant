@@ -19,6 +19,7 @@ export type AchievementType =
   | "grammar_games"
   | "grammar_hot_streak"
   | "ai_tutor_questions"
+  | "daily_words_learned"
 
 export interface AchievementMilestone {
   target: number
@@ -163,6 +164,12 @@ const ACHIEVEMENT_CONFIG: Record<AchievementType, {
     color: "cyan",
     activityTypes: ["ai_tutor_question"],
     initialMilestone: 5,
+  },
+  daily_words_learned: {
+    icon: "CalendarDays",
+    color: "stone",
+    activityTypes: ["daily_word_complete"],
+    initialMilestone: 7,
   },
 }
 
