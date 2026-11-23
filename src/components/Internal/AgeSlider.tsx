@@ -15,8 +15,12 @@ import { cn } from "@/utils/style";
  * values stay in sync automatically. `setStudentAge` keeps the persistence
  * behaviour the old main-page User Information section had (persisted store,
  * history sync and per-session API sync).
+ *
+ * `compact` tightens the vertical rhythm (gap above the level box, its inner
+ * padding) for tight surfaces like the sidebar/drawer's collapsible User Info
+ * card; the Settings dialog keeps the roomier default.
  */
-function AgeSlider() {
+function AgeSlider({ compact = false }: { compact?: boolean }) {
   const { t } = useTranslation();
   const sliderId = useId();
   const studentAge = useReadingStore((s) => s.studentAge);
@@ -46,7 +50,7 @@ function AgeSlider() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className={compact ? "space-y-1" : "space-y-3"}>
       <div className="space-y-2">
         <div className="flex flex-wrap justify-between items-center gap-x-2">
           <Label htmlFor={sliderId}>
@@ -74,7 +78,10 @@ function AgeSlider() {
       {/* flex-wrap: in English the label + level badge don't fit narrow
           surfaces (sidebar/drawer panel, narrow dialog viewports) on one
           line — the badge drops to its own line instead of overflowing. */}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 p-2 bg-muted/50 rounded-md">
+      <div className={cn(
+        "flex flex-wrap items-center gap-x-2 gap-y-1 bg-muted/50 rounded-md",
+        compact ? "px-2 py-1" : "p-2"
+      )}>
         <GraduationCap className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="text-sm text-muted-foreground">
           {t("reading.studentInfo.estimatedLevel")}:

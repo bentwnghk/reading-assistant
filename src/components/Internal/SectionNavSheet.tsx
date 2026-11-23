@@ -537,8 +537,11 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
         </button>
         {userInfoOpen && (
           <div className="px-3 pb-2 pt-1">
-            <div className="rounded-md border bg-muted/30 p-2">
-              <AgeSlider />
+            {/* px-2 py-1: the label hugs the card's top edge so the
+                expanded card takes as little vertical space as possible
+                in the narrow sidebar/drawer. */}
+            <div className="rounded-md border bg-muted/30 px-2 py-1">
+              <AgeSlider compact />
             </div>
           </div>
         )}
