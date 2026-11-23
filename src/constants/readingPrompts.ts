@@ -1021,7 +1021,7 @@ Maximum points: ${maxPoints}
 Evaluate whether the student's answer is grammatically correct and addresses the question.
 Respond with ONLY a JSON object (no markdown, no code blocks):
 {
-  "earnedPoints": <number 0 to ${maxPoints}>,
+  "earnedPoints": <whole number 0 to ${maxPoints}>,
   "feedback": "<brief feedback in English explaining what was good and what could be improved>"
 }
 

@@ -9,6 +9,23 @@ export interface SessionWithImages extends ReadingStore {
   assignmentId?: string
 }
 
+/**
+ * Point-total fields backed by INTEGER columns. AI partial credit (and legacy
+ * JSONB data) can produce fractional sums like 6.5, which makes the whole
+ * INSERT/UPDATE fail — silently dropping every other field in the same write.
+ * Values are coerced to whole numbers on every write path.
+ */
+const INTEGER_POINT_FIELDS = new Set([
+  "testEarnedPoints",
+  "testTotalPoints",
+  "grammarQuizEarnedPoints",
+  "grammarQuizTotalPoints",
+])
+
+function roundPointValue(value: unknown): unknown {
+  return typeof value === "number" && Number.isFinite(value) ? Math.round(value) : value
+}
+
 export async function createReadingSession(
   userId: string,
   sessionData: ReadingStore
@@ -159,8 +176,8 @@ export async function createReadingSession(
         JSON.stringify(sessionData.glossaryRatings),
         sessionData.testScore,
         sessionData.testCompleted,
-        sessionData.testEarnedPoints,
-        sessionData.testTotalPoints,
+        roundPointValue(sessionData.testEarnedPoints),
+        roundPointValue(sessionData.testTotalPoints),
         sessionData.testShowChinese,
         sessionData.testMode,
         sessionData.vocabularyQuizScore,
@@ -180,8 +197,8 @@ export async function createReadingSession(
         sessionData.grammarQuizScore ?? 0,
         sessionData.grammarQuizCompleted ?? false,
         sessionData.grammarQuizzesCompleted ?? 0,
-        sessionData.grammarQuizEarnedPoints ?? 0,
-        sessionData.grammarQuizTotalPoints ?? 0,
+        roundPointValue(sessionData.grammarQuizEarnedPoints ?? 0),
+        roundPointValue(sessionData.grammarQuizTotalPoints ?? 0),
         sessionData.grammarGeneratedAt ?? 0,
         sessionData.grammarQuizCompletedAt ?? 0,
         sessionData.grammarHighlightEnabled ?? false,
@@ -699,6 +716,9 @@ export async function updateReadingSession(
           values.push(value ? JSON.stringify(value) : null)
         } else if (key === "grammarGameCompletedAt") {
           values.push(value ? new Date(value as number) : null)
+        } else if (INTEGER_POINT_FIELDS.has(key)) {
+          // Whole points only — see INTEGER_POINT_FIELDS (INTEGER columns).
+          values.push(roundPointValue(value))
         } else {
           values.push(value)
         }

@@ -1254,6 +1254,13 @@ function useReadingAssistant() {
       }
     }
     
+    // Point totals persist into INTEGER columns. Legacy sessions can carry
+    // fractional per-question earnedPoints (AI partial credit) in their
+    // reading_test JSONB — round the sums so the UPDATE can never fail on a
+    // value like 6.5 (which would silently drop the whole write).
+    earnedPoints = Math.round(earnedPoints);
+    totalPoints = Math.round(totalPoints);
+
     const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
     setTestScore(score);
     setTestCompleted(true);
@@ -1305,7 +1312,7 @@ Maximum points: ${maxPoints}
 Evaluate how well the student's answer addresses the expected key points.
 Respond with ONLY a JSON object (no markdown, no code blocks):
 {
-  "earnedPoints": <number 0 to ${maxPoints}>,
+  "earnedPoints": <whole number 0 to ${maxPoints}>,
   "feedback": "<brief feedback in English explaining what was good and what was missing>"
 }
 
@@ -1320,7 +1327,11 @@ Guidelines:
       if (!isSameSession()) return { earnedPoints: 0, feedback: "Session changed." };
 
       const evaluation = JSON.parse(text);
-      const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
+      // The AI may award fractional partial credit, but point totals persist
+      // into INTEGER columns — a fractional sum fails the whole session
+      // UPDATE. Round to whole points and guard against non-numeric junk.
+      const awarded = Math.round(Number(evaluation.earnedPoints) || 0);
+      const earnedPoints = Math.min(Math.max(0, awarded), maxPoints);
       
       setQuestionEarnedPoints(questionId, earnedPoints);
       
@@ -1716,6 +1727,12 @@ Guidelines:
       }
     }
 
+    // INTEGER columns: round the sums for the same reason as
+    // calculateTestScore (legacy grammar_quiz JSONB can hold fractional
+    // AI partial credit). Applies to the retry display and return too.
+    earnedPoints = Math.round(earnedPoints);
+    totalPoints = Math.round(totalPoints);
+
     const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
     // Passing `questions` marks a practice-only retry: the score is returned
     // for display but never written to the store, so the recorded attempt's
@@ -1761,7 +1778,9 @@ Guidelines:
       if (!isSameSession()) return { earnedPoints: 0, feedback: "Session changed." };
 
       const evaluation = JSON.parse(text);
-      const earnedPoints = Math.min(Math.max(0, evaluation.earnedPoints), maxPoints);
+      // Same as evaluateShortAnswer: whole points only — INTEGER DB columns.
+      const awarded = Math.round(Number(evaluation.earnedPoints) || 0);
+      const earnedPoints = Math.min(Math.max(0, awarded), maxPoints);
 
       if (record) {
         setGrammarQuizQuestionPoints(questionId, earnedPoints);
