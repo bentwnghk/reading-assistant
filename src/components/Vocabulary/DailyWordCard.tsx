@@ -323,24 +323,35 @@ function DailyWordDialog({
   const renderSpread = (print: boolean) => {
     if (!entry) return null;
     return (
-      <div className="rounded-xl border border-amber-300/60 dark:border-amber-800 bg-[#fbf5e4] dark:bg-stone-800 shadow-lg grid md:grid-cols-2 overflow-hidden">
+      <div
+        className={cn(
+          "rounded-xl border border-amber-300/60 bg-[#fbf5e4] grid overflow-hidden",
+          print ? "grid-cols-2" : "dark:border-amber-800 dark:bg-stone-800 shadow-lg md:grid-cols-2"
+        )}
+      >
         {/* Front page */}
-        <div className="p-4 sm:p-6 md:border-r border-amber-300/60 dark:border-amber-800 text-emerald-950 dark:text-emerald-100">
+        <div
+          className={cn(
+            "border-amber-300/60 text-emerald-950",
+            print ? "p-6 border-r" : "p-4 sm:p-6 md:border-r dark:border-amber-800 dark:text-emerald-100"
+          )}
+        >
           <div className="flex items-baseline justify-between text-sm font-serif">
             <span>{date.getFullYear()}</span>
             <span className="font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-300">{month}</span>
             <span>{weekday}</span>
           </div>
           <div className="relative flex items-end justify-center gap-3 mt-1">
-            <div className="text-8xl sm:text-9xl font-black leading-none text-emerald-900 dark:text-emerald-400">
+            <div className={cn("font-black leading-none text-emerald-900", print ? "text-9xl" : "text-8xl sm:text-9xl dark:text-emerald-400")}>
               {date.getDate()}
             </div>
             <IllustrationSlot
               src={images[imageStoreKey(entry.word, "mascot")]}
               status={imageStatus[imageStoreKey(entry.word, "mascot")]}
               fallback={content?.mascot ?? "📖"}
-              className="h-24 w-24 sm:h-32 sm:w-32 shrink-0"
-              emojiClassName="text-5xl sm:text-6xl"
+              className={print ? "h-32 w-32 shrink-0" : "h-24 w-24 sm:h-32 sm:w-32 shrink-0"}
+              emojiClassName={print ? "text-6xl" : "text-5xl sm:text-6xl"}
+              print={print}
             />
           </div>
 
@@ -389,7 +400,12 @@ function DailyWordDialog({
         </div>
 
         {/* Back page */}
-        <div className="p-4 sm:p-6 space-y-3 text-emerald-950 dark:text-emerald-100 border-t md:border-t-0 border-amber-300/60 dark:border-amber-800">
+        <div
+          className={cn(
+            "space-y-3 text-emerald-950 border-amber-300/60",
+            print ? "p-6" : "p-4 sm:p-6 dark:text-emerald-100 border-t md:border-t-0 dark:border-amber-800"
+          )}
+        >
           {content ? (
             <>
               <div className="rounded-lg border-2 border-emerald-900/70 dark:border-emerald-500/60 p-3">
@@ -404,6 +420,7 @@ function DailyWordDialog({
                     fallback={content.scene.join(" ")}
                     className="w-full aspect-video"
                     emojiClassName="text-3xl tracking-widest"
+                    print={print}
                     onRetry={() => {
                       useDailyWordStore.setState((st) => {
                         const imageStatus = { ...st.imageStatus };
@@ -418,7 +435,7 @@ function DailyWordDialog({
                   )}
                 </div>
               </div>
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className={cn("grid gap-3", print ? "grid-cols-2" : "sm:grid-cols-2")}>
                 {content.decode.length > 0 && (
                   <PageBox title={t("vocabulary.dailyWord.decode")}>
                     <ul className="text-xs space-y-1">
@@ -507,6 +524,7 @@ function DailyWordDialog({
       fit();
     };
     const after = () => {
+      document.getElementById("daily-word-page-style")?.remove();
       root.classList.remove("printing-daily-word");
       if (wasDark.current) root.classList.add("dark");
     };
@@ -529,19 +547,19 @@ function DailyWordDialog({
     if (!spread) return;
     setIsExportingPdf(true);
     try {
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import("html2canvas"),
+      const [{ toCanvas }, { jsPDF }] = await Promise.all([
+        import("html-to-image"),
         import("jspdf"),
       ]);
-      const canvas = await html2canvas(spread, {
-        scale: 2,
-        backgroundColor: "#f6efdc",
-        onclone: (doc) => doc.documentElement.classList.remove("dark"),
-      });
+      // html2canvas mis-positions text in WebKit; html-to-image lets the
+      // browser itself lay out the text. The first pass warms fonts/images.
+      const opts = { pixelRatio: 2, backgroundColor: "#f6efdc" };
+      await toCanvas(spread, opts);
+      const canvas = await toCanvas(spread, opts);
       const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 8; // mm — mirrors the @page margin of the print path
+      const margin = 8;
       const fit = Math.min(
         (pageW - margin * 2) / canvas.width,
         (pageH - margin * 2) / canvas.height
@@ -569,6 +587,14 @@ function DailyWordDialog({
     if (!browserAutoSetsOrientation()) {
       void exportPdf();
       return;
+    }
+    // Unnamed @page, injected only while printing: some Chrome builds ignore
+    // the named page and fall back to portrait, which stacked the spread.
+    if (!document.getElementById("daily-word-page-style")) {
+      const st = document.createElement("style");
+      st.id = "daily-word-page-style";
+      st.textContent = "@page{size:A4 landscape;margin:8mm}";
+      document.head.appendChild(st);
     }
     document.documentElement.classList.add("printing-daily-word");
     window.print();
@@ -725,6 +751,7 @@ function IllustrationSlot({
   className,
   emojiClassName,
   onRetry,
+  print,
 }: {
   src?: string;
   status?: "loading" | "failed";
@@ -732,6 +759,7 @@ function IllustrationSlot({
   className?: string;
   emojiClassName?: string;
   onRetry?: () => void;
+  print?: boolean;
 }) {
   const { t } = useTranslation();
   const [broken, setBroken] = useState(false);
@@ -743,7 +771,7 @@ function IllustrationSlot({
           src={src}
           alt=""
           onError={() => setBroken(true)}
-          className="h-full w-full object-contain animate-in fade-in duration-500"
+          className={cn("h-full w-full object-contain", !print && "animate-in fade-in duration-500")}
         />
       </div>
     );
