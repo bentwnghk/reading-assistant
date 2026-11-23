@@ -36,6 +36,7 @@ import {
   useCategoryLabel,
 } from "@/components/LanguageCheck/shared";
 import useLanguageCheck from "@/hooks/useLanguageCheck";
+import { usePrintLightTheme } from "@/hooks/usePrintLightTheme";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 import { LANGUAGE_CHECK_ESSAY_TYPE_GUIDANCE } from "@/constants/languageCheck";
 import { parseError } from "@/utils/error";
@@ -165,6 +166,9 @@ export default function TopicAiReport() {
   const [handoutBusy, setHandoutBusy] = useState<number | null>(null);
   const [schoolName, setSchoolName] = useState<string | null | undefined>(undefined);
   const started = useRef(false);
+  // The printout always uses the light design, whatever theme is on screen
+  // (§ print fidelity: dark cards waste ink and wash out on paper).
+  usePrintLightTheme();
 
   const backUrl = topicId
     ? `/writing-assessment/topic-report?topic=${encodeURIComponent(topicId)}`
@@ -402,7 +406,7 @@ export default function TopicAiReport() {
   const handoutFor = (index: number) => (handouts ? handouts[String(index)] : undefined);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 pb-10 print:gap-5">
+    <div className="print-exact-colors mx-auto flex w-full max-w-5xl flex-col gap-8 pb-10 print:gap-5">
       {/* Header */}
       <div className="flex flex-col gap-2">
         <Button variant="ghost" size="sm" className="-ml-2 w-fit print:hidden" onClick={() => router.push(backUrl)}>
@@ -477,9 +481,11 @@ export default function TopicAiReport() {
         )}
       </div>
 
-      {/* Hero: overview */}
-      <section className="overflow-hidden rounded-2xl border bg-gradient-to-br from-violet-50 via-background to-sky-50 p-5 dark:from-violet-950/30 dark:to-sky-950/20 md:p-6">
-        <div className="grid items-center gap-6 md:grid-cols-[1fr_300px]">
+      {/* Hero: overview. print:grid-cols keeps the radar beside the text — the
+       * md: breakpoint never matches A4's ~700–790px print width, so without it
+       * the hero (and the md:/lg: grids below) collapse to one column. */}
+      <section className="overflow-hidden rounded-2xl border bg-gradient-to-br from-violet-50 via-background to-sky-50 p-5 dark:from-violet-950/30 dark:to-sky-950/20 md:p-6 break-inside-avoid">
+        <div className="grid items-center gap-6 md:grid-cols-[1fr_300px] print:grid-cols-[1fr_300px]">
           <div className="flex flex-col gap-4">
             <h2 className="flex items-center gap-2 text-xl font-bold text-violet-700 dark:text-violet-300">
               <Sparkles className="h-5 w-5" />
@@ -518,12 +524,12 @@ export default function TopicAiReport() {
 
       {/* Criteria */}
       <Section icon={Target} title={t("languageCheck.aiReport.criteria")} tone="text-sky-700 dark:text-sky-300">
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 print:grid-cols-2">
           {scored.map((k) => {
             const pct = percentOf(averages[k], max[k]);
             const ai = insights.criteria.find((c) => c.key === k);
             return (
-              <div key={k} className={cn("flex flex-col gap-3 rounded-2xl border p-4", CRITERION[k].soft)}>
+              <div key={k} className={cn("flex flex-col gap-3 rounded-2xl border p-4 break-inside-avoid", CRITERION[k].soft)}>
                 <div className="flex items-center justify-between gap-2">
                   <h3 className={cn("font-bold", CRITERION[k].text)}>{t(`languageCheck.assessment.criteria.${k}`)}</h3>
                   {ai && (
@@ -559,7 +565,7 @@ export default function TopicAiReport() {
       </Section>
 
       {/* Distribution + strengths */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 print:grid-cols-2">
         <div className="flex flex-col gap-3 rounded-2xl border bg-card p-4 break-inside-avoid">
           <h3 className="font-semibold">{t("languageCheck.reports.distribution")}</h3>
           <div className="flex h-36 items-end gap-3">
@@ -616,7 +622,7 @@ export default function TopicAiReport() {
       {/* Common mistakes + practice */}
       {insights.mistakes.length > 0 && (
         <Section icon={XCircle} title={t("languageCheck.aiReport.mistakes")} tone="text-red-700 dark:text-red-400">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2 print:grid-cols-2">
             {insights.mistakes.map((m, i) => {
               const ex = exampleFor(m.category);
               const stat = categories.find((c) => c.category === m.category);
@@ -752,7 +758,7 @@ export default function TopicAiReport() {
       {groups.length > 0 && (
         <Section icon={Users} title={t("languageCheck.aiReport.differentiation")} tone="text-indigo-700 dark:text-indigo-300">
           <p className="-mt-1 text-sm text-muted-foreground">{t("languageCheck.aiReport.differentiationHint")}</p>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3 print:grid-cols-3">
             {(["support", "developing", "secure"] as const).map((tier) => {
               const list: StudentInsight[] = groups
                 .filter((g) => g.tier === tier)

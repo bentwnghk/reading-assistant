@@ -152,6 +152,7 @@ realtime/                       # Standalone Socket.io server for multiplayer sp
   - `useAccurateTimer` — High-precision countdown timer for games
   - `useSubmitShortcut` — Keyboard shortcut (Ctrl+Enter) for form submission
   - `useIdleTimer` — Client-side idle timeout with multi-tab sync via BroadcastChannel
+  - `usePrintLightTheme` — Forces the light theme for the print window (strips `.dark` + `color-scheme` from `<html>` between `beforeprint`/`afterprint`, restores after); used by the Class Assessment Report so printouts always use the light design
 
 ### 3. Components & UI
 

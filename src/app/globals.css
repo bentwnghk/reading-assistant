@@ -567,3 +567,18 @@ html.nav-sidebar-resizing body {
     box-shadow: none;
   }
 }
+
+/* ── Print colour fidelity (opt-in) ──────────────────────────────── */
+/* Browsers default to `print-color-adjust: economy`, silently dropping every
+ * background colour from print/PDF output — the cause of the Class Assessment
+ * Report printing without its score bars, chart bars, card fills and coloured
+ * pills. `exact` keeps them. The property inherits, but the `*` form also pins
+ * it on each descendant (and the -webkit- prefix covers Safari). Opt-in class
+ * so only pages that ask for it spend the ink. */
+@media print {
+  .print-exact-colors,
+  .print-exact-colors * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
