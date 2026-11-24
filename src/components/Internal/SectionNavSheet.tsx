@@ -86,11 +86,11 @@ interface SectionItem {
 }
 
 // Partial-completion mark — "乄", a check-like glyph visually distinct from
-// the full ✓.
+// the full ✓. Same amber family as the help icons and the current-task box.
 function HalfCheck() {
   return (
     <span
-      className="flex h-4 w-4 shrink-0 items-center justify-center text-base leading-none text-primary font-semibold"
+      className="flex h-4 w-4 shrink-0 items-center justify-center text-base leading-none text-amber-500 font-semibold dark:text-amber-400"
       aria-hidden="true"
     >
       乄
@@ -634,7 +634,7 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
                 </Popover>
               )}
               {isCompleted ? (
-                <Check className="h-4 w-4 shrink-0 text-primary" />
+                <Check className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" />
               ) : (
                 isPartial && <HalfCheck />
               )}
