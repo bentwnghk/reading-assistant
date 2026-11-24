@@ -634,7 +634,9 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
                 </Popover>
               )}
               {isCompleted ? (
-                <Check className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" />
+                // Full tick: green = done. HalfCheck stays amber (in progress),
+                // matching the help icons.
+                <Check className="h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
               ) : (
                 isPartial && <HalfCheck />
               )}
@@ -644,10 +646,18 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
       })}
       {/* Current-task box directly below the last section (Grammar): the
           current reading text's completion percentage in a tight bordered
-          box, using the same amber palette as the help icons above it.
-          Incomplete sections carry a help icon (click for the checklist) —
-          the box shows the overall figure. */}
-      <div className="mx-3 mt-0.5 mb-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-700 dark:text-amber-300">
+          box. Amber — the help icons' palette — while work remains; green
+          once every activity is done (100%). Incomplete sections carry a
+          help icon (click for the checklist) — the box shows the overall
+          figure. */}
+      <div
+        className={cn(
+          "mx-3 mt-0.5 mb-1.5 rounded-md border px-2.5 py-1 text-xs",
+          progressPercent >= 100
+            ? "border-green-500/40 bg-green-500/10 text-green-700 dark:text-green-300"
+            : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+        )}
+      >
         {t("toc.currentTaskProgress", { percent: progressPercent })}
       </div>
       <div className="my-1 border-t" />
