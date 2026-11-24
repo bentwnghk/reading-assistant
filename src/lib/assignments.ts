@@ -1110,8 +1110,14 @@ export async function markSubmissionViewed(
  */
 function progressInputFromRow(row: Record<string, unknown>): Partial<ReadingStore> {
   // pg values are typed (number/string/boolean) or NULL — coerce defensively.
+  // BIGINT (e.g. visualization_generated_at) and NUMERIC columns arrive as
+  // strings, so numbers must be parsed rather than type-checked, otherwise
+  // those steps silently count as 0 (the roster was stuck at 14/15 = 93%).
   const str = (v: unknown): string => (typeof v === "string" ? v : "")
-  const num = (v: unknown): number => (typeof v === "number" ? v : 0)
+  const num = (v: unknown): number => {
+    const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : 0
+    return Number.isFinite(n) ? n : 0
+  }
   const bool = (v: unknown): boolean => v === true
   return {
     extractedText: str(row.extracted_text),
