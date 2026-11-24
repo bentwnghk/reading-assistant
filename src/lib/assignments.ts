@@ -18,6 +18,8 @@ import { grammarGameBestScore } from "@/utils/sessionMetrics"
  * every per-student attempt field. Forked from shared-sessions.stripUserData
  * with the grammar/spelling/completion state also reset (shared-sessions leaves
  * those untouched, which leaks source-student state into assignments).
+ * Per-item answers are stripped from every question array (readingTest,
+ * grammarQuiz, vocabularyQuiz) — keep in sync with stripUserData.
  */
 export function stripSessionForAssignment(sessionData: ReadingStore): Record<string, unknown> {
   const stripped: Record<string, unknown> = {
@@ -30,6 +32,25 @@ export function stripSessionForAssignment(sessionData: ReadingStore): Record<str
           return clean
         })
       : sessionData.readingTest,
+    // Question arrays ship so students can take each quiz fresh — but the
+    // source student's/teacher's per-item answers must not (same per-item
+    // stripping stripUserData applies; unlike sharing, assignments KEEP the
+    // vocabulary-quiz questions and only drop the answers).
+    grammarQuiz: Array.isArray(sessionData.grammarQuiz)
+      ? sessionData.grammarQuiz.map((q) => {
+          const clean: Record<string, unknown> = { ...q }
+          delete clean.userAnswer
+          delete clean.earnedPoints
+          return clean
+        })
+      : sessionData.grammarQuiz,
+    vocabularyQuiz: Array.isArray(sessionData.vocabularyQuiz)
+      ? sessionData.vocabularyQuiz.map((q) => {
+          const clean: Record<string, unknown> = { ...q }
+          delete clean.userAnswer
+          return clean
+        })
+      : sessionData.vocabularyQuiz,
     // Reading test
     testScore: 0,
     testCompleted: false,
@@ -158,6 +179,10 @@ async function insertStudentAssignmentSession(
        grammar_error_challenges,
        grammar_scramble_challenges, grammar_workshop_challenges,
        grammar_game_questions,
+       vocabulary_quiz,
+       pre_reading, pre_reading_generated_at,
+       collocations, collocations_generated_at,
+       generated_text_meta,
         assignment_id, created_at, visualization_language, mind_map_language,
         summary_language
        ) VALUES (
@@ -165,7 +190,8 @@ async function insertStudentAssignmentSession(
          $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
          $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44,
          $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58,
-         $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74
+         $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72,
+         $73, $74, $75, $76, $77, $78, $79, $80
        )`,
     [
       studentSession.id,
@@ -237,6 +263,12 @@ async function insertStudentAssignmentSession(
       JSON.stringify(studentSession.grammarScrambleChallenges ?? []),
       JSON.stringify(studentSession.grammarWorkshopChallenges ?? []),
       JSON.stringify(studentSession.grammarGameQuestions ?? []),
+      JSON.stringify(studentSession.vocabularyQuiz ?? []),
+      studentSession.preReading ? JSON.stringify(studentSession.preReading) : null,
+      studentSession.preReadingGeneratedAt ?? 0,
+      JSON.stringify(studentSession.collocations ?? []),
+      studentSession.collocationsGeneratedAt ?? 0,
+      studentSession.generatedTextMeta ? JSON.stringify(studentSession.generatedTextMeta) : null,
       assignmentId,
       new Date(now),
       (studentSession.visualizationLanguage as "en" | "zh" | null) ?? null,
@@ -626,6 +658,10 @@ export async function getAssignment(
 ): Promise<Assignment | null> {
   const client = await getClient()
   try {
+    // Converge the cached submission progress before the AVG query below
+    // reads it — the tagline, the roster and the list cards all read
+    // assignment_submissions.progress and must agree.
+    await syncAssignmentProgressCache(client, assignmentId)
     const result = await client.query(
       `SELECT a.*,
               COALESCE(COUNT(s_all.id), 0)::int AS student_count,
@@ -1067,6 +1103,42 @@ export async function markSubmissionViewed(
 }
 
 /**
+ * Map a reading_sessions DB row (progress-relevant columns) to the input
+ * shape of calculateAssignmentProgress. Shared by syncSubmissionMetrics
+ * (single session, after a student save) and syncAssignmentProgressCache
+ * (whole roster, on read) so both always compute identical progress.
+ */
+function progressInputFromRow(row: Record<string, unknown>): Partial<ReadingStore> {
+  // pg values are typed (number/string/boolean) or NULL — coerce defensively.
+  const str = (v: unknown): string => (typeof v === "string" ? v : "")
+  const num = (v: unknown): number => (typeof v === "number" ? v : 0)
+  const bool = (v: unknown): boolean => v === true
+  return {
+    extractedText: str(row.extracted_text),
+    preReading: (row.pre_reading ?? null) as Partial<ReadingStore>["preReading"],
+    studentPrediction: str(row.student_prediction),
+    collocations: (row.collocations ?? []) as Partial<ReadingStore>["collocations"],
+    summary: str(row.summary),
+    mindMap: str(row.mind_map),
+    visualizationGeneratedAt: num(row.visualization_generated_at),
+    adaptedText: str(row.adapted_text),
+    testCompleted: bool(row.test_completed),
+    analyzedSentences: (row.analyzed_sentences ?? {}) as Partial<ReadingStore>["analyzedSentences"],
+    highlightedWords: (row.highlighted_words ?? []) as Partial<ReadingStore>["highlightedWords"],
+    glossary: (row.glossary ?? []) as Partial<ReadingStore>["glossary"],
+    spellingGameBestScore: num(row.spelling_game_best_score),
+    vocabularyQuizScore: num(row.vocabulary_quiz_score),
+    grammarQuizCompleted: bool(row.grammar_quiz_completed),
+    grammarQuizScore: num(row.grammar_quiz_score),
+    grammarScrambleHighScore: num(row.grammar_scramble_high_score),
+    grammarWorkshopHighScore: num(row.grammar_workshop_high_score),
+    grammarSurgeryHighScore: num(row.grammar_surgery_high_score),
+    grammarRouletteHighScore: num(row.grammar_roulette_high_score),
+    grammarDuelHighScore: num(row.grammar_duel_high_score),
+  }
+}
+
+/**
  * Sync cached metrics on an assignment_submissions row from the student's
  * latest session data. Reads the FULL session row from the DB so that partial
  * updates (which only carry the changed fields) don't zero-out fields that
@@ -1101,30 +1173,11 @@ export async function syncSubmissionMetrics(
 
     const row = sessionRes.rows[0]
     // Map DB row to the shape expected by calculateAssignmentProgress
+    // (progress fields via the shared mapper; score/accuracy extras on top)
     const session: Partial<ReadingStore> = {
-      extractedText: row.extracted_text ?? "",
-      preReading: row.pre_reading ?? null,
-      studentPrediction: row.student_prediction ?? "",
-      collocations: row.collocations ?? [],
-      summary: row.summary ?? "",
-      mindMap: row.mind_map ?? "",
+      ...progressInputFromRow(row),
       visualizationImage: row.visualization_image ?? "",
-      visualizationGeneratedAt: Number(row.visualization_generated_at ?? 0),
-      adaptedText: row.adapted_text ?? "",
-      testCompleted: row.test_completed ?? false,
-      analyzedSentences: row.analyzed_sentences ?? {},
-      highlightedWords: row.highlighted_words ?? [],
-      glossary: row.glossary ?? [],
-      spellingGameBestScore: row.spelling_game_best_score ?? 0,
       spellingGameAccuracy: row.spelling_game_accuracy ?? 0,
-      vocabularyQuizScore: row.vocabulary_quiz_score ?? 0,
-      grammarQuizCompleted: row.grammar_quiz_completed ?? false,
-      grammarQuizScore: row.grammar_quiz_score ?? 0,
-      grammarScrambleHighScore: row.grammar_scramble_high_score ?? 0,
-      grammarWorkshopHighScore: row.grammar_workshop_high_score ?? 0,
-      grammarSurgeryHighScore: row.grammar_surgery_high_score ?? 0,
-      grammarRouletteHighScore: row.grammar_roulette_high_score ?? 0,
-      grammarDuelHighScore: row.grammar_duel_high_score ?? 0,
       grammarGameAccuracy: row.grammar_game_accuracy ?? 0,
       testScore: row.test_score ?? 0,
     }
@@ -1176,5 +1229,56 @@ export async function syncSubmissionMetrics(
     )
   } finally {
     client.release()
+  }
+}
+
+/**
+ * Recompute the cached `progress` of every submission on an assignment from
+ * the students' live session rows and write back drifted rows (best-effort —
+ * a failure here must never fail the read).
+ *
+ * Why: syncSubmissionMetrics only runs when a student SAVES. Copies whose
+ * content was repaired after the fact (missing pre-reading/collocations
+ * columns on copies created before that INSERT was fixed, or the backfill
+ * migration restoring them) would otherwise keep their under-counted seed
+ * progress forever, so the roster rows, the "Avg progress" tagline and the
+ * assignment-list cards disagree. getAssignment runs this before its AVG
+ * query so every view of the assignment converges on the same values.
+ */
+async function syncAssignmentProgressCache(
+  client: PoolClient,
+  assignmentId: string,
+): Promise<void> {
+  try {
+    const { rows } = await client.query(
+      `SELECT s.id AS submission_id, s.progress AS cached_progress, r.id AS session_row_id,
+              r.extracted_text, r.pre_reading, r.student_prediction, r.collocations,
+              r.summary, r.mind_map, r.visualization_generated_at, r.adapted_text,
+              r.test_completed, r.analyzed_sentences, r.highlighted_words, r.glossary,
+              r.spelling_game_best_score, r.vocabulary_quiz_score,
+              r.grammar_quiz_completed, r.grammar_quiz_score,
+              r.grammar_scramble_high_score, r.grammar_workshop_high_score,
+              r.grammar_surgery_high_score, r.grammar_roulette_high_score,
+              r.grammar_duel_high_score
+       FROM assignment_submissions s
+       LEFT JOIN reading_sessions r ON r.id = s.student_session_id
+       WHERE s.assignment_id = $1`,
+      [assignmentId],
+    )
+    for (const row of rows) {
+      // Deleted working copy (assignment_id is a soft link) — keep the cache.
+      if (!row.session_row_id) continue
+      const progress = calculateAssignmentProgress(
+        progressInputFromRow(row) as ReadingStore,
+      )
+      if (progress !== (row.cached_progress ?? 0)) {
+        await client.query(
+          `UPDATE assignment_submissions SET progress = $1 WHERE id = $2`,
+          [progress, row.submission_id],
+        )
+      }
+    }
+  } catch (error) {
+    console.error("[assignments] Failed to re-sync submission progress:", error)
   }
 }
