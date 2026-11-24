@@ -139,15 +139,18 @@ export function AssignmentStats({ roster }: { roster: AssignmentSubmission[] }) 
 
   const hasAnyAttempt = activityStats.some((a) => a.attempted > 0)
 
-  // Hardest-first bar chart data. Descending by mean so, in a vertical chart,
-  // the lowest-scoring (hardest) activity sits at the top. Only percentage-scale
-  // activities belong here — the axis is fixed at 0–100, so raw point totals
-  // (spelling) would be meaningless. Activities with no attempts are excluded.
+  // Hardest-first bar chart data. Ascending by mean: a recharts vertical bar
+  // chart renders the FIRST array item at the TOP, so the lowest-scoring
+  // (hardest) activity must come first for it to sit at the top — matching the
+  // card subtitle ("hardest at the top") and the landing-page mockup. Only
+  // percentage-scale activities belong here — the axis is fixed at 0–100, so
+  // raw point totals would be meaningless. Activities with no attempts are
+  // excluded.
   const chartData: PerformanceBarDatum[] = useMemo(() => {
     return activityStats
       .filter((a) => a.scale === "percentage" && a.mean != null)
       .map((a) => toDatum(a, t, overview.totalStudents))
-      .sort((a, b) => (b.mean ?? 0) - (a.mean ?? 0))
+      .sort((a, b) => (a.mean ?? 0) - (b.mean ?? 0))
   }, [activityStats, t, overview.totalStudents])
 
   return (
