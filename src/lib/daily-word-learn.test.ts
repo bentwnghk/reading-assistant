@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const query = vi.fn();
 vi.mock("./db", () => ({ getPool: vi.fn(() => ({ query })) }));
@@ -9,6 +9,17 @@ const ROW = { word: "gather", learned_at: 1732286400000, on_time: true, note: ""
 
 beforeEach(() => {
   query.mockReset();
+  // Pin the clock to the UTC day the fixtures use. markDailyWordLearned
+  // downgrades on_time for any claimed day more than ±1 from real UTC today
+  // (anti-backdating), so these tests silently depended on the wall clock and
+  // started failing once the real date passed 2026-11-23. Fake timers keep
+  // "2026-11-22" plausible (and "2026-11-01" implausible) on every run date.
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-11-22T12:00:00Z"));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("markDailyWordLearned", () => {
