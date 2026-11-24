@@ -644,9 +644,10 @@ function NavMenu({ onNavigate }: { onNavigate?: () => void }) {
       })}
       {/* Current-task box directly below the last section (Grammar): the
           current reading text's completion percentage in a tight bordered
-          box. Incomplete sections above carry a help icon (click for the
-          checklist) — the box shows the overall figure. */}
-      <div className="mx-3 mt-0.5 mb-1.5 rounded-md border bg-muted/30 px-2.5 py-1 text-xs text-muted-foreground">
+          box, using the same amber palette as the help icons above it.
+          Incomplete sections carry a help icon (click for the checklist) —
+          the box shows the overall figure. */}
+      <div className="mx-3 mt-0.5 mb-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-700 dark:text-amber-300">
         {t("toc.currentTaskProgress", { percent: progressPercent })}
       </div>
       <div className="my-1 border-t" />
