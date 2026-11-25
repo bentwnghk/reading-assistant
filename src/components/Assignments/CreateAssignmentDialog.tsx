@@ -354,8 +354,8 @@ export default function CreateAssignmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[85vh] max-w-2xl flex-col overflow-hidden">
+        <DialogHeader className="shrink-0">
           <DialogTitle>{t("assignments.create.title")}</DialogTitle>
           <DialogDescription>
             {step === "pick"
@@ -367,7 +367,7 @@ export default function CreateAssignmentDialog({
         {/* Step indicator — same arrangement as the Writing Assessment
             "Scan → Review transcript → Assessment" indicator. */}
         <ol
-          className="flex items-center gap-1.5 text-sm"
+          className="flex shrink-0 flex-wrap items-center gap-1.5 text-sm"
           aria-label={t("assignments.create.steps.label")}
         >
           {steps.map((s, i) => {
@@ -408,7 +408,7 @@ export default function CreateAssignmentDialog({
         </ol>
 
         {step === "pick" ? (
-          <div className="space-y-3">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
             <SearchArea
               className="w-full"
               onChange={handleSearch}
@@ -443,7 +443,7 @@ export default function CreateAssignmentDialog({
               )
             ) : (
               <>
-                <div className="max-h-[50vh] overflow-y-auto rounded-md border divide-y">
+                <div className="divide-y rounded-md border">
                   {sessionList.map((item) => {
                     const selected = selectedSession?.id === item.id
                     return (
@@ -511,7 +511,7 @@ export default function CreateAssignmentDialog({
             )}
           </div>
         ) : (
-          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+          <div className="min-h-0 min-w-0 flex-1 space-y-4 overflow-y-auto pr-1">
             {/* Source session summary */}
             <div className="space-y-1.5">
               <Label>{t("assignments.create.sourceSession")}</Label>
@@ -709,7 +709,7 @@ export default function CreateAssignmentDialog({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0">
           {step === "pick" ? (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
