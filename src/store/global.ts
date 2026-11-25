@@ -21,8 +21,6 @@ interface GlobalStore {
   openSetting: boolean;
   openHistory: boolean;
   openDashboard: boolean;
-  /** Optional tab to focus when the Dashboard dialog opens ("overview" | "sessions"). */
-  dashboardInitialTab: string;
   hasOpenedAbout: boolean;
   /** Persisted only when the user completes setup (saves credentials, starts
    *  checkout, or jumps into Settings). Skip/dismiss is session-scope only. */
@@ -53,8 +51,7 @@ interface GlobalStore {
 interface GlobalActions {
   setOpenSetting: (visible: boolean) => void;
   setOpenHistory: (visible: boolean) => void;
-  setOpenDashboard: (visible: boolean, initialTab?: string) => void;
-  setDashboardInitialTab: (tab: string) => void;
+  setOpenDashboard: (visible: boolean) => void;
   setHasOpenedAbout: (value: boolean) => void;
   setHasCompletedOnboarding: (value: boolean) => void;
   setOpenTutorChat: (visible: boolean) => void;
@@ -70,7 +67,6 @@ export const useGlobalStore = create(
       openSetting: false,
       openHistory: false,
       openDashboard: false,
-      dashboardInitialTab: "",
       hasOpenedAbout: false,
       hasCompletedOnboarding: false,
       lastSignedInUserId: "",
@@ -81,11 +77,7 @@ export const useGlobalStore = create(
       navSidebarWidth: NAV_SIDEBAR_DEFAULT_WIDTH,
       setOpenSetting: (visible) => set({ openSetting: visible }),
       setOpenHistory: (visible) => set({ openHistory: visible }),
-      setOpenDashboard: (visible, initialTab) =>
-        set(visible && initialTab
-          ? { openDashboard: true, dashboardInitialTab: initialTab }
-          : { openDashboard: visible }),
-      setDashboardInitialTab: (tab) => set({ dashboardInitialTab: tab }),
+      setOpenDashboard: (visible) => set({ openDashboard: visible }),
       setHasOpenedAbout: (value) => set({ hasOpenedAbout: value }),
       setHasCompletedOnboarding: (value) => set({ hasCompletedOnboarding: value }),
       setOpenTutorChat: (visible) => set({ openTutorChat: visible }),
@@ -119,7 +111,6 @@ export const useGlobalStore = create(
           openSetting: _openSetting,
           openHistory: _openHistory,
           openDashboard: _openDashboard,
-          dashboardInitialTab: _dashboardInitialTab,
           openTutorChat: _openTutorChat,
           tutorChatSelectedText: _tutorChatSelectedText,
           openTeacherDashboard: _openTeacherDashboard,
@@ -134,7 +125,9 @@ export const useGlobalStore = create(
         state.openSetting = false;
         state.openHistory = false;
         state.openDashboard = false;
-        state.dashboardInitialTab = "";
+        // Strip the removed dashboardInitialTab flag for the same legacy
+        // entries, so partialize's rest-spread does not re-persist it.
+        delete (state as unknown as Record<string, unknown>).dashboardInitialTab;
         state.openTutorChat = false;
         state.tutorChatSelectedText = "";
         state.openTeacherDashboard = false;

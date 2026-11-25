@@ -4496,7 +4496,7 @@
     "navTitle": "My Assignments",
     "title": "My Assignments",
     "teacherView": {
-      "empty": "No assignments yet. To create one, click \"Create assignment\" above. In the dialog that opens, find the reading session you want to assign, and click the graduation-cap icon next to it. Then pick your students, optionally set a due date, and submit.",
+      "empty": "No assignments yet. Click \"Create assignment\" above to open a two-step wizard: pick one of your reading sessions, then choose the students to assign it to.",
       "new": "Create assignment",
       "studentCount": "{{count}} students",
       "completedCount": "Completed: {{count}}/{{total}} students",
@@ -4634,7 +4634,25 @@
       "submit": "Create assignment ({{count}})",
       "creating": "Creating…",
       "success": "Assignment created.",
-      "error": "Failed to create assignment."
+      "error": "Failed to create assignment.",
+      "steps": {
+        "label": "Assignment creation steps",
+        "pickSession": "Choose session",
+        "setup": "Set up & assign"
+      },
+      "pick": {
+        "description": "Pick one of your reading sessions to turn into an assignment.",
+        "empty": "You have no reading sessions yet. Create a reading session on the home page first, then come back to assign it as homework.",
+        "goHome": "Go to the home page",
+        "noMatches": "No sessions match your search.",
+        "loadMore": "Show more sessions",
+        "words": "{{count}} words",
+        "untitled": "Untitled session"
+      },
+      "continue": "Continue",
+      "setupDescription": "Set the details and choose the students to assign.",
+      "sourceSession": "Source session",
+      "changeSession": "Change"
     },
     "edit": {
       "students": "Students",
@@ -4732,14 +4750,14 @@
         "gettingStarted": {
           "title": "Getting started",
           "step1": "Click the \"Create assignment\" button in the top-right corner.",
-          "step2": "In the dialog that opens, find the reading session you want to assign.",
-          "step3": "Click the graduation-cap icon next to that session to select it.",
+          "step2": "In the dialog that opens, pick the reading session to assign — search by title or content if you have many.",
+          "step3": "Click \"Continue\" to move on.",
           "step4": "Pick your students (or load a saved roster), then optionally set a title, subject, due date and instructions.",
           "step5": "Click \"Create assignment (N)\" to confirm — students will see it on their Assignments page immediately."
         },
         "create": {
           "name": "Create assignment",
-          "desc": "Click \"Create assignment\", pick a reading session with the graduation-cap icon, select students and optionally set a due date."
+          "desc": "Click \"Create assignment\" and follow the two steps: pick a reading session, then select students and optionally set a due date."
         },
         "presets": {
           "name": "Class presets",

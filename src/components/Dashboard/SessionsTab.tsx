@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useLayoutEffect, useRef } from "react";
+import { useState, useMemo, useLayoutEffect, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSession } from "next-auth/react";
 import { TrashIcon, FileOutput, Download, Upload, Share2, GraduationCap } from "lucide-react";
@@ -31,10 +31,17 @@ import { downloadFile } from "@/utils/file";
 import { calculateProgress } from "@/utils/progress";
 import { grammarGameBestScore, formatScore } from "@/utils/sessionMetrics";
 import ShareSessionDialog from "@/components/Dashboard/ShareSessionDialog";
-import AssignRosterDialog from "@/components/Assignments/AssignRosterDialog";
+import CreateAssignmentDialog from "@/components/Assignments/CreateAssignmentDialog";
 
 interface SessionsTabProps {
   onClose: () => void;
+  /**
+   * Reports whether any dialog stacked on this one (share /
+   * create-assignment / confirm-switch) is open, so the parent Dashboard
+   * dialog can guard against the touch close race (see the stacked-dialog
+   * rule in AGENTS.md §O).
+   */
+  onChildDialogOpenChange?: (open: boolean) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -122,7 +129,7 @@ function formatTime(timestamp: number, locale: string): string {
   });
 }
 
-function SessionsTab({ onClose }: SessionsTabProps) {
+function SessionsTab({ onClose, onChildDialogOpenChange }: SessionsTabProps) {
   const { t, i18n } = useTranslation();
   const { data: session } = useSession();
   const canAssign = !!session?.user?.role && session.user.role !== "student";
@@ -140,6 +147,14 @@ function SessionsTab({ onClose }: SessionsTabProps) {
   const showLoadMore = useMemo(() => {
     return history.length > currentPage * PAGE_SIZE;
   }, [history, currentPage]);
+
+  // Lift "a child dialog is open" up to the Dashboard so its DialogContent
+  // can guard onInteractOutside while a stacked dialog is on top.
+  const childDialogOpen =
+    shareOpen || assignOpen || pendingSwitchId !== null;
+  useEffect(() => {
+    onChildDialogOpenChange?.(childDialogOpen);
+  }, [childDialogOpen, onChildDialogOpenChange]);
 
   async function importSession(file: File) {
     try {
@@ -437,7 +452,7 @@ function SessionsTab({ onClose }: SessionsTabProps) {
         onOpenChange={setShareOpen}
         session={shareSession}
       />
-      <AssignRosterDialog
+      <CreateAssignmentDialog
         open={assignOpen}
         onOpenChange={setAssignOpen}
         session={assignSession}

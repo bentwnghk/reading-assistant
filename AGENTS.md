@@ -620,7 +620,7 @@ When sharing, `stripUserData` removes: `userAnswer`, `earnedPoints` from test qu
 
 ## Assignments (Teacher → Student)
 
-Teachers can create assignments from a reading session (their own or from the text repository) and assign them to students. Each student receives a **stripped copy** (`stripSessionForAssignment`) with all AI content preserved and every per-student attempt field reset. Students work the assignment; their scores are cached on `assignment_submissions` and surfaced in the teacher dashboard.
+Teachers create assignments from one of their **own** reading sessions — the create-assignment POST resolves `sourceSessionId` via `getReadingSession(caller)`, so sessions from the text repository or other users cannot be assigned. Entry points: the "Create assignment" button on `/assignments` opens the two-step `CreateAssignmentDialog` wizard (① choose session → ② set up & assign), and the graduation-cap "Assign as homework" action in the Learning Journey Sessions tab opens the same wizard pre-seeded with the session, landing on step 2. Each student receives a **stripped copy** (`stripSessionForAssignment`) with all AI content preserved and every per-student attempt field reset. Students work the assignment; their scores are cached on `assignment_submissions` and surfaced in the teacher dashboard.
 
 ### Database Tables
 

@@ -56,13 +56,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useGlobalStore } from "@/store/global"
 import { cn } from "@/utils/style"
 import { SegmentedTabs } from "@/components/LanguageCheck/shared"
 import { RecipientPicker } from "@/components/Internal/RecipientPicker"
 import type { ShareTargetGroup } from "@/lib/shared-sessions"
 import PresetsSection from "./PresetsSection"
 import SchoolAssignmentsTable from "./SchoolAssignmentsTable"
+import CreateAssignmentDialog from "./CreateAssignmentDialog"
 
 function formatDate(iso: string | null | undefined, locale: string): string {
   if (!iso) return ""
@@ -87,7 +87,6 @@ type StatusFilter = "all" | "active" | "archived"
 export default function AssignmentsList() {
   const { data: session } = useSession()
   const { t, i18n } = useTranslation()
-  const setOpenDashboard = useGlobalStore((s) => s.setOpenDashboard)
 
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,6 +98,7 @@ export default function AssignmentsList() {
   const [pageSize, setPageSize] = useState(10)
   const [editing, setEditing] = useState<Assignment | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null)
+  const [createOpen, setCreateOpen] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [helpTab, setHelpTab] = useState<"overview" | "tracking" | "manage">(
     "overview",
@@ -299,7 +299,7 @@ export default function AssignmentsList() {
             variant="outline"
             size="sm"
             className="ml-auto"
-            onClick={() => setOpenDashboard(true, "sessions")}
+            onClick={() => setCreateOpen(true)}
             title={t("assignments.teacherView.new")}
           >
             <Plus className="h-4 w-4 mr-1" />
@@ -561,6 +561,7 @@ export default function AssignmentsList() {
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => deleteTarget && handleDelete(deleteTarget)}
       />
+      <CreateAssignmentDialog open={createOpen} onOpenChange={setCreateOpen} />
 
       <Dialog open={showHelp} onOpenChange={setShowHelp}>
         <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto scrollbar-hide">

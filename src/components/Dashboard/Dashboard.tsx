@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BarChart3, HelpCircle, Clock } from "lucide-react";
 import {
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGlobalStore } from "@/store/global";
 import { OverviewTab } from "./OverviewTab";
 import SessionsTab from "./SessionsTab";
 import DashboardGuide from "./DashboardGuide";
@@ -25,18 +24,9 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
   const [showHelp, setShowHelp] = useState(false);
-  const dashboardInitialTab = useGlobalStore((s) => s.dashboardInitialTab);
-  const setDashboardInitialTab = useGlobalStore((s) => s.setDashboardInitialTab);
-
-  // When the dialog opens, honor any caller-requested initial tab (e.g. "sessions"
-  // from the Assignments page's "Create assignment" button) and then clear the
-  // intent so the next open returns to the default.
-  useEffect(() => {
-    if (open && dashboardInitialTab) {
-      setActiveTab(dashboardInitialTab);
-      setDashboardInitialTab("");
-    }
-  }, [open, dashboardInitialTab, setDashboardInitialTab]);
+  // Whether a dialog is stacked on top of this one (help guide, or the
+  // SessionsTab share / create-assignment / confirm-switch dialogs).
+  const [childDialogOpen, setChildDialogOpen] = useState(false);
 
   function handleClose(dialogOpen: boolean) {
     if (!dialogOpen) onClose();
@@ -44,7 +34,21 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-lg:max-w-screen-sm max-w-screen-xl gap-2 max-sm:p-3 overflow-hidden">
+      <DialogContent
+        className="max-lg:max-w-screen-sm max-w-screen-xl gap-2 max-sm:p-3 overflow-hidden"
+        onInteractOutside={(e) => {
+          // Stacked child dialogs (help guide, share, create-assignment,
+          // confirm-switch): outside interactions belong to the top layer,
+          // not this one — and the tap that closed a child can arrive here
+          // after the child's layer unmounted mid-event (touch close race).
+          if (childDialogOpen || showHelp) {
+            e.preventDefault();
+            return;
+          }
+          const target = e.detail.originalEvent.target as Node | null;
+          if (target && !target.isConnected) e.preventDefault();
+        }}
+      >
         <DialogHeader className="text-left">
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
@@ -78,7 +82,10 @@ export default function Dashboard({ open, onClose }: DashboardProps) {
             <OverviewTab />
           </TabsContent>
           <TabsContent value="sessions" className="mt-4 min-w-0">
-            <SessionsTab onClose={onClose} />
+            <SessionsTab
+              onClose={onClose}
+              onChildDialogOpenChange={setChildDialogOpen}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>
