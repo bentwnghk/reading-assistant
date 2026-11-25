@@ -922,7 +922,7 @@ body.toc-noscroll{overflow:hidden}
       <table class="ref">
         <tr><th>功能（標籤）</th><th>可用模型</th><th>預設</th></tr>
         <tr><td>視覺（OCR）模型</td><td>claude-haiku-5-5† · gpt-6-luna</td><td>gpt-6-luna</td></tr>
-        <tr><td>摘要模型</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-3.8-flash</td><td>deepseek-flash</td></tr>
+        <tr><td>摘要模型</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-4-hydrogen · gemini-3.8-flash</td><td>deepseek-flash</td></tr>
         <tr><td>讀前模型</td><td rowspan="2">與摘要相同</td><td>gpt-6-luna</td></tr>
         <tr><td>思維導圖模型</td><td>deepseek-flash</td></tr>
         <tr><td>視覺化模型</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-nano-banana-2.1 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
@@ -935,9 +935,9 @@ body.toc-noscroll{overflow:hidden}
         <tr><td>句子分析模型</td><td>deepseek-flash</td></tr>
         <tr><td>語法模型</td><td>gpt-6-luna</td></tr>
         <tr><td>OCR 模型（寫作評估）</td><td>claude-haiku-5-5† · gpt-6-luna</td><td>gpt-6-luna</td></tr>
-        <tr><td>寫作評估模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · gpt-6.1-terra · deepseek-flash · gemini-3.8-flash</td><td>gpt-6.1-sol</td></tr>
-        <tr><td>閱讀文本生成模型</td><td>claude-sonnet-5-5† · gpt-6.1-sol · gpt-6.1-terra · deepseek-flash · gemini-3.8-flash</td><td>deepseek-flash</td></tr>
-        <tr><td>AI 導師模型</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-haiku-5-5† · claude-sonnet-5-5† · gemini-3.8-flash</td><td>gpt-6-luna</td></tr>
+        <tr><td>寫作評估模型</td><td>claude-sonnet-5-5† · gpt-6.2-sol · gpt-6.1-sol · gpt-6.1-terra · deepseek-flash · gemini-4-hydrogen · gemini-3.8-flash</td><td>gpt-6.2-sol</td></tr>
+        <tr><td>閱讀文本生成模型</td><td>claude-sonnet-5-5† · gpt-6.2-sol · gpt-6.1-sol · gpt-6.1-terra · deepseek-flash · gemini-4-hydrogen · gemini-3.8-flash</td><td>gpt-6.2-sol</td></tr>
+        <tr><td>AI 導師模型</td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-haiku-5-5† · claude-sonnet-5-5† · gemini-4-hydrogen · gemini-3.8-flash</td><td>gpt-6-luna</td></tr>
         <tr><td>語音模型</td><td>tts-1 · gemini-3.8-flash-lite-tts · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
       <div class="callout tip"><strong>如何選擇？</strong> 預設值已平衡成本與質素。AI 導師方面，<code>gpt-6-luna</code> 為推薦之選；<code>gemini-3.8-flash</code> 為開放給所有用戶的強力選擇；<code>claude-haiku-5-5</code>† 及 <code>claude-sonnet-5-5</code>† 僅提供予管理員／超級管理員及計量用戶——當中 <code>claude-sonnet-5-5</code> 最強（亦最貴）。</div>
@@ -2654,7 +2654,7 @@ body.toc-noscroll{overflow:hidden}
         <li><b>優化文章</b>分頁可生成<b>你自己文章的兩個改良版本</b>——你不按<b>生成優化文章</b>就不會生成，結果會與作文一併保存。面板內的<b>輕度／深度</b>開關可自由切換：<b>輕度優化</b>只作潤飾——修正文法筆誤、錯字、生硬表達及標點，同時嚴格保留你的語氣、句式及想法，展示原文清理後的模樣；<b>深度優化</b>則是理想水平的範文示範——以進階詞彙、多樣句式（倒裝、複雜從句）及更強的過渡重寫句子，把語域提升至頂級 <b>HKDSE 5**</b> 水平，同時保留你的核心論點及題目要點，展示建基於你自己想法的更高層次寫法。學生每篇作文只可<b>生成一次</b>：結果一經保存，面板即變為唯讀，只有教職員可重新生成。<b>重新生成屬教職員動作</b>（於「學生作文」視圖內進行）；重新<b>轉錄</b>或<b>檢查</b>會重設面板，以便對新文字再次生成。文字會跟隨 <b>English / 繁體中文</b> 開關切換，並與更正及評估使用同一個<b>寫作評估模型</b>。按<b>用作閱讀文本</b>可將現時選定的版本載入主頁的<b>選擇文本</b>區，成為標示<b>來自寫作</b>的新閱讀文本——課堂可以繼續進行心智圖、改寫文本及所有其他閱讀活動（§4.3）。</li>
         <li>以 <b>English / 繁體中文</b> 開關即時切換語法說明的語言。<b>匯出至 Word</b> 會產生批改後的作文、乾淨的更正版本、編號說明及 AI 寫作評估；<b>原始掃描</b>與<b>重新檢查</b>位於「更多操作」選單。同一工具列的<b>從錯誤中學習</b>按鈕可將批改結果變成課堂——見 11.2。</li>
       </ol>
-      <div class="callout"><strong>選擇模型</strong> 可在「設定 &rarr; 模型」選擇<b>寫作評估模型</b>（預設為 <code>gpt-6.1-sol</code>；<code>gpt-6.1-terra</code>、<code>deepseek-flash</code> 及 <code>gemini-3.8-flash</code> 亦開放給所有用戶。<code>claude-sonnet-5-5</code> 屬預覽模型——僅提供予管理員／超級管理員及計量用戶）。更正配合 HKDSE 寫作「語言」範疇，以最少修改為原則，保留學生原本的意思和語氣。</div>
+      <div class="callout"><strong>選擇模型</strong> 可在「設定 &rarr; 模型」選擇<b>寫作評估模型</b>（預設為 <code>gpt-6.2-sol</code>；<code>gpt-6.1-sol</code>、<code>gpt-6.1-terra</code>、<code>deepseek-flash</code>、<code>gemini-4-hydrogen</code> 及 <code>gemini-3.8-flash</code> 亦開放給所有用戶。<code>claude-sonnet-5-5</code> 屬預覽模型——僅提供予管理員／超級管理員及計量用戶）。更正配合 HKDSE 寫作「語言」範疇，以最少修改為原則，保留學生原本的意思和語氣。</div>
 
       <h3>11.2 從錯誤中學習</h3>
       <p>在已檢查作文的結果頁按<b>從錯誤中學習</b>，即可將批改結果變成根據你自己作文生成的學習計劃。從作文的批改結果中選擇最多 <b>6 個類別</b>（錯誤與建議分開列出；<b>最常見 3 項</b>會自動選取最常見的類別），並在年齡滑桿上設定你的程度——課堂與練習會按該程度編寫。每個類別成一個主題，三個階段依次解鎖：</p>
@@ -2805,11 +2805,11 @@ body.toc-noscroll{overflow:hidden}
         <tr><td><b>視覺</b>（OCR）</td><td>claude-haiku-5-5† · gpt-6-luna</td><td>gpt-6-luna</td></tr>
         <tr><td>OCR（寫作評估）</td><td>claude-haiku-5-5† · gpt-6-luna</td><td>gpt-6-luna</td></tr>
         <tr><td><b>圖像</b>（視覺化）</td><td>gemini-3.1-flash-lite-image · grok-imagine-image-2.0 · gemini-nano-banana-2.1 · gemini-3.1-flash-image‡</td><td>gemini-3.1-flash-lite-image</td></tr>
-        <tr><td><b>通用</b>——預設 <code>deepseek-flash</code>（摘要、心智圖、改寫、簡化、詞彙、句子分析）</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-3.8-flash</td><td>deepseek-flash</td></tr>
+        <tr><td><b>通用</b>——預設 <code>deepseek-flash</code>（摘要、心智圖、改寫、簡化、詞彙、句子分析）</td><td>claude-sonnet-5-5† · gpt-6-luna · deepseek-flash · gemini-4-hydrogen · gemini-3.8-flash</td><td>deepseek-flash</td></tr>
         <tr><td><b>通用</b>——預設 <code>gpt-6-luna</code>（讀前、閱讀測驗、推薦生字、搭配、語法）</td><td>同上</td><td>gpt-6-luna</td></tr>
-        <tr><td><b>寫作評估</b>（錯誤更正、AI 寫作評估及優化文章）</td><td>claude-sonnet-5-5† · gpt-6.1-sol · gpt-6.1-terra · deepseek-flash · gemini-3.8-flash</td><td>gpt-6.1-sol</td></tr>
-        <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>claude-sonnet-5-5† · gpt-6.1-sol · gpt-6.1-terra · deepseek-flash · gemini-3.8-flash</td><td>deepseek-flash</td></tr>
-        <tr><td><b>AI 導師</b></td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-haiku-5-5† · claude-sonnet-5-5† · gemini-3.8-flash</td><td>gpt-6-luna</td></tr>
+        <tr><td><b>寫作評估</b>（錯誤更正、AI 寫作評估及優化文章）</td><td>claude-sonnet-5-5† · gpt-6.2-sol · gpt-6.1-sol · gpt-6.1-terra · deepseek-flash · gemini-4-hydrogen · gemini-3.8-flash</td><td>gpt-6.2-sol</td></tr>
+        <tr><td><b>閱讀文本</b>（AI 文本生成器）</td><td>claude-sonnet-5-5† · gpt-6.2-sol · gpt-6.1-sol · gpt-6.1-terra · deepseek-flash · gemini-4-hydrogen · gemini-3.8-flash</td><td>gpt-6.2-sol</td></tr>
+        <tr><td><b>AI 導師</b></td><td>deepseek-flash · step-3.7-flash · gpt-6-luna · claude-haiku-5-5† · claude-sonnet-5-5† · gemini-4-hydrogen · gemini-3.8-flash</td><td>gpt-6-luna</td></tr>
         <tr><td><b>語音合成</b>（TTS）</td><td>tts-1 · gemini-3.8-flash-lite-tts · x-ai/grok-voice-tts-1.0</td><td>x-ai/grok-voice-tts-1.0</td></tr>
       </table>
       <p class="small"><b>註：</b>若部署設有 <code>NEXT_PUBLIC_MODEL_LIST</code>（如 <code>-all,+gpt-5.4-mini</code>）或以 <code>NEXT_PUBLIC_DISABLED_AI_PROVIDER</code> 停用供應商，你可見的模型清單可能不同。<b>†</b> 預覽模型——除非你是管理員／超級管理員或使用計量計費，否則不會出現在設定的下拉選單；已儲存的選擇會自動重設為該功能預設值。<b>‡</b> 高級圖像模型——僅管理員／超級管理員及計量（API 金鑰）用戶可在 設定 → 模型 → 視覺化模型 中選用；其他帳戶生成時會自動採用預設模型。</p>

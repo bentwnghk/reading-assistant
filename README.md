@@ -708,7 +708,7 @@ A standalone page (`/writing-assessment`, opened from the hamburger menu) that i
 | 📷 **Upload** | Handwritten essay or scanned work as images or PDF (up to 10 pages), or photos taken with a phone camera one page at a time. Pages wait in a tray where each can be **cropped** to just the handwriting, reordered or removed before transcription |
 | 🔤 **OCR** | The Settings *OCR Model (Writing Assessment)* (`gpt-6-luna` by default; `claude-haiku-5-5` is admin/super-admin/Meter only) transcribes it **verbatim** (mistakes kept; unreadable words become `[?]`) with paragraph breaks preserved. A transcriber-only system prompt with few-shot examples resists the model's habit of silently fixing errors, and an optional **Double-check transcription** switch adds a second pass that reverts any it still fixed |
 | 👀 **Review** | Edit the transcript side by side with the zoomable original scan |
-| ✍️ **Check** | The Settings *Writing Assessment Model* (`gpt-6.1-sol` by default; `gpt-6.1-terra`, `deepseek-flash` and `gemini-3.8-flash` also open to all users; `claude-sonnet-5-5` is admin/super-admin/Meter only) finds **errors** tuned to common ESL/EFL (HK) patterns and HKDSE Writing, plus optional **expression suggestions**: unclear/awkward phrasing, Chinglish (literal translation), wordiness and stronger word choice, each with alternatives and a "why" note |
+| ✍️ **Check** | The Settings *Writing Assessment Model* (`gpt-6.2-sol` by default; `gpt-6.1-sol`, `gpt-6.1-terra`, `deepseek-flash`, `gemini-4-hydrogen` and `gemini-3.8-flash` also open to all users; `claude-sonnet-5-5` is admin/super-admin/Meter only) finds **errors** tuned to common ESL/EFL (HK) patterns and HKDSE Writing, plus optional **expression suggestions**: unclear/awkward phrasing, Chinglish (literal translation), wordiness and stronger word choice, each with alternatives and a "why" note |
 | 🎨 **Results** | Colour-coded inline highlights, hover/tap popover (original vs. correction + grammar note), side cards with red→green changes, English / 繁體中文 notes, `.docx` export |
 | 📊 **Class Assessment Report** | Staff-only, from any **Topic report** ("Generate AI assessment report"; needs ≥1 checked essay): the Writing Assessment Model reads every student's *latest* checked essay — anonymised into error categories with real examples plus the marker notes from individual assessments — and writes a printable teaching report: criterion findings with next steps (Strength / Developing / Priority), mistake frequency, common mistakes quoting the class's own wrong→corrected sentences, teaching priorities, differentiation groups (support <40% / developing 40–69% / secure 70%+, each student's weakest criterion tagged) and quick tips. Saved per topic per staff member (scope-limited), staleness banner on new checked essays, **Regenerate**, **Print / PDF**, EN/繁體中文 |
 | 📝 **Follow-up exercise** | From the Class Assessment Report ("Generate follow-up exercise"): drills the class's top five error patterns (level set by the Learn-from-mistakes age slider) into a Word worksheet that downloads automatically — school name + name/class/date header, *Part 1 · Our common mistakes* (rules with wrong/correct pairs), *Part 2 · Practice* with ten questions (**A. Fix the error** + **B. Fill in the blank**) and a page-broken **teacher answer key**. "Download worksheet again" / "Regenerate exercise" afterwards; regenerating the report resets the worksheet |
@@ -758,8 +758,8 @@ All models are served through the **Mr.🆖 AI Hub** (an OpenAI-compatible gatew
 
 | Provider | Models |
 |----------|--------|
-| 🟢 **Google Gemini** | gemini-3.8-flash |
-| 🔵 **OpenAI** | gpt-5.6-luna, gpt-6-luna, gpt-6.1-sol, gpt-6.1-terra |
+| 🟢 **Google Gemini** | gemini-4-hydrogen, gemini-3.8-flash |
+| 🔵 **OpenAI** | gpt-5.6-luna, gpt-6-luna, gpt-6.1-sol, gpt-6.1-terra, gpt-6.2-sol |
 | 🟣 **Anthropic** | claude-sonnet-5-5 |
 | 🔴 **DeepSeek** | deepseek-flash |
 | 🟠 **OpenRouter** | step-3.7-flash |

@@ -5,6 +5,7 @@ export const AVAILABLE_MODELS = [
   "claude-sonnet-5-5",
   "gpt-6-luna",
   "deepseek-flash",
+  "gemini-4-hydrogen",
   "gemini-3.8-flash",
 ] as const;
 
@@ -54,6 +55,7 @@ export const TUTOR_MODELS = [
   "gpt-6-luna",
   "claude-haiku-5-5",
   "claude-sonnet-5-5",
+  "gemini-4-hydrogen",
   "gemini-3.8-flash",
 ] as const;
 
@@ -61,9 +63,11 @@ export type TutorModel = (typeof TUTOR_MODELS)[number];
 
 export const READING_TEXT_MODELS = [
   "claude-sonnet-5-5",
+  "gpt-6.2-sol",
   "gpt-6.1-sol",
   "gpt-6.1-terra",
   "deepseek-flash",
+  "gemini-4-hydrogen",
   "gemini-3.8-flash",
 ] as const;
 
@@ -116,9 +120,9 @@ const TTS_MODEL_REPLACEMENTS: Record<string, TtsModel> = {
 // RESTRICTED_TUTOR_MODELS / RESTRICTED_VISION_MODELS for non-privileged
 // users (everyone except admins/super-admins/meter-billing).
 // languageCheckModel follows the standard policy: claude-sonnet-5-5 (in
-// RESTRICTED_MODELS) is premium there too, while gpt-6.1-sol (its default),
-// gpt-6.1-terra, deepseek-flash and gemini-3.8-flash stay selectable by
-// everyone.
+// RESTRICTED_MODELS) is premium there too, while gpt-6.2-sol (its default),
+// gpt-6.1-sol, gpt-6.1-terra, deepseek-flash, gemini-4-hydrogen and
+// gemini-3.8-flash stay selectable by everyone.
 export const RESTRICTED_MODEL_FIELD_NAMES = [
   "visionModel",
   "ocrModel",
@@ -441,8 +445,8 @@ export const defaultValues: SettingStore = {
   sentenceAnalysisModel: "deepseek-flash",
   collocationModel: "gpt-6-luna",
   grammarModel: "gpt-6-luna",
-  readingTextModel: "deepseek-flash",
-  languageCheckModel: "gpt-6.1-sol",
+  readingTextModel: "gpt-6.2-sol",
+  languageCheckModel: "gpt-6.2-sol",
   tutorModel: "gpt-6-luna",
   ttsModel: "x-ai/grok-voice-tts-1.0",
   ttsVoice: "ara",

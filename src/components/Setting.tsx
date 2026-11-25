@@ -1322,9 +1322,10 @@ function Setting({ open, onClose }: SettingProps) {
                           <SelectContent>
                             {/* Filtered by RESTRICTED_MODELS like the other
                                 model dropdowns: claude-sonnet-5-5 is admin/
-                                super-admin/meter-billing only; gpt-6.1-sol
-                                (the default), gpt-6.1-terra, deepseek-flash
-                                and gemini-3.8-flash are open to everyone. */}
+                                super-admin/meter-billing only; gpt-6.2-sol
+                                (the default), gpt-6.1-sol, gpt-6.1-terra,
+                                deepseek-flash, gemini-4-hydrogen and
+                                gemini-3.8-flash are open to everyone. */}
                             {readingTextModelOptions.map((m) => (
                               <SelectItem key={m} value={m}>
                                 {formatModelLabel(m)}
