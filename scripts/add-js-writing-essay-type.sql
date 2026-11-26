@@ -1,4 +1,4 @@
--- Writing Assessment: add the "JS Writing" (Junior Secondary) essay type to
+-- Writing Assessment: add the "S1–3 Writing" (Junior Secondary) essay type to
 -- the Topic Library. Essays snapshot essay_type into an unconstrained TEXT
 -- column, so only the topics table needs its CHECK constraint widened.
 
