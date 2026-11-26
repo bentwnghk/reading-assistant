@@ -1,22 +1,27 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent, waitFor, within } from "@testing-library/react";
 import TopicLibrary from "./TopicLibrary";
 import { useLanguageCheckStore } from "@/store/languageCheck";
 
 // Regression tests for the Topic Library filter: a class pick and a word
 // search (title, topic text or class name) narrow the list client-side,
-// with a distinct "no match" empty state.
+// with a distinct "no match" empty state — plus who gets edit/delete.
+
+// Mutable so a test can sit in a different role.
+const viewer = { current: { id: "u1", role: "teacher" } };
 
 vi.mock("next-auth/react", () => ({
-  useSession: () => ({
-    status: "authenticated",
-    data: { user: { id: "u1", role: "teacher" } },
-  }),
+  useSession: () => ({ status: "authenticated", data: { user: viewer.current } }),
 }));
 
 vi.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts
+        ? `${key}|${Object.entries(opts).map(([k, v]) => `${k}=${v}`).join(",")}`
+        : key,
+  }),
 }));
 
 vi.mock("sonner", () => ({
@@ -71,6 +76,7 @@ const TOPICS: LanguageCheckTopicSummary[] = [
 ];
 
 beforeEach(() => {
+  viewer.current = { id: "u1", role: "teacher" };
   useLanguageCheckStore.setState({
     topics: TOPICS,
     topicsLoaded: true,
@@ -112,6 +118,9 @@ beforeEach(() => {
     }
     if (url.pathname === "/api/writing-assessment/topics") {
       return { ok: true, json: async () => TOPICS } as Response;
+    }
+    if (/^\/api\/writing-assessment\/topics\/[^/]+$/.test(url.pathname)) {
+      return { ok: true, json: async () => ({ success: true }) } as Response;
     }
     throw new Error(`unexpected fetch: ${url.pathname}`);
   }));
@@ -229,5 +238,100 @@ describe("TopicLibrary filters", () => {
     fireEvent.click(screen.getAllByText("languageCheck.topics.use")[0]);
     expect(onUseTopic).toHaveBeenCalledTimes(1);
     expect(onUseTopic).toHaveBeenCalledWith(TOPICS[0]);
+  });
+});
+
+/** The library row (`<li>`) that shows a topic title. */
+function row(title: string): HTMLElement {
+  const li = screen.getByText(title).closest("li");
+  if (!li) throw new Error(`row ${title} not found`);
+  return li;
+}
+
+function action(title: string, name: "edit" | "delete"): HTMLElement | null {
+  return row(title).querySelector(`[title="languageCheck.topics.${name}"]`);
+}
+
+describe("TopicLibrary manage rights", () => {
+  // TOPICS: "Climate essay" + "Personal task" are u1's; "Speech task" is
+  // u2's (created for class c1).
+  it.each(["teacher", "student"])(
+    "offers edit/delete on the %s's own topics only",
+    (role) => {
+      viewer.current = { id: "u1", role };
+      render(<TopicLibrary onUseTopic={() => {}} />);
+      expect(action("Climate essay", "edit")).not.toBeNull();
+      expect(action("Personal task", "delete")).not.toBeNull();
+      expect(action("Speech task", "edit")).toBeNull();
+      expect(action("Speech task", "delete")).toBeNull();
+    },
+  );
+
+  it.each(["admin", "super-admin"])(
+    "offers edit/delete on every listed topic to an %s",
+    (role) => {
+      viewer.current = { id: "u1", role };
+      render(<TopicLibrary onUseTopic={() => {}} />);
+      for (const title of ["Climate essay", "Speech task", "Personal task"]) {
+        expect(action(title, "edit")).not.toBeNull();
+        expect(action(title, "delete")).not.toBeNull();
+      }
+    },
+  );
+
+  it("opens another user's topic in the edit form for an admin", async () => {
+    viewer.current = { id: "u1", role: "admin" };
+    render(<TopicLibrary onUseTopic={() => {}} />);
+    fireEvent.click(action("Speech task", "edit")!);
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("languageCheck.topics.form.editTitle")).toBeTruthy();
+    expect(
+      (within(dialog).getByLabelText(/^languageCheck\.topics\.form\.title/) as HTMLInputElement)
+        .value,
+    ).toBe("Speech task");
+  });
+
+  it("tells an admin that deleting someone else's topic removes it for everyone", async () => {
+    viewer.current = { id: "u1", role: "admin" };
+    render(<TopicLibrary onUseTopic={() => {}} />);
+    fireEvent.click(action("Speech task", "delete")!);
+    const dialog = await screen.findByRole("dialog");
+    expect(
+      within(dialog).getByText(
+        "languageCheck.topics.deleteDescOthers|title=Speech task,name=Ms Chan",
+      ),
+    ).toBeTruthy();
+    expect(within(dialog).queryByText(/^languageCheck\.topics\.deleteDesc\|/)).toBeNull();
+  });
+
+  it("keeps the plain confirmation when an admin deletes their own topic", async () => {
+    viewer.current = { id: "u1", role: "admin" };
+    render(<TopicLibrary onUseTopic={() => {}} />);
+    fireEvent.click(action("Climate essay", "delete")!);
+    const dialog = await screen.findByRole("dialog");
+    expect(
+      within(dialog).getByText("languageCheck.topics.deleteDesc|title=Climate essay"),
+    ).toBeTruthy();
+    expect(within(dialog).queryByText(/^languageCheck\.topics\.deleteDescOthers/)).toBeNull();
+  });
+
+  it("deletes another user's topic as an admin", async () => {
+    viewer.current = { id: "u1", role: "admin" };
+    render(<TopicLibrary onUseTopic={() => {}} />);
+    fireEvent.click(action("Speech task", "delete")!);
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(within(dialog).getByText("languageCheck.topics.delete"));
+    await waitFor(() => expect(screen.queryByText("Speech task")).toBeNull());
+    // DELETE /api/writing-assessment/topics/[id] for the other user's topic.
+    const calls = vi.mocked(fetch).mock.calls;
+    expect(
+      calls.some(
+        ([url, init]) =>
+          String(url) === "/api/writing-assessment/topics/b" &&
+          (init as RequestInit | undefined)?.method === "DELETE",
+      ),
+    ).toBe(true);
+    // The library still shows the admin's own topics.
+    expect(screen.getByText("Climate essay")).toBeTruthy();
   });
 });

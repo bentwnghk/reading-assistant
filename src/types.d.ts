@@ -1146,7 +1146,10 @@ interface LanguageCheckTopicSummary {
   essayType: LanguageCheckEssayTypeId;
   /** A question image is saved (the image itself is only on the full topic). */
   hasQuestionImage: boolean;
-  /** Creator of the topic; edit/delete is restricted to them. */
+  /**
+   * Creator of the topic. They can always edit/delete it; admins and
+   * super-admins can edit/delete any topic their library shows.
+   */
   userId: string;
   /** Class the topic was created for (null = personal to the creator). */
   classId: string | null;

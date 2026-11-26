@@ -4968,6 +4968,7 @@
       "empty": "No topics yet. Create one to get started.",
       "deleteTitle": "Delete topic?",
       "deleteDesc": "\"{{title}}\" will be removed from your library. Essays already marked with it keep their own copy of the task.",
+      "deleteDescOthers": "\"{{title}}\" was created by {{name}} — deleting it removes it from the Topic Library of everyone who can see it. Essays already marked with it keep their own copy of the task.",
       "by": "By {{name}}",
       "classTopicTitle": "Created for this class — it appears in the topic lists of the class's students and its teacher.",
       "allClasses": "All classes",

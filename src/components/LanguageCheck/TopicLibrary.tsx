@@ -33,10 +33,12 @@ import { parseError } from "@/utils/error";
 /**
  * Topic Library: the user's own saved writing topics plus topics created
  * for the classes they are in / teach / supervise (shown with their class
- * and creator — only the creator can edit or delete). Topics can be
- * created before any essay and picked to scan one. A class filter and a
- * word search (topic text or class) narrow the list client-side, mirroring
- * the staff views' filters.
+ * and creator). The creator can edit or delete a topic; admins and
+ * super-admins can edit or delete every topic their library shows (the
+ * role check is inlined — client components must not import the lib).
+ * Topics can be created before any essay and picked to scan one. A class
+ * filter and a word search (topic text or class) narrow the list
+ * client-side, mirroring the staff views' filters.
  */
 export default function TopicLibrary({
   onUseTopic,
@@ -47,6 +49,10 @@ export default function TopicLibrary({
 }) {
   const { t } = useTranslation();
   const { data: session } = useSession();
+  // Admins and super-admins manage every topic their library shows, not
+  // only their own (mirrors `topicWriteScope` in lib/language-check-topics).
+  const role = session?.user?.role;
+  const managesLibrary = role === "admin" || role === "super-admin";
   const topics = useLanguageCheckStore((s) => s.topics);
   const loading = useLanguageCheckStore((s) => s.topicsLoading);
   const loaded = useLanguageCheckStore((s) => s.topicsLoaded);
@@ -180,6 +186,7 @@ export default function TopicLibrary({
             <ul className="flex flex-col gap-2">
               {visibleTopics.map((topic) => {
                 const own = topic.userId === session?.user?.id;
+                const manageable = own || managesLibrary;
                 return (
                   <li
                     key={topic.id}
@@ -233,7 +240,7 @@ export default function TopicLibrary({
                         <Upload className="mr-1.5 h-4 w-4" />
                         {t("languageCheck.topics.use")}
                       </Button>
-                      {own && (
+                      {manageable && (
                         <>
                           <Button
                             variant="ghost"
@@ -274,7 +281,14 @@ export default function TopicLibrary({
           <DialogHeader>
             <DialogTitle>{t("languageCheck.topics.deleteTitle")}</DialogTitle>
             <DialogDescription>
-              {t("languageCheck.topics.deleteDesc", { title: toDelete?.title ?? "" })}
+              {/* Someone else's topic (an admin deleting it) disappears from
+                  every library that shows it — not just the caller's. */}
+              {toDelete && toDelete.userId !== session?.user?.id
+                ? t("languageCheck.topics.deleteDescOthers", {
+                    title: toDelete.title,
+                    name: toDelete.creatorName ?? "",
+                  })
+                : t("languageCheck.topics.deleteDesc", { title: toDelete?.title ?? "" })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

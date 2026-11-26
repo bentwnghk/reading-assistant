@@ -335,6 +335,11 @@ export const useLanguageCheckStore = create(
         set((s) => ({
           topics: [summary, ...s.topics.filter((x) => x.id !== topic.id)],
         }));
+        // An edit can also drop the topic out of this library (an admin
+        // making another user's class topic personal) or change where it
+        // sorts, so re-sync with the server; the mirror above remains as the
+        // fallback if that background refresh fails.
+        if (id) get().loadTopics(true).catch(() => {});
         return topic;
       },
 

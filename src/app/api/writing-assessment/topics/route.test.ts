@@ -3,14 +3,15 @@ import type { NextRequest } from "next/server";
 
 // Class-assigned topics: the list/read scope mirrors /api/classes (students →
 // classes they belong to, teachers → classes they teach, admins → school,
-// super-admins → all), a class target must be within that scope, and only
-// the creator may update/delete.
+// super-admins → all), a class target must be within that scope, and the
+// creator may update/delete. Admins and super-admins may additionally
+// update/delete every topic their own Topic Library shows.
 
 const queries: Array<{ sql: string; values: unknown[] }> = [];
 let role: string | null = "teacher";
 /** canAssignTopicClass result: 1 = the class is within the caller's scope. */
 let assignRows = 1;
-/** update/delete rowCount: 0 = the caller is not the creator. */
+/** update/delete rowCount: 0 = the topic is outside the caller's write scope. */
 let writeRows = 1;
 /** Rows returned by the single-topic fetch: [] = invisible to the caller. */
 let singleRows: unknown[] | null = null;
@@ -199,19 +200,101 @@ describe("topics/[id] (read / update / delete)", () => {
     const res = await PUT(req("PUT", body()), ctx());
     expect(res.status).toBe(404);
     const update = queries.find((q) => q.sql.startsWith("UPDATE"))!;
-    expect(update.sql).toContain("user_id = $2");
+    // Creator-only predicate — no class scope for a student.
+    expect(update.sql).toContain("WHERE id = $6 AND user_id = $7");
+    expect(update.sql).not.toContain("class_id IN");
+  });
+
+  it("keeps a teacher on the creator-only rule, even for their own class", async () => {
+    role = "teacher";
+    writeRows = 0;
+    // class-1 is the teacher's own class, but they did not create the topic.
+    const res = await PUT(req("PUT", body({ classId: "class-1" })), ctx());
+    expect(res.status).toBe(404);
+    const update = queries.find((q) => q.sql.startsWith("UPDATE"))!;
+    expect(update.sql).toContain("WHERE id = $6 AND user_id = $7");
+    expect(update.sql).not.toContain("class_id IN");
   });
 
   it("lets the creator move a topic to a class they may target", async () => {
     const res = await PUT(req("PUT", body({ classId: "class-1" })), ctx());
     expect(res.status).toBe(200);
     const update = queries.find((q) => q.sql.startsWith("UPDATE"))!;
-    expect(update.values[6]).toBe("class-1");
+    // Data placeholders first (title … classId), then the id and the scope.
+    expect(update.values).toEqual([
+      "S6 Writing 1",
+      "Write a letter",
+      "dse-part-a",
+      "",
+      "class-1",
+      "topic-1",
+      "u-1",
+    ]);
+  });
+
+  it("lets an admin update a topic they did not create", async () => {
+    role = "admin";
+    const res = await PUT(req("PUT", body({ title: "Fixed" })), ctx());
+    expect(res.status).toBe(200);
+    const update = queries.find((q) => q.sql.startsWith("UPDATE"))!;
+    // Creator OR any class topic of the admin's school (their library).
+    expect(update.sql).toContain(
+      "WHERE id = $6 AND (user_id = $7 OR class_id IN (SELECT id FROM classes WHERE school_id = $8))",
+    );
+    expect(update.values.slice(5)).toEqual(["topic-1", "u-1", "school-1"]);
+    // The read-back is by id alone (scoped to nothing): the saved row may
+    // have just left the writer's library, e.g. an admin making another
+    // user's class topic personal. The caller still drives the creator label.
+    const readBack = queries.find((q) => q.sql.endsWith("WHERE t.id = $1"))!;
+    expect(readBack.values).toEqual(["topic-1", "u-1"]);
+  });
+
+  it("lets a super-admin update any class topic", async () => {
+    role = "super-admin";
+    expect((await PUT(req("PUT", body()), ctx())).status).toBe(200);
+    const update = queries.find((q) => q.sql.startsWith("UPDATE"))!;
+    expect(update.sql).toContain(
+      "(user_id = $7 OR class_id IN (SELECT id FROM classes))",
+    );
+    // Every class — no scope parameter.
+    expect(update.values.slice(5)).toEqual(["topic-1", "u-1"]);
+  });
+
+  it("returns 404 when an admin's target lies outside their library", async () => {
+    role = "admin";
+    writeRows = 0;
+    expect((await PUT(req("PUT", body()), ctx())).status).toBe(404);
+    expect((await DELETE(req("DELETE"), ctx())).status).toBe(404);
+  });
+
+  it("still stops an admin from retargeting a topic to a foreign class", async () => {
+    role = "admin";
+    assignRows = 0;
+    const res = await PUT(req("PUT", body({ classId: "other-school-class" })), ctx());
+    expect(res.status).toBe(403);
+    expect(queries.find((q) => q.sql.startsWith("UPDATE"))).toBeUndefined();
   });
 
   it("refuses deletes from anyone but the creator", async () => {
+    role = "teacher";
     writeRows = 0;
     const res = await DELETE(req("DELETE"), ctx());
     expect(res.status).toBe(404);
+    const del = queries.find((q) => q.sql.startsWith("DELETE"))!;
+    expect(del.sql).toBe(
+      "DELETE FROM language_check_topics WHERE id = $1 AND user_id = $2",
+    );
+    expect(del.values).toEqual(["topic-1", "u-1"]);
+  });
+
+  it("lets an admin delete a topic they did not create", async () => {
+    role = "admin";
+    const res = await DELETE(req("DELETE"), ctx());
+    expect(res.status).toBe(200);
+    const del = queries.find((q) => q.sql.startsWith("DELETE"))!;
+    expect(del.sql).toContain(
+      "WHERE id = $1 AND (user_id = $2 OR class_id IN (SELECT id FROM classes WHERE school_id = $3))",
+    );
+    expect(del.values).toEqual(["topic-1", "u-1", "school-1"]);
   });
 });

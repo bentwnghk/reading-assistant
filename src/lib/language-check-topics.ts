@@ -179,15 +179,48 @@ export interface TopicInput {
   classId: string | null
 }
 
-/** Read-back after a write: the creator sees their own topic regardless of role. */
-async function getOwnedTopic(
-  userId: string,
+/** Admins and super-admins manage every topic their Topic Library shows, not only their own. */
+function managesLibrary(role: string): boolean {
+  return role === "admin" || role === "super-admin"
+}
+
+/**
+ * Who may edit or delete a topic, as a predicate over `language_check_topics`
+ * (no table alias — it is used directly in UPDATE / DELETE): always the
+ * creator, plus — for admins and super-admins — every topic that appears in
+ * their Topic Library, i.e. the classes they supervise. That is the same
+ * `visibleClassIds` scope as `listTopics`, so nobody can reach a topic their
+ * library does not show. Placeholders start at `start`.
+ */
+async function topicWriteScope(
+  viewer: TopicViewer,
+  start: number,
+): Promise<{ sql: string; params: unknown[] }> {
+  if (!managesLibrary(viewer.role)) {
+    return { sql: `user_id = $${start}`, params: [viewer.id] }
+  }
+  const scope = await visibleClassIds(viewer, start + 1)
+  return {
+    sql: `(user_id = $${start} OR class_id IN (${scope.sql}))`,
+    params: [viewer.id, ...scope.params],
+  }
+}
+
+/**
+ * Read-back after a write. Unscoped ON PURPOSE: it only ever runs right
+ * after an authorised INSERT / UPDATE touched this row, and that very write
+ * may have moved the row out of the writer's library (an admin making
+ * another user's class topic personal). `viewerId` only drives the creator
+ * label, exactly like the list query.
+ */
+async function readBackTopic(
+  viewerId: string,
   id: string,
 ): Promise<LanguageCheckTopic | null> {
   const { rows } = await getPool().query(
     `${topicSelect(", t.question_image").replace(/\$VIEWER/g, "$2")}
-     WHERE t.id = $1 AND t.user_id = $2`,
-    [id, userId],
+     WHERE t.id = $1`,
+    [id, viewerId],
   )
   if (!rows[0]) return null
   return { ...mapSummary(rows[0]), questionImage: rows[0].question_image || "" }
@@ -203,33 +236,55 @@ export async function createTopic(
      RETURNING id`,
     [userId, data.title, data.topic, data.essayType, data.questionImage, data.classId],
   )
-  return (await getOwnedTopic(userId, rows[0].id as string))!
+  return (await readBackTopic(userId, rows[0].id as string))!
 }
 
-/** Only the creator may edit their topic (even class-assigned ones). */
+/**
+ * The creator may edit their topic; admins and super-admins any topic in
+ * their library (`topicWriteScope`). Editing never changes ownership — the
+ * creator stays the creator. Null when the topic does not exist or is out
+ * of the caller's scope.
+ */
 export async function updateTopic(
-  userId: string,
+  viewer: TopicViewer,
   id: string,
   data: TopicInput,
 ): Promise<LanguageCheckTopic | null> {
+  // The data placeholders come first so their positions never depend on the
+  // caller's role (the scope adds a param for admins only).
+  const values: unknown[] = [
+    data.title,
+    data.topic,
+    data.essayType,
+    data.questionImage,
+    data.classId,
+    id,
+  ]
+  const scope = await topicWriteScope(viewer, values.length + 1)
+  values.push(...scope.params)
   const result = await getPool().query(
     `UPDATE language_check_topics
-     SET title = $3, topic = $4, essay_type = $5, question_image = $6, class_id = $7
-     WHERE id = $1 AND user_id = $2`,
-    [id, userId, data.title, data.topic, data.essayType, data.questionImage, data.classId],
+     SET title = $1, topic = $2, essay_type = $3, question_image = $4, class_id = $5
+     WHERE id = $6 AND ${scope.sql}`,
+    values,
   )
   if ((result.rowCount ?? 0) === 0) return null
-  return getOwnedTopic(userId, id)
+  return readBackTopic(viewer.id, id)
 }
 
-/** Essays keep their own snapshot, so deleting a topic never alters them. */
+/**
+ * Essays keep their own snapshot, so deleting a topic never alters them.
+ * Same right as `updateTopic`: the creator, or an admin / super-admin for a
+ * topic in their library.
+ */
 export async function deleteTopic(
-  userId: string,
+  viewer: TopicViewer,
   id: string,
 ): Promise<boolean> {
+  const scope = await topicWriteScope(viewer, 2)
   const result = await getPool().query(
-    `DELETE FROM language_check_topics WHERE id = $1 AND user_id = $2`,
-    [id, userId],
+    `DELETE FROM language_check_topics WHERE id = $1 AND ${scope.sql}`,
+    [id, ...scope.params],
   )
   return (result.rowCount ?? 0) > 0
 }
