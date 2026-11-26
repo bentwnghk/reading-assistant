@@ -997,20 +997,27 @@ function EditDialog({
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+          {/* Same phone treatment as the Create dialog: iOS Safari sizes the
+              native date-time control from its internal UI, so an even 50/50
+              split overflows on iPhone portrait. Subject takes the smaller
+              share below `sm`; the due-date control may shrink to its cell
+              and is clipped rather than spilling out of the dialog. */}
+          <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-3 sm:grid-cols-2">
+            <div className="min-w-0 space-y-1.5">
               <Label htmlFor="edit-subject">{t("assignments.create.subjectLabel")}</Label>
               <Input
                 id="edit-subject"
+                className="px-2 sm:px-3"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="min-w-0 space-y-1.5">
               <Label htmlFor="edit-due">{t("assignments.create.dueDateLabel")}</Label>
               <Input
                 id="edit-due"
                 type="datetime-local"
+                className="min-w-0 max-w-full overflow-hidden px-2 sm:px-3 max-sm:appearance-none"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
               />

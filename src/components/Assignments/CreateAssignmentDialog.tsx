@@ -550,7 +550,7 @@ export default function CreateAssignmentDialog({
             </div>
 
             {/* Metadata fields */}
-            <div className="grid gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="assign-title">{t("assignments.create.titleLabel")}</Label>
                 <Input
@@ -564,11 +564,20 @@ export default function CreateAssignmentDialog({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
+              {/* Subject + Due date share one row. The native date-time
+                  control is far wider than a text input, and iOS Safari
+                  sizes it from its internal UI, so an even 50/50 split
+                  overflows the dialog on phones (iPhone portrait) and forces
+                  horizontal scrolling. On phones Subject therefore takes the
+                  smaller share, which moves Due date left and gives it more
+                  room; from `sm` up the split is even again. The tracks use
+                  minmax(0, ...) so neither cell can grow past its track. */}
+              <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-3 sm:grid-cols-2">
+                <div className="min-w-0 space-y-1.5">
                   <Label htmlFor="assign-subject">{t("assignments.create.subjectLabel")}</Label>
                   <Input
                     id="assign-subject"
+                    className="px-2 sm:px-3"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder={t("assignments.create.subjectPlaceholder")}
@@ -580,11 +589,18 @@ export default function CreateAssignmentDialog({
                     ))}
                   </datalist>
                 </div>
-                <div className="space-y-1.5">
+                <div className="min-w-0 space-y-1.5">
                   <Label htmlFor="assign-due">{t("assignments.create.dueDateLabel")}</Label>
+                  {/* Let the native control shrink to its cell instead of
+                      spilling out of the dialog: min-w-0/max-w-full stop the
+                      internal-UI width from acting as a floor, overflow-hidden
+                      clips whatever still does not fit, and appearance-none
+                      (phones only) drops iOS's own size constraint — the
+                      native picker still opens on tap. */}
                   <Input
                     id="assign-due"
                     type="datetime-local"
+                    className="min-w-0 max-w-full overflow-hidden px-2 sm:px-3 max-sm:appearance-none"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
                   />
