@@ -7,6 +7,7 @@ import {
   Eye,
   LoaderCircle,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -257,10 +259,12 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
   const [page, setPage] = useState(1);
   const [detail, setDetail] = useState<LearnStaffSessionDetailWire | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [toDelete, setToDelete] = useState<LearnStaffSessionSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
   for (const [k, v] of Object.entries(filters)) if (v) params.set(k, v);
-  const { data, loading, error } = useLanguageCheckLearnData<{
+  const { data, loading, error, reload } = useLanguageCheckLearnData<{
     rows: LearnStaffSessionSummary[];
     total: number;
   }>(`/api/writing-assessment/learn/staff/sessions?${params.toString()}`);
@@ -276,6 +280,42 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
       toast.error(parseError(e));
     } finally {
       setDetailId(null);
+    }
+  }
+
+  // --- Delete (actions column) -----------------------------------------
+  // Staff may delete a learner's learning session. The server applies the
+  // caller's scope INSIDE the DELETE (a session outside it answers 404 like a
+  // missing one), so there is no client-side scope check — the component only
+  // ever renders for staff.
+  async function confirmDelete() {
+    if (!toDelete || deleting) return;
+    const row = toDelete;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/writing-assessment/learn/staff/sessions/${row.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || `HTTP ${res.status}`);
+      }
+      setToDelete(null);
+      toast.success(
+        t("languageCheck.learnData.staffDeleted", {
+          title: row.essayTitle || t("languageCheck.list.untitled"),
+          name: row.userName,
+        }),
+      );
+      // Totals and the row set change, so the table re-fetches — except when
+      // this was the last row of a page other than the first: that page no
+      // longer exists, so step back instead (the page change itself re-fetches).
+      if (data && data.rows.length === 1 && page > 1) setPage(page - 1);
+      else reload();
+    } catch (e) {
+      toast.error(parseError(e));
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -353,24 +393,36 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
                 </td>
                 <td className="whitespace-nowrap py-2 pr-3 text-muted-foreground">{formatDateTime(s.updatedAt)}</td>
                 <td className="whitespace-nowrap py-2 text-right">
-                  <Button variant="ghost" size="sm" disabled={detailId === s.id} onClick={() => void openDetail(s.id)}>
-                    {detailId === s.id ? (
-                      <LoaderCircle className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Eye className="mr-1 h-4 w-4" />
-                        {t("languageCheck.staff.view")}
-                      </>
-                    )}
-                  </Button>
-                  <LearnExportMenu
-                    sessionId={s.id}
-                    status={s.status}
-                    endpoint={`/api/writing-assessment/learn/staff/sessions/${s.id}`}
-                    variant="ghost"
-                    iconOnly
-                    includeStudentWork
-                  />
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="sm" disabled={detailId === s.id} onClick={() => void openDetail(s.id)}>
+                      {detailId === s.id ? (
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Eye className="mr-1 h-4 w-4" />
+                          {t("languageCheck.staff.view")}
+                        </>
+                      )}
+                    </Button>
+                    <LearnExportMenu
+                      sessionId={s.id}
+                      status={s.status}
+                      endpoint={`/api/writing-assessment/learn/staff/sessions/${s.id}`}
+                      variant="ghost"
+                      iconOnly
+                      includeStudentWork
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      title={t("languageCheck.learnData.staffDelete")}
+                      aria-label={t("languageCheck.learnData.staffDelete")}
+                      onClick={() => setToDelete(s)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -402,6 +454,29 @@ function StaffSessions({ filters }: { filters: Record<string, string | undefined
             </DialogDescription>
           </DialogHeader>
           {detail && <LearnSessionDetail session={detail.session} rounds={detail.rounds} />}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!toDelete} onOpenChange={(o) => !o && !deleting && setToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("languageCheck.learnData.staffDeleteTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("languageCheck.learnData.staffDeleteDesc", {
+                title: toDelete?.essayTitle || t("languageCheck.list.untitled"),
+                name: toDelete?.userName ?? "",
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" disabled={deleting} onClick={() => setToDelete(null)}>
+              {t("languageCheck.cancel")}
+            </Button>
+            <Button variant="destructive" disabled={deleting} onClick={() => void confirmDelete()}>
+              {deleting && <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />}
+              {t("languageCheck.list.delete")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

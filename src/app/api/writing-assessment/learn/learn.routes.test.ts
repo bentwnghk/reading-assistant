@@ -19,6 +19,7 @@ const lib = vi.hoisted(() => ({
   listEvents: vi.fn(async () => ({ rows: [], total: 0 })),
   listStaffSessions: vi.fn(async () => ({ rows: [], total: 0 })),
   getStaffSession: vi.fn(async () => null),
+  deleteStaffSession: vi.fn(async () => false),
 }));
 vi.mock("@/lib/language-check-learn", async () => ({
   ...lib,
@@ -39,7 +40,7 @@ import { GET as dashboardGET } from "./dashboard/route";
 import { GET as staffDashboardGET } from "./staff/dashboard/route";
 import { GET as staffActivityGET } from "./staff/activity/route";
 import { GET as staffSessionsGET } from "./staff/sessions/route";
-import { GET as staffSessionGET } from "./staff/sessions/[id]/route";
+import { GET as staffSessionGET, DELETE as staffSessionDELETE } from "./staff/sessions/[id]/route";
 
 const req = (query = "", body?: unknown) =>
   ({ nextUrl: new URL(`http://x/api?${query}`), json: async () => body }) as unknown as NextRequest;
@@ -58,6 +59,7 @@ describe("learning routes", () => {
     expect((await DELETE(req(), ctx)).status).toBe(401);
     expect((await dashboardGET(req())).status).toBe(401);
     expect((await staffDashboardGET(req())).status).toBe(401);
+    expect((await staffSessionDELETE(req(), ctx)).status).toBe(401);
     expect(lib.listSessions).not.toHaveBeenCalled();
   });
 
@@ -68,12 +70,14 @@ describe("learning routes", () => {
       await staffActivityGET(req()),
       await staffSessionsGET(req()),
       await staffSessionGET(req(), ctx),
+      await staffSessionDELETE(req(), ctx),
     ]) {
       expect(res.status).toBe(403);
     }
     expect(lib.getStaffDashboard).not.toHaveBeenCalled();
     expect(lib.listEvents).not.toHaveBeenCalled();
     expect(lib.getStaffSession).not.toHaveBeenCalled();
+    expect(lib.deleteStaffSession).not.toHaveBeenCalled();
   });
 
   it("a teacher gets their class scope; an admin without a resolvable scope is refused", async () => {
@@ -104,6 +108,15 @@ describe("learning routes", () => {
       { kind: "teacher", teacherId: "t1" },
       expect.objectContaining({ mineTeacherId: "t1" }),
     );
+  });
+
+  it("staff DELETE deletes inside the caller's scope and maps a miss to 404", async () => {
+    session = { user: { id: "t1", role: "teacher" } };
+    lib.deleteStaffSession.mockResolvedValueOnce(true);
+    expect((await staffSessionDELETE(req(), ctx)).status).toBe(200);
+    expect(lib.deleteStaffSession).toHaveBeenCalledWith({ kind: "teacher", teacherId: "t1" }, "s1");
+    // The scope is applied inside the delete: out of scope = 404, like a miss.
+    expect((await staffSessionDELETE(req(), ctx)).status).toBe(404);
   });
 
   it("the learner's own dashboard/activity ignore any user id in the query", async () => {

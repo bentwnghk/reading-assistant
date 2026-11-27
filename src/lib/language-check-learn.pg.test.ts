@@ -330,6 +330,43 @@ describe.skipIf(pgliteMissing)("learn persistence against real Postgres", () => 
     expect(await lib.getSessionForReview("s1", id)).toBeNull();
     await lib.deleteSession("s2", id);
   });
+
+  it("staff delete is scoped to the caller; the ledger keeps the history and records the deletion", async () => {
+    const started = await lib.startSession("s2", { essayId: "e2", categories: ["tense"], age: 12 });
+    if (!started.ok) throw new Error("start");
+    const id = started.session.id;
+    await lib.syncSession("s2", id, {
+      units: [{ category: "tense", lessonSeen: true, quiz: [choice("d-1")], quizResults: { "d-1": { answer: "goes", score: 1, correct: true } } }],
+    });
+
+    // Out of scope (another teacher's class, another school) is indistinguishable from missing.
+    expect(await lib.deleteStaffSession({ kind: "teacher", teacherId: "t1" }, id)).toBe(false);
+    expect(await lib.deleteStaffSession({ kind: "school", schoolId: "school-9" }, id)).toBe(false);
+    expect(await lib.getStaffSession({ kind: "teacher", teacherId: "t2" }, id)).not.toBeNull();
+
+    const before = await lib.getOwnDashboard("s2", { range: 0, timeZone: "UTC" });
+    // The quiz event of THIS session, captured before the delete: the FK must
+    // null its session_id (the ledger survives; the dead link is cleaned up).
+    const evBefore = await db.query(
+      `SELECT id FROM language_check_learn_events WHERE session_id = $1 AND type = 'quiz_completed'`,
+      [id],
+    );
+    const evId = (evBefore.rows[0] as { id: number }).id;
+    expect(await lib.deleteStaffSession({ kind: "teacher", teacherId: "t2" }, id)).toBe(true);
+    expect(await lib.getStaffSession({ kind: "teacher", teacherId: "t2" }, id)).toBeNull();
+
+    // The archived rounds cascade with the row; the ledger's activity counts
+    // are untouched (session_deleted is excluded) and the feed records it.
+    const rounds = await db.query(`SELECT COUNT(*)::int AS n FROM language_check_learn_rounds WHERE session_id = $1`, [id]);
+    expect((rounds.rows[0] as { n: number }).n).toBe(0);
+    const kept = await db.query(`SELECT session_id FROM language_check_learn_events WHERE id = $1`, [evId]);
+    expect((kept.rows[0] as { session_id: string | null }).session_id).toBeNull();
+    const after = await lib.getOwnDashboard("s2", { range: 0, timeZone: "UTC" });
+    expect(after.totals.quizzesCompleted).toBe(before.totals.quizzesCompleted);
+    expect(after.totals.sessionsStarted).toBe(before.totals.sessionsStarted);
+    const feed = await lib.listEvents({ kind: "self", userId: "s2" }, { range: 0, page: 1, pageSize: 200 });
+    expect(feed.rows.some((r) => r.type === "session_deleted" && r.essayTitle === "Essay")).toBe(true);
+  });
 });
 
 describe.skipIf(pgliteMissing)("teacher-uploaded essays (real SQL)", () => {

@@ -1343,3 +1343,49 @@ export async function getStaffSession(
     },
   }
 }
+
+/**
+ * Staff delete of one learner's learning session — every staff role, scoped:
+ * teacher → their classes, admin → their school, super-admin → everyone.
+ * The scope predicate sits INSIDE the statement — the same `scopeClauses`
+ * fragments the staff reads use — so the check and the write are one atomic
+ * DELETE: an out-of-scope session (another teacher's class, another school)
+ * is indistinguishable from a missing one (false). It is the caller's ROLE
+ * scope, never the table's class / student filters, which only narrow the view.
+ *
+ * Mirrors the learner's own `deleteSession`: the archived quiz rounds cascade
+ * with the row, and a `session_deleted` event is appended to the ledger under
+ * the LEARNER's id (the dashboards exclude it from activity; the feed records
+ * that the session was removed).
+ */
+export async function deleteStaffSession(
+  scope: LanguageCheckStaffScope,
+  id: string,
+): Promise<boolean> {
+  return inTransaction(async (db) => {
+    const p = new Params()
+    const clauses = [...scopeClauses(p, scope, "s"), `s.id = ${p.add(id)}`]
+    const found = await db.query(
+      `SELECT s.user_id, s.essay_id, s.essay_title
+       FROM language_check_learn_sessions s
+       ${whereOf(clauses)}
+       FOR UPDATE`,
+      p.values,
+    )
+    const row = found.rows[0] as Row | undefined
+    if (!row) return false
+    // The row is locked inside the scope, so deleting by id cannot escape it.
+    await db.query(`DELETE FROM language_check_learn_sessions WHERE id = $1`, [id])
+    await writeEvents(
+      db,
+      {
+        userId: row.user_id as string,
+        sessionId: null,
+        essayId: (row.essay_id as string | null) ?? null,
+        essayTitle: (row.essay_title as string) || "",
+      },
+      [{ type: "session_deleted", key: `sd:${id}` }],
+    )
+    return true
+  })
+}
