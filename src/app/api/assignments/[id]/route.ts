@@ -58,13 +58,18 @@ export async function PATCH(
 
     const { id } = await params
 
-    // Only the owner teacher can update (admins/super-admins can edit user roles,
-    // but assignments are pedagogical content owned by the teacher)
+    // Owner teacher, school admins, and super-admins may update. getAssignment
+    // already scopes admins to their own school (out-of-scope admins get null
+    // → 404 above), so a non-null result here proves same-school access.
     const existing = await getAssignment(id, session.user.id, session.user.role)
     if (!existing) {
       return NextResponse.json({ error: "Assignment not found" }, { status: 404 })
     }
-    if (existing.teacherId !== session.user.id && session.user.role !== "super-admin") {
+    if (
+      existing.teacherId !== session.user.id &&
+      session.user.role !== "admin" &&
+      session.user.role !== "super-admin"
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
@@ -120,11 +125,17 @@ export async function DELETE(
     }
 
     const { id } = await params
+    // Same manage policy as PATCH: owner teacher, school admins (getAssignment
+    // already proved same-school), and super-admins.
     const existing = await getAssignment(id, session.user.id, session.user.role)
     if (!existing) {
       return NextResponse.json({ error: "Assignment not found" }, { status: 404 })
     }
-    if (existing.teacherId !== session.user.id && session.user.role !== "super-admin") {
+    if (
+      existing.teacherId !== session.user.id &&
+      session.user.role !== "admin" &&
+      session.user.role !== "super-admin"
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

@@ -120,12 +120,15 @@ function SortableHead({
  * tab). Shows every assignment created by teachers in the school with the
  * creating teacher and derived roster name (e.g. "S3A"), plus filtering by
  * teacher / roster / status, sorting, and vocabulary-style pagination.
+ * Super-admins can manage any row; admins every row (their school table);
+ * other rows fall back to ownership (a.teacherId === currentUserId).
  */
 export default function SchoolAssignmentsTable({
   assignments,
   loading,
   currentUserId,
   isSuperAdmin,
+  isAdmin,
   onEdit,
   onArchive,
   onDelete,
@@ -134,6 +137,7 @@ export default function SchoolAssignmentsTable({
   loading: boolean
   currentUserId: string
   isSuperAdmin: boolean
+  isAdmin: boolean
   onEdit: (a: Assignment) => void
   onArchive: (a: Assignment, archive: boolean) => void
   onDelete: (a: Assignment) => void
@@ -498,7 +502,10 @@ export default function SchoolAssignmentsTable({
                   a.status === "active" &&
                   isOverdue(a.dueDate) &&
                   (a.avgProgress ?? 0) < 100
-                const canManage = a.teacherId === currentUserId || isSuperAdmin
+                // Super-admins manage any assignment; admins every row of
+                // their school table; ownership covers everything else.
+                const canManage =
+                  isSuperAdmin || isAdmin || a.teacherId === currentUserId
                 const subject = splitSubjectParts(a.subject || "—")
                 return (
                   <TableRow key={a.id} className={a.status === "archived" ? "opacity-60" : ""}>

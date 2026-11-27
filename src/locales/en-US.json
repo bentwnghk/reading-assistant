@@ -4773,7 +4773,7 @@
         },
         "schoolView": {
           "name": "All Teachers tab",
-          "desc": "Admins and super-admins see a second \"All Teachers\" tab listing every assignment created by teachers in your school (super-admins: across all schools). Filter by teacher, roster, subject or status, click a column header to sort, and open any title for the full roster. Super-admins can manage any assignment; admins only their own."
+          "desc": "Admins and super-admins see a second \"All Teachers\" tab listing every assignment created by teachers in your school (super-admins: across all schools). Filter by teacher, roster, subject or status, click a column header to sort, and open any title for the full roster. Use the row actions to edit, archive or delete: super-admins can manage any assignment, admins any assignment in their school, teachers only their own."
         },
         "tip": {
           "title": "Note:",

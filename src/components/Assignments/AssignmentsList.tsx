@@ -255,6 +255,7 @@ export default function AssignmentsList() {
           loading={schoolLoading}
           currentUserId={session?.user?.id || ""}
           isSuperAdmin={role === "super-admin"}
+          isAdmin={role === "admin"}
           onEdit={(a) => setEditing(a)}
           onArchive={handleArchive}
           onDelete={(a) => setDeleteTarget(a)}
