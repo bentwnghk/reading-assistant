@@ -404,6 +404,20 @@ export function isStaffRole(role: string | null | undefined): boolean {
 }
 
 /**
+ * May this role DELETE an essay from the Student essays table? Removing a
+ * learner's work is reserved for the school-wide roles — admins (their own
+ * school) and super-admins (everywhere). Teachers keep every
+ * non-destructive staff affordance (view, rename, re-link, re-check,
+ * assess, enhance) but never delete. Mirrored inline in StaffEssayLog —
+ * client components must not import this module (it pulls `pg`).
+ */
+export function canDeleteStudentEssays(
+  role: string | null | undefined,
+): boolean {
+  return role === "admin" || role === "super-admin"
+}
+
+/**
  * May this staff member scan an essay on the student's behalf? Same scope as
  * the staff views (teacher → students in their classes, admin → school,
  * super-admin → everyone), restricted to current, non-banned student
@@ -941,4 +955,39 @@ export async function staffRecheckEssay(
     ],
   )
   return true
+}
+
+/**
+ * Deletes an essay inside the caller's staff scope. The scope predicate
+ * sits INSIDE the statement — the same `scopeConditions` fragments the
+ * staff reads use, over the same `e` / `u` aliases — so the check and the
+ * write are one atomic DELETE: there is no read-then-write window, and an
+ * out-of-scope essay is indistinguishable from a missing one (false). It
+ * is the caller's ROLE scope (the rows the table can show), never the
+ * table's class / student / status / topic filters, which only narrow the
+ * view.
+ *
+ * A teacher scope never deletes here, whatever the caller passed: the
+ * route gates the role with `canDeleteStudentEssays` first, and this
+ * guard keeps the primitive itself safe for any future caller.
+ *
+ * The essay's scans, transcript, corrections, assessment and enhanced
+ * essays go with it. Learning sessions built from it are kept — their
+ * `essay_id` is ON DELETE SET NULL — and so is the activity ledger.
+ */
+export async function deleteStaffEssay(
+  scope: LanguageCheckStaffScope,
+  id: string,
+): Promise<boolean> {
+  if (scope.kind === "teacher") return false
+  const { clauses, params } = scopeConditions(scope)
+  const { rowCount } = await getPool().query(
+    `DELETE FROM language_check_essays e
+     USING users u
+     WHERE u.id = e.user_id
+       ${clauses.length > 0 ? `AND ${clauses.join(" AND ")}` : ""}
+       AND e.id = $${params.length + 1}`,
+    [...params, id],
+  )
+  return (rowCount ?? 0) > 0
 }

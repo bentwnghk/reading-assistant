@@ -15,6 +15,7 @@ import {
   PenLine,
   Pencil,
   RefreshCw,
+  Trash2,
   Trophy,
   Users,
 } from "lucide-react";
@@ -32,6 +33,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -103,12 +105,27 @@ function SortHeader({
  * Staff "Student essays" tab on /writing-assessment. Renders nothing for students.
  * Teachers see their classes' students, admins their school, super-admins
  * everyone. Class and student come from the shared staff filter bar; topic
- * and status are essay-specific and live here.
+ * and status are essay-specific and live here. Every staff role can view,
+ * rename and re-link; only admins / super-admins can delete.
  */
 export default function StaffEssayLog({ classId: classProp, userId: userProp }: StaffEssayLogProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const role = session?.user?.role;
+  // Admins and super-admins may delete a learner's essay from its row;
+  // teachers keep the non-destructive affordances only (mirrors
+  // `canDeleteStudentEssays` in lib/language-check.ts, which client
+  // components must not import).
+  const canDelete = role === "admin" || role === "super-admin";
+  // A marking / transcription running on an essay (owner workspace or the
+  // view dialog) saves its result against that essay when it ends, so the
+  // row's delete waits for it instead of pulling the essay out from under
+  // the running job.
+  const generating = useLanguageCheckStore((s) => s.activeGenerations);
+  const generatingId = useLanguageCheckStore((s) => s.generatingEssayId);
+  const isGenerating = (essayId: string) =>
+    generatingId === essayId &&
+    (!!generating["language-check"] || !!generating["ocr"]);
 
   const [data, setData] = useState<StaffListResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -136,6 +153,10 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   const [relinkPick, setRelinkPick] = useState<string | null>(null);
   const [relinking, setRelinking] = useState(false);
   const [libraryTopics, setLibraryTopics] = useState<LanguageCheckStaffTopic[] | null>(null);
+  // Delete (admin / super-admin affordance in the actions column): the row
+  // awaiting confirmation, and whether its DELETE is in flight.
+  const [toDelete, setToDelete] = useState<LanguageCheckStaffRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // A different class/student starts again from the first page, and drops
   // the topic pick — the topic options are narrowed by the class, so a
@@ -293,6 +314,46 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
       toast.error(parseError(error));
     } finally {
       setRelinking(false);
+    }
+  }
+
+  // --- Delete (actions column) -----------------------------------------
+  // Admins / super-admins may delete a learner's essay. The server applies
+  // the caller's role scope INSIDE the DELETE (an essay outside it answers
+  // 404 like a missing one), so there is no client-side scope check — the
+  // button is simply not offered to other roles.
+  async function confirmDelete() {
+    if (!toDelete || deleting) return;
+    const row = toDelete;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/writing-assessment/staff/${row.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || `HTTP ${res.status}`);
+      }
+      setToDelete(null);
+      toast.success(
+        t("languageCheck.staff.deleted", {
+          title: row.title || t("languageCheck.list.untitled"),
+          name: row.userName,
+        }),
+      );
+      // The caller may be the owner or the uploader (a school scope
+      // includes its own staff) — their own essay list caches it too.
+      void useLanguageCheckStore.getState().loadList(true);
+      // Totals, the stat cards and the topic filter options all change, so
+      // the table re-fetches — except when this was the last row of a page
+      // other than the first: that page no longer exists, so step back
+      // instead (the page change itself triggers the fetch).
+      if (data?.rows.length === 1 && page > 1) setPage(page - 1);
+      else await load();
+    } catch (error) {
+      toast.error(parseError(error));
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -560,14 +621,33 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                       {formatDateTime(row.updatedAt)}
                     </td>
                     <td className="py-2 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setOpenId(row.id)}
-                      >
-                        <Eye className="mr-1 h-4 w-4" />
-                        {t("languageCheck.staff.view")}
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setOpenId(row.id)}
+                        >
+                          <Eye className="mr-1 h-4 w-4" />
+                          {t("languageCheck.staff.view")}
+                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            title={
+                              isGenerating(row.id)
+                                ? t("languageCheck.staff.deleteBusy")
+                                : t("languageCheck.staff.delete")
+                            }
+                            aria-label={t("languageCheck.staff.delete")}
+                            disabled={isGenerating(row.id)}
+                            onClick={() => setToDelete(row)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -718,6 +798,42 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
           </DialogContent>
         </Dialog>
       )}
+
+      <Dialog
+        open={!!toDelete}
+        onOpenChange={(o) => !o && !deleting && setToDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("languageCheck.staff.deleteTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("languageCheck.staff.deleteDesc", {
+                title: toDelete?.title || t("languageCheck.list.untitled"),
+                name: toDelete?.userName ?? "",
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={deleting}
+              onClick={() => setToDelete(null)}
+            >
+              {t("languageCheck.cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleting}
+              onClick={() => void confirmDelete()}
+            >
+              {deleting && (
+                <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
+              )}
+              {t("languageCheck.staff.delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </section>
   );

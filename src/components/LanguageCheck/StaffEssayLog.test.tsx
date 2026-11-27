@@ -1,17 +1,24 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, cleanup, fireEvent, within } from "@testing-library/react";
+import { toast } from "sonner";
 import StaffEssayLog from "./StaffEssayLog";
+import { useLanguageCheckStore } from "@/store/languageCheck";
 
 // Regression tests for the Student essays filters. Class and student now come
 // from the shared staff filter bar as props; topic and status are local. Every
 // filter must fire a narrowed request, and narrow BOTH the table rows and the
 // stats cards.
 
+// Mutable session role: the delete affordance is admin / super-admin only.
+const { sessionState } = vi.hoisted(() => ({
+  sessionState: { role: "teacher" as string },
+}));
+
 vi.mock("next-auth/react", () => ({
   useSession: () => ({
     status: "authenticated",
-    data: { user: { id: "teacher-1", role: "teacher" } },
+    data: { user: { id: "teacher-1", role: sessionState.role } },
   }),
 }));
 
@@ -52,6 +59,9 @@ const ALL_ROWS: FixtureRow[] = [
   { id: "e2", userId: "bob", userName: "Bob", title: "Bob essay", status: "draft", topicId: "topic-gone", topicTitle: null },
 ];
 
+/** Rows the mocked list answers with (reset to ALL_ROWS before each test). */
+let rowsFixture: FixtureRow[];
+
 const ALL_TOPICS: LanguageCheckStaffTopic[] = [
   { id: "topic-1", title: "S6 Writing 1" },
 ];
@@ -68,6 +78,12 @@ const detailRequests: string[] = [];
 const renameRequests: { id: string; body: unknown }[] = [];
 /** PUT /api/writing-assessment/staff/:id/topic captures (topic re-link). */
 const relinkRequests: { id: string; body: unknown }[] = [];
+/** DELETE /api/writing-assessment/staff/:id captures (admin essay delete). */
+const deleteRequests: string[] = [];
+/** When true, the staff DELETE answers 500. */
+let deleteFails = false;
+/** GET /api/writing-assessment — the caller's own essay list refresh. */
+let ownListRequests = 0;
 
 /** Mutable staff detail fixture (view dialog), re-set in beforeEach. */
 let detailFixture: Record<string, unknown>;
@@ -112,7 +128,11 @@ function staffResponse(url: URL) {
   const status = url.searchParams.get("status");
   const classId = url.searchParams.get("classId");
   const topicId = url.searchParams.get("topicId");
-  const rows = ALL_ROWS.filter(
+  // Like the real list route: `rows` is the requested page only, `total`
+  // the size of the whole filtered set.
+  const page = Number(url.searchParams.get("page") ?? 1);
+  const pageSize = Number(url.searchParams.get("pageSize") ?? 20);
+  const rows = rowsFixture.filter(
     (r) =>
       (!userId || r.userId === userId) &&
       (!status || r.status === status) &&
@@ -120,7 +140,7 @@ function staffResponse(url: URL) {
       (!classId || r.userId === "alice"), // pretend class contains Alice
   );
   return {
-    rows: rows.map((r, i) => ({
+    rows: rows.slice((page - 1) * pageSize, page * pageSize).map((r, i) => ({
       id: r.id,
       userId: r.userId,
       userName: r.userName,
@@ -150,10 +170,15 @@ function staffResponse(url: URL) {
 }
 
 beforeEach(() => {
+  sessionState.role = "teacher";
+  rowsFixture = [...ALL_ROWS];
   staffRequests.length = 0;
   detailRequests.length = 0;
   renameRequests.length = 0;
   relinkRequests.length = 0;
+  deleteRequests.length = 0;
+  deleteFails = false;
+  ownListRequests = 0;
   detailFixture = makeDetail();
   runStaffCheckSpy.mockReset();
   runStaffCheckSpy.mockResolvedValue(true);
@@ -216,6 +241,20 @@ beforeEach(() => {
         });
         return { ok: true, json: async () => ({ success: true }) } as Response;
       }
+      // Admin delete from the table (staff DELETE). Like the server, a
+      // successful delete makes the row disappear from later list reads.
+      if (init?.method === "DELETE") {
+        deleteRequests.push(detailMatch[1]);
+        if (deleteFails) {
+          return {
+            ok: false,
+            status: 500,
+            json: async () => ({ error: "delete failed" }),
+          } as Response;
+        }
+        rowsFixture = rowsFixture.filter((r) => r.id !== detailMatch[1]);
+        return { ok: true, json: async () => ({ success: true }) } as Response;
+      }
       detailRequests.push(detailMatch[1]);
       return {
         ok: true,
@@ -242,6 +281,7 @@ beforeEach(() => {
     }
     // The caller's own essay list (languageCheck store loadList refresh).
     if (url.pathname === "/api/writing-assessment") {
+      ownListRequests++;
       return { ok: true, json: async () => [] } as Response;
     }
     throw new Error(`unexpected fetch: ${url.pathname}`);
@@ -251,6 +291,11 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  // Generation flags set by the delete tests must not leak into the next one.
+  useLanguageCheckStore.setState({
+    activeGenerations: {},
+    generatingEssayId: null,
+  });
 });
 
 /** Stat card value shown under its label (e.g. statEssays → "2"). The Stat
@@ -758,5 +803,180 @@ describe("StaffEssayLog topic re-link", () => {
     })) as HTMLButtonElement;
     expect(save.disabled).toBe(true);
     expect(relinkRequests).toEqual([]);
+  });
+});
+
+describe("StaffEssayLog delete", () => {
+  /** The trash button inside the row titled `title` (null = not offered). */
+  function deleteButtonForRow(title: string): HTMLButtonElement | null {
+    const row = screen.getByText(title).closest("tr");
+    if (!row) throw new Error(`row ${title} not found`);
+    return (within(row).queryByRole("button", {
+      name: "languageCheck.staff.delete",
+    }) ?? null) as HTMLButtonElement | null;
+  }
+
+  /** Renders as the given role and waits for the fixture rows. */
+  async function renderAs(role: string) {
+    sessionState.role = role;
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Alice essay")).toBeTruthy());
+  }
+
+  /** Opens the confirm dialog from `title`'s row and returns its buttons. */
+  async function askToDelete(title: string) {
+    fireEvent.click(deleteButtonForRow(title)!);
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("languageCheck.staff.deleteTitle")).toBeTruthy();
+    expect(within(dialog).getByText("languageCheck.staff.deleteDesc")).toBeTruthy();
+    return {
+      confirm: within(dialog).getByRole("button", {
+        name: "languageCheck.staff.delete",
+      }) as HTMLButtonElement,
+      cancel: within(dialog).getByRole("button", {
+        name: "languageCheck.cancel",
+      }) as HTMLButtonElement,
+    };
+  }
+
+  beforeEach(() => {
+    vi.mocked(toast.success).mockClear();
+    vi.mocked(toast.error).mockClear();
+  });
+
+  it("teachers get no delete button — they can view, rename and re-link only", async () => {
+    await renderAs("teacher");
+    for (const title of ["Alice essay", "Bob essay"]) {
+      expect(deleteButtonForRow(title)).toBeNull();
+      // The affordances teachers DO have are untouched.
+      expect(
+        within(screen.getByText(title).closest("tr")!).getByRole("button", {
+          name: "languageCheck.staff.rename",
+        }),
+      ).toBeTruthy();
+    }
+  });
+
+  it.each(["admin", "super-admin"])("%s gets a delete button on every row", async (role) => {
+    await renderAs(role);
+    expect(deleteButtonForRow("Alice essay")).not.toBeNull();
+    expect(deleteButtonForRow("Bob essay")).not.toBeNull();
+  });
+
+  it.each(["admin", "super-admin"])(
+    "%s: confirming DELETEs the row, then refreshes the table and the caller's own essay list",
+    async (role) => {
+      await renderAs(role);
+      const listBefore = staffRequests.length;
+      const ownListBefore = ownListRequests;
+
+      const { confirm } = await askToDelete("Alice essay");
+      // Opening the dialog alone never deletes.
+      expect(deleteRequests).toEqual([]);
+
+      fireEvent.click(confirm);
+
+      await waitFor(() => expect(deleteRequests).toEqual(["e1"]));
+      await waitFor(() => expect(staffRequests.length).toBeGreaterThan(listBefore));
+      await waitFor(() => expect(ownListRequests).toBeGreaterThan(ownListBefore));
+      expect(toast.success).toHaveBeenCalledWith("languageCheck.staff.deleted");
+      // The dialog is gone, Alice's row with it; Bob is untouched.
+      await waitFor(() =>
+        expect(screen.queryByText("languageCheck.staff.deleteTitle")).toBeNull(),
+      );
+      await waitFor(() => expect(screen.queryByText("Alice essay")).toBeNull());
+      expect(screen.getByText("Bob essay")).toBeTruthy();
+    },
+  );
+
+  it("Cancel closes the dialog without a request or a reload", async () => {
+    await renderAs("admin");
+    const listBefore = staffRequests.length;
+
+    const { cancel } = await askToDelete("Bob essay");
+    fireEvent.click(cancel);
+
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).toBeNull(),
+    );
+    expect(deleteRequests).toEqual([]);
+    expect(staffRequests).toHaveLength(listBefore);
+    expect(screen.getByText("Bob essay")).toBeTruthy();
+  });
+
+  it("a failed delete keeps the row and the dialog, and reports the error", async () => {
+    await renderAs("admin");
+    const listBefore = staffRequests.length;
+    deleteFails = true;
+
+    const { confirm } = await askToDelete("Alice essay");
+    fireEvent.click(confirm);
+
+    await waitFor(() =>
+      // parseError prefixes the message with the error's name.
+      expect(toast.error).toHaveBeenCalledWith("[Error]: delete failed"),
+    );
+    expect(deleteRequests).toEqual(["e1"]);
+    expect(toast.success).not.toHaveBeenCalled();
+    // Still open (retry or cancel is the user's call), row still listed.
+    expect(screen.getByText("languageCheck.staff.deleteTitle")).toBeTruthy();
+    expect(screen.getByText("Alice essay")).toBeTruthy();
+    expect(staffRequests).toHaveLength(listBefore);
+    // The button is usable again after the failure.
+    await waitFor(() => expect(confirm.disabled).toBe(false));
+  });
+
+  it("deleting the last row of a later page steps back to the previous page", async () => {
+    // Twenty-one rows at the default twenty per page: page 1 holds
+    // "Essay 0"…"Essay 19", page 2 the single row "Essay 20".
+    rowsFixture = Array.from({ length: 21 }, (_, i) => ({
+      id: `e${i}`,
+      userId: "alice",
+      userName: "Alice",
+      title: `Essay ${i}`,
+      status: "checked",
+      topicId: null,
+      topicTitle: null,
+    }));
+    sessionState.role = "admin";
+    render(<StaffEssayLog classId={null} userId={null} />);
+    await waitFor(() => expect(screen.getByText("Essay 0")).toBeTruthy());
+
+    const pager = screen.getByText("languageCheck.staff.page").parentElement!;
+    const nextButton = Array.from(pager.querySelectorAll("button")).pop()!;
+    fireEvent.click(nextButton);
+    await waitFor(() =>
+      expect(staffRequests[staffRequests.length - 1]).toContain("page=2"),
+    );
+    await waitFor(() => expect(screen.getByText("Essay 20")).toBeTruthy());
+
+    const { confirm } = await askToDelete("Essay 20");
+    fireEvent.click(confirm);
+    await waitFor(() => expect(deleteRequests).toEqual(["e20"]));
+
+    // Page 2 no longer exists (twenty rows left) — the reload asks for page 1
+    // instead of an empty page 2.
+    await waitFor(() => {
+      const last = staffRequests[staffRequests.length - 1];
+      expect(last).toContain("page=1");
+      expect(last).not.toContain("page=2");
+    });
+    await waitFor(() => expect(screen.getByText("Essay 0")).toBeTruthy());
+    expect(screen.queryByText("Essay 20")).toBeNull();
+  });
+
+  it("waits for a marking that is running on that essay (other rows stay deletable)", async () => {
+    useLanguageCheckStore.setState({
+      generatingEssayId: "e1",
+      activeGenerations: { "language-check": true },
+    });
+    await renderAs("admin");
+
+    const alice = deleteButtonForRow("Alice essay")!;
+    expect(alice.disabled).toBe(true);
+    expect(alice.title).toBe("languageCheck.staff.deleteBusy");
+    const bob = deleteButtonForRow("Bob essay")!;
+    expect(bob.disabled).toBe(false);
+    expect(bob.title).toBe("languageCheck.staff.delete");
   });
 });

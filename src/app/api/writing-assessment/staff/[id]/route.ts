@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { parseError } from "@/utils/error"
 import {
+  canDeleteStudentEssays,
+  deleteStaffEssay,
   getStaffEssay,
   isStaffRole,
   renameStaffEssay,
@@ -71,6 +73,40 @@ export async function PATCH(request: NextRequest, context: Ctx) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error renaming staff essay:", error)
+    return NextResponse.json({ error: parseError(error) }, { status: 500 })
+  }
+}
+
+/**
+ * Staff delete from the Student essays table. Unlike the other staff
+ * writers this is NOT for every staff role: only admins (their school) and
+ * super-admins (everywhere) may delete — `canDeleteStudentEssays` gates the
+ * role before any query, so students AND teachers get the same 403 without
+ * touching the database. The caller's scope is then applied inside the
+ * DELETE itself (`deleteStaffEssay`), so an out-of-scope essay looks
+ * identical to a missing one (404) and nothing is written.
+ */
+export async function DELETE(_request: NextRequest, context: Ctx) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+    if (!canDeleteStudentEssays(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+    const scope = await resolveStaffScope(session.user.role, session.user.id)
+    if (!scope) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+    const { id } = await context.params
+    const ok = await deleteStaffEssay(scope, id)
+    if (!ok) {
+      return NextResponse.json({ error: "Essay not found" }, { status: 404 })
+    }
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error deleting staff essay:", error)
     return NextResponse.json({ error: parseError(error) }, { status: 500 })
   }
 }

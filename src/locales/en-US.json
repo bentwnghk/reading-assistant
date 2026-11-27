@@ -4852,7 +4852,7 @@
         },
         "staff": {
           "name": "Staff View",
-          "desc": "Switch between \"My work\" and \"My students\". Each scope leads with its topic tab: under \"My work\" the sections are \"Topic Library\" (first and default), \"My essays\" and \"My learning\"; under \"My students\" they become \"Topic reports\" (first and default), \"Student essays\" and \"Student learning\", sharing one class and student filter (Topic reports follows the class only) — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns."
+          "desc": "Switch between \"My work\" and \"My students\". Each scope leads with its topic tab: under \"My work\" the sections are \"Topic Library\" (first and default), \"My essays\" and \"My learning\"; under \"My students\" they become \"Topic reports\" (first and default), \"Student essays\" and \"Student learning\", sharing one class and student filter (Topic reports follows the class only) — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns. Admins (not teachers) can also delete an essay with the trash icon in its row."
         },
         "tip": {
           "title": "Tip:",
@@ -5233,7 +5233,7 @@
     },
     "staff": {
       "title": "Essay activity log",
-      "intro": "Essays your students have scanned — filter by topic or status, then open one to review the transcript and corrections, mark it again, or change its topic.",
+      "intro": "Essays your students have scanned — filter by topic or status, then open one to review the transcript and corrections, mark it again, or change its topic. Admins can also delete an essay from its row.",
       "scopeTeacher": "Students in your classes",
       "scopeSchool": "Your school",
       "scopeAll": "All users",
@@ -5271,6 +5271,11 @@
       "relinkSave": "Save",
       "view": "View",
       "rename": "Rename",
+      "delete": "Delete",
+      "deleteTitle": "Delete this essay?",
+      "deleteDesc": "\"{{title}}\" by {{name}}, with its scans and corrections, will be permanently deleted. This cannot be undone. \"Learn from your mistakes\" sessions the student already started from it are kept.",
+      "deleteBusy": "Marking is in progress — delete it once that has finished.",
+      "deleted": "Deleted \"{{title}}\" by {{name}}.",
       "empty": "No essays yet.",
       "emptyFilter": "No essays match these filters.",
       "page": "Page {{page}} of {{total}}",
