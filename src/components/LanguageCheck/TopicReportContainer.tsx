@@ -14,12 +14,21 @@ import {
   PenLine,
   Search,
   Sparkles,
+  Trash2,
   Trophy,
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -101,6 +110,10 @@ export default function TopicReportContainer() {
   const [sort, setSort] = useState<StudentSort>("overall");
   const [showTopic, setShowTopic] = useState(false);
   const [hasAiReport, setHasAiReport] = useState(false);
+  // Topic deletion (mirrors the Topic Library rule server-side via canDelete):
+  // the confirm dialog is ephemeral view state, `deleting` guards double taps.
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const categoryLabel = useCategoryLabel();
 
   useEffect(() => {
@@ -167,6 +180,27 @@ export default function TopicReportContainer() {
     };
     return [...list].sort(by[sort]);
   }, [report, query, sort]);
+
+  /** Delete the topic (and so this report) — server applies the Topic
+   *  Library rule; 404 means it went (or was never) out of scope. */
+  async function handleDeleteTopic() {
+    if (!report || deleting) return;
+    const title = report.topic.title || t("languageCheck.list.untitled");
+    setDeleting(true);
+    try {
+      const res = await fetch(
+        `/api/writing-assessment/staff/topic-reports/${encodeURIComponent(report.topic.id)}`,
+        { method: "DELETE" },
+      );
+      const body = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+      toast.success(t("languageCheck.reports.deleted", { title }));
+      router.replace(BACK_URL);
+    } catch (error) {
+      toast.error(parseError(error));
+      setDeleting(false);
+    }
+  }
 
   if (loading || !report) {
     return (
@@ -250,6 +284,17 @@ export default function TopicReportContainer() {
                 ? t("languageCheck.aiReport.viewButton")
                 : t("languageCheck.aiReport.button")}
             </Button>
+            {report.canDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive dark:border-destructive/50"
+                onClick={() => setConfirmDeleteOpen(true)}
+              >
+                <Trash2 className="mr-1.5 h-4 w-4" />
+                {t("languageCheck.reports.delete")}
+              </Button>
+            )}
           </div>
         </div>
         {showTopic && (
@@ -460,6 +505,33 @@ export default function TopicReportContainer() {
           </div>
         )}
       </section>
+
+      {report.canDelete && (
+        <Dialog
+          open={confirmDeleteOpen}
+          onOpenChange={(o) => !o && !deleting && setConfirmDeleteOpen(false)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("languageCheck.reports.deleteTitle")}</DialogTitle>
+              <DialogDescription>
+                {t("languageCheck.reports.deleteDesc", {
+                  title: topic.title || t("languageCheck.list.untitled"),
+                })}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" disabled={deleting} onClick={() => setConfirmDeleteOpen(false)}>
+                {t("languageCheck.cancel")}
+              </Button>
+              <Button variant="destructive" disabled={deleting} onClick={() => void handleDeleteTopic()}>
+                {deleting && <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />}
+                {t("languageCheck.reports.delete")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <StaffEssayDialog
         essayId={openId}

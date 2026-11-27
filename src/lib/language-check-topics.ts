@@ -288,3 +288,21 @@ export async function deleteTopic(
   )
   return (result.rowCount ?? 0) > 0
 }
+
+/**
+ * May the viewer delete this topic? One read over the exact `deleteTopic`
+ * scope (creator, or admin / super-admin for a topic their library shows),
+ * so the report route can mirror the affordance the server will enforce —
+ * the button never promises a delete that answers 404.
+ */
+export async function canDeleteTopic(
+  viewer: TopicViewer,
+  id: string,
+): Promise<boolean> {
+  const scope = await topicWriteScope(viewer, 2)
+  const { rowCount } = await getPool().query(
+    `SELECT 1 FROM language_check_topics WHERE id = $1 AND ${scope.sql}`,
+    [id, ...scope.params],
+  )
+  return (rowCount ?? 0) > 0
+}

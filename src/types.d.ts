@@ -1436,6 +1436,11 @@ interface LanguageCheckTopicReport {
   commonErrors: { category: string; count: number }[];
   students: LanguageCheckTopicReportStudent[];
   pending: LanguageCheckTopicReportPending[];
+  /**
+   * May the viewer delete the topic (and so this report)? Mirrors the Topic
+   * Library delete rule; set by the report route, never by the lib.
+   */
+  canDelete?: boolean;
 }
 
 // ─── AI assessment report for a writing topic (staff) ────────────────────────
