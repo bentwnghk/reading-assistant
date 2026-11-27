@@ -2,12 +2,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
 // Topic-report detail route. GET serves the report plus `canDelete` (the
-// Topic Library delete rule: the creator always; admins / super-admins for a
-// topic their library shows), and DELETE removes the report's TOPIC itself
-// with the same scope predicate INSIDE the delete — one statement, no
-// read-then-write window — so an out-of-scope topic answers 404 exactly like
-// a missing one. Teachers may delete their own topics (same right as the
-// Topic Library).
+// widened topic write scope: the creator always; admins / super-admins also
+// school/class topics their reports surface, including "No class" topics
+// created in their school — super-admins everything), and DELETE removes the
+// report's TOPIC itself with the same scope predicate INSIDE the delete —
+// one statement, no read-then-write window — so an out-of-scope topic
+// answers 404 exactly like a missing one. Teachers may delete their own
+// topics (same right as the Topic Library).
 
 const queries: Array<{ sql: string; values: unknown[] }> = [];
 let role: string | null = "teacher";
@@ -105,24 +106,31 @@ describe("DELETE /api/writing-assessment/staff/topic-reports/[id]", () => {
     expect(q.values).toEqual(["topic-1", "staff-1"]);
   });
 
-  it("admin: the scope reaches the school's class topics", async () => {
+  it("admin: the scope reaches the school's classed AND unclassed topics", async () => {
     role = "admin";
     expect((await DELETE(request(), ctx())).status).toBe(200);
     const q = queries[0];
     expect(q.sql).toContain(
       "class_id IN (SELECT id FROM classes WHERE school_id = $3)",
     );
-    expect(q.values).toEqual(["topic-1", "staff-1", "school-1"]);
+    // The "No class" clause: creator lives in the admin's school — the
+    // reports tabs surface such topics even though the library list hides
+    // them, so the delete must reach them too.
+    expect(q.sql).toContain(
+      "class_id IS NULL AND user_id IN (SELECT id FROM users WHERE school_id = $4)",
+    );
+    expect(q.values).toEqual(["topic-1", "staff-1", "school-1", "school-1"]);
   });
 
-  it("super-admin: no scope clause beyond ownership", async () => {
+  it("super-admin: no scope clause beyond the topic id — classed or unclassed", async () => {
     role = "super-admin";
     expect((await DELETE(request(), ctx())).status).toBe(200);
     const q = queries[0];
-    expect(q.sql).toContain("class_id IN (SELECT id FROM classes)");
+    expect(q.sql).toContain("(class_id IS NULL OR class_id IN (SELECT id FROM classes))");
     expect(q.sql).not.toContain("school_id");
     expect(q.sql).not.toContain("teacher_id");
-    expect(q.values).toEqual(["topic-1", "staff-1"]);
+    // The clause is fully static — the topic id is the only parameter.
+    expect(q.values).toEqual(["topic-1"]);
   });
 
   it.each(["teacher", "admin", "super-admin"])(

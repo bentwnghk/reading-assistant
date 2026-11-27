@@ -110,8 +110,9 @@ export default function TopicReportContainer() {
   const [sort, setSort] = useState<StudentSort>("overall");
   const [showTopic, setShowTopic] = useState(false);
   const [hasAiReport, setHasAiReport] = useState(false);
-  // Topic deletion (mirrors the Topic Library rule server-side via canDelete):
-  // the confirm dialog is ephemeral view state, `deleting` guards double taps.
+  // Topic deletion (server-computed via canDelete — the widened topic write
+  // scope): the confirm dialog is ephemeral view state, `deleting` guards
+  // double taps.
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const categoryLabel = useCategoryLabel();

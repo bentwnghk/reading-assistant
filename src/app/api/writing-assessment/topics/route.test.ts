@@ -5,7 +5,9 @@ import type { NextRequest } from "next/server";
 // classes they belong to, teachers → classes they teach, admins → school,
 // super-admins → all), a class target must be within that scope, and the
 // creator may update/delete. Admins and super-admins may additionally
-// update/delete every topic their own Topic Library shows.
+// update/delete everything the Topic reports tabs surface them: the class
+// topics their Topic Library shows PLUS "No class" topics created inside the
+// admin's school (super-admins: every topic, classed or unclassed).
 
 const queries: Array<{ sql: string; values: unknown[] }> = [];
 let role: string | null = "teacher";
@@ -237,11 +239,12 @@ describe("topics/[id] (read / update / delete)", () => {
     const res = await PUT(req("PUT", body({ title: "Fixed" })), ctx());
     expect(res.status).toBe(200);
     const update = queries.find((q) => q.sql.startsWith("UPDATE"))!;
-    // Creator OR any class topic of the admin's school (their library).
+    // Creator OR any class topic of the admin's school OR an unclassed topic
+    // created inside it — the reports tabs surface all three.
     expect(update.sql).toContain(
-      "WHERE id = $6 AND (user_id = $7 OR class_id IN (SELECT id FROM classes WHERE school_id = $8))",
+      "WHERE id = $6 AND (user_id = $7 OR class_id IN (SELECT id FROM classes WHERE school_id = $8) OR (class_id IS NULL AND user_id IN (SELECT id FROM users WHERE school_id = $9)))",
     );
-    expect(update.values.slice(5)).toEqual(["topic-1", "u-1", "school-1"]);
+    expect(update.values.slice(5)).toEqual(["topic-1", "u-1", "school-1", "school-1"]);
     // The read-back is by id alone (scoped to nothing): the saved row may
     // have just left the writer's library, e.g. an admin making another
     // user's class topic personal. The caller still drives the creator label.
@@ -249,15 +252,15 @@ describe("topics/[id] (read / update / delete)", () => {
     expect(readBack.values).toEqual(["topic-1", "u-1"]);
   });
 
-  it("lets a super-admin update any class topic", async () => {
+  it("lets a super-admin update any topic, classed or unclassed", async () => {
     role = "super-admin";
     expect((await PUT(req("PUT", body()), ctx())).status).toBe(200);
     const update = queries.find((q) => q.sql.startsWith("UPDATE"))!;
     expect(update.sql).toContain(
-      "(user_id = $7 OR class_id IN (SELECT id FROM classes))",
+      "(class_id IS NULL OR class_id IN (SELECT id FROM classes))",
     );
-    // Every class — no scope parameter.
-    expect(update.values.slice(5)).toEqual(["topic-1", "u-1"]);
+    // The clause is static — the topic id is the only non-data parameter.
+    expect(update.values.slice(5)).toEqual(["topic-1"]);
   });
 
   it("returns 404 when an admin's target lies outside their library", async () => {
@@ -293,8 +296,8 @@ describe("topics/[id] (read / update / delete)", () => {
     expect(res.status).toBe(200);
     const del = queries.find((q) => q.sql.startsWith("DELETE"))!;
     expect(del.sql).toContain(
-      "WHERE id = $1 AND (user_id = $2 OR class_id IN (SELECT id FROM classes WHERE school_id = $3))",
+      "WHERE id = $1 AND (user_id = $2 OR class_id IN (SELECT id FROM classes WHERE school_id = $3) OR (class_id IS NULL AND user_id IN (SELECT id FROM users WHERE school_id = $4)))",
     );
-    expect(del.values).toEqual(["topic-1", "u-1", "school-1"]);
+    expect(del.values).toEqual(["topic-1", "u-1", "school-1", "school-1"]);
   });
 });

@@ -78,7 +78,8 @@ beforeAll(async () => {
       ('teacher-c1', 't1', 'Teacher C1', 'P', 'dse-part-a', 'c1'),
       ('teacher-c2', 't1', 'Teacher C2', 'P', 'dse-part-b', 'c2'),
       ('teacher-none', 't1', 'Teacher personal', 'P', 'dse-part-a', NULL),
-      ('other-school', 'other-t', 'Elsewhere', 'P', 'dse-part-a', 'c3');
+      ('other-school', 'other-t', 'Elsewhere', 'P', 'dse-part-a', 'c3'),
+      ('abroad-none', 'other-t', 'Abroad personal', 'P', 'dse-part-a', NULL);
   `);
 });
 
@@ -189,15 +190,26 @@ describe("language-check-topics against real Postgres", () => {
     expect(await topics.getTopic({ id: "t1", role: "teacher" }, made.id)).toBeNull();
   });
 
-  itDb("an admin cannot reach topics outside their library", async () => {
+  itDb("an admin reaches classed + unclassed topics in their school, nothing beyond", async () => {
     const admin = { id: "a1", role: "admin" };
-    // Another school's class topic, and another user's PERSONAL topic.
+    // Another school's class topic — never reachable.
     expect(await topics.updateTopic(admin, "other-school", INPUT)).toBeNull();
-    expect(await topics.updateTopic(admin, "teacher-none", INPUT)).toBeNull();
     expect(await topics.deleteTopic(admin, "other-school")).toBe(false);
-    expect(await topics.deleteTopic(admin, "teacher-none")).toBe(false);
+    // A "No class" topic created in the admin's school IS reachable, even
+    // though the library list hides it — the Topic reports tabs surface it
+    // the moment an in-scope student writes on it.
+    expect(await topics.updateTopic(admin, "teacher-none", INPUT)).toMatchObject({
+      userId: "t1",
+      title: "Edited",
+      classId: null,
+    });
+    expect(await topics.deleteTopic(admin, "teacher-none")).toBe(true);
+    // But a "No class" topic from ANOTHER school's creator stays out of reach.
+    expect(await topics.updateTopic(admin, "abroad-none", INPUT)).toBeNull();
+    expect(await topics.deleteTopic(admin, "abroad-none")).toBe(false);
     const root = await topics.listTopics({ id: "root", role: "super-admin" });
-    // Every fixture row is untouched.
+    // Every surviving fixture row is untouched (the library list still
+    // shows class topics only — personal ones stay off it).
     expect(root.map((t) => t.id).sort()).toEqual([
       "other-school",
       "own-class",
@@ -206,19 +218,26 @@ describe("language-check-topics against real Postgres", () => {
     ]);
   });
 
-  itDb("a super-admin manages every class topic, but not other users' personal topics", async () => {
+  itDb("a super-admin manages every topic — classed or personal, any school", async () => {
     const root = { id: "root", role: "super-admin" };
-    // A class topic from ANOTHER school — beyond any admin.
+    // A class topic from ANOTHER school — beyond any admin, not beyond root.
     const abroad = await topics.createTopic("other-t", { ...INPUT, classId: "c3" });
     expect(
       (await topics.updateTopic(root, abroad.id, { ...INPUT, classId: "c3" }))?.title,
     ).toBe("Edited");
     expect(await topics.deleteTopic(root, abroad.id)).toBe(true);
-    // A personal topic belongs to its creator alone.
+    // A personal ("No class") topic is also reachable: the reports tabs show
+    // it to root, so root can clear it. Ownership never moves.
     const personal = await topics.createTopic("t1", { ...INPUT, classId: null });
-    expect(await topics.updateTopic(root, personal.id, INPUT)).toBeNull();
-    expect(await topics.deleteTopic(root, personal.id)).toBe(false);
-    expect(await topics.deleteTopic({ id: "t1", role: "teacher" }, personal.id)).toBe(true);
+    expect(await topics.updateTopic(root, personal.id, INPUT)).toMatchObject({
+      userId: "t1",
+      title: "Edited",
+      classId: null,
+    });
+    expect(await topics.deleteTopic(root, personal.id)).toBe(true);
+    // And the creator keeps the same right over their own personal topic.
+    const mine = await topics.createTopic("t1", { ...INPUT, classId: null });
+    expect(await topics.deleteTopic({ id: "t1", role: "teacher" }, mine.id)).toBe(true);
   });
 
   itDb("an admin making someone else's class topic personal loses sight of it; the creator keeps it", async () => {
@@ -226,13 +245,17 @@ describe("language-check-topics against real Postgres", () => {
     const made = await topics.createTopic("t1", { ...INPUT, title: "Shared", classId: "c1" });
     // The write succeeds and still reports the saved row …
     expect((await topics.updateTopic(admin, made.id, INPUT))?.classId).toBeNull();
-    // … but it has left the admin's library, while the creator still has it.
+    // … but it has left the admin's library LIST, while the creator still
+    // has it.
     expect((await topics.listTopics(admin)).map((t) => t.id)).not.toContain(made.id);
     expect(
       (await topics.listTopics({ id: "t1", role: "teacher" })).map((t) => t.id),
     ).toContain(made.id);
-    expect(await topics.deleteTopic(admin, made.id)).toBe(false);
-    expect(await topics.deleteTopic({ id: "t1", role: "teacher" }, made.id)).toBe(true);
+    // Off the list but not out of reach: it is now an unclassed topic
+    // created inside the admin's school, so the widened write scope — and
+    // the Topic reports affordance — still reaches it.
+    expect(await topics.deleteTopic(admin, made.id)).toBe(true);
+    expect(await topics.deleteTopic({ id: "t1", role: "teacher" }, made.id)).toBe(false);
   });
 
   itDb("deleting a class detaches its topics instead of deleting them", async () => {

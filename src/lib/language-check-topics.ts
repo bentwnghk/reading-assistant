@@ -179,7 +179,10 @@ export interface TopicInput {
   classId: string | null
 }
 
-/** Admins and super-admins manage every topic their Topic Library shows, not only their own. */
+/**
+ * Admins and super-admins have the widened write scope (see
+ * `topicWriteScope`); everyone else only ever touches their own topics.
+ */
 function managesLibrary(role: string): boolean {
   return role === "admin" || role === "super-admin"
 }
@@ -187,10 +190,20 @@ function managesLibrary(role: string): boolean {
 /**
  * Who may edit or delete a topic, as a predicate over `language_check_topics`
  * (no table alias — it is used directly in UPDATE / DELETE): always the
- * creator, plus — for admins and super-admins — every topic that appears in
- * their Topic Library, i.e. the classes they supervise. That is the same
- * `visibleClassIds` scope as `listTopics`, so nobody can reach a topic their
- * library does not show. Placeholders start at `start`.
+ * creator — plus, for admins and super-admins, everything the Topic reports
+ * tabs can surface to them. Those tabs are essay-driven and DO show topics
+ * the library list hides, so the write scope is deliberately WIDER than
+ * `listTopics`:
+ *
+ *  - classed topics of the classes they supervise (the same `visibleClassIds`
+ *    scope the library list uses), and
+ *  - UNCLASSED ("No class") topics — a NULL class_id matches no class scope,
+ *    yet a report appears for one as soon as an in-scope student writes on
+ *    it. Admins reach unclassed topics created by users in their school;
+ *    super-admins reach every topic, classed or not.
+ *
+ * Teachers and students keep creator-only rights. Placeholders start at
+ * `start`.
  */
 async function topicWriteScope(
   viewer: TopicViewer,
@@ -199,10 +212,21 @@ async function topicWriteScope(
   if (!managesLibrary(viewer.role)) {
     return { sql: `user_id = $${start}`, params: [viewer.id] }
   }
+  if (viewer.role === "super-admin") {
+    // Every topic: classed (any class) or unclassed.
+    return {
+      sql: `(class_id IS NULL OR class_id IN (SELECT id FROM classes))`,
+      params: [],
+    }
+  }
+  const schoolId = await getSchoolForUser(viewer.id)
+  if (!schoolId) return { sql: `user_id = $${start}`, params: [viewer.id] }
   const scope = await visibleClassIds(viewer, start + 1)
+  const schoolParam = `$${start + 1 + scope.params.length}`
   return {
-    sql: `(user_id = $${start} OR class_id IN (${scope.sql}))`,
-    params: [viewer.id, ...scope.params],
+    sql: `(user_id = $${start} OR class_id IN (${scope.sql})
+          OR (class_id IS NULL AND user_id IN (SELECT id FROM users WHERE school_id = ${schoolParam})))`,
+    params: [viewer.id, ...scope.params, schoolId],
   }
 }
 
@@ -240,10 +264,11 @@ export async function createTopic(
 }
 
 /**
- * The creator may edit their topic; admins and super-admins any topic in
- * their library (`topicWriteScope`). Editing never changes ownership — the
- * creator stays the creator. Null when the topic does not exist or is out
- * of the caller's scope.
+ * The creator may edit their topic; admins and super-admins also any topic
+ * the widened `topicWriteScope` reaches (school-surfaced classed topics,
+ * unclassed topics created in their school; super-admins everything).
+ * Editing never changes ownership — the creator stays the creator. Null
+ * when the topic does not exist or is out of the caller's scope.
  */
 export async function updateTopic(
   viewer: TopicViewer,
@@ -274,8 +299,9 @@ export async function updateTopic(
 
 /**
  * Essays keep their own snapshot, so deleting a topic never alters them.
- * Same right as `updateTopic`: the creator, or an admin / super-admin for a
- * topic in their library.
+ * Same right as `updateTopic`: the creator, or an admin / super-admin under
+ * the widened `topicWriteScope` (so the "No class" reports the tabs surface
+ * are deletable too).
  */
 export async function deleteTopic(
   viewer: TopicViewer,
@@ -291,9 +317,9 @@ export async function deleteTopic(
 
 /**
  * May the viewer delete this topic? One read over the exact `deleteTopic`
- * scope (creator, or admin / super-admin for a topic their library shows),
- * so the report route can mirror the affordance the server will enforce —
- * the button never promises a delete that answers 404.
+ * scope (the widened `topicWriteScope` — see there), so the report route can
+ * mirror the affordance the server will enforce — the button never promises
+ * a delete that answers 404.
  */
 export async function canDeleteTopic(
   viewer: TopicViewer,
