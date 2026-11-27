@@ -404,17 +404,17 @@ export function isStaffRole(role: string | null | undefined): boolean {
 }
 
 /**
- * May this role DELETE an essay from the Student essays table? Removing a
- * learner's work is reserved for the school-wide roles — admins (their own
- * school) and super-admins (everywhere). Teachers keep every
- * non-destructive staff affordance (view, rename, re-link, re-check,
- * assess, enhance) but never delete. Mirrored inline in StaffEssayLog —
- * client components must not import this module (it pulls `pg`).
+ * May this role DELETE an essay from the Student essays table? Every staff
+ * role may — teachers (their classes), admins (their school), super-admins
+ * (everywhere) — always within the same scope they can VIEW: the delete can
+ * never reach past the caller's own scope. Students may never delete.
+ * The client just uses its existing `isStaff` check — client components
+ * must not import this module (it pulls `pg`).
  */
 export function canDeleteStudentEssays(
   role: string | null | undefined,
 ): boolean {
-  return role === "admin" || role === "super-admin"
+  return isStaffRole(role)
 }
 
 /**
@@ -962,14 +962,10 @@ export async function staffRecheckEssay(
  * sits INSIDE the statement — the same `scopeConditions` fragments the
  * staff reads use, over the same `e` / `u` aliases — so the check and the
  * write are one atomic DELETE: there is no read-then-write window, and an
- * out-of-scope essay is indistinguishable from a missing one (false). It
- * is the caller's ROLE scope (the rows the table can show), never the
- * table's class / student / status / topic filters, which only narrow the
- * view.
- *
- * A teacher scope never deletes here, whatever the caller passed: the
- * route gates the role with `canDeleteStudentEssays` first, and this
- * guard keeps the primitive itself safe for any future caller.
+ * essay outside the caller's scope (another teacher's class, another
+ * school) is indistinguishable from a missing one (false). It is the
+ * caller's ROLE scope (the rows the table can show), never the table's
+ * class / student / status / topic filters, which only narrow the view.
  *
  * The essay's scans, transcript, corrections, assessment and enhanced
  * essays go with it. Learning sessions built from it are kept — their
@@ -979,7 +975,6 @@ export async function deleteStaffEssay(
   scope: LanguageCheckStaffScope,
   id: string,
 ): Promise<boolean> {
-  if (scope.kind === "teacher") return false
   const { clauses, params } = scopeConditions(scope)
   const { rowCount } = await getPool().query(
     `DELETE FROM language_check_essays e

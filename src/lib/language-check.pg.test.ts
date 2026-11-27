@@ -143,16 +143,21 @@ describe("deleteStaffEssay against real Postgres", () => {
     expect(await essayExists("e-sc2")).toBe(false);
   });
 
-  itDb("a teacher scope never deletes — even an essay the teacher can see", async () => {
+  itDb("a teacher deletes inside their classes — but never past them", async () => {
     await addEssay("e-own-class", "s1");
+    await addEssay("e-unknown-student", "s0"); // in no class the teacher teaches
     const teacher = await lc.resolveStaffScope("teacher", "t1");
     expect(teacher).toEqual({ kind: "teacher", teacherId: "t1" });
-    // Amy is in the teacher's class: the essay is inside the teacher's VIEW
-    // scope …
+    // Amy is in the teacher's class: the essay is inside the teacher's
+    // scope, view and delete alike.
     expect(await lc.getStaffEssay(teacher!, "e-own-class")).not.toBeNull();
-    // … and still cannot be deleted with that scope.
-    expect(await lc.deleteStaffEssay(teacher!, "e-own-class")).toBe(false);
-    expect(await essayExists("e-own-class")).toBe(true);
+    expect(await lc.deleteStaffEssay(teacher!, "e-own-class")).toBe(true);
+    expect(await essayExists("e-own-class")).toBe(false);
+    // A student in no class of theirs is neither visible nor deletable —
+    // the delete cannot reach past the scope the teacher can view.
+    expect(await lc.getStaffEssay(teacher!, "e-unknown-student")).toBeNull();
+    expect(await lc.deleteStaffEssay(teacher!, "e-unknown-student")).toBe(false);
+    expect(await essayExists("e-unknown-student")).toBe(true);
   });
 
   itDb("a missing essay is a plain false", async () => {
@@ -178,11 +183,11 @@ describe("deleteStaffEssay against real Postgres", () => {
 });
 
 describe("canDeleteStudentEssays", () => {
-  it.each(["admin", "super-admin"])("allows %s", (role) => {
+  it.each(["teacher", "admin", "super-admin"])("allows %s", (role) => {
     expect(lc.canDeleteStudentEssays(role)).toBe(true);
   });
 
-  it.each(["teacher", "student", "", null, undefined])(
+  it.each(["student", "", null, undefined])(
     "refuses %s",
     (role) => {
       expect(lc.canDeleteStudentEssays(role)).toBe(false);

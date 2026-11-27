@@ -106,17 +106,12 @@ function SortHeader({
  * Teachers see their classes' students, admins their school, super-admins
  * everyone. Class and student come from the shared staff filter bar; topic
  * and status are essay-specific and live here. Every staff role can view,
- * rename and re-link; only admins / super-admins can delete.
+ * rename, re-link and delete — each within its own scope.
  */
 export default function StaffEssayLog({ classId: classProp, userId: userProp }: StaffEssayLogProps) {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const role = session?.user?.role;
-  // Admins and super-admins may delete a learner's essay from its row;
-  // teachers keep the non-destructive affordances only (mirrors
-  // `canDeleteStudentEssays` in lib/language-check.ts, which client
-  // components must not import).
-  const canDelete = role === "admin" || role === "super-admin";
   // A marking / transcription running on an essay (owner workspace or the
   // view dialog) saves its result against that essay when it ends, so the
   // row's delete waits for it instead of pulling the essay out from under
@@ -153,8 +148,8 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   const [relinkPick, setRelinkPick] = useState<string | null>(null);
   const [relinking, setRelinking] = useState(false);
   const [libraryTopics, setLibraryTopics] = useState<LanguageCheckStaffTopic[] | null>(null);
-  // Delete (admin / super-admin affordance in the actions column): the row
-  // awaiting confirmation, and whether its DELETE is in flight.
+  // Delete (staff affordance in the actions column): the row awaiting
+  // confirmation, and whether its DELETE is in flight.
   const [toDelete, setToDelete] = useState<LanguageCheckStaffRow | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -318,10 +313,10 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
   }
 
   // --- Delete (actions column) -----------------------------------------
-  // Admins / super-admins may delete a learner's essay. The server applies
-  // the caller's role scope INSIDE the DELETE (an essay outside it answers
-  // 404 like a missing one), so there is no client-side scope check — the
-  // button is simply not offered to other roles.
+  // Staff may delete a learner's essay. The server applies the caller's
+  // scope INSIDE the DELETE (an essay outside it answers 404 like a missing
+  // one), so there is no client-side scope check — the button is simply
+  // not offered to non-staff.
   async function confirmDelete() {
     if (!toDelete || deleting) return;
     const row = toDelete;
@@ -630,7 +625,7 @@ export default function StaffEssayLog({ classId: classProp, userId: userProp }: 
                           <Eye className="mr-1 h-4 w-4" />
                           {t("languageCheck.staff.view")}
                         </Button>
-                        {canDelete && (
+                        {isStaff && (
                           <Button
                             variant="ghost"
                             size="icon"

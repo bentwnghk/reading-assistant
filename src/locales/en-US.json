@@ -4852,7 +4852,7 @@
         },
         "staff": {
           "name": "Staff View",
-          "desc": "Switch between \"My work\" and \"My students\". Each scope leads with its topic tab: under \"My work\" the sections are \"Topic Library\" (first and default), \"My essays\" and \"My learning\"; under \"My students\" they become \"Topic reports\" (first and default), \"Student essays\" and \"Student learning\", sharing one class and student filter (Topic reports follows the class only) — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns. Admins (not teachers) can also delete an essay with the trash icon in its row."
+          "desc": "Switch between \"My work\" and \"My students\". Each scope leads with its topic tab: under \"My work\" the sections are \"Topic Library\" (first and default), \"My essays\" and \"My learning\"; under \"My students\" they become \"Topic reports\" (first and default), \"Student essays\" and \"Student learning\", sharing one class and student filter (Topic reports follows the class only) — teachers see their classes, admins their school. Student essays adds Topics / Essays / Students / Average score cards, a searchable Topic filter beside the status filter, and sortable Student, Title, Overall and Updated columns. Staff can also delete an essay with the trash icon in its row (always within their own scope)."
         },
         "tip": {
           "title": "Tip:",
@@ -5237,7 +5237,7 @@
     },
     "staff": {
       "title": "Essay activity log",
-      "intro": "Essays your students have scanned — filter by topic or status, then open one to review the transcript and corrections, mark it again, or change its topic. Admins can also delete an essay from its row.",
+      "intro": "Essays your students have scanned — filter by topic or status, then open one to review the transcript and corrections, mark it again, change its topic, or delete it.",
       "scopeTeacher": "Students in your classes",
       "scopeSchool": "Your school",
       "scopeAll": "All users",

@@ -78,13 +78,13 @@ export async function PATCH(request: NextRequest, context: Ctx) {
 }
 
 /**
- * Staff delete from the Student essays table. Unlike the other staff
- * writers this is NOT for every staff role: only admins (their school) and
- * super-admins (everywhere) may delete — `canDeleteStudentEssays` gates the
- * role before any query, so students AND teachers get the same 403 without
- * touching the database. The caller's scope is then applied inside the
- * DELETE itself (`deleteStaffEssay`), so an out-of-scope essay looks
- * identical to a missing one (404) and nothing is written.
+ * Staff delete from the Student essays table — open to every staff role,
+ * like the other staff writers: teachers delete within their classes,
+ * admins their school, super-admins everywhere. `canDeleteStudentEssays`
+ * gates the role before any query (a student gets the same 403 without
+ * touching the database); the caller's scope is then applied inside the
+ * DELETE itself (`deleteStaffEssay`), so an essay outside the caller's
+ * scope looks identical to a missing one (404) and nothing is written.
  */
 export async function DELETE(_request: NextRequest, context: Ctx) {
   try {

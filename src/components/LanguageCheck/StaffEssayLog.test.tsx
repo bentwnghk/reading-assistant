@@ -844,26 +844,23 @@ describe("StaffEssayLog delete", () => {
     vi.mocked(toast.error).mockClear();
   });
 
-  it("teachers get no delete button — they can view, rename and re-link only", async () => {
-    await renderAs("teacher");
-    for (const title of ["Alice essay", "Bob essay"]) {
-      expect(deleteButtonForRow(title)).toBeNull();
-      // The affordances teachers DO have are untouched.
-      expect(
-        within(screen.getByText(title).closest("tr")!).getByRole("button", {
-          name: "languageCheck.staff.rename",
-        }),
-      ).toBeTruthy();
-    }
-  });
+  it.each(["teacher", "admin", "super-admin"])(
+    "%s gets a delete button on every row (alongside the existing affordances)",
+    async (role) => {
+      await renderAs(role);
+      for (const title of ["Alice essay", "Bob essay"]) {
+        expect(deleteButtonForRow(title)).not.toBeNull();
+        // Rename is untouched.
+        expect(
+          within(screen.getByText(title).closest("tr")!).getByRole("button", {
+            name: "languageCheck.staff.rename",
+          }),
+        ).toBeTruthy();
+      }
+    },
+  );
 
-  it.each(["admin", "super-admin"])("%s gets a delete button on every row", async (role) => {
-    await renderAs(role);
-    expect(deleteButtonForRow("Alice essay")).not.toBeNull();
-    expect(deleteButtonForRow("Bob essay")).not.toBeNull();
-  });
-
-  it.each(["admin", "super-admin"])(
+  it.each(["teacher", "admin", "super-admin"])(
     "%s: confirming DELETEs the row, then refreshes the table and the caller's own essay list",
     async (role) => {
       await renderAs(role);

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
 
-// Staff delete: DELETE /api/writing-assessment/staff/[id] is the one staff
-// writer that is NOT open to every staff role. Teachers can view, rename and
-// re-link an in-scope essay but never delete one; admins may delete inside
-// their school and super-admins anywhere. The scope predicate must live
-// INSIDE the delete — one statement, no read-then-write window — and an
-// out-of-scope essay must answer 404 exactly like a missing one.
+// Staff delete: DELETE /api/writing-assessment/staff/[id] is open to every
+// staff role, like the other staff writers — each strictly inside its own
+// scope (teacher → classes they teach, admin → school, super-admin → all).
+// Only students are refused. The scope predicate must live INSIDE the
+// delete — one statement, no read-then-write window — and an essay outside
+// the caller's scope must answer 404 exactly like a missing one.
 
 const queries: Array<{ sql: string; values: unknown[] }> = [];
 let role: string | null = "admin";
@@ -58,10 +58,17 @@ describe("DELETE /api/writing-assessment/staff/[id]", () => {
     expect(queries).toHaveLength(0);
   });
 
-  it("refuses teachers — they may view, rename and re-link, never delete", async () => {
+  it("teacher: one scoped DELETE (classes they teach), no read before it", async () => {
     role = "teacher";
-    expect((await DELETE(request(), ctx())).status).toBe(403);
-    expect(queries).toHaveLength(0);
+    const res = await DELETE(request(), ctx());
+    expect(res.status).toBe(200);
+    expect(queries).toHaveLength(1);
+    const q = queries[0];
+    expect(q.sql).toMatch(/^DELETE FROM language_check_essays e USING users u/);
+    expect(q.sql).toContain("u.id = e.user_id");
+    expect(q.sql).toContain("sc.teacher_id = $1");
+    expect(q.sql).toContain("e.id = $2");
+    expect(q.values).toEqual(["staff-1", "essay-1"]);
   });
 
   it("admin: exactly one statement — a DELETE scoped to the school, no read before it", async () => {
@@ -90,7 +97,7 @@ describe("DELETE /api/writing-assessment/staff/[id]", () => {
     expect(q.values).toEqual(["essay-1"]);
   });
 
-  it.each(["admin", "super-admin"])(
+  it.each(["teacher", "admin", "super-admin"])(
     "%s: an essay outside the scope (or missing) is a 404 — only the scoped DELETE ran",
     async (r) => {
       role = r;
